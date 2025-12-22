@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { login } from '../../api/auth.js';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaGoogle, FaPhone } from 'react-icons/fa';
-import './authcss/auth.css';
+import './authcss/login.css';
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -39,11 +39,11 @@ function Login() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
+    <div className="login-container">
+      <div className="login-card">
         <h2 className="title-login">UzWork ga kirish</h2>
 
-        {error && <p className="alert alert-error">{error}</p>}
+        {error && <p className="alert-error">{error}</p>}
 
         <form className="form-login" onSubmit={handleSubmit}>
           {/* Email/Phone input + icon */}

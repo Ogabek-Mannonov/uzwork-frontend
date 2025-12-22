@@ -1,0 +1,194 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Montserrat:wght@600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  /* background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); Signup bilan bir xil fon */
+}
+
+.login-card {
+  background: #fff;
+  padding: 5rem;
+  border-radius: 20px; 
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  width: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  border: 2px solid #6ec5ff;
+  font-family: 'Roboto', sans-serif;
+}
+
+.title-login {
+  font-size: 2rem;
+  margin-bottom: 3rem;
+  color: #2c3e50;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.form-login {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-input {
+  width: 100%;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 1.3rem;
+
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+}
+
+/* Asosiy tugma – ko‘k rang (Signup bilan bir xil) */
+.cont-btn {
+  width: 100%;
+  padding: 1rem;
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.cont-btn:hover {
+  background-color: #2980b9;
+}
+
+.cont-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.login-or {
+  text-align: center;
+  margin: 1.5rem 0;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Google tugmasi – original Google rangi saqlanadi */
+.google-btn {
+  width: 100%;
+  padding: 1rem;
+  background-color: transparent;
+  color: #4285f4;
+  border: 1px solid #4285f4;
+  border-radius: 10px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.google-btn:hover {
+  background-color: #3367d6;
+  color: white;
+}
+
+/* Telefon tugmasi – ko‘k ton bilan moslashtirdim */
+.apple-btn {
+  width: 100%;
+  padding: 1rem;
+  background-color: transparent;
+  color: #4285f4;
+  border: 1px solid #4285f4;
+  border-radius: 10px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.apple-btn:hover {
+  background-color: #2980b9;
+  color: white;
+}
+
+.text-center {
+  text-align: center;
+  margin-top: 3rem;
+  color: #666;
+  font-size: 16px;
+}
+
+.signup-btn-link {
+  margin-top: 2rem;
+  padding: 1.2rem 4rem;
+  background-color: transparent;
+  border: 2px solid #3498db;
+  cursor: pointer;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.signup-btn-link:hover {
+  background-color: #3498db;
+}
+
+.signup-btn-link:hover .link-sign {
+  color: white;
+}
+
+.link-sign {
+  text-decoration: none;
+  color: #3498db;
+  font-weight: bold;
+}
+
+/* Input ichidagi icon */
+.input-group {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.input-icon {
+  position: absolute;
+  left: 15px;
+  top: 30%;
+  transform: translateY(-50%);
+  color: #3498db;
+}
+
+.login-input {
+  padding-left: 50px !important;
+}
+
+
+/* Xato xabari */
+.alert-error {
+  color: #e74c3c;
+  background: #fdf2f2;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 15px;
+}
