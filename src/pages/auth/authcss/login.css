@@ -11,20 +11,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  /* background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); Signup bilan bir xil fon */
+  min-height: 100dvh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 1rem;
 }
 
 .login-card {
   background: #fff;
-  padding: 5rem;
-  border-radius: 20px; 
+  padding: 5rem 4rem;
+  border-radius: 20px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  width: 500px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  width: 100%;
+  max-width: 500px;
   border: 2px solid #6ec5ff;
   font-family: 'Roboto', sans-serif;
 }
@@ -34,6 +32,7 @@
   margin-bottom: 3rem;
   color: #2c3e50;
   font-family: 'Montserrat', sans-serif;
+  text-align: center;
 }
 
 .form-login {
@@ -42,14 +41,18 @@
   flex-direction: column;
 }
 
+.input-group {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
 .login-input {
   width: 100%;
   padding: 1rem;
-  margin-bottom: 2rem;
+  padding-left: 50px;
   border: 1px solid #ddd;
   border-radius: 10px;
   font-size: 1.3rem;
-
 }
 
 .login-input:focus {
@@ -58,7 +61,16 @@
   box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
 }
 
-/* Asosiy tugma – ko‘k rang (Signup bilan bir xil) */
+.input-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #3498db;
+  font-size: 1.4rem;
+}
+
+/* Asosiy tugma */
 .cont-btn {
   width: 100%;
   padding: 1rem;
@@ -87,8 +99,8 @@
   font-weight: 500;
 }
 
-/* Google tugmasi – original Google rangi saqlanadi */
-.google-btn {
+.google-btn,
+.apple-btn {
   width: 100%;
   padding: 1rem;
   background-color: transparent;
@@ -102,32 +114,12 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
+  transition: all 0.3s;
 }
 
-.google-btn:hover {
-  background-color: #3367d6;
-  color: white;
-}
-
-/* Telefon tugmasi – ko‘k ton bilan moslashtirdim */
-.apple-btn {
-  width: 100%;
-  padding: 1rem;
-  background-color: transparent;
-  color: #4285f4;
-  border: 1px solid #4285f4;
-  border-radius: 10px;
-  font-size: 1.3rem;
-  cursor: pointer;
-  margin-top: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
+.google-btn:hover,
 .apple-btn:hover {
-  background-color: #2980b9;
+  background-color: #4285f4;
   color: white;
 }
 
@@ -138,49 +130,41 @@
   font-size: 16px;
 }
 
+/* Ro'yxatdan o'tish tugmasi – to'liq tuzatilgan */
 .signup-btn-link {
   margin-top: 2rem;
   padding: 1.2rem 4rem;
   background-color: transparent;
   border: 2px solid #3498db;
-  cursor: pointer;
   border-radius: 12px;
+  color: #3498db;
   font-size: 1rem;
-  transition: all 0.3s;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .signup-btn-link:hover {
-  background-color: #3498db;
+  background-color: #3498db !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
 }
 
 .signup-btn-link:hover .link-sign {
-  color: white;
+  color: white !important;
 }
 
-.link-sign {
-  text-decoration: none;
-  color: #3498db;
-  font-weight: bold;
-}
-
-/* Input ichidagi icon */
-.input-group {
-  position: relative;
-  margin-bottom: 2rem;
-}
-
-.input-icon {
-  position: absolute;
-  left: 15px;
-  top: 30%;
-  transform: translateY(-50%);
+/* Agar ichida oddiy matn bo'lsa */
+.signup-btn-link {
   color: #3498db;
 }
 
-.login-input {
-  padding-left: 50px !important;
+.signup-btn-link:hover {
+  color: white !important;
 }
-
 
 /* Xato xabari */
 .alert-error {
@@ -191,4 +175,61 @@
   margin-bottom: 20px;
   text-align: center;
   font-size: 15px;
+}
+
+/* Responsive – faqat kichik ekranlar uchun minimal o'zgartirish */
+@media (max-width: 580px) {
+  .login-card {
+    padding: 3.5rem 2.5rem;
+    max-width: 95%;
+    border-radius: 16px;
+  }
+
+  .title-login {
+    font-size: 1.75rem;
+    margin-bottom: 2.2rem;
+  }
+
+  .login-input,
+  .cont-btn,
+  .google-btn,
+  .apple-btn {
+    font-size: 1.15rem;
+    padding: 0.9rem;
+  }
+
+  .login-input {
+    padding-left: 45px;
+  }
+
+  .input-icon {
+    left: 12px;
+  }
+
+  .signup-btn-link {
+    padding: 1rem 3rem;
+    font-size: 0.95rem;
+  }
+
+  .text-center {
+    font-size: 14px;
+    margin-top: 2.2rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .login-card {
+    padding: 2.8rem 1.8rem;
+  }
+
+  .title-login {
+    font-size: 1.55rem;
+  }
+
+  .login-input,
+  .cont-btn,
+  .google-btn,
+  .apple-btn {
+    font-size: 1.05rem;
+  }
 }

@@ -1,93 +1,93 @@
-// src/pages/auth/Login.jsx
-import { useState } from 'react';
-import { login } from '../../api/auth.js';
-import { useNavigate } from 'react-router-dom';
-import { FaUser, FaGoogle, FaPhone } from 'react-icons/fa';
+// Login.jsx
+import React, { useState } from 'react';
+import { FaUser, FaLock, FaPhoneAlt } from 'react-icons/fa'; 
 import './authcss/login.css';
 
-function Login() {
-  const [formData, setFormData] = useState({
-    emailOrPhone: '',
-    password: '',
-  });
-  const [loading, setLoading] = useState(false);
+
+const Login = () => {
+  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
-    try {
-      await login({
-        email: formData.emailOrPhone.includes('@') ? formData.emailOrPhone : undefined,
-        phone: !formData.emailOrPhone.includes('@') ? formData.emailOrPhone : undefined,
-        password: formData.password,
-      });
-      alert('Muvaffaqiyatli kirish!');
-      navigate('/');
-    } catch (err) {
-      setError(err.response?.data?.message || "Email/telefon yoki parol noto'g'ri");
-    } finally {
+    // Bu yerda login logikasi bo'ladi (masalan API chaqiruvi)
+    setTimeout(() => {
+      if (!email) {
+        setError("Iltimos, barcha maydonlarni to'ldiring");
+      } else {
+        setError('');
+        // login muvaffaqiyatli bo'lsa keyingi sahifaga yo'naltirish
+        console.log('Login muvaffaqiyatli:', { email });
+      }
       setLoading(false);
-    }
+    }, 1000);
   };
 
   return (
     <div className="login-container">
       <div className="login-card">
-        <h2 className="title-login">UzWork ga kirish</h2>
+        <h1 className="title-login">Kirish</h1>
 
-        {error && <p className="alert-error">{error}</p>}
+        {error && <div className="alert-error">{error}</div>}
 
         <form className="form-login" onSubmit={handleSubmit}>
-          {/* Email/Phone input + icon */}
+          {/* Email maydoni */}
           <div className="input-group">
-            <FaUser className="input-icon" size={20} />
+            <FaUser className="input-icon" />
             <input
+              type="email"
               className="login-input"
-              type="text"
-              name="emailOrPhone"
-              placeholder="Email yoki telefon"
-              value={formData.emailOrPhone}
-              onChange={handleChange}
+              placeholder="Email yoki telefon raqam"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
 
-          <button className="cont-btn" type="submit" disabled={loading}>
-            {loading ? 'Yuklanmoqda...' : 'Davom etish'}
+          {/* Kirish tugmasi */}
+          <button type="submit" className="cont-btn" disabled={loading}>
+            {loading ? 'Yuklanmoqda...' : 'Kirish'}
           </button>
         </form>
 
         <div className="login-or">yoki</div>
 
-        <button className="google-btn" type="button">
-          <FaGoogle size={20} className="mr-3" />
-          Google orqali davom etish
+        {/* Google bilan kirish */}
+        <button className="google-btn">
+          <img
+            src="https://www.google.com/favicon.ico"
+            alt="Google"
+            width={20}
+            height={20}
+          />
+          Google orqali kirish
         </button>
 
-        
-        <button className="apple-btn" type="button">
-          <FaPhone size={20} className="mr-3" />
-          Telefon raqam orqali davom etish
+        {/* Apple bilan kirish (agar kerak bo'lsa) */}
+        <button className="apple-btn">
+          <FaPhoneAlt size={20} />
+          Telefon raqam orqali kirish
         </button>
 
-        <p className="text-center">
-          Hisobingiz yo'qmi?
-        </p>
-
-        <button className="signup-btn-link">
-          <a className="link-sign" href="/signup">Ro'yxatdan o'tish</a>
-        </button>
+        {/* Ro'yxatdan o'tish qismi */}
+        <div className="text-center">
+          <p>Hisobingiz yo'qmi?</p>
+          <a href="/signup" className="signup-btn-link">
+            Ro'yxatdan o'tish
+          </a>
+          {/* Agar link ichida span bo'lsa, quyidagicha ham ishlatish mumkin: */}
+          {/* 
+          <a href="/signup" className="signup-btn-link">
+            <span className="link-sign">Ro'yxatdan o'tish</span>
+          </a> 
+          */}
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default Login;
