@@ -232,3 +232,110 @@
     font-size: 1.05rem;
   }
 }
+
+
+/* ... oldingi kodlarning hammasi saqlanadi, faqat qo‘shimchalar quyida */
+
+/* Email ko‘rsatiladigan joy */
+.email-preview {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #2c3e50;
+  margin-bottom: 2.5rem;
+  font-weight: 500;
+}
+
+/* Parol maydoni uchun maxsus guruh */
+.password-group {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #3498db;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Checkbox va Forgot link qatori */
+.options-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1.5rem 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: #3498db;
+}
+
+/* "Parolni unutdingizmi?" */
+.forgot-link {
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* "Log in" tugmasi */
+.login-btn {
+  background-color: #3498db;
+  padding: 1.1rem;
+  font-size: 1.25rem;
+}
+
+.login-btn:hover {
+  background-color: #2980b9;
+}
+
+/* "Not you?" qismi */
+.not-you {
+  margin-top: 2.5rem;
+  font-size: 1rem;
+}
+
+.not-you-link {
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.not-you-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive moslashuv */
+@media (max-width: 580px) {
+  .options-row {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .email-preview {
+    font-size: 1.1rem;
+  }
+}
+
+
+
