@@ -4,14 +4,16 @@ import { FaUser, FaLock, FaPhoneAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
 import './authcss/login.css';
 
 const Login = () => {
-  const [step, setStep] = useState('email');
+  const [step, setStep] = useState('email'); // email, password, google, phone
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Email bilan davom etish
   const handleEmailSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
@@ -26,6 +28,7 @@ const Login = () => {
     }, 800);
   };
 
+  // Parol bilan kirish
   const handleLogin = (e) => {
     e.preventDefault();
     setLoading(true);
@@ -35,12 +38,22 @@ const Login = () => {
       } else {
         setError('');
         console.log('Login muvaffaqiyatli:', { email, password, keepLoggedIn });
-        // Bu yerda real login API chaqiriladi
       }
       setLoading(false);
     }, 1000);
   };
 
+  // Google tugmasi bosilganda
+  const handleGoogleClick = () => {
+    setStep('google');
+  };
+
+  // Telefon tugmasi bosilganda
+  const handlePhoneClick = () => {
+    setStep('phone');
+  };
+
+  // Orqaga qaytish
   const handleBack = () => {
     setStep('email');
     setError('');
@@ -50,12 +63,14 @@ const Login = () => {
     <div className="login-container">
       <div className="login-card">
         <h1 className="title-login">
-          {step === 'email' ? 'Uzworkga kirish' : 'Xush kelibsiz'}
+          {step === 'email' || step === 'google' || step === 'phone'
+            ? 'Uzworkga kirish'
+            : 'Xush kelibsiz'}
         </h1>
 
         {error && <div className="alert-error">{error}</div>}
 
-        {/* 1-bosqich: Email / Telefon */}
+        {/* 1-bosqich: Email kiritish */}
         {step === 'email' && (
           <>
             <form onSubmit={handleEmailSubmit}>
@@ -78,12 +93,14 @@ const Login = () => {
 
             <div className="login-or">yoki</div>
 
-            <button className="google-btn">
+            {/* Asl Google tugmasi */}
+            <button className="google-btn" onClick={handleGoogleClick} disabled={loading}>
               <img src="https://www.google.com/favicon.ico" alt="Google" width={20} height={20} />
               Google orqali kirish
             </button>
 
-            <button className="apple-btn">
+            {/* Asl Telefon tugmasi */}
+            <button className="apple-btn" onClick={handlePhoneClick} disabled={loading}>
               <FaPhoneAlt size={20} />
               Telefon raqam orqali kirish
             </button>
@@ -97,7 +114,7 @@ const Login = () => {
           </>
         )}
 
-        {/* 2-bosqich: Parol kiritish */}
+        {/* Parol kiritish */}
         {step === 'password' && (
           <>
             <div className="email-preview">{email}</div>
@@ -146,6 +163,68 @@ const Login = () => {
               <a href="#" onClick={handleBack} className="not-you-link">
                 Bu siz emassizmi?
               </a>
+            </div>
+          </>
+        )}
+
+        {/* Google bosilganda (demo) */}
+        {step === 'google' && (
+          <>
+            <div className="input-group" style={{ marginBottom: '2rem' }}>
+              <FaUser className="input-icon" />
+              <input
+                type="text"
+                className="login-input"
+                placeholder="Google hisobingiz"
+                autoFocus
+                readOnly
+                value={email || 'mannonovogabek270@gmail.com'}
+              />
+            </div>
+
+            <button className="cont-btn" disabled={loading}>
+              {loading ? 'Yuklanmoqda...' : 'Google bilan kirish'}
+            </button>
+
+            <div className="text-center" style={{ marginTop: '2rem' }}>
+              <button
+                onClick={handleBack}
+                style={{ background: 'none', border: 'none', color: '#3498db', cursor: 'pointer', fontSize: '1rem' }}
+              >
+                ← Orqaga
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Telefon raqami bosilganda */}
+        {step === 'phone' && (
+          <>
+            <form onSubmit={(e) => { e.preventDefault(); alert('SMS kod yuborildi! (demo)'); }}>
+              <div className="input-group">
+                <FaPhoneAlt className="input-icon" />
+                <input
+                  type="tel"
+                  className="login-input"
+                  placeholder="+998 (__) ___ __ __"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  autoFocus
+                />
+              </div>
+
+              <button type="submit" className="cont-btn" disabled={loading}>
+                {loading ? 'Yuborilmoqda...' : 'Kodni yuborish'}
+              </button>
+            </form>
+
+            <div className="text-center" style={{ marginTop: '2rem' }}>
+              <button
+                onClick={handleBack}
+                style={{ background: 'none', border: 'none', color: '#3498db', cursor: 'pointer', fontSize: '1rem' }}
+              >
+                ← Orqaga
+              </button>
             </div>
           </>
         )}
