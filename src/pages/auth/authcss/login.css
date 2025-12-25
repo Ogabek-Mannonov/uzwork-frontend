@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Montserrat:wght@600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Montserrat:wght@600;700&display=swap");
 
 * {
   margin: 0;
@@ -11,26 +11,27 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100dvh;
+  min-height: 100vh;
   padding: 1rem;
 }
 
 .login-card {
+  margin: 0 auto;
+  padding:20px;  
   background: #fff;
-  padding: 5rem 4rem;
   border-radius: 20px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 500px;
+  max-width: 450px;
   border: 2px solid #6ec5ff;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .title-login {
   font-size: 2rem;
-  margin-bottom: 3rem;
+  margin: 2rem;
   color: #2c3e50;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   text-align: center;
 }
 
@@ -42,16 +43,16 @@
 
 .input-group {
   position: relative;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .login-input {
   width: 100%;
-  padding: 1rem;
+  padding: 0.8rem;
   padding-left: 50px;
   border: 1px solid #ddd;
   border-radius: 10px;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
 }
 
 .login-input:focus {
@@ -72,7 +73,7 @@
 /* Asosiy tugma */
 .cont-btn {
   width: 100%;
-  padding: 1rem;
+  padding: 0.8rem;
   background-color: #3498db;
   color: #fff;
   border: none;
@@ -93,7 +94,7 @@
 
 .login-or {
   text-align: center;
-  margin: 1.5rem 0;
+  margin: 1rem 0;
   color: #666;
   font-weight: 500;
 }
@@ -101,14 +102,14 @@
 .google-btn,
 .apple-btn {
   width: 100%;
-  padding: 1rem;
+  padding: 0.8rem;
   background-color: transparent;
   color: #4285f4;
   border: 1px solid #4285f4;
   border-radius: 10px;
   font-size: 1.3rem;
   cursor: pointer;
-  margin-top: 1.5rem;
+  margin-top: 1.3rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -124,15 +125,15 @@
 
 .text-center {
   text-align: center;
-  margin-top: 3rem;
+  margin-top: 1rem;
   color: #666;
   font-size: 16px;
 }
 
 /* Ro'yxatdan o'tish tugmasi – to'liq tuzatilgan */
 .signup-btn-link {
-  margin-top: 2rem;
-  padding: 1.2rem 4rem;
+  margin-top: 0.6rem;
+  padding: 0.8rem 3rem;
   background-color: transparent;
   border: 2px solid #3498db;
   border-radius: 12px;
@@ -232,7 +233,6 @@
     font-size: 1.05rem;
   }
 }
-
 
 /* ... oldingi kodlarning hammasi saqlanadi, faqat qo‘shimchalar quyida */
 
@@ -336,9 +336,3 @@
     font-size: 1.1rem;
   }
 }
-
-
-
-
-
-
