@@ -102,7 +102,7 @@ const Login = () => {
             {/* Asl Telefon tugmasi */}
             <button className="apple-btn" onClick={handlePhoneClick} disabled={loading}>
               <FaPhoneAlt size={20} />
-              Telefon raqam orqali kirish
+              Telefon orqali kirish
             </button>
 
             <div className="text-center">

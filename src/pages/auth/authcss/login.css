@@ -6,33 +6,38 @@
   box-sizing: border-box;
 }
 
+body {
+  font-family: "Roboto", sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
 .login-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 1rem;
+  padding: 20px;
 }
 
 .login-card {
-  margin: 0 auto;
-  padding:20px;  
   background: #fff;
   border-radius: 20px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 450px;
   border: 2px solid #6ec5ff;
-  font-family: "Roboto", sans-serif;
+  padding: 40px 35px;
 }
 
 .title-login {
   font-size: 2rem;
-  margin: 2rem;
+  margin-bottom: 30px;
   color: #2c3e50;
   font-family: "Montserrat", sans-serif;
   text-align: center;
+  font-weight: 700;
 }
 
 .form-login {
@@ -43,22 +48,23 @@
 
 .input-group {
   position: relative;
-  margin-bottom: 1rem;
+  margin-bottom: 20px;
 }
 
 .login-input {
   width: 100%;
-  padding: 0.8rem;
-  padding-left: 50px;
+  padding: 15px 15px 15px 50px;
   border: 1px solid #ddd;
   border-radius: 10px;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-family: "Roboto", sans-serif;
+  transition: all 0.3s;
 }
 
 .login-input:focus {
   outline: none;
   border-color: #3498db;
-  box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
 }
 
 .input-icon {
@@ -67,53 +73,57 @@
   top: 50%;
   transform: translateY(-50%);
   color: #3498db;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
 }
 
-/* Asosiy tugma */
 .cont-btn {
   width: 100%;
-  padding: 0.8rem;
+  padding: 15px;
   background-color: #3498db;
   color: #fff;
   border: none;
   border-radius: 10px;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
+  margin-top: 10px;
 }
 
 .cont-btn:hover {
   background-color: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
 }
 
-.cont-btn:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
+.cont-btn:active {
+  transform: translateY(0);
 }
 
 .login-or {
   text-align: center;
-  margin: 1rem 0;
+  margin: 20px 0;
   color: #666;
   font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .google-btn,
 .apple-btn {
   width: 100%;
-  padding: 0.8rem;
+  padding: 15px;
   background-color: transparent;
   color: #4285f4;
   border: 1px solid #4285f4;
   border-radius: 10px;
-  font-size: 1.3rem;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  margin-top: 1.3rem;
+  margin-bottom: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   transition: all 0.3s;
 }
 
@@ -121,131 +131,44 @@
 .apple-btn:hover {
   background-color: #4285f4;
   color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
+}
+
+.google-btn i,
+.apple-btn i {
+  font-size: 1.2rem;
 }
 
 .text-center {
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 25px;
   color: #666;
-  font-size: 16px;
+  font-size: 0.95rem;
 }
 
-/* Ro'yxatdan o'tish tugmasi – to'liq tuzatilgan */
 .signup-btn-link {
-  margin-top: 0.6rem;
-  padding: 0.8rem 3rem;
+  display: inline-block;
+  margin-top: 10px;
+  padding: 12px 40px;
   background-color: transparent;
   border: 2px solid #3498db;
-  border-radius: 12px;
+  border-radius: 10px;
   color: #3498db;
   font-size: 1rem;
-  font-weight: bold;
+  font-weight: 600;
   text-decoration: none;
-  display: inline-block;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  transition: all 0.3s;
 }
 
 .signup-btn-link:hover {
-  background-color: #3498db !important;
-  color: white !important;
+  background-color: #3498db;
+  color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
 }
 
-.signup-btn-link:hover .link-sign {
-  color: white !important;
-}
-
-/* Agar ichida oddiy matn bo'lsa */
-.signup-btn-link {
-  color: #3498db;
-}
-
-.signup-btn-link:hover {
-  color: white !important;
-}
-
-/* Xato xabari */
-.alert-error {
-  color: #e74c3c;
-  background: #fdf2f2;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  text-align: center;
-  font-size: 15px;
-}
-
-/* Responsive – faqat kichik ekranlar uchun minimal o'zgartirish */
-@media (max-width: 580px) {
-  .login-card {
-    padding: 3.5rem 2.5rem;
-    max-width: 95%;
-    border-radius: 16px;
-  }
-
-  .title-login {
-    font-size: 1.75rem;
-    margin-bottom: 2.2rem;
-  }
-
-  .login-input,
-  .cont-btn,
-  .google-btn,
-  .apple-btn {
-    font-size: 1.15rem;
-    padding: 0.9rem;
-  }
-
-  .login-input {
-    padding-left: 45px;
-  }
-
-  .input-icon {
-    left: 12px;
-  }
-
-  .signup-btn-link {
-    padding: 1rem 3rem;
-    font-size: 0.95rem;
-  }
-
-  .text-center {
-    font-size: 14px;
-    margin-top: 2.2rem;
-  }
-}
-
-@media (max-width: 380px) {
-  .login-card {
-    padding: 2.8rem 1.8rem;
-  }
-
-  .title-login {
-    font-size: 1.55rem;
-  }
-
-  .login-input,
-  .cont-btn,
-  .google-btn,
-  .apple-btn {
-    font-size: 1.05rem;
-  }
-}
-
-/* ... oldingi kodlarning hammasi saqlanadi, faqat qo‘shimchalar quyida */
-
-/* Email ko‘rsatiladigan joy */
-.email-preview {
-  text-align: center;
-  font-size: 1.2rem;
-  color: #2c3e50;
-  margin-bottom: 2.5rem;
-  font-weight: 500;
-}
-
-/* Parol maydoni uchun maxsus guruh */
+/* Password toggle */
 .password-group {
   position: relative;
 }
@@ -258,35 +181,44 @@
   background: none;
   border: none;
   color: #3498db;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   cursor: pointer;
-  padding: 0;
+  padding: 5px;
 }
 
-/* Checkbox va Forgot link qatori */
+/* Email preview */
+.email-preview {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  font-weight: 500;
+}
+
+/* Options row */
 .options-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 1.5rem 0;
-  font-size: 1rem;
+  margin: 20px 0;
+  font-size: 0.9rem;
   color: #555;
 }
 
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
 }
 
 .checkbox-label input {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   accent-color: #3498db;
+  cursor: pointer;
 }
 
-/* "Parolni unutdingizmi?" */
 .forgot-link {
   color: #3498db;
   text-decoration: none;
@@ -297,21 +229,9 @@
   text-decoration: underline;
 }
 
-/* "Log in" tugmasi */
-.login-btn {
-  background-color: #3498db;
-  padding: 1.1rem;
-  font-size: 1.25rem;
-}
-
-.login-btn:hover {
-  background-color: #2980b9;
-}
-
-/* "Not you?" qismi */
 .not-you {
-  margin-top: 2.5rem;
-  font-size: 1rem;
+  margin-top: 25px;
+  font-size: 0.95rem;
 }
 
 .not-you-link {
@@ -324,15 +244,76 @@
   text-decoration: underline;
 }
 
-/* Responsive moslashuv */
-@media (max-width: 580px) {
-  .options-row {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
+/* Alert */
+.alert-error {
+  color: #e74c3c;
+  background: #fdf2f2;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Responsive - barcha qurilmalarda bir xil ko'rinish */
+@media (max-width: 768px) {
+  .login-card {
+    max-width: 420px;
+    padding: 35px 30px;
   }
 
-  .email-preview {
+  .title-login {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    max-width: 100%;
+    padding: 30px 25px;
+    border-radius: 15px;
+  }
+
+  .title-login {
+    font-size: 1.6rem;
+    margin-bottom: 25px;
+  }
+
+  .login-input {
+    font-size: 0.95rem;
+    padding: 14px 14px 14px 45px;
+  }
+
+  .input-icon {
     font-size: 1.1rem;
+    left: 12px;
+  }
+
+  .cont-btn,
+  .google-btn,
+  .apple-btn {
+    font-size: 0.95rem;
+    padding: 14px;
+  }
+
+  .options-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .signup-btn-link {
+    padding: 11px 35px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-card {
+    padding: 25px 20px;
+  }
+
+  .title-login {
+    font-size: 1.5rem;
   }
 }
