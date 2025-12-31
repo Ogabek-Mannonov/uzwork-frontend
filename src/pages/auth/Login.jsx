@@ -1,17 +1,23 @@
 // Login.jsx
-import React, { useState } from 'react';
-import { FaUser, FaLock, FaPhoneAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
-import './authcss/login.css';
+import React, { useState } from "react";
+import { FaUser, FaLock, FaPhoneAlt, FaEye, FaEyeSlash } from "react-icons/fa";
+import "./authcss/login.css";
+
+// ==================notification==================
+import { Toast } from "../components/Toast";
 
 const Login = () => {
-  const [step, setStep] = useState('email'); // email, password, google, phone
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
+  const [step, setStep] = useState("email"); // email, password, google, phone
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // ==================notification==================
+  const [showToast, setShowToast] = useState(false);
 
   // Email bilan davom etish
   const handleEmailSubmit = (e) => {
@@ -21,8 +27,8 @@ const Login = () => {
       if (!email.trim()) {
         setError("Iltimos, email yoki telefon raqamni kiriting");
       } else {
-        setError('');
-        setStep('password');
+        setError("");
+        setStep("password");
       }
       setLoading(false);
     }, 800);
@@ -36,8 +42,8 @@ const Login = () => {
       if (!password.trim()) {
         setError("Parolni kiriting");
       } else {
-        setError('');
-        console.log('Login muvaffaqiyatli:', { email, password, keepLoggedIn });
+        setError("");
+        console.log("Login muvaffaqiyatli:", { email, password, keepLoggedIn });
       }
       setLoading(false);
     }, 1000);
@@ -45,33 +51,35 @@ const Login = () => {
 
   // Google tugmasi bosilganda
   const handleGoogleClick = () => {
-    setStep('google');
+    // setStep("google");
+    setShowToast(true);
   };
 
   // Telefon tugmasi bosilganda
   const handlePhoneClick = () => {
-    setStep('phone');
+    // setStep("phone");
+    setShowToast(true);
   };
 
   // Orqaga qaytish
   const handleBack = () => {
-    setStep('email');
-    setError('');
+    setStep("email");
+    setError("");
   };
 
   return (
     <div className="login-container">
       <div className="login-card">
         <h1 className="title-login">
-          {step === 'email' || step === 'google' || step === 'phone'
-            ? 'Uzworkga kirish'
-            : 'Xush kelibsiz'}
+          {step === "email" || step === "google" || step === "phone"
+            ? "Uzworkga kirish"
+            : "Xush kelibsiz"}
         </h1>
 
         {error && <div className="alert-error">{error}</div>}
 
         {/* 1-bosqich: Email kiritish */}
-        {step === 'email' && (
+        {step === "email" && (
           <>
             <form onSubmit={handleEmailSubmit}>
               <div className="input-group">
@@ -87,20 +95,33 @@ const Login = () => {
               </div>
 
               <button type="submit" className="cont-btn" disabled={loading}>
-                {loading ? 'Tekshirilmoqda...' : 'Davom etish'}
+                {loading ? "Tekshirilmoqda..." : "Davom etish"}
               </button>
             </form>
 
             <div className="login-or">yoki</div>
 
             {/* Asl Google tugmasi */}
-            <button className="google-btn" onClick={handleGoogleClick} disabled={loading}>
-              <img src="https://www.google.com/favicon.ico" alt="Google" width={20} height={20} />
+            <button
+              className="google-btn"
+              onClick={handleGoogleClick}
+              disabled={loading}
+            >
+              <img
+                src="https://www.google.com/favicon.ico"
+                alt="Google"
+                width={20}
+                height={20}
+              />
               Google orqali kirish
             </button>
 
             {/* Asl Telefon tugmasi */}
-            <button className="apple-btn" onClick={handlePhoneClick} disabled={loading}>
+            <button
+              className="apple-btn"
+              onClick={handlePhoneClick}
+              disabled={loading}
+            >
               <FaPhoneAlt size={20} />
               Telefon orqali kirish
             </button>
@@ -115,7 +136,7 @@ const Login = () => {
         )}
 
         {/* Parol kiritish */}
-        {step === 'password' && (
+        {step === "password" && (
           <>
             <div className="email-preview">{email}</div>
 
@@ -123,7 +144,7 @@ const Login = () => {
               <div className="input-group password-group">
                 <FaLock className="input-icon" />
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   className="login-input"
                   placeholder="Parol"
                   value={password}
@@ -154,8 +175,12 @@ const Login = () => {
                 </a>
               </div>
 
-              <button type="submit" className="cont-btn login-btn" disabled={loading}>
-                {loading ? 'Yuklanmoqda...' : 'Kirish'}
+              <button
+                type="submit"
+                className="cont-btn login-btn"
+                disabled={loading}
+              >
+                {loading ? "Yuklanmoqda..." : "Kirish"}
               </button>
             </form>
 
@@ -168,9 +193,9 @@ const Login = () => {
         )}
 
         {/* Google bosilganda (demo) */}
-        {step === 'google' && (
+        {/* {step === "google" && (
           <>
-            <div className="input-group" style={{ marginBottom: '2rem' }}>
+            <div className="input-group" style={{ marginBottom: "2rem" }}>
               <FaUser className="input-icon" />
               <input
                 type="text"
@@ -178,29 +203,40 @@ const Login = () => {
                 placeholder="Google hisobingiz"
                 autoFocus
                 readOnly
-                value={email || 'mannonovogabek270@gmail.com'}
+                value={email || "mannonovogabek270@gmail.com"}
               />
             </div>
 
             <button className="cont-btn" disabled={loading}>
-              {loading ? 'Yuklanmoqda...' : 'Google bilan kirish'}
+              {loading ? "Yuklanmoqda..." : "Google bilan kirish"}
             </button>
 
-            <div className="text-center" style={{ marginTop: '2rem' }}>
+            <div className="text-center" style={{ marginTop: "2rem" }}>
               <button
                 onClick={handleBack}
-                style={{ background: 'none', border: 'none', color: '#3498db', cursor: 'pointer', fontSize: '1rem' }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#3498db",
+                  cursor: "pointer",
+                  fontSize: "1rem",
+                }}
               >
                 ← Orqaga
               </button>
             </div>
           </>
-        )}
+        )} */}
 
         {/* Telefon raqami bosilganda */}
-        {step === 'phone' && (
+        {/* {step === "phone" && (
           <>
-            <form onSubmit={(e) => { e.preventDefault(); alert('SMS kod yuborildi! (demo)'); }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                alert("SMS kod yuborildi! (demo)");
+              }}
+            >
               <div className="input-group">
                 <FaPhoneAlt className="input-icon" />
                 <input
@@ -214,21 +250,35 @@ const Login = () => {
               </div>
 
               <button type="submit" className="cont-btn" disabled={loading}>
-                {loading ? 'Yuborilmoqda...' : 'Kodni yuborish'}
+                {loading ? "Yuborilmoqda..." : "Kodni yuborish"}
               </button>
             </form>
 
-            <div className="text-center" style={{ marginTop: '2rem' }}>
+            <div className="text-center" style={{ marginTop: "2rem" }}>
               <button
                 onClick={handleBack}
-                style={{ background: 'none', border: 'none', color: '#3498db', cursor: 'pointer', fontSize: '1rem' }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#3498db",
+                  cursor: "pointer",
+                  fontSize: "1rem",
+                }}
               >
                 ← Orqaga
               </button>
             </div>
           </>
-        )}
+        )} */}
       </div>
+
+      {/* Toast xabari */}
+      {showToast && (
+        <Toast
+          message="Bu xususiyat vaqtinchalik ishlamayapti"
+          onClose={() => setShowToast(false)}
+        />
+      )}
     </div>
   );
 };
