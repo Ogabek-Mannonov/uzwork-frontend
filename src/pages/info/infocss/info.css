@@ -30,7 +30,7 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  height: 80px;
+  height: 60px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
@@ -97,7 +97,7 @@ body {
 .nav-btn {
   background: #6ec5ff;
   color: white;
-  padding: 14px 32px;
+  padding: 8px 30px;
   border-radius: 10px;
   font-weight: 600;
   font-size: 16px;
