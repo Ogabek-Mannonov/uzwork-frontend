@@ -1,20 +1,22 @@
 // src/pages/auth/Signup.jsx
-import { useState } from 'react';
-import { FaBriefcase, FaUser } from 'react-icons/fa';
-import './authcss/signup.css';
+import { useState } from "react";
+import { FaBriefcase, FaUser } from "react-icons/fa";
+import { IoMdArrowRoundBack } from "react-icons/io";
+
+import "./authcss/signup.css";
 
 function Signup() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    password: '',
-    country: 'Uzbekistan',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    country: "Uzbekistan",
     sendEmails: true,
     agreeTerms: false,
-    role: ''
+    role: "",
   });
 
   const handleRoleChange = (e) => {
@@ -25,7 +27,7 @@ function Signup() {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
@@ -37,16 +39,16 @@ function Signup() {
 
   const handleBack = () => {
     setStep(1);
-    setFormData({ ...formData, role: '' });
+    setFormData({ ...formData, role: "" });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.agreeTerms) {
-      alert('Shartlarga rozilik bildiring!');
+      alert("Shartlarga rozilik bildiring!");
       return;
     }
-    console.log('Signup data:', formData);
+    console.log("Signup data:", formData);
   };
 
   return (
@@ -58,12 +60,16 @@ function Signup() {
         {step === 1 && (
           <>
             <div className="role-boxes">
-              <label className={`role-box ${formData.role === 'client' ? 'selected' : ''}`}>
+              <label
+                className={`role-box ${
+                  formData.role === "client" ? "selected" : ""
+                }`}
+              >
                 <input
                   type="radio"
                   name="role"
                   value="client"
-                  checked={formData.role === 'client'}
+                  checked={formData.role === "client"}
                   onChange={handleRoleChange}
                   className="radio-input"
                 />
@@ -74,12 +80,16 @@ function Signup() {
                 </div>
               </label>
 
-              <label className={`role-box ${formData.role === 'freelancer' ? 'selected' : ''}`}>
+              <label
+                className={`role-box ${
+                  formData.role === "freelancer" ? "selected" : ""
+                }`}
+              >
                 <input
                   type="radio"
                   name="role"
                   value="freelancer"
-                  checked={formData.role === 'freelancer'}
+                  checked={formData.role === "freelancer"}
                   onChange={handleRoleChange}
                   className="radio-input"
                 />
@@ -105,12 +115,15 @@ function Signup() {
         {/* Step 2*/}
         {step === 2 && (
           <>
+            <button type="button" className="back-btn" onClick={handleBack}>
+              <IoMdArrowRoundBack />
+            </button>
             <div className="selected-role-header">
-              <button type="button" className="back-btn" onClick={handleBack}>
-                ← Orqaga
-              </button>
               <h3 className="selected-role-title">
-                {formData.role === 'client' ? 'Ish beruvchi sifatida' : 'Freelancer sifatida'} ro'yxatdan o'tish
+                {formData.role === "client"
+                  ? "Ish beruvchi sifatida"
+                  : "Freelancer sifatida"}{" "}
+                ro'yxatdan o'tish
               </h3>
             </div>
 
@@ -206,7 +219,19 @@ function Signup() {
                   required
                 />
                 <label htmlFor="agreeTerms">
-                  Ha, men <a href="#" className="terms-link">UzWork shartlari</a>, <a href="#" className="terms-link">Foydalanuvchi kelishuvi</a> va <a href="#" className="terms-link">Maxfiylik siyosati</a> bilan tanishib chiqdim va roziman.
+                  Ha, men{" "}
+                  <a href="#" className="terms-link">
+                    UzWork shartlari
+                  </a>
+                  ,{" "}
+                  <a href="#" className="terms-link">
+                    Foydalanuvchi kelishuvi
+                  </a>{" "}
+                  va{" "}
+                  <a href="#" className="terms-link">
+                    Maxfiylik siyosati
+                  </a>{" "}
+                  bilan tanishib chiqdim va roziman.
                 </label>
               </div>
 
@@ -216,7 +241,10 @@ function Signup() {
             </form>
 
             <p className="text-center-signup">
-              Allaqachon hisobingiz bormi? <a href="/login" className="login-link">Kirish</a>
+              Allaqachon hisobingiz bormi?{" "}
+              <a href="/login" className="login-link">
+                Kirish
+              </a>
             </p>
           </>
         )}
