@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./infocss/info.css";
+import Footer from "../footer/Footer";
 const Info = () => {
   return (
     <div className="info-container">
@@ -141,6 +142,8 @@ const Info = () => {
           </div>
         </div>
       </section>
+      {/* Footer Part */}
+      <Footer/>
     </div>
   );
 };
