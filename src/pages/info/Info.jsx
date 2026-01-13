@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Briefcase, Users, Award, Zap, Shield, Globe, TrendingUp, Star, CheckCircle, ArrowRight, Sparkles, Rocket, Code, Palette, BarChart, MessageSquare, FileText, Video, Target, Settings, Landmark, Scale, UserCog, Wrench } from "lucide-react";
 import "./infocss/info.css";
-import "../components/Toast"
-// import { Toast } from "../components/Toast";
 
+import Footer from "../footer/Footer";
 
 const Info = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -364,7 +363,6 @@ const Info = () => {
         </div>
       </section>
 
-
       {/* Testimonials */}
       <section className="testimonials-section">
         <div className="section-container">
@@ -449,7 +447,8 @@ const Info = () => {
           <button className="cta-btn">Bepul boshlash</button>
         </div>
       </section>
-
+      {/* Footer Part */}
+      <Footer/>
     </div>
   );
 };
