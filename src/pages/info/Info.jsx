@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Briefcase, Users, Award, Zap, Shield, Globe, TrendingUp, Star, CheckCircle, ArrowRight, Sparkles, Rocket, Code, Palette, BarChart, MessageSquare, FileText, Video, Target, Settings, Landmark, Scale, UserCog, Wrench } from "lucide-react";
 import "./infocss/info.css";
-
 import Footer from "../footer/Footer";
 
 const Info = () => {
