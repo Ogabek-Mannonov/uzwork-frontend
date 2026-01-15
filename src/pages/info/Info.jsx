@@ -536,9 +536,7 @@ const Info = () => {
                 <Moon className="w-5 h-5" />
               )}
             </button>
-            <a href="#" className="nav-link">
-              Kirish
-            </a>
+            <button className="nav-link">Kirish</button>  
             <button className="nav-btn">Boshlash</button>
           </div>
         </div>
