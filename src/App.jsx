@@ -16,7 +16,7 @@ function App() {
       <div className="min-h-screen bg-gray-50">
         {/* Keyin Header qo‘shamiz */}
         <Routes>
-          <Route path="/index" element={<Home />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/" element={<Info />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
