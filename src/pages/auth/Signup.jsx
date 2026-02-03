@@ -5,7 +5,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 
 import "./authcss/signup.css";
-import { signup as signupRequest } from "../../api/auth"; // yo‘lni mosla
+import { signup as signupRequest } from "../../api/auth";
 
 function Signup() {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ function Signup() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    username: "", // ✅ USERNAME QO‘SHILDI
     email: "",
     phone: "",
     password: "",
@@ -48,7 +49,7 @@ function Signup() {
     setFormData({ ...formData, role: "" });
   };
 
-  // backend username: faqat harf/raqam/_
+  // Agar user username kiritmasa — avtomatik generatsiya
   const genUsername = () => {
     const base =
       (formData.firstName || "user") +
@@ -66,13 +67,22 @@ function Signup() {
     setServerError("");
 
     if (!formData.agreeTerms) {
-      alert("Shartlarga rozilik bildiring!");
+      setServerError("Shartlarga rozilik bildiring.");
       return;
     }
 
-    // minimal tekshiruv
     if (!formData.phone.trim()) {
-      setServerError("Telefon raqamni kiriting (backend talab qiladi).");
+      setServerError("Telefon raqamni kiriting.");
+      return;
+    }
+
+    if (
+      formData.username &&
+      !/^[a-zA-Z0-9_]+$/.test(formData.username)
+    ) {
+      setServerError(
+        "Username faqat harflar, raqamlar va _ belgisidan iborat bo‘lishi kerak."
+      );
       return;
     }
 
@@ -86,7 +96,9 @@ function Signup() {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        username: genUsername(),
+        username: formData.username.trim()
+          ? formData.username.trim()
+          : genUsername(),
         display_name: `${formData.firstName} ${formData.lastName}`.trim(),
       };
 
@@ -97,10 +109,12 @@ function Signup() {
         return;
       }
 
-      // Signup bo‘ldi — onboardingga yuboramiz
-      navigate("/profile"); // xohlasang /profile/edit qilasan
+      // Signup OK → profilga
+      navigate("/profile");
     } catch (err) {
-      setServerError(err?.response?.data?.message || "Server bilan ulanishda xato");
+      setServerError(
+        err?.response?.data?.message || "Server bilan ulanishda xato"
+      );
     } finally {
       setSubmitting(false);
     }
@@ -127,7 +141,7 @@ function Signup() {
           </div>
         )}
 
-        {/* Step 1: Role */}
+        {/* STEP 1: ROLE */}
         {step === 1 && (
           <>
             <div className="role-boxes">
@@ -175,7 +189,7 @@ function Signup() {
           </>
         )}
 
-        {/* Step 2: Form */}
+        {/* STEP 2: FORM */}
         {step === 2 && (
           <>
             <button type="button" className="back-btn" onClick={handleBack}>
@@ -184,7 +198,9 @@ function Signup() {
 
             <div className="selected-role-header">
               <h3 className="selected-role-title">
-                {formData.role === "client" ? "Ish beruvchi sifatida" : "Freelancer sifatida"}{" "}
+                {formData.role === "client"
+                  ? "Ish beruvchi sifatida"
+                  : "Freelancer sifatida"}{" "}
                 ro'yxatdan o'tish
               </h3>
             </div>
@@ -214,6 +230,21 @@ function Signup() {
                 </div>
               </div>
 
+              {/* ✅ USERNAME */}
+              <div className="input-group full-width">
+                <label>Username</label>
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="masalan: ogabek_dev"
+                  value={formData.username}
+                  onChange={handleChange}
+                />
+                <small style={{ opacity: 0.7 }}>
+                  Ixtiyoriy. Bo‘sh qoldirsangiz avtomatik yaratiladi.
+                </small>
+              </div>
+
               <div className="input-group full-width">
                 <label>Email</label>
                 <input
@@ -225,7 +256,6 @@ function Signup() {
                 />
               </div>
 
-              {/* ✅ TELEFON QO‘SHILDI (backend talab qiladi) */}
               <div className="input-group full-width">
                 <label>Telefon</label>
                 <input
@@ -243,82 +273,23 @@ function Signup() {
                 <input
                   type="password"
                   name="password"
-                  placeholder="Parol (8 yoki undan ko'p belgi)"
+                  placeholder="Kamida 8 ta belgi"
                   value={formData.password}
                   onChange={handleChange}
                   required
                 />
               </div>
 
-              <div className="input-group full-width">
-                <label>Davlat</label>
-                <select
-                  name="country"
-                  value={formData.country}
-                  onChange={handleChange}
-                  className="country-select"
-                  required
-                >
-                  <option value="Uzbekistan">O'zbekiston</option>
-                  <option value="Kazakhstan">Qozog'iston</option>
-                  <option value="Kyrgyzstan">Qirg'iziston</option>
-                  <option value="Tajikistan">Tojikiston</option>
-                  <option value="Turkmenistan">Turkmaniston</option>
-                  <option value="Russia">Rossiya</option>
-                  <option value="Turkey">Turkiya</option>
-                </select>
-              </div>
+              <div className="upwork-checkbox-group"> <input type="checkbox" name="agreeTerms" checked={formData.agreeTerms} onChange={handleChange} id="agreeTerms" required /> <label htmlFor="agreeTerms"> Ha, men{" "} <a href="#" className="terms-link"> UzWork shartlari </a> ,{" "} <a href="#" className="terms-link"> Foydalanuvchi kelishuvi </a>{" "} va{" "} <a href="#" className="terms-link"> Maxfiylik siyosati </a>{" "} bilan tanishib chiqdim va roziman. </label> </div>
 
-              <div className="upwork-checkbox-group">
-                <input
-                  type="checkbox"
-                  name="sendEmails"
-                  checked={formData.sendEmails}
-                  onChange={handleChange}
-                  id="sendEmails"
-                />
-                <label htmlFor="sendEmails">
-                  Menga loyiha topish bo'yicha maslahatlar yuborilsin
-                </label>
-              </div>
-
-              <div className="upwork-checkbox-group">
-                <input
-                  type="checkbox"
-                  name="agreeTerms"
-                  checked={formData.agreeTerms}
-                  onChange={handleChange}
-                  id="agreeTerms"
-                  required
-                />
-                <label htmlFor="agreeTerms">
-                  Ha, men{" "}
-                  <a href="#" className="terms-link">
-                    UzWork shartlari
-                  </a>
-                  ,{" "}
-                  <a href="#" className="terms-link">
-                    Foydalanuvchi kelishuvi
-                  </a>{" "}
-                  va{" "}
-                  <a href="#" className="terms-link">
-                    Maxfiylik siyosati
-                  </a>{" "}
-                  bilan tanishib chiqdim va roziman.
-                </label>
-              </div>
-
-              <button type="submit" className="create-account-btn" disabled={submitting}>
+              <button
+                type="submit"
+                className="create-account-btn"
+                disabled={submitting}
+              >
                 {submitting ? "Yaratilmoqda..." : "Hisobni yaratish"}
               </button>
             </form>
-
-            <p className="text-center-signup">
-              Allaqachon hisobingiz bormi?{" "}
-              <a href="/login" className="login-link">
-                Kirish
-              </a>
-            </p>
           </>
         )}
       </div>
