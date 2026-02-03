@@ -1,69 +1,83 @@
-// Login.jsx
+// src/pages/auth/Login.jsx
 import React, { useState } from "react";
 import { FaUser, FaLock, FaPhoneAlt, FaEye, FaEyeSlash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import "./authcss/login.css";
 
-// ==================notification==================
 import { Toast } from "../components/Toast";
+import { login as loginRequest } from "../../api/auth"; // yo‘lni loyihangga mosla
 
 const Login = () => {
-  const [step, setStep] = useState("email"); // email, password, google, phone
-  const [email, setEmail] = useState("");
+  const navigate = useNavigate();
+
+  const [step, setStep] = useState("email"); // email, password
+  const [identifier, setIdentifier] = useState(""); // email yoki phone
   const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ==================notification==================
   const [showToast, setShowToast] = useState(false);
 
-  // Email bilan davom etish
+  const isEmail = (value) => value.includes("@");
+
+  // 1-bosqich: Email/phone kiritish
   const handleEmailSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      if (!email.trim()) {
-        setError("Iltimos, email yoki telefon raqamni kiriting");
-      } else {
-        setError("");
-        setStep("password");
-      }
-      setLoading(false);
-    }, 800);
+    if (!identifier.trim()) {
+      setError("Iltimos, email yoki telefon raqamni kiriting");
+      return;
+    }
+    setError("");
+    setStep("password");
   };
 
-  // Parol bilan kirish
-  const handleLogin = (e) => {
+  // 2-bosqich: Parol bilan kirish (backend)
+  const handleLogin = async (e) => {
     e.preventDefault();
+    if (!password.trim()) {
+      setError("Parolni kiriting");
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => {
-      if (!password.trim()) {
-        setError("Parolni kiriting");
-      } else {
-        setError("");
-        console.log("Login muvaffaqiyatli:", { email, password, keepLoggedIn });
+    setError("");
+
+    try {
+      const id = identifier.trim();
+
+      const payload = isEmail(id)
+        ? { email: id, password }
+        : { phone: id, password };
+
+      const res = await loginRequest(payload);
+
+      if (!res?.success) {
+        setError(res?.message || "Kirishda xatolik");
+        return;
       }
+
+      // Tokenlar auth.js ichida localStorage ga saqlandi
+
+      // Role bo‘yicha yo‘naltirish (xohlasang o‘zgartirasan)
+      const role = res?.data?.user?.role;
+      if (role === "client") navigate("/profile"); // vaqtinchalik profilega yonaltirilsin
+      else navigate("/profile");
+    } catch (err) {
+      setError(err?.response?.data?.message || "Server bilan ulanishda xato");
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
-  // Google tugmasi bosilganda
-  const handleGoogleClick = () => {
-    // setStep("google");
-    setShowToast(true);
-  };
+  const handleGoogleClick = () => setShowToast(true);
+  const handlePhoneClick = () => setShowToast(true);
 
-  // Telefon tugmasi bosilganda
-  const handlePhoneClick = () => {
-    // setStep("phone");
-    setShowToast(true);
-  };
-
-  // Orqaga qaytish
-  const handleBack = () => {
+  const handleBack = (e) => {
+    e?.preventDefault();
     setStep("email");
+    setPassword("");
     setError("");
   };
 
@@ -71,14 +85,12 @@ const Login = () => {
     <div className="login-container">
       <div className="login-card">
         <h1 className="title-login">
-          {step === "email" || step === "google" || step === "phone"
-            ? "Uzworkga kirish"
-            : "Xush kelibsiz"}
+          {step === "email" ? "Uzworkga kirish" : "Xush kelibsiz"}
         </h1>
 
         {error && <div className="alert-error">{error}</div>}
 
-        {/* 1-bosqich: Email kiritish */}
+        {/* 1-bosqich: Email/phone */}
         {step === "email" && (
           <>
             <form onSubmit={handleEmailSubmit}>
@@ -88,8 +100,8 @@ const Login = () => {
                   type="text"
                   className="login-input"
                   placeholder="Email yoki telefon raqam"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   autoFocus
                 />
               </div>
@@ -101,11 +113,11 @@ const Login = () => {
 
             <div className="login-or">yoki</div>
 
-            {/* Asl Google tugmasi */}
             <button
               className="google-btn"
               onClick={handleGoogleClick}
               disabled={loading}
+              type="button"
             >
               <img
                 src="https://www.google.com/favicon.ico"
@@ -116,11 +128,11 @@ const Login = () => {
               Google orqali kirish
             </button>
 
-            {/* Asl Telefon tugmasi */}
             <button
               className="apple-btn"
               onClick={handlePhoneClick}
               disabled={loading}
+              type="button"
             >
               <FaPhoneAlt size={20} />
               Telefon orqali kirish
@@ -135,10 +147,10 @@ const Login = () => {
           </>
         )}
 
-        {/* Parol kiritish */}
+        {/* 2-bosqich: Parol */}
         {step === "password" && (
           <>
-            <div className="email-preview">{email}</div>
+            <div className="email-preview">{identifier}</div>
 
             <form onSubmit={handleLogin}>
               <div className="input-group password-group">
@@ -191,8 +203,9 @@ const Login = () => {
             </div>
           </>
         )}
+      </div>
 
-        {/* Google bosilganda (demo) */}
+       {/* Google bosilganda (demo) */}
         {/* {step === "google" && (
           <>
             <div className="input-group" style={{ marginBottom: "2rem" }}>
@@ -270,9 +283,8 @@ const Login = () => {
             </div>
           </>
         )} */}
-      </div>
 
-      {/* Toast xabari */}
+
       {showToast && (
         <Toast
           message="Bu xususiyat vaqtinchalik ishlamayapti"

@@ -2,11 +2,18 @@
 import { useState } from "react";
 import { FaBriefcase, FaUser } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
 
 import "./authcss/signup.css";
+import { signup as signupRequest } from "../../api/auth"; // yo‘lni mosla
 
 function Signup() {
+  const navigate = useNavigate();
+
   const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState("");
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -32,23 +39,71 @@ function Signup() {
   };
 
   const handleContinue = () => {
-    if (formData.role) {
-      setStep(2);
-    }
+    if (formData.role) setStep(2);
   };
 
   const handleBack = () => {
     setStep(1);
+    setServerError("");
     setFormData({ ...formData, role: "" });
   };
 
-  const handleSubmit = (e) => {
+  // backend username: faqat harf/raqam/_
+  const genUsername = () => {
+    const base =
+      (formData.firstName || "user") +
+      "_" +
+      (formData.lastName || "") +
+      "_" +
+      (formData.email ? formData.email.split("@")[0] : "uzwork");
+
+    const cleaned = base.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 20);
+    return cleaned || `user_${Date.now()}`;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setServerError("");
+
     if (!formData.agreeTerms) {
       alert("Shartlarga rozilik bildiring!");
       return;
     }
-    console.log("Signup data:", formData);
+
+    // minimal tekshiruv
+    if (!formData.phone.trim()) {
+      setServerError("Telefon raqamni kiriting (backend talab qiladi).");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const payload = {
+        role: formData.role,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        username: genUsername(),
+        display_name: `${formData.firstName} ${formData.lastName}`.trim(),
+      };
+
+      const res = await signupRequest(payload);
+
+      if (!res?.success) {
+        setServerError(res?.message || "Ro‘yxatdan o‘tishda xato");
+        return;
+      }
+
+      // Signup bo‘ldi — onboardingga yuboramiz
+      navigate("/profile"); // xohlasang /profile/edit qilasan
+    } catch (err) {
+      setServerError(err?.response?.data?.message || "Server bilan ulanishda xato");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -56,15 +111,27 @@ function Signup() {
       <div className="signup-card">
         <h2 className="title-signup">Ro'yxatdan o'tish</h2>
 
-        {/* Step 1 */}
+        {serverError && (
+          <div
+            style={{
+              background: "#ffeded",
+              border: "1px solid #ffb3b3",
+              color: "#b10000",
+              padding: "10px 12px",
+              borderRadius: 10,
+              marginBottom: 14,
+              fontSize: 14,
+            }}
+          >
+            {serverError}
+          </div>
+        )}
+
+        {/* Step 1: Role */}
         {step === 1 && (
           <>
             <div className="role-boxes">
-              <label
-                className={`role-box ${
-                  formData.role === "client" ? "selected" : ""
-                }`}
-              >
+              <label className={`role-box ${formData.role === "client" ? "selected" : ""}`}>
                 <input
                   type="radio"
                   name="role"
@@ -80,11 +147,7 @@ function Signup() {
                 </div>
               </label>
 
-              <label
-                className={`role-box ${
-                  formData.role === "freelancer" ? "selected" : ""
-                }`}
-              >
+              <label className={`role-box ${formData.role === "freelancer" ? "selected" : ""}`}>
                 <input
                   type="radio"
                   name="role"
@@ -112,17 +175,16 @@ function Signup() {
           </>
         )}
 
-        {/* Step 2*/}
+        {/* Step 2: Form */}
         {step === 2 && (
           <>
             <button type="button" className="back-btn" onClick={handleBack}>
               <IoMdArrowRoundBack />
             </button>
+
             <div className="selected-role-header">
               <h3 className="selected-role-title">
-                {formData.role === "client"
-                  ? "Ish beruvchi sifatida"
-                  : "Freelancer sifatida"}{" "}
+                {formData.role === "client" ? "Ish beruvchi sifatida" : "Freelancer sifatida"}{" "}
                 ro'yxatdan o'tish
               </h3>
             </div>
@@ -134,18 +196,17 @@ function Signup() {
                   <input
                     type="text"
                     name="firstName"
-                    placeholder=""
                     value={formData.firstName}
                     onChange={handleChange}
                     required
                   />
                 </div>
+
                 <div className="input-group">
                   <label>Familiyangiz</label>
                   <input
                     type="text"
                     name="lastName"
-                    placeholder=""
                     value={formData.lastName}
                     onChange={handleChange}
                     required
@@ -158,8 +219,20 @@ function Signup() {
                 <input
                   type="email"
                   name="email"
-                  placeholder=""
                   value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              {/* ✅ TELEFON QO‘SHILDI (backend talab qiladi) */}
+              <div className="input-group full-width">
+                <label>Telefon</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="+998901234567"
+                  value={formData.phone}
                   onChange={handleChange}
                   required
                 />
@@ -235,8 +308,8 @@ function Signup() {
                 </label>
               </div>
 
-              <button type="submit" className="create-account-btn">
-                Hisobni yaratish
+              <button type="submit" className="create-account-btn" disabled={submitting}>
+                {submitting ? "Yaratilmoqda..." : "Hisobni yaratish"}
               </button>
             </form>
 
