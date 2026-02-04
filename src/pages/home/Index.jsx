@@ -11,6 +11,7 @@ import {
   Menu,
 } from "lucide-react";
 import "./homecss/home.css";
+import Projects from "../components/projectsCards";
 
 export default function Index() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -210,11 +211,7 @@ export default function Index() {
         </section>
 
         <section className="content">
-          <h3 className="content-title">Kontent bo‘limi</h3>
-          <p className="content-text">
-            Bu yerga siz keyinroq cardlar, statistikalar, jadval va boshqa
-            bo‘limlarni qo‘shasiz.
-          </p>
+          <Projects />
         </section>
       </main>
     </div>
