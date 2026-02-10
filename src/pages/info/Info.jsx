@@ -520,7 +520,8 @@ const Info = () => {
         <div className="navbar-container">
           <div className="navbar-logo">
             <div className="logo-icon">
-              <Rocket className="w-4 h-4 text-white" />
+              {/* <Rocket className="w-4 h-4 text-white" /> */}
+              <img className="logo" src="../../UzWork transparent.png" alt="" />
             </div>
             <span className="logo-text">UZWORK</span>
           </div>
