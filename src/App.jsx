@@ -9,6 +9,7 @@ import Home from './pages/home/Index.jsx';
 import JobsList from './pages/jobs/List.jsx';
 import MyProfile from './pages/profile/MyProfile.jsx';
 import Info from './pages/info/Info.jsx';
+import Klient from './pages/profile/Klient.jsx';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/jobs" element={<JobsList />} />
           <Route path="/profile" element={<MyProfile />} />
+          <Route path="/profile/klient" element={<Klient />} />
           {/* Keyinroq qo‘shamiz */}
         </Routes>
         {/* Keyin Footer qo‘shamiz */}
