@@ -70,7 +70,7 @@ import {
   Flag,
   MoreHorizontal
 } from "lucide-react";
-import "../profile/klient.css";
+import "./profile-css/profile.css";
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState("my-info");

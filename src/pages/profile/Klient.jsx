@@ -70,7 +70,7 @@ import {
   Flag,
   MoreHorizontal
 } from "lucide-react";
-import "../profile/klient.css";
+import "./profile-css/klient.css";
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState("my-info");
@@ -558,7 +558,7 @@ const Settings = () => {
             </form>
             
             <div className="header-actions">
-              <button className="theme-toggle" onClick={toggleDarkMode} aria-label="Toggle theme">
+              <button className="cl-theme-toggle" onClick={toggleDarkMode} aria-label="Toggle theme">
                 {darkMode ? <Sun size={18} /> : <Moon size={18} />}
               </button>
               
@@ -620,7 +620,7 @@ const Settings = () => {
         
         {/* SIDEBAR - FIXED */}
         <aside className={`settings-sidebar ${showMobileMenu ? 'open' : ''}`}>
-          <div className="sidebar-header">
+          <div className="cl-sidebar-header">
             <h2>Settings</h2>
             <button 
               className="close-sidebar"
@@ -639,7 +639,7 @@ const Settings = () => {
                   {section.items.map(item => (
                     <li key={item.id}>
                       <button
-                        className={`nav-link ${activeSection === item.id ? 'active' : ''}`}
+                        className={`cl-nav-link ${activeSection === item.id ? 'active' : ''}`}
                         onClick={() => handleSectionChange(item.id, item.label)}
                       >
                         <span className="nav-icon">{item.icon}</span>
