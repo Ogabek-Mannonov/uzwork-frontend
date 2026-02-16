@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   User,
   Settings as SettingsIcon,
@@ -85,7 +85,27 @@ const Settings = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [notifications, setNotifications] = useState(3);
   const [activeHeaderTab, setActiveHeaderTab] = useState("hire");
+  const [showUserMenu, setShowUserMenu] = useState(false);
   
+  // Apply dark mode class to body
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [darkMode]);
+
+  // Auto-hide message after 3 seconds
+  useEffect(() => {
+    if (message.text) {
+      const timer = setTimeout(() => {
+        setMessage({ type: "", text: "" });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   const [userData, setUserData] = useState({
     name: "Ogabek",
     fullName: "Ogabek Karimov",
@@ -114,7 +134,7 @@ const Settings = () => {
   // Navigation sections
   const navSections = [
     {
-      title: "Settings",
+      title: "SETTINGS",
       items: [
         { id: "my-info", label: "My Info", icon: <User size={18} />, badge: null },
         { id: "billing", label: "Billing & Payments", icon: <CreditCard size={18} />, badge: null },
@@ -140,27 +160,28 @@ const Settings = () => {
   // Header actions handlers
   const handleHeaderNavClick = (id) => {
     setActiveHeaderTab(id);
-    setMessage({ type: "info", text: `Navigating to ${id}...` });
-    setTimeout(() => setMessage({ type: "", text: "" }), 2000);
+    showMessage("info", `Navigating to ${headerNav.find(item => item.id === id).label}...`);
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      setMessage({ type: "info", text: `Searching for "${searchQuery}"...` });
-      setTimeout(() => setMessage({ type: "", text: "" }), 2000);
+      showMessage("info", `Searching for "${searchQuery}"...`);
     }
   };
 
   const handleNotificationClick = () => {
     setNotifications(0);
-    setMessage({ type: "success", text: "All notifications marked as read" });
-    setTimeout(() => setMessage({ type: "", text: "" }), 2000);
+    showMessage("success", "All notifications marked as read");
   };
 
   const handleUserMenuClick = (action) => {
-    setMessage({ type: "info", text: `${action} clicked` });
-    setTimeout(() => setMessage({ type: "", text: "" }), 1500);
+    setShowUserMenu(false);
+    showMessage("info", `${action} clicked`);
+  };
+
+  const showMessage = (type, text) => {
+    setMessage({ type, text });
   };
 
   // Notification settings
@@ -382,39 +403,36 @@ const Settings = () => {
     e.preventDefault();
     
     if (!passwordForm.currentPassword) {
-      setMessage({ type: "error", text: "Please enter your current password" });
+      showMessage("error", "Please enter your current password");
       return;
     }
     
     if (!passwordForm.newPassword) {
-      setMessage({ type: "error", text: "Please enter a new password" });
+      showMessage("error", "Please enter a new password");
       return;
     }
     
     if (!passwordForm.confirmPassword) {
-      setMessage({ type: "error", text: "Please confirm your new password" });
+      showMessage("error", "Please confirm your new password");
       return;
     }
     
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setMessage({ type: "error", text: "New passwords do not match" });
+      showMessage("error", "New passwords do not match");
       return;
     }
     
     const strength = calculatePasswordStrength(passwordForm.newPassword);
     if (strength.score < 3) {
-      setMessage({ type: "error", text: "Password is too weak. Please choose a stronger password." });
+      showMessage("error", "Password is too weak. Please choose a stronger password.");
       return;
     }
     
     setIsLoading(true);
-    setMessage({ type: "", text: "" });
     
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setMessage({ type: "success", text: "Password updated successfully!" });
+      showMessage("success", "Password updated successfully!");
       setPasswordForm({
         currentPassword: "",
         newPassword: "",
@@ -430,7 +448,7 @@ const Settings = () => {
       });
     } catch (err) {
       console.error("Password update error:", err);
-      setMessage({ type: "error", text: "Failed to update password. Please try again." });
+      showMessage("error", "Failed to update password. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -445,41 +463,39 @@ const Settings = () => {
     );
     
     const setting = securitySettings.find(s => s.id === id);
-    setMessage({ 
-      type: "success", 
-      text: `${setting.label} ${!setting.enabled ? 'enabled' : 'disabled'} successfully!` 
-    });
-    setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+    showMessage("success", `${setting.label} ${!setting.enabled ? 'enabled' : 'disabled'} successfully!`);
   };
 
   // Handle revoke session
   const handleRevokeSession = (sessionId) => {
     setActiveSessions(prev => prev.filter(session => session.id !== sessionId));
-    setMessage({ type: "success", text: "Session revoked successfully!" });
-    setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+    showMessage("success", "Session revoked successfully!");
   };
 
   // Handle enable 2FA
   const handleEnable2FA = () => {
-    setMessage({ type: "info", text: "2FA setup wizard will open..." });
-    setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+    showMessage("info", "2FA setup wizard will open...");
   };
 
   // Handle save profile
   const handleSaveProfile = () => {
     setIsEditing(false);
-    setMessage({ type: "success", text: "Profile updated successfully!" });
-    setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+    showMessage("success", "Profile updated successfully!");
   };
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
-    document.body.classList.toggle('dark-mode', !darkMode);
-    setMessage({ type: "success", text: `${!darkMode ? 'Dark' : 'Light'} mode activated` });
-    setTimeout(() => setMessage({ type: "", text: "" }), 2000);
+    showMessage("success", `${!darkMode ? 'Dark' : 'Light'} mode activated`);
   };
 
   const passwordStrength = calculatePasswordStrength(passwordForm.newPassword);
+
+  // Handle section change
+  const handleSectionChange = (id, label) => {
+    setActiveSection(id);
+    setShowMobileMenu(false);
+    showMessage("info", `Opening ${label}...`);
+  };
 
   return (
     <div className={`settings-container ${darkMode ? 'dark' : 'light'}`}>
@@ -491,6 +507,7 @@ const Settings = () => {
             <button 
               className="mobile-menu-btn"
               onClick={() => setShowMobileMenu(!showMobileMenu)}
+              aria-label="Toggle menu"
             >
               <Menu size={20} />
             </button>
@@ -528,7 +545,12 @@ const Settings = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               {searchQuery && (
-                <button type="button" className="search-clear" onClick={() => setSearchQuery("")}>
+                <button 
+                  type="button" 
+                  className="search-clear" 
+                  onClick={() => setSearchQuery("")}
+                  aria-label="Clear search"
+                >
                   <X size={14} />
                 </button>
               )}
@@ -536,16 +558,16 @@ const Settings = () => {
             </form>
             
             <div className="header-actions">
-              <button className="theme-toggle" onClick={toggleDarkMode}>
+              <button className="theme-toggle" onClick={toggleDarkMode} aria-label="Toggle theme">
                 {darkMode ? <Sun size={18} /> : <Moon size={18} />}
               </button>
               
-              <button className="notification-btn" onClick={handleNotificationClick}>
+              <button className="notification-btn" onClick={handleNotificationClick} aria-label="Notifications">
                 <Bell size={18} />
                 {notifications > 0 && <span className="notification-badge"></span>}
               </button>
               
-              <div className="user-profile" onClick={() => handleUserMenuClick("Profile")}>
+              <div className="user-profile" onClick={() => setShowUserMenu(!showUserMenu)}>
                 <div className="user-avatar-wrapper">
                   <img 
                     src={userData.profilePicture} 
@@ -558,8 +580,36 @@ const Settings = () => {
                   <span className="user-display-name">{userData.name}</span>
                   <span className="user-role">Client</span>
                 </div>
-                <ChevronDown size={16} className="dropdown-icon" />
+                <ChevronDown size={16} className={`dropdown-icon ${showUserMenu ? 'open' : ''}`} />
               </div>
+
+              {/* User Dropdown Menu */}
+              {showUserMenu && (
+                <div className="user-dropdown">
+                  <div className="dropdown-header">
+                    <img src={userData.profilePicture} alt={userData.name} className="dropdown-avatar" />
+                    <div>
+                      <h4>{userData.fullName}</h4>
+                      <p>{userData.email}</p>
+                    </div>
+                  </div>
+                  <div className="dropdown-menu">
+                    <button onClick={() => handleUserMenuClick("Profile")}>
+                      <User size={14} /> Profile
+                    </button>
+                    <button onClick={() => handleUserMenuClick("Settings")}>
+                      <SettingsIcon size={14} /> Settings
+                    </button>
+                    <button onClick={() => handleUserMenuClick("Help")}>
+                      <HelpCircle size={14} /> Help
+                    </button>
+                    <hr />
+                    <button onClick={() => handleUserMenuClick("Sign Out")}>
+                      <LogOut size={14} /> Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -568,24 +618,17 @@ const Settings = () => {
       {/* MAIN CONTENT */}
       <div className="settings-main">
         
-        {/* SIDEBAR */}
+        {/* SIDEBAR - FIXED */}
         <aside className={`settings-sidebar ${showMobileMenu ? 'open' : ''}`}>
           <div className="sidebar-header">
             <h2>Settings</h2>
             <button 
               className="close-sidebar"
               onClick={() => setShowMobileMenu(false)}
+              aria-label="Close sidebar"
             >
               <X size={18} />
             </button>
-          </div>
-          
-          <div className="sidebar-user-preview" onClick={() => handleUserMenuClick("Profile preview")}>
-            <img src={userData.profilePicture} alt={userData.name} className="sidebar-avatar" />
-            <div className="sidebar-user-info">
-              <h3>{userData.fullName}</h3>
-              <p>{userData.email}</p>
-            </div>
           </div>
           
           <nav className="sidebar-nav">
@@ -597,12 +640,7 @@ const Settings = () => {
                     <li key={item.id}>
                       <button
                         className={`nav-link ${activeSection === item.id ? 'active' : ''}`}
-                        onClick={() => {
-                          setActiveSection(item.id);
-                          setShowMobileMenu(false);
-                          setMessage({ type: "info", text: `Opening ${item.label}...` });
-                          setTimeout(() => setMessage({ type: "", text: "" }), 1500);
-                        }}
+                        onClick={() => handleSectionChange(item.id, item.label)}
                       >
                         <span className="nav-icon">{item.icon}</span>
                         <span className="nav-label">{item.label}</span>
