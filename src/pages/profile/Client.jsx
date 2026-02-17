@@ -60,8 +60,6 @@ import {
   LogIn,
   UserPlus,
   Filter,
-  Download as DownloadIcon,
-  Upload as UploadIcon,
   Printer,
   Copy,
   ExternalLink,
@@ -87,7 +85,6 @@ const Settings = () => {
   const [activeHeaderTab, setActiveHeaderTab] = useState("hire");
   const [showUserMenu, setShowUserMenu] = useState(false);
   
-  // Apply dark mode class to body
   useEffect(() => {
     if (darkMode) {
       document.body.classList.add('dark-mode');
@@ -96,7 +93,6 @@ const Settings = () => {
     }
   }, [darkMode]);
 
-  // Auto-hide message after 3 seconds
   useEffect(() => {
     if (message.text) {
       const timer = setTimeout(() => {
@@ -131,7 +127,6 @@ const Settings = () => {
     rating: 4.9
   });
 
-  // Navigation sections
   const navSections = [
     {
       title: "SETTINGS",
@@ -149,7 +144,6 @@ const Settings = () => {
     }
   ];
 
-  // Header navigation
   const headerNav = [
     { id: "hire", label: "Hire talent", icon: <Briefcase size={16} />, active: activeHeaderTab === "hire" },
     { id: "manage", label: "Manage work", icon: <BarChart size={16} />, active: activeHeaderTab === "manage" },
@@ -157,7 +151,6 @@ const Settings = () => {
     { id: "messages", label: "Messages", icon: <MessageCircle size={16} />, active: activeHeaderTab === "messages", badge: notifications }
   ];
 
-  // Header actions handlers
   const handleHeaderNavClick = (id) => {
     setActiveHeaderTab(id);
     showMessage("info", `Navigating to ${headerNav.find(item => item.id === id).label}...`);
@@ -184,7 +177,6 @@ const Settings = () => {
     setMessage({ type, text });
   };
 
-  // Notification settings
   const notificationSettings = [
     {
       category: "Job Opportunities",
@@ -212,13 +204,11 @@ const Settings = () => {
     }
   ];
 
-  // Billing methods
   const billingMethods = [
     { id: 1, type: "visa", last4: "4242", exp: "12/25", default: true },
     { id: 2, type: "bank", account: "**** 1234", bank: "Kapital Bank", default: false }
   ];
 
-  // Transactions
   const transactions = [
     {
       id: 1,
@@ -249,14 +239,12 @@ const Settings = () => {
     }
   ];
 
-  // Password form state
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
   });
 
-  // Password validation state
   const [passwordValidations, setPasswordValidations] = useState({
     length: false,
     uppercase: false,
@@ -266,7 +254,6 @@ const Settings = () => {
     match: false
   });
 
-  // Security settings
   const [securitySettings, setSecuritySettings] = useState([
     { 
       id: "2fa", 
@@ -302,7 +289,6 @@ const Settings = () => {
     }
   ]);
 
-  // Active sessions
   const [activeSessions, setActiveSessions] = useState([
     {
       id: 1,
@@ -339,7 +325,6 @@ const Settings = () => {
     }
   ]);
 
-  // Password strength checks
   const passwordStrengthChecks = [
     { id: "length", label: "At least 8 characters", validator: (pwd) => pwd.length >= 8 },
     { id: "uppercase", label: "One uppercase letter", validator: (pwd) => /[A-Z]/.test(pwd) },
@@ -348,7 +333,6 @@ const Settings = () => {
     { id: "special", label: "One special character", validator: (pwd) => /[!@#$%^&*(),.?":{}|<>]/.test(pwd) }
   ];
 
-  // Calculate password strength
   const calculatePasswordStrength = (password) => {
     let strength = 0;
     const checks = [
@@ -367,7 +351,6 @@ const Settings = () => {
     };
   };
 
-  // Handle input changes
   const handleInputChange = (field, value) => {
     setUserData(prev => ({
       ...prev,
@@ -375,7 +358,6 @@ const Settings = () => {
     }));
   };
 
-  // Handle password change
   const handlePasswordChange = (field, value) => {
     setPasswordForm(prev => ({ ...prev, [field]: value }));
     
@@ -398,7 +380,6 @@ const Settings = () => {
     }
   };
 
-  // Handle update password
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     
@@ -406,17 +387,14 @@ const Settings = () => {
       showMessage("error", "Please enter your current password");
       return;
     }
-    
     if (!passwordForm.newPassword) {
       showMessage("error", "Please enter a new password");
       return;
     }
-    
     if (!passwordForm.confirmPassword) {
       showMessage("error", "Please confirm your new password");
       return;
     }
-    
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       showMessage("error", "New passwords do not match");
       return;
@@ -433,51 +411,34 @@ const Settings = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       showMessage("success", "Password updated successfully!");
-      setPasswordForm({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: ""
-      });
-      setPasswordValidations({
-        length: false,
-        uppercase: false,
-        lowercase: false,
-        number: false,
-        special: false,
-        match: false
-      });
-    } catch (err) {
-      console.error("Password update error:", err);
+      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setPasswordValidations({ length: false, uppercase: false, lowercase: false, number: false, special: false, match: false });
+    } catch {
       showMessage("error", "Failed to update password. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Toggle security setting
   const toggleSecuritySetting = (id) => {
     setSecuritySettings(prev =>
       prev.map(setting =>
         setting.id === id ? { ...setting, enabled: !setting.enabled } : setting
       )
     );
-    
     const setting = securitySettings.find(s => s.id === id);
     showMessage("success", `${setting.label} ${!setting.enabled ? 'enabled' : 'disabled'} successfully!`);
   };
 
-  // Handle revoke session
   const handleRevokeSession = (sessionId) => {
     setActiveSessions(prev => prev.filter(session => session.id !== sessionId));
     showMessage("success", "Session revoked successfully!");
   };
 
-  // Handle enable 2FA
   const handleEnable2FA = () => {
     showMessage("info", "2FA setup wizard will open...");
   };
 
-  // Handle save profile
   const handleSaveProfile = () => {
     setIsEditing(false);
     showMessage("success", "Profile updated successfully!");
@@ -490,7 +451,6 @@ const Settings = () => {
 
   const passwordStrength = calculatePasswordStrength(passwordForm.newPassword);
 
-  // Handle section change
   const handleSectionChange = (id, label) => {
     setActiveSection(id);
     setShowMobileMenu(false);
@@ -512,13 +472,15 @@ const Settings = () => {
               <Menu size={20} />
             </button>
             
-            <div className="brand-section">
+            {/* Logo — nav dan 40px ajratilgan */}
+            <div className="brand-section" style={{ marginRight: '40px' }}>
               <div className="logo" onClick={() => handleUserMenuClick("Logo")}>
                 <span className="logo-text">UzWork</span>
                 <span className="logo-tm">®</span>
               </div>
             </div>
             
+            {/* Nav */}
             <nav className="header-nav">
               {headerNav.map((item) => (
                 <button 
@@ -583,7 +545,6 @@ const Settings = () => {
                 <ChevronDown size={16} className={`dropdown-icon ${showUserMenu ? 'open' : ''}`} />
               </div>
 
-              {/* User Dropdown Menu */}
               {showUserMenu && (
                 <div className="user-dropdown">
                   <div className="dropdown-header">
@@ -618,7 +579,7 @@ const Settings = () => {
       {/* MAIN CONTENT */}
       <div className="settings-main">
         
-        {/* SIDEBAR - FIXED */}
+        {/* ===== SIDEBAR — sticky, page bilan scroll bo'lmaydi ===== */}
         <aside className={`settings-sidebar ${showMobileMenu ? 'open' : ''}`}>
           <div className="cl-sidebar-header">
             <h2>Settings</h2>
@@ -653,6 +614,7 @@ const Settings = () => {
             ))}
           </nav>
           
+          {/* Footer — flex-shrink: 0, har doim pastda qoladi */}
           <div className="sidebar-footer">
             <button className="sidebar-footer-btn" onClick={() => handleUserMenuClick("Help & Support")}>
               <HelpCircle size={16} />
@@ -668,7 +630,6 @@ const Settings = () => {
         {/* CONTENT AREA */}
         <main className="settings-content">
           
-          {/* Global Message Banner */}
           {message.text && (
             <div className={`message-banner ${message.type}`}>
               {message.type === "success" && <CheckCircle size={20} />}
@@ -697,63 +658,106 @@ const Settings = () => {
                   onClick={() => setIsEditing(!isEditing)}
                 >
                   {isEditing ? (
-                    <>
-                      <X size={16} />
-                      Cancel
-                    </>
+                    <><X size={16} />Cancel</>
                   ) : (
-                    <>
-                      <Edit size={16} />
-                      Edit Profile
-                    </>
+                    <><Edit size={16} />Edit Profile</>
                   )}
                 </button>
               </div>
               
               <div className="profile-card">
+                {/* ── COVER ── */}
                 <div className="profile-cover">
                   <img src={userData.coverPhoto} alt="Cover" className="cover-image" />
+
+                  {/* Faqat Change Cover — cover ichida */}
                   {isEditing && (
                     <button className="change-cover-btn" onClick={() => handleUserMenuClick("Change cover")}>
-                      <Camera size={16} />
-                      Change Cover
+                      <Camera size={15} /> Change Cover
                     </button>
                   )}
                 </div>
-                
+
+                {/* ── PROFILE CONTENT ── */}
                 <div className="profile-content">
-                  <div className="profile-avatar-section">
-                    <div className="avatar-wrapper">
-                      <img 
-                        src={userData.profilePicture} 
-                        alt="Profile" 
-                        className="profile-avatar" 
-                      />
-                      {isEditing && (
-                        <button className="change-avatar-btn" onClick={() => handleUserMenuClick("Change avatar")}>
-                          <Camera size={14} />
-                        </button>
-                      )}
-                      <span className="avatar-status online"></span>
-                    </div>
-                    
-                    <div className="profile-name-section">
-                      <div className="name-wrapper">
-                        <h2>{userData.fullName}</h2>
-                        <div className="profile-badges">
-                          <span className="badge membership">
-                            <Award size={12} />
-                            {userData.membership}
-                          </span>
-                          <span className="badge verified">
-                            <CheckCircle size={12} />
-                            Verified
-                          </span>
-                        </div>
+                  <div className="profile-header-row">
+
+                    {/* Chap — avatar + ism */}
+                    <div className="profile-left">
+                      <div className="avatar-wrapper">
+                        <img src={userData.profilePicture} alt="Profile" className="profile-avatar" />
+                        {isEditing && (
+                          <button className="change-avatar-btn" onClick={() => handleUserMenuClick("Change avatar")}>
+                            <Camera size={14} />
+                          </button>
+                        )}
+                        <span className="avatar-status online" />
                       </div>
-                      <p className="profile-username">{userData.username}</p>
-                      <p className="profile-company">{userData.company}</p>
+                      <div className="profile-name-section">
+                        {isEditing ? (
+                          <input type="text" value={userData.fullName} onChange={(e) => handleInputChange('fullName', e.target.value)} className="edit-input name-edit-input" />
+                        ) : (
+                          <h2 className="profile-fullname">{userData.fullName}</h2>
+                        )}
+                        {isEditing ? (
+                          <input type="text" value={userData.username} onChange={(e) => handleInputChange('username', e.target.value)} className="edit-input" placeholder="@username" style={{ marginTop: '6px' }} />
+                        ) : (
+                          <p className="profile-username">{userData.username}</p>
+                        )}
+                        {isEditing ? (
+                          <input type="text" value={userData.company} onChange={(e) => handleInputChange('company', e.target.value)} className="edit-input" placeholder="Company" style={{ marginTop: '4px' }} />
+                        ) : (
+                          <p className="profile-company">{userData.company}</p>
+                        )}
+                      </div>
                     </div>
+
+                    {/* O'rta — bio + location + rating */}
+                    <div className="profile-center">
+                      {isEditing ? (
+                        <textarea
+                          value={userData.bio}
+                          onChange={(e) => handleInputChange('bio', e.target.value)}
+                          className="edit-textarea"
+                          rows={3}
+                          placeholder="Tell about yourself..."
+                          style={{ fontSize: '13px' }}
+                        />
+                      ) : (
+                        <p className="profile-bio-text">"{userData.bio}"</p>
+                      )}
+                      <div className="profile-meta-row">
+                        <span className="profile-meta-item">
+                          <MapPin size={13} />
+                          {userData.location}
+                        </span>
+                        <span className="profile-meta-item">
+                          <Star size={13} fill="currentColor" />
+                          {userData.rating} rating
+                        </span>
+                        <span className="profile-meta-item">
+                          <Briefcase size={13} />
+                          {userData.accountType}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* O'ng — badges */}
+                    <div className="profile-badges-row">
+                      <span
+                        className="profile-badge-item profile-badge-membership"
+                        onClick={() => handleSectionChange('membership', 'Membership')}
+                        title="Upgrade membership"
+                      >
+                        <Award size={14} />
+                        {userData.membership}
+                      </span>
+                      <span className="profile-badge-item profile-badge-verified">
+                        <CheckCircle size={14} />
+                        Verified
+                      </span>
+                    </div>
+
                   </div>
                   
                   <div className="profile-stats">
@@ -778,18 +782,11 @@ const Settings = () => {
                   <div className="profile-details">
                     <div className="details-grid">
                       <div className="detail-item">
-                        <span className="detail-icon">
-                          <Mail size={16} />
-                        </span>
+                        <span className="detail-icon"><Mail size={16} /></span>
                         <div className="detail-content">
                           <span className="detail-label">Email</span>
                           {isEditing ? (
-                            <input
-                              type="email"
-                              value={userData.email}
-                              onChange={(e) => handleInputChange('email', e.target.value)}
-                              className="edit-input"
-                            />
+                            <input type="email" value={userData.email} onChange={(e) => handleInputChange('email', e.target.value)} className="edit-input" />
                           ) : (
                             <div className="detail-value-wrapper">
                               <span className="detail-value">{userData.email}</span>
@@ -800,18 +797,11 @@ const Settings = () => {
                       </div>
                       
                       <div className="detail-item">
-                        <span className="detail-icon">
-                          <Phone size={16} />
-                        </span>
+                        <span className="detail-icon"><Phone size={16} /></span>
                         <div className="detail-content">
                           <span className="detail-label">Phone</span>
                           {isEditing ? (
-                            <input
-                              type="tel"
-                              value={userData.phone}
-                              onChange={(e) => handleInputChange('phone', e.target.value)}
-                              className="edit-input"
-                            />
+                            <input type="tel" value={userData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} className="edit-input" />
                           ) : (
                             <span className="detail-value">{userData.phone}</span>
                           )}
@@ -819,18 +809,11 @@ const Settings = () => {
                       </div>
                       
                       <div className="detail-item">
-                        <span className="detail-icon">
-                          <MapPin size={16} />
-                        </span>
+                        <span className="detail-icon"><MapPin size={16} /></span>
                         <div className="detail-content">
                           <span className="detail-label">Location</span>
                           {isEditing ? (
-                            <input
-                              type="text"
-                              value={userData.location}
-                              onChange={(e) => handleInputChange('location', e.target.value)}
-                              className="edit-input"
-                            />
+                            <input type="text" value={userData.location} onChange={(e) => handleInputChange('location', e.target.value)} className="edit-input" />
                           ) : (
                             <span className="detail-value">{userData.location}</span>
                           )}
@@ -838,17 +821,11 @@ const Settings = () => {
                       </div>
                       
                       <div className="detail-item">
-                        <span className="detail-icon">
-                          <Globe size={16} />
-                        </span>
+                        <span className="detail-icon"><Globe size={16} /></span>
                         <div className="detail-content">
                           <span className="detail-label">Timezone</span>
                           {isEditing ? (
-                            <select 
-                              value={userData.timezone}
-                              onChange={(e) => handleInputChange('timezone', e.target.value)}
-                              className="edit-select"
-                            >
+                            <select value={userData.timezone} onChange={(e) => handleInputChange('timezone', e.target.value)} className="edit-select">
                               <option>GMT+5 (Tashkent)</option>
                               <option>GMT+6 (Almaty)</option>
                               <option>GMT+3 (Moscow)</option>
@@ -860,17 +837,11 @@ const Settings = () => {
                       </div>
                       
                       <div className="detail-item">
-                        <span className="detail-icon">
-                          <Users size={16} />
-                        </span>
+                        <span className="detail-icon"><Users size={16} /></span>
                         <div className="detail-content">
                           <span className="detail-label">Language</span>
                           {isEditing ? (
-                            <select 
-                              value={userData.language}
-                              onChange={(e) => handleInputChange('language', e.target.value)}
-                              className="edit-select"
-                            >
+                            <select value={userData.language} onChange={(e) => handleInputChange('language', e.target.value)} className="edit-select">
                               <option>English (US)</option>
                               <option>Russian</option>
                               <option>Uzbek</option>
@@ -882,18 +853,11 @@ const Settings = () => {
                       </div>
                       
                       <div className="detail-item">
-                        <span className="detail-icon">
-                          <Building size={16} />
-                        </span>
+                        <span className="detail-icon"><Building size={16} /></span>
                         <div className="detail-content">
                           <span className="detail-label">Company</span>
                           {isEditing ? (
-                            <input
-                              type="text"
-                              value={userData.companyDetails}
-                              onChange={(e) => handleInputChange('companyDetails', e.target.value)}
-                              className="edit-input"
-                            />
+                            <input type="text" value={userData.companyDetails} onChange={(e) => handleInputChange('companyDetails', e.target.value)} className="edit-input" />
                           ) : (
                             <span className="detail-value">{userData.companyDetails}</span>
                           )}
@@ -904,12 +868,7 @@ const Settings = () => {
                     <div className="bio-section">
                       <span className="bio-label">Bio</span>
                       {isEditing ? (
-                        <textarea
-                          value={userData.bio}
-                          onChange={(e) => handleInputChange('bio', e.target.value)}
-                          className="edit-textarea"
-                          rows="4"
-                        />
+                        <textarea value={userData.bio} onChange={(e) => handleInputChange('bio', e.target.value)} className="edit-textarea" rows="4" />
                       ) : (
                         <p className="bio-text">{userData.bio}</p>
                       )}
@@ -918,9 +877,7 @@ const Settings = () => {
                   
                   {isEditing && (
                     <div className="profile-actions">
-                      <button className="btn-secondary" onClick={() => setIsEditing(false)}>
-                        Cancel
-                      </button>
+                      <button className="btn-secondary" onClick={() => setIsEditing(false)}>Cancel</button>
                       <button className="btn-primary" onClick={handleSaveProfile}>
                         <Save size={16} />
                         Save Changes
@@ -951,9 +908,7 @@ const Settings = () => {
               
               <div className="payment-summary">
                 <div className="summary-card gradient">
-                  <div className="summary-icon">
-                    <DollarSign size={24} />
-                  </div>
+                  <div className="summary-icon"><DollarSign size={24} /></div>
                   <div className="summary-content">
                     <h3>Total Spent</h3>
                     <p className="summary-value">${userData.totalSpent.toLocaleString()}</p>
@@ -961,9 +916,7 @@ const Settings = () => {
                   </div>
                 </div>
                 <div className="summary-card">
-                  <div className="summary-icon">
-                    <Clock size={24} />
-                  </div>
+                  <div className="summary-icon"><Clock size={24} /></div>
                   <div className="summary-content">
                     <h3>Pending</h3>
                     <p className="summary-value">${userData.pendingAmount.toLocaleString()}</p>
@@ -971,9 +924,7 @@ const Settings = () => {
                   </div>
                 </div>
                 <div className="summary-card">
-                  <div className="summary-icon">
-                    <Wallet size={24} />
-                  </div>
+                  <div className="summary-icon"><DollarSign size={24} /></div>
                   <div className="summary-content">
                     <h3>Balance</h3>
                     <p className="summary-value">${userData.availableBalance.toLocaleString()}</p>
@@ -996,13 +947,9 @@ const Settings = () => {
                     <div key={method.id} className="method-card">
                       <div className="method-header">
                         {method.type === 'visa' ? (
-                          <div className="method-brand visa">
-                            <CreditCard size={24} />
-                          </div>
+                          <div className="method-brand visa"><CreditCard size={24} /></div>
                         ) : (
-                          <div className="method-brand bank">
-                            <Building size={24} />
-                          </div>
+                          <div className="method-brand bank"><Building size={24} /></div>
                         )}
                         {method.default && <span className="default-badge">Default</span>}
                       </div>
@@ -1037,9 +984,7 @@ const Settings = () => {
                 <div className="transactions-list">
                   {transactions.map(transaction => (
                     <div key={transaction.id} className="transaction-item">
-                      <div className="transaction-icon">
-                        <Briefcase size={20} />
-                      </div>
+                      <div className="transaction-icon"><Briefcase size={20} /></div>
                       <div className="transaction-details">
                         <h4>{transaction.project}</h4>
                         <p>Paid to {transaction.freelancer} • {transaction.date}</p>
@@ -1066,12 +1011,9 @@ const Settings = () => {
                 </div>
               </div>
 
-              {/* CHANGE PASSWORD CARD */}
               <div className="password-card">
                 <div className="card-header">
-                  <div className="header-icon">
-                    <Lock size={24} />
-                  </div>
+                  <div className="header-icon"><Lock size={24} /></div>
                   <div className="header-info">
                     <h2>Change Password</h2>
                     <p>Your password must be at least 8 characters and contain a mix of letters, numbers, and symbols</p>
@@ -1090,11 +1032,7 @@ const Settings = () => {
                         className="password-input"
                         disabled={isLoading}
                       />
-                      <button
-                        type="button"
-                        className="toggle-password"
-                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      >
+                      <button type="button" className="toggle-password" onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
                         {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
@@ -1111,26 +1049,15 @@ const Settings = () => {
                         className="password-input"
                         disabled={isLoading}
                       />
-                      <button
-                        type="button"
-                        className="toggle-password"
-                        onClick={() => setShowNewPassword(!showNewPassword)}
-                      >
+                      <button type="button" className="toggle-password" onClick={() => setShowNewPassword(!showNewPassword)}>
                         {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
 
-                    {/* Password Strength Meter */}
                     {passwordForm.newPassword && (
                       <div className="password-strength">
                         <div className="strength-meter">
-                          <div 
-                            className="strength-fill" 
-                            style={{ 
-                              width: `${passwordStrength.percentage}%`,
-                              backgroundColor: passwordStrength.color
-                            }}
-                          />
+                          <div className="strength-fill" style={{ width: `${passwordStrength.percentage}%`, backgroundColor: passwordStrength.color }} />
                         </div>
                         <span className="strength-label" style={{ color: passwordStrength.color }}>
                           {passwordStrength.label} Password
@@ -1138,27 +1065,15 @@ const Settings = () => {
                       </div>
                     )}
 
-                    {/* Password Requirements */}
                     <div className="password-requirements">
                       {passwordStrengthChecks.map(check => (
-                        <div 
-                          key={check.id} 
-                          className={`requirement ${passwordValidations[check.id] ? "valid" : ""}`}
-                        >
-                          {passwordValidations[check.id] ? (
-                            <CheckCircle size={14} className="valid-icon" />
-                          ) : (
-                            <div className="dot" />
-                          )}
+                        <div key={check.id} className={`requirement ${passwordValidations[check.id] ? "valid" : ""}`}>
+                          {passwordValidations[check.id] ? <CheckCircle size={14} className="valid-icon" /> : <div className="dot" />}
                           <span>{check.label}</span>
                         </div>
                       ))}
                       <div className={`requirement ${passwordValidations.match ? "valid" : ""}`}>
-                        {passwordValidations.match ? (
-                          <CheckCircle size={14} className="valid-icon" />
-                        ) : (
-                          <div className="dot" />
-                        )}
+                        {passwordValidations.match ? <CheckCircle size={14} className="valid-icon" /> : <div className="dot" />}
                         <span>Passwords match</span>
                       </div>
                     </div>
@@ -1175,37 +1090,22 @@ const Settings = () => {
                         className="password-input"
                         disabled={isLoading}
                       />
-                      <button
-                        type="button"
-                        className="toggle-password"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      >
+                      <button type="button" className="toggle-password" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
                         {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
                   </div>
 
-                  <button 
-                    type="submit" 
-                    className="update-password-btn"
-                    disabled={isLoading}
-                  >
+                  <button type="submit" className="update-password-btn" disabled={isLoading}>
                     {isLoading ? (
-                      <>
-                        <RefreshCw size={18} className="spinning" />
-                        Updating...
-                      </>
+                      <><RefreshCw size={18} className="spinning" />Updating...</>
                     ) : (
-                      <>
-                        <Save size={18} />
-                        Update Password
-                      </>
+                      <><Save size={18} />Update Password</>
                     )}
                   </button>
                 </form>
               </div>
 
-              {/* SECURITY SETTINGS */}
               <div className="security-settings-grid">
                 {securitySettings.map(setting => (
                   <div key={setting.id} className="security-setting-card" style={{ borderColor: `${setting.color}30` }}>
@@ -1225,13 +1125,8 @@ const Settings = () => {
                           {setting.enabled ? "Enabled" : "Disabled"}
                         </span>
                       </div>
-                      
                       <label className="switch">
-                        <input 
-                          type="checkbox" 
-                          checked={setting.enabled}
-                          onChange={() => toggleSecuritySetting(setting.id)}
-                        />
+                        <input type="checkbox" checked={setting.enabled} onChange={() => toggleSecuritySetting(setting.id)} />
                         <span className="slider"></span>
                       </label>
                     </div>
@@ -1245,7 +1140,6 @@ const Settings = () => {
                   </div>
                 ))}
 
-                {/* Security Tip Card */}
                 <div className="security-tip-card">
                   <AlertTriangle size={20} />
                   <div className="tip-content">
@@ -1255,7 +1149,6 @@ const Settings = () => {
                 </div>
               </div>
 
-              {/* ACTIVE SESSIONS */}
               <div className="sessions-card">
                 <div className="sessions-header">
                   <h2>Active Sessions</h2>
@@ -1277,23 +1170,14 @@ const Settings = () => {
                             <h3>{session.device}</h3>
                             {session.current && <span className="current-badge">Current</span>}
                           </div>
-                          <p className="device-details">
-                            {session.browser} • {session.os}
-                          </p>
-                          <p className="device-location">
-                            {session.location} • {session.ip}
-                          </p>
-                          <span className="last-active">
-                            Last active: {session.lastActive}
-                          </span>
+                          <p className="device-details">{session.browser} • {session.os}</p>
+                          <p className="device-location">{session.location} • {session.ip}</p>
+                          <span className="last-active">Last active: {session.lastActive}</span>
                         </div>
                       </div>
                       
                       {!session.current && (
-                        <button 
-                          className="revoke-btn"
-                          onClick={() => handleRevokeSession(session.id)}
-                        >
+                        <button className="revoke-btn" onClick={() => handleRevokeSession(session.id)}>
                           Revoke Access
                         </button>
                       )}
@@ -1334,7 +1218,6 @@ const Settings = () => {
                       </div>
                       <span className="owner-badge">Owner</span>
                     </div>
-                    
                     <div className="member-item">
                       <div className="member-avatar-placeholder">JD</div>
                       <div className="member-info">
@@ -1343,7 +1226,6 @@ const Settings = () => {
                       </div>
                       <span className="role-badge">Admin</span>
                     </div>
-                    
                     <div className="member-item">
                       <div className="member-avatar-placeholder">JS</div>
                       <div className="member-info">
@@ -1373,7 +1255,6 @@ const Settings = () => {
                     <p>Free • Active</p>
                   </div>
                 </div>
-                
                 <div className="membership-features">
                   <h3>Current benefits:</h3>
                   <ul>
@@ -1439,11 +1320,7 @@ const Settings = () => {
                             <p>{setting.description}</p>
                           </div>
                           <label className="switch">
-                            <input 
-                              type="checkbox" 
-                              checked={setting.enabled} 
-                              onChange={() => handleUserMenuClick(`Toggle ${setting.label}`)}
-                            />
+                            <input type="checkbox" checked={setting.enabled} onChange={() => handleUserMenuClick(`Toggle ${setting.label}`)} />
                             <span className="slider"></span>
                           </label>
                         </div>
