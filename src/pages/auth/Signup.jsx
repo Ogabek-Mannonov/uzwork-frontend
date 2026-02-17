@@ -17,7 +17,7 @@ function Signup() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    username: "", // ✅ USERNAME QO‘SHILDI
+    username: "",
     email: "",
     phone: "",
     password: "",
@@ -33,10 +33,10 @@ function Signup() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((p) => ({
+      ...p,
       [name]: type === "checkbox" ? checked : value,
-    });
+    }));
   };
 
   const handleContinue = () => {
@@ -46,7 +46,7 @@ function Signup() {
   const handleBack = () => {
     setStep(1);
     setServerError("");
-    setFormData({ ...formData, role: "" });
+    setFormData((p) => ({ ...p, role: "" }));
   };
 
   // Agar user username kiritmasa — avtomatik generatsiya
@@ -62,9 +62,55 @@ function Signup() {
     return cleaned || `user_${Date.now()}`;
   };
 
+  // ✅ Universal saver (token + user) — login dagidek
+  const persistAuth = (res) => {
+    const token =
+      res?.data?.accessToken ||
+      res?.data?.token ||
+      res?.accessToken ||
+      res?.token ||
+      res?.data?.access_token ||
+      res?.data?.jwt;
+
+    const user =
+      res?.data?.user ||
+      res?.user ||
+      res?.data?.me ||
+      res?.me ||
+      res?.data?.profile ||
+      res?.profile;
+
+    if (token) localStorage.setItem("accessToken", token);
+
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      // user kelmasa ham role bo'lsa saqlab qo'yamiz
+      const role =
+        res?.data?.role || res?.role || res?.data?.userRole || res?.userRole;
+      if (role) localStorage.setItem("user", JSON.stringify({ role }));
+    }
+
+    let role = null;
+    try {
+      const raw = localStorage.getItem("user");
+      role = raw ? (JSON.parse(raw)?.role || "").toLowerCase() : null;
+    } catch {
+      role = null;
+    }
+
+    return { token, role };
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setServerError("");
+
+    // basic validations
+    if (!formData.role) {
+      setServerError("Role tanlanmagan.");
+      return;
+    }
 
     if (!formData.agreeTerms) {
       setServerError("Shartlarga rozilik bildiring.");
@@ -76,13 +122,8 @@ function Signup() {
       return;
     }
 
-    if (
-      formData.username &&
-      !/^[a-zA-Z0-9_]+$/.test(formData.username)
-    ) {
-      setServerError(
-        "Username faqat harflar, raqamlar va _ belgisidan iborat bo‘lishi kerak."
-      );
+    if (formData.username && !/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+      setServerError("Username faqat harflar, raqamlar va _ belgisidan iborat bo‘lishi kerak.");
       return;
     }
 
@@ -91,14 +132,12 @@ function Signup() {
     try {
       const payload = {
         role: formData.role,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
+        first_name: formData.firstName.trim(),
+        last_name: formData.lastName.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
         password: formData.password,
-        username: formData.username.trim()
-          ? formData.username.trim()
-          : genUsername(),
+        username: formData.username.trim() ? formData.username.trim() : genUsername(),
         display_name: `${formData.firstName} ${formData.lastName}`.trim(),
       };
 
@@ -109,12 +148,22 @@ function Signup() {
         return;
       }
 
-      // Signup OK → profilga
-      navigate("/profile");
+      // ✅ signup success bo'lsa ham token+user saqlab qo'yamiz (agar backend qaytarsa)
+      const { token, role } = persistAuth(res);
+
+      // Agar backend token bermasa ham bo'lishi mumkin (registerdan keyin login qildirish)
+      // Sizning backend token qaytaryapti deb faraz qildik.
+      if (!token) {
+        // token bo'lmasa login pagega yuboramiz (eng to'g'ri flow)
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      // ✅ Role bo‘yicha yo‘naltirish
+      if (role === "freelancer") navigate("/jobs", { replace: true });
+      else navigate("/profile", { replace: true });
     } catch (err) {
-      setServerError(
-        err?.response?.data?.message || "Server bilan ulanishda xato"
-      );
+      setServerError(err?.message || "Server bilan ulanishda xato");
     } finally {
       setSubmitting(false);
     }
@@ -198,9 +247,7 @@ function Signup() {
 
             <div className="selected-role-header">
               <h3 className="selected-role-title">
-                {formData.role === "client"
-                  ? "Ish beruvchi sifatida"
-                  : "Freelancer sifatida"}{" "}
+                {formData.role === "client" ? "Ish beruvchi sifatida" : "Freelancer sifatida"}{" "}
                 ro'yxatdan o'tish
               </h3>
             </div>
@@ -230,7 +277,7 @@ function Signup() {
                 </div>
               </div>
 
-              {/* ✅ USERNAME */}
+              {/* USERNAME */}
               <div className="input-group full-width">
                 <label>Username</label>
                 <input
@@ -247,13 +294,7 @@ function Signup() {
 
               <div className="input-group full-width">
                 <label>Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
+                <input type="email" name="email" value={formData.email} onChange={handleChange} required />
               </div>
 
               <div className="input-group full-width">
@@ -280,13 +321,33 @@ function Signup() {
                 />
               </div>
 
-              <div className="upwork-checkbox-group"> <input type="checkbox" name="agreeTerms" checked={formData.agreeTerms} onChange={handleChange} id="agreeTerms" required /> <label htmlFor="agreeTerms"> Ha, men{" "} <a href="#" className="terms-link"> UzWork shartlari </a> ,{" "} <a href="#" className="terms-link"> Foydalanuvchi kelishuvi </a>{" "} va{" "} <a href="#" className="terms-link"> Maxfiylik siyosati </a>{" "} bilan tanishib chiqdim va roziman. </label> </div>
+              <div className="upwork-checkbox-group">
+                <input
+                  type="checkbox"
+                  name="agreeTerms"
+                  checked={formData.agreeTerms}
+                  onChange={handleChange}
+                  id="agreeTerms"
+                  required
+                />
+                <label htmlFor="agreeTerms">
+                  Ha, men{" "}
+                  <a href="#" className="terms-link">
+                    UzWork shartlari
+                  </a>{" "}
+                  ,{" "}
+                  <a href="#" className="terms-link">
+                    Foydalanuvchi kelishuvi
+                  </a>{" "}
+                  va{" "}
+                  <a href="#" className="terms-link">
+                    Maxfiylik siyosati
+                  </a>{" "}
+                  bilan tanishib chiqdim va roziman.
+                </label>
+              </div>
 
-              <button
-                type="submit"
-                className="create-account-btn"
-                disabled={submitting}
-              >
+              <button type="submit" className="create-account-btn" disabled={submitting}>
                 {submitting ? "Yaratilmoqda..." : "Hisobni yaratish"}
               </button>
             </form>

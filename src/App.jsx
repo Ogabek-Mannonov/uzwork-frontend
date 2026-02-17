@@ -24,6 +24,7 @@ import MyProfile from "./pages/profile/MyProfile.jsx";
 import PublicProfile from "./pages/profile/PublicProfile.jsx";
 
 import MyProposals from "./pages/proposals/MyProposals.jsx";
+import Proposal from "./pages/proposals/Proposal.jsx";
 
 import ContractsList from "./pages/contracts/List.jsx";
 import ContractDetail from "./pages/contracts/Detail.jsx";
@@ -63,7 +64,7 @@ function App() {
           <Route path="/jobs" element={<JobsList />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/profile/:id" element={<PublicProfile />} />
-          <Route path="/profile/klient" element={<Klient />} />
+          <Route path="/profile/client" element={<Klient />} />
 
           {/* Protected area */}
           <Route element={<ProtectedRoute />}>
@@ -72,7 +73,9 @@ function App() {
 
             {/* Proposals (freelancer) */}
             <Route element={<RoleRoute allow={["freelancer"]} />}>
+              <Route path="/proposals" element={<Proposal />} />
               <Route path="/my-proposals" element={<MyProposals />} />
+              <Route path="/proposals/new/:jobId" element={<Proposal />} />
             </Route>
 
             {/* Create Job (client) */}

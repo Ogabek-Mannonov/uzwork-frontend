@@ -1,17 +1,22 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
-// User info qayerda turishiga qarab moslashtirasan:
-// masalan: localStorage.getItem("user") yoki "me" state.
 const getRole = () => {
+  // 1) localStorage user dan
   try {
     const raw = localStorage.getItem("user");
-    if (!raw) return null;
-    const u = JSON.parse(raw);
-    return (u?.role || "").toLowerCase();
-  } catch {
-    return null;
-  }
+    if (raw) {
+      const u = JSON.parse(raw);
+      const r = (u?.role || "").toLowerCase();
+      if (r) return r;
+    }
+  } catch {}
+
+  // 2) agar siz roleni alohida keyda saqlasangiz (opsional)
+  const role2 = (localStorage.getItem("role") || "").toLowerCase();
+  if (role2) return role2;
+
+  return null;
 };
 
 export default function RoleRoute({ allow = [], redirectTo = "/home" }) {

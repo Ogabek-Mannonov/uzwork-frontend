@@ -6,7 +6,8 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 const api = axios.create({
   baseURL: API_URL,
   headers: { "Content-Type": "application/json" },
-  withCredentials: true, // kerak bo‘lsa (hozircha zarar qilmaydi)
+  // Cookie ishlatmasangiz false qiling:
+  withCredentials: false,
 });
 
 // Access token ni headerga qo‘shish
@@ -16,46 +17,93 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export const saveTokens = ({ accessToken, refreshToken }) => {
+// 401 bo‘lsa tokenni tozalash (ixtiyoriy, lekin foydali)
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err?.response?.status === 401) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      // user ham o'chsin
+      localStorage.removeItem("user");
+    }
+    return Promise.reject(err);
+  }
+);
+
+export const saveAuth = ({ user, accessToken, refreshToken }) => {
   if (accessToken) localStorage.setItem("accessToken", accessToken);
   if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+  if (user) localStorage.setItem("user", JSON.stringify(user));
 };
 
-export const clearTokens = () => {
+export const clearAuth = () => {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
+  localStorage.removeItem("user");
 };
 
+const unwrap = (res) => res?.data; // axios response -> payload
+
 export const signup = async (payload) => {
-  const res = await api.post("/auth/signup", payload);
+  try {
+    const res = await api.post("/auth/signup", payload);
+    const body = unwrap(res);
 
-  // Backend: { success, data: { user, accessToken, refreshToken } }
-  const { data } = res.data || {};
-  if (data?.accessToken) saveTokens(data);
+    // Backend: { success, data: { user, accessToken, refreshToken } }
+    const data = body?.data;
+    if (data?.accessToken || data?.user) saveAuth(data);
 
-  return res.data; // res.data.success, res.data.data.user...
+    return body;
+  } catch (err) {
+    // UI uchun chiroyli message
+    const msg =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Signup request failed";
+    return { success: false, message: msg };
+  }
 };
 
 export const login = async (payload) => {
-  const res = await api.post("/auth/login", payload);
+  try {
+    const res = await api.post("/auth/login", payload);
+    const body = unwrap(res);
 
-  const { data } = res.data || {};
-  if (data?.accessToken) saveTokens(data);
+    const data = body?.data;
+    if (data?.accessToken || data?.user) saveAuth(data);
 
-  return res.data;
+    return body;
+  } catch (err) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Login request failed";
+    return { success: false, message: msg };
+  }
 };
 
 export const getCurrentUser = async () => {
-  const res = await api.get("/auth/me");
-  return res.data;
+  try {
+    const res = await api.get("/auth/me");
+    return unwrap(res);
+  } catch (err) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Me request failed";
+    return { success: false, message: msg };
+  }
 };
 
 export const logout = async () => {
-  // backend logout hozir tokenni invalid qilmaydi, ammo UI uchun yetarli
   try {
     await api.post("/auth/logout");
-  } catch (e) {}
-  clearTokens();
+  } catch (e) {
+    // ignore
+  } finally {
+    clearAuth();
+  }
 };
 
 export default api;

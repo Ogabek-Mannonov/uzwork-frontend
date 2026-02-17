@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import "./authcss/login.css";
 
 import { Toast } from "../components/Toast";
-import { login as loginRequest } from "../../api/auth"; // yo‘lni loyihangga mosla
+import { login as loginRequest } from "../../api/auth"; // sizdagi auth helper
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,7 +20,56 @@ const Login = () => {
 
   const [showToast, setShowToast] = useState(false);
 
-  const isEmail = (value) => value.includes("@");
+  const isEmail = (value) => String(value || "").includes("@");
+
+  // ✅ Universal saver (token + user)
+  const persistAuth = (res) => {
+    // token turli nomlarda kelishi mumkin
+    const token =
+      res?.data?.accessToken ||
+      res?.data?.token ||
+      res?.accessToken ||
+      res?.token ||
+      res?.data?.access_token ||
+      res?.data?.jwt;
+
+    // user ham turli nomlarda kelishi mumkin
+    const user =
+      res?.data?.user ||
+      res?.user ||
+      res?.data?.me ||
+      res?.me ||
+      res?.data?.profile ||
+      res?.profile;
+
+    if (token) localStorage.setItem("accessToken", token);
+
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      // user kelmasa ham hech bo'lmasa role bo'lsa saqlaymiz
+      const role =
+        res?.data?.role || res?.role || res?.data?.userRole || res?.userRole;
+      if (role) localStorage.setItem("user", JSON.stringify({ role }));
+    }
+
+    // optional: "meni eslab qol"
+    if (!keepLoggedIn) {
+      // agar siz session storage ishlatmoqchi bo'lsangiz shu yerda qilasiz
+      // hozircha o'zgartirmadik
+    }
+
+    // role olish (keyin route uchun)
+    let role = null;
+    try {
+      const raw = localStorage.getItem("user");
+      role = raw ? (JSON.parse(raw)?.role || "").toLowerCase() : null;
+    } catch {
+      role = null;
+    }
+
+    return { token, role };
+  };
 
   // 1-bosqich: Email/phone kiritish
   const handleEmailSubmit = (e) => {
@@ -58,14 +107,24 @@ const Login = () => {
         return;
       }
 
-      // Tokenlar auth.js ichida localStorage ga saqlandi
+      // ✅ ENG MUHIM: user ham token ham localStorage ga yoziladi
+      const { token, role } = persistAuth(res);
 
-      // Role bo‘yicha yo‘naltirish (xohlasang o‘zgartirasan)
-      const role = res?.data?.user?.role;
-      if (role === "client") navigate("/profile"); // vaqtinchalik profilega yonaltirilsin
-      else navigate("/profile");
+      if (!token) {
+        // token kelmasa route'lar ishlamaydi
+        setError("Token kelmadi. Backend login response'ni tekshiring.");
+        return;
+      }
+
+      // ✅ Role bo‘yicha yo‘naltirish
+      // Siz hozir hammani /profile ga yuboryapsiz, lekin freelancer bo'lsa /jobs ga ham bo'lishi mumkin
+      if (role === "freelancer") navigate("/profile", { replace: true });
+      else if (role === "client") navigate("/profile/client", { replace: true });
+      else if (role === "admin") navigate("/home", { replace: true });
+      else navigate("/profile", { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.message || "Server bilan ulanishda xato");
+      // loginRequest fetch bo'lsa err.response bo'lmaydi
+      setError(err?.message || "Server bilan ulanishda xato");
     } finally {
       setLoading(false);
     }
@@ -205,7 +264,7 @@ const Login = () => {
         )}
       </div>
 
-       {/* Google bosilganda (demo) */}
+      {/* Google bosilganda (demo) */}
         {/* {step === "google" && (
           <>
             <div className="input-group" style={{ marginBottom: "2rem" }}>
@@ -283,7 +342,6 @@ const Login = () => {
             </div>
           </>
         )} */}
-
 
       {showToast && (
         <Toast
