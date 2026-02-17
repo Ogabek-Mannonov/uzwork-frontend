@@ -39,7 +39,7 @@ import DisputesList from "./pages/disputes/List.jsx";
 import DisputeDetail from "./pages/disputes/Detail.jsx";
 
 import NotFound from "./pages/NotFound.jsx";
-import Klient from './pages/profile/Klient.jsx';
+import Client from './pages/profile/Client.jsx';
 
 function App() {
   return (
@@ -64,7 +64,7 @@ function App() {
           <Route path="/jobs" element={<JobsList />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/profile/:id" element={<PublicProfile />} />
-          <Route path="/profile/client" element={<Klient />} />
+          <Route path="/profile/client" element={<Client />} />
 
           {/* Protected area */}
           <Route element={<ProtectedRoute />}>
