@@ -306,6 +306,100 @@
   text-decoration: underline;
 }
 
+
+
+/* ================= SUCCESS CARD ================= */
+
+.success-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 30px;
+  animation: fadeInSuccess 0.4s ease forwards;
+}
+
+.success-icon-wrapper {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 25px rgba(39, 174, 96, 0.35);
+}
+
+.success-icon {
+  font-size: 3rem;
+  color: white;
+}
+
+.success-title {
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.success-text {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  max-width: 420px;
+}
+
+.success-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.success-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(52, 152, 219, 0.4);
+}
+
+.success-btn:active {
+  transform: translateY(0);
+}
+
+.success-secondary-btn {
+  margin-top: 12px;
+  background: transparent;
+  border: 1px solid #3498db;
+  color: #3498db;
+}
+
+.success-secondary-btn:hover {
+  background: #3498db;
+  color: white;
+}
+
+/* Animation */
+@keyframes fadeInSuccess {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
 /* Responsive - Login bilan bir xil breakpointlar */
 @media (max-width: 768px) {
   .signup-card {
@@ -397,3 +491,5 @@
     padding: 20px 15px;
   }
 }
+
+

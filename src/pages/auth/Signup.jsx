@@ -1,6 +1,6 @@
 // src/pages/auth/Signup.jsx
 import { useState } from "react";
-import { FaBriefcase, FaUser } from "react-icons/fa";
+import { FaBriefcase, FaUser, FaCheckCircle } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 
@@ -13,6 +13,9 @@ function Signup() {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
+
+  // ✅ Success card toggle
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -123,7 +126,9 @@ function Signup() {
     }
 
     if (formData.username && !/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-      setServerError("Username faqat harflar, raqamlar va _ belgisidan iborat bo‘lishi kerak.");
+      setServerError(
+        "Username faqat harflar, raqamlar va _ belgisidan iborat bo‘lishi kerak."
+      );
       return;
     }
 
@@ -137,7 +142,9 @@ function Signup() {
         email: formData.email.trim(),
         phone: formData.phone.trim(),
         password: formData.password,
-        username: formData.username.trim() ? formData.username.trim() : genUsername(),
+        username: formData.username.trim()
+          ? formData.username.trim()
+          : genUsername(),
         display_name: `${formData.firstName} ${formData.lastName}`.trim(),
       };
 
@@ -148,20 +155,11 @@ function Signup() {
         return;
       }
 
-      // ✅ signup success bo'lsa ham token+user saqlab qo'yamiz (agar backend qaytarsa)
-      const { token, role } = persistAuth(res);
+      // token/user kelgan bo'lsa saqlab qo'yamiz (ammo baribir login pagega yuboramiz)
+      persistAuth(res);
 
-      // Agar backend token bermasa ham bo'lishi mumkin (registerdan keyin login qildirish)
-      // Sizning backend token qaytaryapti deb faraz qildik.
-      if (!token) {
-        // token bo'lmasa login pagega yuboramiz (eng to'g'ri flow)
-        navigate("/login", { replace: true });
-        return;
-      }
-
-      // ✅ Role bo‘yicha yo‘naltirish
-      if (role === "freelancer") navigate("/jobs", { replace: true });
-      else navigate("/profile", { replace: true });
+      // ✅ Success card ko'rsatamiz
+      setShowSuccess(true);
     } catch (err) {
       setServerError(err?.message || "Server bilan ulanishda xato");
     } finally {
@@ -169,188 +167,238 @@ function Signup() {
     }
   };
 
+  const handleGoLogin = () => {
+    // Siz xohlaganingiz: signupdan keyin login pagega o'tish
+    // Agar signup token qaytarib qo'ysa ham login flow bo'lsin desangiz tokenni o'chiramiz:
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    navigate("/login", { replace: true });
+  };
+
   return (
     <div className="signup-container">
       <div className="signup-card">
-        <h2 className="title-signup">Ro'yxatdan o'tish</h2>
-
-        {serverError && (
-          <div
-            style={{
-              background: "#ffeded",
-              border: "1px solid #ffb3b3",
-              color: "#b10000",
-              padding: "10px 12px",
-              borderRadius: 10,
-              marginBottom: 14,
-              fontSize: 14,
-            }}
-          >
-            {serverError}
-          </div>
-        )}
-
-        {/* STEP 1: ROLE */}
-        {step === 1 && (
-          <>
-            <div className="role-boxes">
-              <label className={`role-box ${formData.role === "client" ? "selected" : ""}`}>
-                <input
-                  type="radio"
-                  name="role"
-                  value="client"
-                  checked={formData.role === "client"}
-                  onChange={handleRoleChange}
-                  className="radio-input"
-                />
-                <div className="role-content">
-                  <FaBriefcase size={60} className="role-icon" />
-                  <h3>Men ish beruvchiman</h3>
-                  <p>Loyiha joylashtirib, freelancer yollamoqchiman</p>
-                </div>
-              </label>
-
-              <label className={`role-box ${formData.role === "freelancer" ? "selected" : ""}`}>
-                <input
-                  type="radio"
-                  name="role"
-                  value="freelancer"
-                  checked={formData.role === "freelancer"}
-                  onChange={handleRoleChange}
-                  className="radio-input"
-                />
-                <div className="role-content">
-                  <FaUser size={60} className="role-icon" />
-                  <h3>Men freelancer man</h3>
-                  <p>Ish topib, daromad qilmoqchiman</p>
-                </div>
-              </label>
+        {/* ✅ SUCCESS CARD */}
+        {showSuccess ? (
+          <div className="success-card">
+            <div className="success-icon-wrapper">
+              <FaCheckCircle className="success-icon" />
             </div>
 
-            <button
-              type="button"
-              onClick={handleContinue}
-              disabled={!formData.role}
-              className="continue-btn"
-            >
+            <h2 className="success-title">Muvaffaqiyatli ro‘yxatdan o‘tdingiz!</h2>
+
+            <p className="success-text">
+              Hisobingiz muvaffaqiyatli yaratildi. Endi login qilib tizimga
+              kirishingiz mumkin.
+            </p>
+
+            <button className="success-btn" onClick={handleGoLogin}>
               Davom etish
             </button>
-          </>
-        )}
-
-        {/* STEP 2: FORM */}
-        {step === 2 && (
+          </div>
+        ) : (
           <>
-            <button type="button" className="back-btn" onClick={handleBack}>
-              <IoMdArrowRoundBack />
-            </button>
+            <h2 className="title-signup">Ro'yxatdan o'tish</h2>
 
-            <div className="selected-role-header">
-              <h3 className="selected-role-title">
-                {formData.role === "client" ? "Ish beruvchi sifatida" : "Freelancer sifatida"}{" "}
-                ro'yxatdan o'tish
-              </h3>
-            </div>
+            {serverError && (
+              <div
+                style={{
+                  background: "#ffeded",
+                  border: "1px solid #ffb3b3",
+                  color: "#b10000",
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  marginBottom: 14,
+                  fontSize: 14,
+                }}
+              >
+                {serverError}
+              </div>
+            )}
 
-            <form onSubmit={handleSubmit} className="upwork-signup-form">
-              <div className="input-row">
-                <div className="input-group">
-                  <label>Ismingiz</label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    required
-                  />
+            {/* STEP 1: ROLE */}
+            {step === 1 && (
+              <>
+                <div className="role-boxes">
+                  <label
+                    className={`role-box ${
+                      formData.role === "client" ? "selected" : ""
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="role"
+                      value="client"
+                      checked={formData.role === "client"}
+                      onChange={handleRoleChange}
+                      className="radio-input"
+                    />
+                    <div className="role-content">
+                      <FaBriefcase size={60} className="role-icon" />
+                      <h3>Men ish beruvchiman</h3>
+                      <p>Loyiha joylashtirib, freelancer yollamoqchiman</p>
+                    </div>
+                  </label>
+
+                  <label
+                    className={`role-box ${
+                      formData.role === "freelancer" ? "selected" : ""
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="role"
+                      value="freelancer"
+                      checked={formData.role === "freelancer"}
+                      onChange={handleRoleChange}
+                      className="radio-input"
+                    />
+                    <div className="role-content">
+                      <FaUser size={60} className="role-icon" />
+                      <h3>Men freelancer man</h3>
+                      <p>Ish topib, daromad qilmoqchiman</p>
+                    </div>
+                  </label>
                 </div>
 
-                <div className="input-group">
-                  <label>Familiyangiz</label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    required
-                  />
+                <button
+                  type="button"
+                  onClick={handleContinue}
+                  disabled={!formData.role}
+                  className="continue-btn"
+                >
+                  Davom etish
+                </button>
+              </>
+            )}
+
+            {/* STEP 2: FORM */}
+            {step === 2 && (
+              <>
+                <button type="button" className="back-btn" onClick={handleBack}>
+                  <IoMdArrowRoundBack />
+                </button>
+
+                <div className="selected-role-header">
+                  <h3 className="selected-role-title">
+                    {formData.role === "client"
+                      ? "Ish beruvchi sifatida"
+                      : "Freelancer sifatida"}{" "}
+                    ro'yxatdan o'tish
+                  </h3>
                 </div>
-              </div>
 
-              {/* USERNAME */}
-              <div className="input-group full-width">
-                <label>Username</label>
-                <input
-                  type="text"
-                  name="username"
-                  placeholder="masalan: ogabek_dev"
-                  value={formData.username}
-                  onChange={handleChange}
-                />
-                <small style={{ opacity: 0.7 }}>
-                  Ixtiyoriy. Bo‘sh qoldirsangiz avtomatik yaratiladi.
-                </small>
-              </div>
+                <form onSubmit={handleSubmit} className="upwork-signup-form">
+                  <div className="input-row">
+                    <div className="input-group">
+                      <label>Ismingiz</label>
+                      <input
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
 
-              <div className="input-group full-width">
-                <label>Email</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} required />
-              </div>
+                    <div className="input-group">
+                      <label>Familiyangiz</label>
+                      <input
+                        type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
 
-              <div className="input-group full-width">
-                <label>Telefon</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="+998901234567"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+                  {/* USERNAME */}
+                  <div className="input-group full-width">
+                    <label>Username</label>
+                    <input
+                      type="text"
+                      name="username"
+                      placeholder="masalan: ogabek_dev"
+                      value={formData.username}
+                      onChange={handleChange}
+                    />
+                    <small style={{ opacity: 0.7 }}>
+                      Ixtiyoriy. Bo‘sh qoldirsangiz avtomatik yaratiladi.
+                    </small>
+                  </div>
 
-              <div className="input-group full-width">
-                <label>Parol</label>
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Kamida 8 ta belgi"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+                  <div className="input-group full-width">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
 
-              <div className="upwork-checkbox-group">
-                <input
-                  type="checkbox"
-                  name="agreeTerms"
-                  checked={formData.agreeTerms}
-                  onChange={handleChange}
-                  id="agreeTerms"
-                  required
-                />
-                <label htmlFor="agreeTerms">
-                  Ha, men{" "}
-                  <a href="#" className="terms-link">
-                    UzWork shartlari
-                  </a>{" "}
-                  ,{" "}
-                  <a href="#" className="terms-link">
-                    Foydalanuvchi kelishuvi
-                  </a>{" "}
-                  va{" "}
-                  <a href="#" className="terms-link">
-                    Maxfiylik siyosati
-                  </a>{" "}
-                  bilan tanishib chiqdim va roziman.
-                </label>
-              </div>
+                  <div className="input-group full-width">
+                    <label>Telefon</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      placeholder="+998901234567"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
 
-              <button type="submit" className="create-account-btn" disabled={submitting}>
-                {submitting ? "Yaratilmoqda..." : "Hisobni yaratish"}
-              </button>
-            </form>
+                  <div className="input-group full-width">
+                    <label>Parol</label>
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Kamida 8 ta belgi"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="upwork-checkbox-group">
+                    <input
+                      type="checkbox"
+                      name="agreeTerms"
+                      checked={formData.agreeTerms}
+                      onChange={handleChange}
+                      id="agreeTerms"
+                      required
+                    />
+                    <label htmlFor="agreeTerms">
+                      Ha, men{" "}
+                      <a href="#" className="terms-link">
+                        UzWork shartlari
+                      </a>{" "}
+                      ,{" "}
+                      <a href="#" className="terms-link">
+                        Foydalanuvchi kelishuvi
+                      </a>{" "}
+                      va{" "}
+                      <a href="#" className="terms-link">
+                        Maxfiylik siyosati
+                      </a>{" "}
+                      bilan tanishib chiqdim va roziman.
+                    </label>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="create-account-btn"
+                    disabled={submitting}
+                  >
+                    {submitting ? "Yaratilmoqda..." : "Hisobni yaratish"}
+                  </button>
+                </form>
+              </>
+            )}
           </>
         )}
       </div>
