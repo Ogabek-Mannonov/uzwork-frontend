@@ -24,7 +24,6 @@ api.interceptors.response.use(
     if (err?.response?.status === 401) {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
-      // user ham o'chsin
       localStorage.removeItem("user");
     }
     return Promise.reject(err);
@@ -50,17 +49,13 @@ export const signup = async (payload) => {
     const res = await api.post("/auth/signup", payload);
     const body = unwrap(res);
 
-    // Backend: { success, data: { user, accessToken, refreshToken } }
     const data = body?.data;
     if (data?.accessToken || data?.user) saveAuth(data);
 
     return body;
   } catch (err) {
-    // UI uchun chiroyli message
     const msg =
-      err?.response?.data?.message ||
-      err?.message ||
-      "Signup request failed";
+      err?.response?.data?.message || err?.message || "Signup request failed";
     return { success: false, message: msg };
   }
 };
@@ -76,9 +71,7 @@ export const login = async (payload) => {
     return body;
   } catch (err) {
     const msg =
-      err?.response?.data?.message ||
-      err?.message ||
-      "Login request failed";
+      err?.response?.data?.message || err?.message || "Login request failed";
     return { success: false, message: msg };
   }
 };
@@ -89,9 +82,7 @@ export const getCurrentUser = async () => {
     return unwrap(res);
   } catch (err) {
     const msg =
-      err?.response?.data?.message ||
-      err?.message ||
-      "Me request failed";
+      err?.response?.data?.message || err?.message || "Me request failed";
     return { success: false, message: msg };
   }
 };
@@ -105,5 +96,45 @@ export const logout = async () => {
     clearAuth();
   }
 };
+
+/* ===================== ✅ FORGOT / RESET PASSWORD ===================== */
+
+/**
+ * Forgot password:
+ * payload: { email } OR { phone }
+ * Backend always returns success message (privacy-friendly)
+ */
+export const forgotPassword = async (payload) => {
+  try {
+    const res = await api.post("/auth/forgot-password", payload);
+    return unwrap(res);
+  } catch (err) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Forgot-password request failed";
+    return { success: false, message: msg };
+  }
+};
+
+/**
+ * Reset password:
+ * payload: { identifier, code, new_password }
+ * identifier = email yoki phone
+ */
+export const resetPassword = async (payload) => {
+  try {
+    const res = await api.post("/auth/reset-password", payload);
+    return unwrap(res);
+  } catch (err) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Reset-password request failed";
+    return { success: false, message: msg };
+  }
+};
+
+/* ===================================================================== */
 
 export default api;
