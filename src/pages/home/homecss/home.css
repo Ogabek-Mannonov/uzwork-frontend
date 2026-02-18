@@ -62,7 +62,7 @@ body {
 }
 
 /* ========= Sidebar ========= */
-.sidebar {
+.h-sidebar {
   position: fixed;
   left: 0;
   top: 0;
@@ -77,19 +77,19 @@ body {
   transition: width 0.25s ease-in-out, transform 0.25s ease-in-out;
 }
 
-.sidebar-closed {
+.h-sidebar-closed {
   width: var(--sidebar-closed);
 }
-.sidebar-open {
+.h-sidebar-open {
   width: var(--sidebar-open);
 }
 
-.sidebar-inner {
+.h-sidebar-inner {
   padding: 14px 10px;
 }
 
 /* ✅ Brand + Toggle bir qatorda */
-.sidebar-header {
+.h-sidebar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -97,14 +97,14 @@ body {
   padding: 6px 6px 12px;
 }
 
-.brand {
+.h-brand {
   display: flex;
   align-items: center;
   gap: 10px;
   min-width: 0;
 }
 
-.brand-badge {
+.h-brand-badge {
   width: 36px;
   height: 36px;
   border-radius: 12px;
@@ -116,18 +116,18 @@ body {
   flex-shrink: 0;
 }
 
-.brand-text {
+.h-brand-text {
   font-weight: 700;
   color: #111827;
   white-space: nowrap;
   overflow: hidden;
   transition: opacity 0.2s ease, width 0.2s ease;
 }
-.brand-text.show {
+.brand-text.h-show {
   opacity: 1;
   width: auto;
 }
-.brand-text.hide {
+.brand-text.h-hide {
   opacity: 0;
   width: 0;
 }

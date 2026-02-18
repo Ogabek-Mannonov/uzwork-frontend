@@ -70,15 +70,14 @@ export default function Index() {
 
       {/* Sidebar */}
       <aside
-        className={`sidebar ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}
+        className={`h-sidebar ${sidebarOpen ? "h-sidebar-open" : "h-sidebar-closed"}`}
         aria-label="Asosiy navigatsiya"
       >
-        <div className="sidebar-inner">
-          {/* ✅ Sidebar Header: Brand + Toggle (hech qachon yopishmaydi) */}
-          <div className="sidebar-header">
-            <div className="brand">
-              <div className="brand-badge">U</div>
-              <div className={`brand-text ${sidebarOpen ? "show" : "hide"}`}>
+        <div className="h-sidebar-inner">
+          <div className="h-sidebar-header">
+            <div className="h-brand">
+              <div className="h-brand-badge">U</div>
+              <div className={`h-brand-text ${sidebarOpen ? "h-show" : "h-hide"}`}>
                 UzWork
               </div>
             </div>
