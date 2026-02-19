@@ -73,7 +73,7 @@ body {
   gap: 0.75rem;
 }
 
-.nav-link {
+.l-nav-link {
    padding: 0.5rem 1.25rem;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
@@ -86,13 +86,13 @@ body {
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
 }
 
-.nav-link:hover {
+.l-nav-link:hover {
     box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
   transform: translateY(-2px);
   background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
 }
 
-.nav-btn {
+.l-nav-btn {
   padding: 0.5rem 1.25rem;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
@@ -105,7 +105,7 @@ body {
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
 }
 
-.nav-btn:hover {
+.l-nav-btn:hover {
   box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
   transform: translateY(-2px);
   background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
@@ -2583,7 +2583,7 @@ body {
 }
 
 /* ==================== THEME TOGGLE BUTTON ==================== */
-.theme-toggle {
+.l-theme-toggle {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -2598,19 +2598,19 @@ body {
   backdrop-filter: blur(10px);
 }
 
-.theme-toggle:hover {
+.l-theme-toggle:hover {
   border-color: rgba(255, 255, 255, 0.5);
   background: rgba(255, 255, 255, 0.2);
   transform: scale(1.1);
 }
 
-.dark-mode .theme-toggle {
+.dark-mode .l-theme-toggle {
   border-color: rgba(251, 191, 36, 0.4);
   background: rgba(251, 191, 36, 0.15);
   color: #fbbf24;
 }
 
-.dark-mode .theme-toggle:hover {
+.dark-mode .l-theme-toggle:hover {
   border-color: #fbbf24;
   background: rgba(251, 191, 36, 0.25);
 }
@@ -2637,20 +2637,20 @@ body {
   color: white;
 }
 
-.dark-mode .nav-link {
+.dark-mode .l-nav-link {
   color: rgba(255, 255, 255, 0.85);
 }
 
-.dark-mode .nav-link:hover {
+.dark-mode .l-nav-link:hover {
   color: white;
 }
 
-.dark-mode .nav-btn {
+.dark-mode .l-nav-btn {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
-.dark-mode .nav-btn:hover {
+.dark-mode .l-nav-btn:hover {
   box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
   background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
 }

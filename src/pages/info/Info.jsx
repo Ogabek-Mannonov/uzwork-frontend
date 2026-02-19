@@ -528,7 +528,7 @@ const Info = () => {
           <div className="navbar-actions">
             <button
               onClick={toggleDarkMode}
-              className="theme-toggle"
+              className="l-theme-toggle"
               aria-label="Toggle dark mode"
             >
               {isDarkMode ? (
@@ -537,8 +537,8 @@ const Info = () => {
                 <Moon className="w-5 h-5" />
               )}
             </button>
-            <button className="nav-link">Kirish</button>  
-            <button className="nav-btn">Boshlash</button>
+            <button className="l-nav-link">Kirish</button>  
+            <button className="l-nav-btn">Boshlash</button>
           </div>
         </div>
       </nav>
