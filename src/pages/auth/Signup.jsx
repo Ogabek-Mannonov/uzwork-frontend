@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { FaBriefcase, FaUser, FaCheckCircle } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 import "./authcss/signup.css";
 import { signup as signupRequest } from "../../api/auth";
@@ -14,7 +14,7 @@ function Signup() {
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
 
-  // ✅ Success card toggle
+
   const [showSuccess, setShowSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -221,9 +221,8 @@ function Signup() {
               <>
                 <div className="role-boxes">
                   <label
-                    className={`role-box ${
-                      formData.role === "client" ? "selected" : ""
-                    }`}
+                    className={`role-box ${formData.role === "client" ? "selected" : ""
+                      }`}
                   >
                     <input
                       type="radio"
@@ -241,9 +240,8 @@ function Signup() {
                   </label>
 
                   <label
-                    className={`role-box ${
-                      formData.role === "freelancer" ? "selected" : ""
-                    }`}
+                    className={`role-box ${formData.role === "freelancer" ? "selected" : ""
+                      }`}
                   >
                     <input
                       type="radio"
@@ -269,6 +267,11 @@ function Signup() {
                 >
                   Davom etish
                 </button>
+                <div className="link-box">
+                  <Link to="/login" className="text-center-signup">
+                    Mavjud hisobga kiring
+                  </Link>
+                </div>
               </>
             )}
 
