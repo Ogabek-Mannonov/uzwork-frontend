@@ -1,0 +1,427 @@
+/* ===================== UZWORK HEADER (LIGHT / UPWORK-LIKE) ===================== */
+
+.uw-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  /* NO BLUR */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+
+  /* PURE WHITE */
+  background: #ffffff;
+
+  border-bottom: 1px solid rgba(15, 23, 42, 0.10);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.uw-header--scrolled {
+  background: #ffffff;
+  border-bottom-color: rgba(15, 23, 42, 0.12);
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.08);
+}
+
+.uw-header__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+/* Brand */
+.uw-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.uw-brand__icon {
+  width: 55px;
+  height: 55px;
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(2, 6, 23, 0.03);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.08);
+  overflow: hidden;
+}
+
+.uw-brand__logo {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  display: block;
+}
+
+.uw-brand__name {
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  color: #0f172a; /* slate-900 */
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+/* ===================== NAV (DESKTOP) ===================== */
+.uw-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+}
+
+.uw-nav__link {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  text-decoration: none;
+  font-weight: 850;
+  font-size: 14px;
+  color: rgba(15, 23, 42, 0.86); /* dark text */
+
+  border: 1px solid transparent;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.uw-nav__link:hover {
+  background: rgba(2, 6, 23, 0.04);
+  border-color: rgba(15, 23, 42, 0.10);
+  transform: translateY(-1px);
+}
+
+.uw-nav__link--active {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.18);
+  color: #1e3a8a; /* indigo-ish */
+}
+
+/* dropdown "More" */
+.uw-nav__more {
+  position: relative;
+}
+
+.uw-nav__morebtn {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(15, 23, 42, 0.86);
+  font-weight: 850;
+  font-size: 14px;
+
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.uw-nav__morebtn:hover {
+  background: rgba(2, 6, 23, 0.04);
+  border-color: rgba(15, 23, 42, 0.10);
+  transform: translateY(-1px);
+}
+
+.uw-nav__menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+
+  min-width: 190px;
+  padding: 8px;
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 30px 70px rgba(2, 6, 23, 0.14);
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.uw-nav__more:hover .uw-nav__menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(2px);
+}
+
+.uw-nav__menulink {
+  display: flex;
+  align-items: center;
+
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 14px;
+  color: #0f172a;
+
+  transition: background 0.18s ease;
+}
+
+.uw-nav__menulink:hover {
+  background: rgba(2, 6, 23, 0.04);
+}
+
+/* ===================== ACTIONS ===================== */
+.uw-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* icon button */
+.uw-iconbtn {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: rgba(2, 6, 23, 0.03);
+  color: #0f172a;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.uw-iconbtn:hover {
+  background: rgba(2, 6, 23, 0.05);
+  border-color: rgba(15, 23, 42, 0.18);
+  transform: translateY(-1px);
+}
+
+/* login link button */
+.uw-linkbtn {
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+
+  display: flex;
+  align-items: center;
+
+  text-decoration: none;
+  font-weight: 850;
+  font-size: 14px;
+
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: rgba(2, 6, 23, 0.03);
+
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.uw-linkbtn:hover {
+  background: rgba(2, 6, 23, 0.05);
+  border-color: rgba(15, 23, 42, 0.18);
+  transform: translateY(-1px);
+}
+
+/* primary CTA */
+.uw-ctabtn {
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+
+  display: flex;
+  align-items: center;
+
+  text-decoration: none;
+  font-weight: 900;
+  font-size: 14px;
+  color: white;
+
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.22);
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.uw-ctabtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 44px rgba(37, 99, 235, 0.30);
+}
+
+/* Mobile burger button */
+.uw-burger {
+  display: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: rgba(2, 6, 23, 0.03);
+  color: #0f172a;
+
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.uw-burger:hover {
+  background: rgba(2, 6, 23, 0.05);
+  border-color: rgba(15, 23, 42, 0.18);
+  transform: translateY(-1px);
+}
+
+/* ===================== MOBILE DRAWER ===================== */
+.uw-drawer {
+  display: none;
+  border-top: 1px solid rgba(15, 23, 42, 0.10);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.uw-drawer--open {
+  display: block;
+}
+
+.uw-drawer__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 16px 18px;
+}
+
+.uw-drawer__links {
+  display: grid;
+  gap: 8px;
+}
+
+.uw-drawer__link {
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+
+  text-decoration: none;
+  font-weight: 850;
+  font-size: 14px;
+  color: #0f172a;
+
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(2, 6, 23, 0.03);
+
+  transition: background 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+}
+
+.uw-drawer__link:hover {
+  background: rgba(2, 6, 23, 0.05);
+  border-color: rgba(15, 23, 42, 0.16);
+  transform: translateY(-1px);
+}
+
+.uw-drawer__link--active {
+  border-color: rgba(37, 99, 235, 0.22);
+  background: rgba(37, 99, 235, 0.08);
+  color: #1e3a8a;
+}
+
+.uw-drawer__actions {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.uw-linkbtn--full,
+.uw-ctabtn--full {
+  justify-content: center;
+  width: 100%;
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 860px) {
+  .uw-nav {
+    display: none;
+  }
+  .uw-burger {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 520px) {
+  .uw-brand__name {
+    display: none;
+  }
+  .uw-linkbtn {
+    display: none;
+  }
+}
+
+
+
+
+
+/* Dark mode  */
+
+/* ===================== DARK MODE HEADER ===================== */
+
+.dark-mode .uw-header {
+  background: #0f172a; /* slate-900 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark-mode .uw-header--scrolled {
+  background: #0f172a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* Textlar oq bo‘lsin */
+.dark-mode .uw-brand__name,
+.dark-mode .uw-nav__link,
+.dark-mode .uw-nav__morebtn,
+.dark-mode .uw-linkbtn,
+.dark-mode .uw-iconbtn {
+  color: #f1f5f9;
+}
+
+/* hover */
+.dark-mode .uw-nav__link:hover,
+.dark-mode .uw-nav__morebtn:hover,
+.dark-mode .uw-linkbtn:hover,
+.dark-mode .uw-iconbtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* drawer */
+.dark-mode .uw-drawer {
+  background: #0f172a;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark-mode .uw-drawer__link {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+}

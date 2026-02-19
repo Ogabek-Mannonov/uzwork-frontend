@@ -35,6 +35,7 @@ import {
 import "./infocss/info.css";
 import Footer from "../footer/Footer";
 import { Link } from "react-router-dom";
+import Header from "../components/header/Header";
 
 const Info = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -517,40 +518,9 @@ const Info = () => {
   return (
     <div className="uzwork-landing">
       {/* Navbar */}
-      <nav className={`uzwork-navbar ${scrolled ? "scrolled" : ""}`}>
-        <div className="navbar-container">
-          <Link to="#navbar-log" id="navbar-logo" className="navbar-logo">
-            <div className="logo-icon">
-              <img
-                className="logo"
-                src="/UzWork transparent.png"
-                alt="UzWork logo"
-              />
-            </div>
-            <span className="logo-text">UZWORK</span>
-          </Link>
-          <div className="navbar-actions">
-            <button
-              onClick={toggleDarkMode}
-              className="l-theme-toggle"
-              aria-label="Toggle dark mode"
-            >
-              {isDarkMode ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
-            </button>
-            <Link to="/login" className="l-nav-link">
-              Kirish
-            </Link>
 
-            <Link to="/signup" className="l-nav-btn">
-              Boshlash
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Header isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+
 
       {/* Hero */}
       <section className="hero-section">
@@ -606,40 +576,98 @@ const Info = () => {
         ></div>
 
         <div className="hero-container">
-          <div className="hero-badge">
-            <Sparkles className="w-3 h-3 text-blue-600" />
-            <span>3 OY 0% KOMISSIYA</span>
-          </div>
-          <h1 className="hero-title">
-            <span className="title-dark">Professional frilanserlar </span>
-            <span className="title-gradient">bir joyda</span>
-          </h1>
-          <p className="hero-desc">
-            AI bilan mutaxassislarni toping. Payme, Click orqali to'lov
-          </p>
-          <div className="hero-search">
-            <input
-              placeholder="Web developer, Designer..."
-              className="search-input"
-            />
-            <button className="search-btn">
-              Qidirish <ArrowRight className="w-4 h-4" />
-            </button>
+          {/* LEFT */}
+          <div className="hero-left">
+            <div className="hero-badge">
+              <Sparkles className="w-3 h-3 text-blue-600" />
+              <span>3 OY 0% KOMISSIYA</span>
+            </div>
+
+            <h1 className="hero-title">
+              <span className="title-dark">Professional frilanserlar </span>
+              <span className="title-gradient">bir joyda</span>
+            </h1>
+
+            <p className="hero-desc">
+              AI bilan mutaxassislarni toping. Payme, Click orqali to'lov
+            </p>
+
+            <div className="hero-search">
+              <input
+                placeholder="Web developer, Designer..."
+                className="search-input"
+              />
+              <button className="search-btn">
+                Qidirish <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
-          {/* <div className="stats-grid">
-            {stats.map((stat, i) => (
-              <div key={i} className="stat-card">
-                <div className="stat-icon">
-                  {React.cloneElement(stat.icon, {
-                    className: "w-7 h-7 text-white",
-                  })}
+          {/* RIGHT (UI PREVIEW) */}
+          <div className="hero-right">
+            <div className="hero-preview">
+              <div className="preview-glow" />
+
+              <div className="preview-card preview-job">
+                <div className="preview-header">
+                  <div className="dot dot-red" />
+                  <div className="dot dot-yellow" />
+                  <div className="dot dot-green" />
+                  <span className="preview-title">Job</span>
                 </div>
-                <div className="stat-value">{stat.value}</div>
-                <div className="stat-label">{stat.label}</div>
+
+                <div className="preview-body">
+                  <div className="preview-line lg" />
+                  <div className="preview-line md" />
+                  <div className="preview-tags">
+                    <span className="tag">React</span>
+                    <span className="tag">Node</span>
+                    <span className="tag">UI</span>
+                  </div>
+
+                  <div className="preview-row">
+                    <span className="badge badge-safe">
+                      <Shield className="w-4 h-4" /> Escrow
+                    </span>
+                    <span className="badge badge-ai">
+                      <Sparkles className="w-4 h-4" /> AI Match
+                    </span>
+                  </div>
+                </div>
               </div>
-            ))}
-          </div> */}
+
+              <div className="preview-card preview-freelancer">
+                <div className="freelancer-top">
+                  <div className="avatar-skeleton" />
+                  <div className="freelancer-meta">
+                    <div className="preview-line md" />
+                    <div className="preview-line sm" />
+                  </div>
+                </div>
+
+                <div className="freelancer-stats-mini">
+                  <span className="mini">
+                    <Star className="w-4 h-4" /> 4.9
+                  </span>
+                  <span className="mini">
+                    <Briefcase className="w-4 h-4" /> 120+
+                  </span>
+                  <span className="mini">
+                    <DollarSign className="w-4 h-4" /> $45/h
+                  </span>
+                </div>
+
+                <button className="preview-btn">
+                  Freelancerni ko'rish <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="preview-floating">
+                <CheckCircle className="w-4 h-4" />
+                <span>Verified profiles</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
