@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import "./infocss/info.css";
 import Footer from "../footer/Footer";
+import { Link } from "react-router-dom";
 
 const Info = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -141,12 +142,12 @@ const Info = () => {
     },
   ];
 
-  const stats = [
-    { icon: <Users />, value: "1M+", label: "Foydalanuvchi" },
-    { icon: <Briefcase />, value: "500K+", label: "Loyiha" },
-    { icon: <Star />, value: "4.9★", label: "Reyting" },
-    { icon: <TrendingUp />, value: "$2B+", label: "To'langan" },
-  ];
+  // const stats = [
+  //   { icon: <Users />, value: "1M+", label: "Foydalanuvchi" },
+  //   { icon: <Briefcase />, value: "500K+", label: "Loyiha" },
+  //   { icon: <Star />, value: "4.9★", label: "Reyting" },
+  //   { icon: <TrendingUp />, value: "$2B+", label: "To'langan" },
+  // ];
 
   const clientSteps = [
     {
@@ -518,13 +519,16 @@ const Info = () => {
       {/* Navbar */}
       <nav className={`uzwork-navbar ${scrolled ? "scrolled" : ""}`}>
         <div className="navbar-container">
-          <div className="navbar-logo">
+          <Link to="#navbar-log" id="navbar-logo" className="navbar-logo">
             <div className="logo-icon">
-              {/* <Rocket className="w-4 h-4 text-white" /> */}
-              <img className="logo" src="../../UzWork transparent.png" alt="" />
+              <img
+                className="logo"
+                src="/UzWork transparent.png"
+                alt="UzWork logo"
+              />
             </div>
             <span className="logo-text">UZWORK</span>
-          </div>
+          </Link>
           <div className="navbar-actions">
             <button
               onClick={toggleDarkMode}
@@ -537,8 +541,13 @@ const Info = () => {
                 <Moon className="w-5 h-5" />
               )}
             </button>
-            <button className="l-nav-link">Kirish</button>  
-            <button className="l-nav-btn">Boshlash</button>
+            <Link to="/login" className="l-nav-link">
+              Kirish
+            </Link>
+
+            <Link to="/signup" className="l-nav-btn">
+              Boshlash
+            </Link>
           </div>
         </div>
       </nav>
@@ -618,7 +627,7 @@ const Info = () => {
             </button>
           </div>
 
-          <div className="stats-grid">
+          {/* <div className="stats-grid">
             {stats.map((stat, i) => (
               <div key={i} className="stat-card">
                 <div className="stat-icon">
@@ -630,7 +639,7 @@ const Info = () => {
                 <div className="stat-label">{stat.label}</div>
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -647,9 +656,8 @@ const Info = () => {
             {categories.map((cat, i) => (
               <div
                 key={i}
-                className={`category-card ${
-                  selectedCategory === cat.title ? "active" : ""
-                }`}
+                className={`category-card ${selectedCategory === cat.title ? "active" : ""
+                  }`}
                 onClick={() =>
                   setSelectedCategory(
                     selectedCategory === cat.title ? null : cat.title
@@ -736,9 +744,8 @@ const Info = () => {
                 Mijozlar uchun
               </button>
               <button
-                className={`work-tab ${
-                  activeTab === "freelancer" ? "active" : ""
-                }`}
+                className={`work-tab ${activeTab === "freelancer" ? "active" : ""
+                  }`}
                 onClick={() => setActiveTab("freelancer")}
               >
                 <Briefcase className="w-4 h-4" />
@@ -963,18 +970,16 @@ const Info = () => {
                 <div className="faq-question-content">
                   <div className="faq-icon">
                     <HelpCircle
-                      className={`w-5 h-5 ${
-                        activeFaq === 0 ? "text-white" : "text-blue-600"
-                      }`}
+                      className={`w-5 h-5 ${activeFaq === 0 ? "text-white" : "text-blue-600"
+                        }`}
                     />
                   </div>
                   <h3 className="faq-question">UZWORK nima?</h3>
                 </div>
                 <div className="faq-toggle">
                   <ChevronDown
-                    className={`w-5 h-5 ${
-                      activeFaq === 0 ? "text-white" : "text-slate-600"
-                    }`}
+                    className={`w-5 h-5 ${activeFaq === 0 ? "text-white" : "text-slate-600"
+                      }`}
                   />
                 </div>
               </div>
@@ -1004,18 +1009,16 @@ const Info = () => {
                 <div className="faq-question-content">
                   <div className="faq-icon">
                     <Settings
-                      className={`w-5 h-5 ${
-                        activeFaq === 1 ? "text-white" : "text-blue-600"
-                      }`}
+                      className={`w-5 h-5 ${activeFaq === 1 ? "text-white" : "text-blue-600"
+                        }`}
                     />
                   </div>
                   <h3 className="faq-question">UZWORK qanday ishlaydi?</h3>
                 </div>
                 <div className="faq-toggle">
                   <ChevronDown
-                    className={`w-5 h-5 ${
-                      activeFaq === 1 ? "text-white" : "text-slate-600"
-                    }`}
+                    className={`w-5 h-5 ${activeFaq === 1 ? "text-white" : "text-slate-600"
+                      }`}
                   />
                 </div>
               </div>
@@ -1047,18 +1050,16 @@ const Info = () => {
                 <div className="faq-question-content">
                   <div className="faq-icon">
                     <UserCheck
-                      className={`w-5 h-5 ${
-                        activeFaq === 2 ? "text-white" : "text-blue-600"
-                      }`}
+                      className={`w-5 h-5 ${activeFaq === 2 ? "text-white" : "text-blue-600"
+                        }`}
                     />
                   </div>
                   <h3 className="faq-question">UZWORK kim uchun?</h3>
                 </div>
                 <div className="faq-toggle">
                   <ChevronDown
-                    className={`w-5 h-5 ${
-                      activeFaq === 2 ? "text-white" : "text-slate-600"
-                    }`}
+                    className={`w-5 h-5 ${activeFaq === 2 ? "text-white" : "text-slate-600"
+                      }`}
                   />
                 </div>
               </div>
@@ -1132,7 +1133,7 @@ const Info = () => {
           <button className="cta-btn">Bepul boshlash</button>
         </div>
       </section>
-        <Footer />
+      <Footer />
     </div>
   );
 };
