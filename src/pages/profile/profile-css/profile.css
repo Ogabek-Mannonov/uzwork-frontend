@@ -186,6 +186,7 @@ body.dark-mode {
   align-items: center;
   flex-shrink: 0;
   height: 100%;
+  width: 110px;
 }
 
 .logo {
