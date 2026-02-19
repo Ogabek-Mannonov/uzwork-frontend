@@ -61,7 +61,7 @@ export default function Index() {
 
       {/* Backdrop (mobile/tablet overlay uchun) */}
       <button
-        className={`backdrop ${sidebarOpen ? "show" : ""}`}
+        className={`h-backdrop ${sidebarOpen ? "h-show" : ""}`}
         aria-label="Sidebarni yopish"
         onClick={closeSidebar}
         type="button"
@@ -84,8 +84,8 @@ export default function Index() {
 
             {/* Desktop Toggle */}
             <button
-              className={`toggle-button ${
-                sidebarOpen ? "toggle-open" : "toggle-closed"
+              className={`h-toggle-button ${
+                sidebarOpen ? "h-toggle-open" : "h-toggle-closed"
               }`}
               onClick={toggleSidebar}
               type="button"
@@ -98,19 +98,19 @@ export default function Index() {
             </button>
           </div>
 
-          <nav id="sidebar-nav" className="nav">
+          <nav id="sidebar-nav" className="h-nav">
             {menuItems.map((item) => {
               const Icon = item.icon;
               return (
                 <button
                   key={item.path}
-                  className="menu-button"
+                  className="h-menu-button"
                   onClick={() => onMenuClick(item.path)}
                   type="button"
                 >
-                  <Icon size={20} className="menu-icon" />
+                  <Icon size={20} className="h-menu-icon" />
                   <span
-                    className={`menu-label ${sidebarOpen ? "show" : "hide"}`}
+                    className={`h-menu-label ${sidebarOpen ? "show" : "hide"}`}
                   >
                     {item.label}
                   </span>
@@ -123,12 +123,12 @@ export default function Index() {
 
       {/* Header */}
       <header
-        className={`header ${sidebarOpen ? "header-open" : "header-closed"}`}
+        className={`h-header ${sidebarOpen ? "h-header-open" : "h-header-closed"}`}
       >
         <div className="decorative-circle-1" />
         <div className="decorative-circle-2" />
 
-        <div className="header-content">
+        <div className="h-header-content">
           {/* Mobile burger */}
           <button
             className="mobile-menu-btn"
@@ -170,7 +170,7 @@ export default function Index() {
       {/* Main */}
       <main
         id="main"
-        className={`main ${sidebarOpen ? "main-open" : "main-closed"}`}
+        className={`h-main ${sidebarOpen ? "h-main-open" : "h-main-closed"}`}
       >
         <section className="hed-section">
           <div className="hed-content">
