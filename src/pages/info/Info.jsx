@@ -513,6 +513,33 @@ const Info = () => {
         "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop",
       company: "E-commerce",
     },
+    {
+      name: "Sardor Alimov",
+      role: "Biznes egasi",
+      text: "3 oy 0% komissiya ajoyib taklif! Endi barcha ishlarimni UZWORK orqali bajaraman.",
+      rating: 5,
+      avatar:
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop",
+      company: "E-commerce",
+    },
+    {
+      name: "Sardor Alimov",
+      role: "Biznes egasi",
+      text: "3 oy 0% komissiya ajoyib taklif! Endi barcha ishlarimni UZWORK orqali bajaraman.",
+      rating: 5,
+      avatar:
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop",
+      company: "E-commerce",
+    },
+    {
+      name: "Sardor Alimov",
+      role: "Biznes egasi",
+      text: "3 oy 0% komissiya ajoyib taklif! Endi barcha ishlarimni UZWORK orqali bajaraman.",
+      rating: 5,
+      avatar:
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop",
+      company: "E-commerce",
+    },
   ];
 
   return (
@@ -894,55 +921,25 @@ const Info = () => {
             ))}
           </div>
         </div>
-      </section>
+        <div className="find-box">
+          <div className="find-box__content">
+            <h3 className="find-box__title">
+              Ishonchli va tajribali frilanserni toping
+            </h3>
 
-      {/* Pricing */}
-      <section className="pricing-section">
-        <div className="pricing-container">
-          <div className="section-header">
-            <h2 className="section-title white">Shaffof narxlar</h2>
-            <p className="section-subtitle light">Mos rejani tanlang</p>
-          </div>
-          <div className="pricing-grid">
-            <div className="pricing-card basic">
-              <h3 className="pricing-title">Basic</h3>
-              <div className="pricing-price">
-                <span className="price-value">5%</span>
-                <span className="price-label">xizmat</span>
-              </div>
-              <ul className="pricing-features">
-                {["AI", "Boshqarish", "To'lov", "24/7"].map((item, i) => (
-                  <li key={i}>
-                    <CheckCircle className="check-icon green" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <button className="pricing-btn outline">Boshlash</button>
-            </div>
+            <p className="find-box__desc">
+              Eng yaxshi mutaxassislarni bir joyda toping. Tekshirilgan profillar,
+              reytinglar va real tajriba.
+            </p>
 
-            <div className="pricing-card premium">
-              <div className="popular-badge">TOP</div>
-              <h3 className="pricing-title">Business</h3>
-              <div className="pricing-price">
-                <span className="price-value">10%</span>
-                <span className="price-label">xizmat</span>
-              </div>
-              <ul className="pricing-features">
-                {["Top 1%", "Recruiter", "Team", "Premium", "Analytics"].map(
-                  (item, i) => (
-                    <li key={i}>
-                      <CheckCircle className="check-icon white" />
-                      <span>{item}</span>
-                    </li>
-                  )
-                )}
-              </ul>
-              <button className="pricing-btn filled">Boshlash</button>
-            </div>
+            <Link to="/search/talent" className="find-box__btn">
+              Frilanserlarni ko'rib chiqish →
+            </Link>
           </div>
         </div>
       </section>
+
+
 
       {/* FAQ */}
       <section className="faq-section">
@@ -1124,6 +1121,54 @@ const Info = () => {
               <button className="faq-promo-btn">
                 Taklif oling <ArrowRight className="w-4 h-4" />
               </button>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* Pricing */}
+
+      <section className="pricing-section">
+        <div className="pricing-container">
+          <div className="section-header">
+            <h2 className="section-title white">Shaffof narxlar</h2>
+            <p className="section-subtitle light">Mos rejani tanlang</p>
+          </div>
+          <div className="pricing-grid">
+            <div className="pricing-card basic">
+              <h3 className="pricing-title">Basic</h3>
+              <div className="pricing-price">
+                <span className="price-value">5%</span>
+                <span className="price-label">xizmat</span>
+              </div>
+              <ul className="pricing-features">
+                {["AI", "Boshqarish", "To'lov", "24/7"].map((item, i) => (
+                  <li key={i}>
+                    <CheckCircle className="check-icon green" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <button className="pricing-btn outline">Boshlash</button>
+            </div>
+
+            <div className="pricing-card premium">
+              <div className="popular-badge">TOP</div>
+              <h3 className="pricing-title">Business</h3>
+              <div className="pricing-price">
+                <span className="price-value">10%</span>
+                <span className="price-label">xizmat</span>
+              </div>
+              <ul className="pricing-features">
+                {["Top 1%", "Recruiter", "Team", "Premium", "Analytics"].map(
+                  (item, i) => (
+                    <li key={i}>
+                      <CheckCircle className="check-icon white" />
+                      <span>{item}</span>
+                    </li>
+                  )
+                )}
+              </ul>
+              <button className="pricing-btn filled">Boshlash</button>
             </div>
           </div>
         </div>
