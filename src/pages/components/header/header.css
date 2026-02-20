@@ -116,6 +116,15 @@
   position: relative;
 }
 
+.uw-nav__more::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 12px; /* oldingi 10px gapni yopadi */
+}
+
 .uw-nav__morebtn {
   height: 40px;
   padding: 0 12px;
@@ -160,11 +169,31 @@
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.uw-nav__more:hover .uw-nav__menu {
+.uw-nav__menu {
+  position: absolute;
+  top: 100%;            /* calc(...) emas */
+  left: 50%;
+  transform: translateX(-50%) translateY(10px); /* pastga vizual siljitish */
+  min-width: 190px;
+  padding: 8px;
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 30px 70px rgba(2, 6, 23, 0.14);
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.uw-nav__menu.open {
   opacity: 1;
   pointer-events: auto;
-  transform: translateX(-50%) translateY(2px);
+  transform: translateX(-50%) translateY(10px);
 }
+
+
 
 .uw-nav__menulink {
   display: flex;

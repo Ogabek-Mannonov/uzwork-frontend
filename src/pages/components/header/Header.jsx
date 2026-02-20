@@ -6,6 +6,7 @@ import "./Header.css";
 export default function Header({ isDarkMode, toggleDarkMode }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -15,8 +16,8 @@ export default function Header({ isDarkMode, toggleDarkMode }) {
   }, []);
 
   useEffect(() => {
-  document.body.classList.toggle("dark-mode", isDarkMode);
-}, [isDarkMode]);
+    document.body.classList.toggle("dark-mode", isDarkMode);
+  }, [isDarkMode]);
 
 
   // route o'zgarsa menu yopilib ketsin (optional)
@@ -69,22 +70,24 @@ export default function Header({ isDarkMode, toggleDarkMode }) {
           ))}
 
           {/* Optional dropdown style item */}
-          <div className="uw-nav__more">
+
+          <div
+            className="uw-nav__more"
+            onMouseEnter={() => setMoreOpen(true)}
+            onMouseLeave={() => setMoreOpen(false)}
+          >
             <button type="button" className="uw-nav__morebtn">
               More <ChevronDown size={16} />
             </button>
-            <div className="uw-nav__menu">
-              <Link to="/pricing" className="uw-nav__menulink">
-                Pricing
-              </Link>
-              <Link to="/reviews" className="uw-nav__menulink">
-                Reviews
-              </Link>
-              <Link to="/support" className="uw-nav__menulink">
-                Support
-              </Link>
+
+            <div className={`uw-nav__menu ${moreOpen ? "open" : ""}`}>
+              <Link to="/pricing" className="uw-nav__menulink">Pricing</Link>
+              <Link to="/reviews" className="uw-nav__menulink">Reviews</Link>
+              <Link to="/support" className="uw-nav__menulink">Support</Link>
             </div>
           </div>
+
+
         </nav>
 
         {/* Right: Actions */}
