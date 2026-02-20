@@ -91,48 +91,48 @@ export default function Header({ isDarkMode, toggleDarkMode }) {
   const hireCategories = useMemo(
     () => [
       {
-        title: "Admin & Support",
+        title: "Admin & qo'llab-quvvatlash",
         items: [
-          { label: "Virtual assistants", to: "/talent/virtual-assistant" },
-          { label: "Data entry", to: "/talent/data-entry" },
-          { label: "Customer support", to: "/talent/customer-support" },
-          { label: "Project managers", to: "/talent/project-manager" },
+          { label: "Virtual yordamchilar", to: "/talent/virtual-assistant" },
+          { label: "Ma'lumot kiritish", to: "/talent/data-entry" },
+          { label: "Mijozlarni qo'llab-quvvatlash", to: "/talent/customer-support" },
+          { label: "Loyiha menejerlari", to: "/talent/project-manager" },
         ],
       },
       {
-        title: "Design & Creative",
+        title: "Dizayn & kreativlik",
         items: [
-          { label: "Graphic designers", to: "/talent/graphic-design" },
-          { label: "UI/UX designers", to: "/talent/ui-ux" },
-          { label: "Illustrators", to: "/talent/illustration" },
-          { label: "Video editors", to: "/talent/video-editing" },
+          { label: "Grafik dizaynerlar", to: "/talent/graphic-design" },
+          { label: "UI/UX dizaynerlar", to: "/talent/ui-ux" },
+          { label: "Illyustratorlar", to: "/talent/illustration" },
+          { label: "Video montajchilar", to: "/talent/video-editing" },
         ],
       },
       {
-        title: "Development & Tech",
+        title: "Dasturlash & texnologiyalar",
         items: [
-          { label: "Web developers", to: "/talent/web-dev" },
-          { label: "Mobile developers", to: "/talent/mobile-dev" },
-          { label: "Backend (Node.js)", to: "/talent/nodejs" },
+          { label: "Veb dasturchilar", to: "/talent/web-dev" },
+          { label: "Mobil ilova dasturchilari", to: "/talent/mobile-dev" },
+          { label: "Backend dasturchilar", to: "/talent/nodejs" },
           { label: "QA & Testing", to: "/talent/qa" },
         ],
       },
       {
         title: "Marketing",
         items: [
-          { label: "SMM managers", to: "/talent/smm" },
-          { label: "SEO experts", to: "/talent/seo" },
-          { label: "Ads specialists", to: "/talent/ads" },
+          { label: "SMM menejerlar", to: "/talent/smm" },
+          { label: "SEO mutaxassislari", to: "/talent/seo" },
+          { label: "Reklama mutaxassislari", to: "/talent/ads" },
           { label: "Email marketing", to: "/talent/email-marketing" },
         ],
       },
       {
-        title: "Writing & Content",
+        title: "Matn Yozish & Kontent",
         items: [
-          { label: "Content writers", to: "/talent/content-writing" },
-          { label: "Copywriters", to: "/talent/copywriting" },
-          { label: "Translators", to: "/talent/translation" },
-          { label: "Editors", to: "/talent/editing" },
+          { label: "Kontent yozuvchilar", to: "/talent/content-writing" },
+          { label: "Kopirayterlar", to: "/talent/copywriting" },
+          { label: "Tarjimonlar", to: "/talent/translation" },
+          { label: "Muharrirlar", to: "/talent/editing" },
         ],
       },
     ],
@@ -142,48 +142,48 @@ export default function Header({ isDarkMode, toggleDarkMode }) {
   const workCategories = useMemo(
     () => [
       {
-        title: "Admin & Support jobs",
+        title: "Admin & qo'llab-quvvatlash",
         items: [
-          { label: "Virtual assistant jobs", to: "/jobs/virtual-assistant" },
-          { label: "Data entry jobs", to: "/jobs/data-entry" },
-          { label: "Customer support jobs", to: "/jobs/customer-support" },
-          { label: "Project management jobs", to: "/jobs/project-management" },
+          { label: "Virtual yordamchilar", to: "/talent/virtual-assistant" },
+          { label: "Ma'lumot kiritish", to: "/talent/data-entry" },
+          { label: "Mijozlarni qo'llab-quvvatlash", to: "/talent/customer-support" },
+          { label: "Loyiha menejerlari", to: "/talent/project-manager" },
         ],
       },
       {
-        title: "Design & Creative jobs",
+        title: "Dizayn & kreativlik",
         items: [
-          { label: "Graphic design jobs", to: "/jobs/graphic-design" },
-          { label: "UI/UX jobs", to: "/jobs/ui-ux" },
-          { label: "Illustration jobs", to: "/jobs/illustration" },
-          { label: "Video editing jobs", to: "/jobs/video-editing" },
+          { label: "Grafik dizaynerlar", to: "/talent/graphic-design" },
+          { label: "UI/UX dizaynerlar", to: "/talent/ui-ux" },
+          { label: "Illyustratorlar", to: "/talent/illustration" },
+          { label: "Video montajchilar", to: "/talent/video-editing" },
         ],
       },
       {
-        title: "Development & Tech jobs",
+        title: "Dasturlash & texnologiyalar",
         items: [
-          { label: "Frontend jobs", to: "/jobs/frontend" },
-          { label: "Backend jobs", to: "/jobs/backend" },
-          { label: "React jobs", to: "/jobs/react" },
-          { label: "Node.js jobs", to: "/jobs/nodejs" },
+          { label: "Veb dasturchilar", to: "/talent/web-dev" },
+          { label: "Mobil ilova dasturchilari", to: "/talent/mobile-dev" },
+          { label: "Backend dasturchilar", to: "/talent/nodejs" },
+          { label: "QA & Testing", to: "/talent/qa" },
         ],
       },
       {
-        title: "Marketing jobs",
+        title: "Marketing",
         items: [
-          { label: "SMM jobs", to: "/jobs/smm" },
-          { label: "SEO jobs", to: "/jobs/seo" },
-          { label: "Google Ads jobs", to: "/jobs/google-ads" },
-          { label: "Email marketing jobs", to: "/jobs/email-marketing" },
+          { label: "SMM menejerlar", to: "/talent/smm" },
+          { label: "SEO mutaxassislari", to: "/talent/seo" },
+          { label: "Reklama mutaxassislari", to: "/talent/ads" },
+          { label: "Email marketing", to: "/talent/email-marketing" },
         ],
       },
       {
-        title: "Writing & content jobs",
+        title: "Matn Yozish & Kontent",
         items: [
-          { label: "Content writing jobs", to: "/jobs/content-writing" },
-          { label: "Copywriting jobs", to: "/jobs/copywriting" },
-          { label: "Translation jobs", to: "/jobs/translation" },
-          { label: "Editing jobs", to: "/jobs/editing" },
+          { label: "Kontent yozuvchilar", to: "/talent/content-writing" },
+          { label: "Kopirayterlar", to: "/talent/copywriting" },
+          { label: "Tarjimonlar", to: "/talent/translation" },
+          { label: "Muharrirlar", to: "/talent/editing" },
         ],
       },
     ],
@@ -192,8 +192,8 @@ export default function Header({ isDarkMode, toggleDarkMode }) {
 
   const navLinks = useMemo(
     () => [
-      { to: "/how-it-works", label: "How it works" },
-      { to: "/enterprise", label: "Enterprise" },
+      { to: "/how-it-works", label: "Qanday ishlaydi" },
+      { to: "/enterprise", label: "Korporativ xizmatlar" },
     ],
     []
   );
@@ -229,7 +229,7 @@ export default function Header({ isDarkMode, toggleDarkMode }) {
               aria-expanded={hireOpen}
               aria-haspopup="menu"
             >
-              Hire talent <ChevronDown size={16} />
+              Mutaxassis yollash <ChevronDown size={16} />
             </button>
 
             <div
@@ -250,15 +250,15 @@ export default function Header({ isDarkMode, toggleDarkMode }) {
                 ))}
 
                 <div className="uw-mega__side">
-                  <div className="uw-mega__sideTitle">Need help?</div>
+                  <div className="uw-mega__sideTitle">Yordam kerakmi?</div>
                   <Link className="uw-mega__sideLink" to="/explore">
-                    Explore more →
+                    Batafsil ko'rish →
                   </Link>
                   <Link className="uw-mega__sideLink" to="/consultation">
-                    Book consultation →
+                    Maslahatga yozilish →
                   </Link>
                   <Link className="uw-mega__sideLink" to="/business-plus">
-                    Join Business Plus →
+                    Business Plus ga qo'shilish →
                   </Link>
                 </div>
               </div>
@@ -278,7 +278,7 @@ export default function Header({ isDarkMode, toggleDarkMode }) {
               aria-expanded={workOpen}
               aria-haspopup="menu"
             >
-              Find work <ChevronDown size={16} />
+              Ish topish <ChevronDown size={16} />
             </button>
 
             <div
@@ -299,15 +299,15 @@ export default function Header({ isDarkMode, toggleDarkMode }) {
                 ))}
 
                 <div className="uw-mega__side">
-                  <div className="uw-mega__sideTitle">Boost your profile</div>
+                  <div className="uw-mega__sideTitle">Profilingizni rivojlantiring</div>
                   <Link className="uw-mega__sideLink" to="/earn">
-                    Ways to earn →
+                    Daromad topish yo'llari →
                   </Link>
                   <Link className="uw-mega__sideLink" to="/ads">
-                    Win work with ads →
+                    Reklama orqali ish yutib oling →
                   </Link>
                   <Link className="uw-mega__sideLink" to="/freelancer-plus">
-                    Join Freelancer Plus →
+                    Freelancer Plus'ga qo'shiling →
                   </Link>
                 </div>
               </div>
@@ -341,7 +341,7 @@ export default function Header({ isDarkMode, toggleDarkMode }) {
             onMouseLeave={scheduleCloseMore}
           >
             <button type="button" className="uw-nav__morebtn">
-              More <ChevronDown size={16} />
+              Yana <ChevronDown size={16} />
             </button>
 
             <div
@@ -349,9 +349,9 @@ export default function Header({ isDarkMode, toggleDarkMode }) {
               onMouseEnter={openMore}
               onMouseLeave={scheduleCloseMore}
             >
-              <Link to="/pricing" className="uw-nav__menulink">Pricing</Link>
-              <Link to="/reviews" className="uw-nav__menulink">Reviews</Link>
-              <Link to="/support" className="uw-nav__menulink">Support</Link>
+              <Link to="/pricing" className="uw-nav__menulink">Narxlar</Link>
+              <Link to="/reviews" className="uw-nav__menulink">Sharhlar</Link>
+              <Link to="/support" className="uw-nav__menulink">Qo'llab-quvvatlash</Link>
             </div>
           </div>
         </nav>

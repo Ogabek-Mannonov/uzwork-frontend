@@ -77,22 +77,14 @@ const Info = () => {
 
 
   const popularHire = [
-    "AI chatbot developer",
-    "Brand identity designer",
-    "Data analyst",
-    "Video editor",
-    "Automation expert (n8n)",
-    "Web developer",
+    "AI chatbot dasturchisi",
+    "Brend identifikatsiya dizayneri",
+    "Ma'lumotlar tahlilchisi",
+    "Video montajchi",
+    "Avtomatlashtirish mutaxassisi (n8n)",
+    "Veb dasturchi",
   ];
 
-  const popularWork = [
-    "Frontend React Developer",
-    "UI/UX Designer",
-    "Copywriter",
-    "SMM Manager",
-    "Backend Node.js",
-    "QA Engineer",
-  ];
 
   const onHeroSearch = () => {
     const q = heroQuery.trim();
@@ -674,7 +666,7 @@ const Info = () => {
                   role="tab"
                   aria-selected={heroTab === "hire"}
                 >
-                  I want to hire
+                  Mutaxassis yollash
                 </button>
 
                 <button
@@ -688,7 +680,7 @@ const Info = () => {
                   role="tab"
                   aria-selected={heroTab === "work"}
                 >
-                  I want to work
+                  Ish topish
                 </button>
               </div>
 
@@ -702,7 +694,7 @@ const Info = () => {
                       onFocus={() => setIsHeroOpen(true)}
                       onClick={() => setIsHeroOpen(true)}
                       onKeyDown={(e) => e.key === "Enter" && onHeroSearch()}
-                      placeholder="Describe what you need to hire for..."
+                      placeholder="Qanday mutaxassis kerakligini yozing..."
                       className="hero-quick__input"
                     />
 
@@ -717,7 +709,7 @@ const Info = () => {
 
                   {isHeroOpen && (
                     <div className="hero-quick__popular">
-                      <div className="hero-quick__popularTitle">POPULAR SEARCHES</div>
+                      <div className="hero-quick__popularTitle">Ommabop qidiruvlar</div>
 
                       <div className="hero-quick__popularList">
                         {popularHire.map((item) => (
@@ -742,10 +734,10 @@ const Info = () => {
                 <div className="hero-quick__panel hero-quick__panel--work">
                   <div className="hero-quick__workText">
                     <div className="hero-quick__workTitle">
-                      Build your freelancing career on UZWORK
+                      UZWORK bilan frilanserlik karyerangizni boshlang va rivojlantiring
                     </div>
                     <div className="hero-quick__workDesc">
-                      With thousands of jobs posted every week.
+                      Har hafta minglab yangi ish e'lonlari sizni kutmoqda.
                     </div>
                   </div>
 
@@ -754,7 +746,7 @@ const Info = () => {
                     className="hero-quick__btn hero-quick__btn--green hero-quick__btn--full"
                     onClick={() => navigate("/jobs?sort=recent")}
                   >
-                    Explore recently posted jobs <ArrowRight className="w-4 h-4" />
+                    So'nggi e'lon qilingan ishlarni ko'rish<ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               )}
@@ -785,10 +777,10 @@ const Info = () => {
 
                   <div className="preview-row">
                     <span className="badge badge-safe">
-                      <Shield className="w-4 h-4" /> Escrow
+                      <Shield className="w-4 h-4" /> Xavfsiz to'lov
                     </span>
                     <span className="badge badge-ai">
-                      <Sparkles className="w-4 h-4" /> AI Match
+                      <Sparkles className="w-4 h-4" /> AI moslashtirish
                     </span>
                   </div>
                 </div>
@@ -822,7 +814,7 @@ const Info = () => {
 
               <div className="preview-floating">
                 <CheckCircle className="w-4 h-4" />
-                <span>Verified profiles</span>
+                <span>Tasdiqlangan profillar</span>
               </div>
             </div>
           </div>
