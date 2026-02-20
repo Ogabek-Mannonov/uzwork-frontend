@@ -1974,7 +1974,7 @@ body {
 
 .popular-badge {
   position: absolute;
-  top: -12px;
+  margin-top: 30px;
   right: 2rem;
   padding: 0.625rem 1.25rem;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
