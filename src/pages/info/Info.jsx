@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 import "./infocss/info.css";
 import Footer from "../footer/Footer";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/header/Header";
 
 const Info = () => {
@@ -46,6 +46,11 @@ const Info = () => {
     const saved = localStorage.getItem("darkMode");
     return saved ? JSON.parse(saved) : false;
   });
+  const [heroTab, setHeroTab] = useState("hire"); // "hire" | "work"
+  const [heroQuery, setHeroQuery] = useState("");
+  const [showPopular, setShowPopular] = useState(false);
+  const navigate = useNavigate();
+  const [isHeroOpen, setIsHeroOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -61,6 +66,43 @@ const Info = () => {
       document.documentElement.classList.remove("dark-mode");
     }
   }, [isDarkMode]);
+
+  useEffect(() => {
+    const onDocClick = (e) => {
+      if (!e.target.closest(".hero-quick")) setIsHeroOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+
+  const popularHire = [
+    "AI chatbot developer",
+    "Brand identity designer",
+    "Data analyst",
+    "Video editor",
+    "Automation expert (n8n)",
+    "Web developer",
+  ];
+
+  const popularWork = [
+    "Frontend React Developer",
+    "UI/UX Designer",
+    "Copywriter",
+    "SMM Manager",
+    "Backend Node.js",
+    "QA Engineer",
+  ];
+
+  const onHeroSearch = () => {
+    const q = heroQuery.trim();
+    navigate(`/search/talent${q ? `?q=${encodeURIComponent(q)}` : ""}`);
+  };
+
+  const pickPopular = (text) => {
+    setHeroQuery(text);
+    setShowPopular(false);
+  };
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -619,14 +661,103 @@ const Info = () => {
               AI bilan mutaxassislarni toping. Payme, Click orqali to'lov
             </p>
 
-            <div className="hero-search">
-              <input
-                placeholder="Web developer, Designer..."
-                className="search-input"
-              />
-              <button className="search-btn">
-                Qidirish <ArrowRight className="w-4 h-4" />
-              </button>
+            <div className="hero-quick">
+              <div className="hero-quick__tabs" role="tablist" aria-label="Hero Tabs">
+                <button
+                  type="button"
+                  className={`hero-quick__tab ${heroTab === "hire" ? "is-active" : ""}`}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setHeroTab("hire");
+                    setIsHeroOpen(false); // workdan qaytsa yopib turamiz
+                  }}
+                  role="tab"
+                  aria-selected={heroTab === "hire"}
+                >
+                  I want to hire
+                </button>
+
+                <button
+                  type="button"
+                  className={`hero-quick__tab ${heroTab === "work" ? "is-active" : ""}`}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setHeroTab("work");
+                    setIsHeroOpen(false); // hire dropdown ochiq bo‘lsa yopiladi
+                  }}
+                  role="tab"
+                  aria-selected={heroTab === "work"}
+                >
+                  I want to work
+                </button>
+              </div>
+
+              {/* HIRE */}
+              {heroTab === "hire" && (
+                <div className="hero-quick__panel">
+                  <div className="hero-quick__search">
+                    <input
+                      value={heroQuery}
+                      onChange={(e) => setHeroQuery(e.target.value)}
+                      onFocus={() => setIsHeroOpen(true)}
+                      onClick={() => setIsHeroOpen(true)}
+                      onKeyDown={(e) => e.key === "Enter" && onHeroSearch()}
+                      placeholder="Describe what you need to hire for..."
+                      className="hero-quick__input"
+                    />
+
+                    <button
+                      type="button"
+                      className="hero-quick__btn"
+                      onClick={onHeroSearch}
+                    >
+                      Qidirish <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {isHeroOpen && (
+                    <div className="hero-quick__popular">
+                      <div className="hero-quick__popularTitle">POPULAR SEARCHES</div>
+
+                      <div className="hero-quick__popularList">
+                        {popularHire.map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            className="hero-quick__popularItem"
+                            onMouseDown={(e) => e.preventDefault()} // blur bo‘lishidan oldin
+                            onClick={() => pickPopular(item)}
+                          >
+                            <span className="hero-quick__popularDot" />
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* WORK */}
+              {heroTab === "work" && (
+                <div className="hero-quick__panel hero-quick__panel--work">
+                  <div className="hero-quick__workText">
+                    <div className="hero-quick__workTitle">
+                      Build your freelancing career on UZWORK
+                    </div>
+                    <div className="hero-quick__workDesc">
+                      With thousands of jobs posted every week.
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="hero-quick__btn hero-quick__btn--green hero-quick__btn--full"
+                    onClick={() => navigate("/jobs?sort=recent")}
+                  >
+                    Explore recently posted jobs <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
