@@ -1,4 +1,5 @@
 import "../../assets/style/projectCard.css";
+import "../../assets/style/theme.css"
 
 export default function ProjectCard({
   img, // ixtiyoriy (rasmda yo'q, xohlasangiz olib tashlaysiz)

@@ -106,15 +106,21 @@ body {
   border-radius: 12px;
   background: var(--grad);
   color: #fff;
-  display: grid;
-  place-items: center;
   font-weight: 800;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--input-border);
+  padding: 16px;
+}
+.h-brand-badge img{
+  width: 25px;
 }
 
 .h-brand-text {
   font-weight: 700;
-  color: #111827;
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   transition:
@@ -145,6 +151,9 @@ body {
   margin-left: 30px;
   z-index: 999;
   transition: all 0.25s ease;
+  border-top: 1px solid var(--input-border);
+  border-bottom: 1px solid var(--input-border);
+  border-right: 1px solid var(--input-border);
 }
 
 .h-toggle-closed {
@@ -368,7 +377,7 @@ body {
 /* Hero */
 .hed-section {
   background: var(--bg);
-  padding: 7rem 2rem 6rem;
+  padding: 3rem 2rem 1rem;
   position: relative;
   overflow: hidden !important;
   color: var(--text);
@@ -378,6 +387,10 @@ body {
   max-width: 720px;
   position: relative;
   z-index: 2;
+  border: 1px solid var(--input-border);
+  background: var(--surface);
+  padding: 2rem;
+  border-radius: 18px;
 }
 
 .hed-title {

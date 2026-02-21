@@ -1,6 +1,6 @@
 .pc-card {
-  background: #f6f6f6;
-  border: 1px solid #e6e6e6;
+  background: var(--surface);
+  border: 1px solid var(--input-border);
   border-radius: 10px;
   padding: 16px 18px;
   box-shadow: none;
