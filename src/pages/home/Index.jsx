@@ -13,6 +13,7 @@ import {
 import "./homecss/home.css";
 import Projects from "../components/projectsCards";
 import "../../assets/style/theme.css"
+import logo from "../../assets/UzWork Logo.png"
 
 function useTheme() {
   const [theme, setTheme] = useState(() => {
@@ -97,7 +98,7 @@ export default function Index() {
         <div className="h-sidebar-inner">
           <div className="h-sidebar-header">
             <div className="h-brand">
-              <div className="h-brand-badge">U</div>
+              <div className="h-brand-badge"><img src={logo} alt="" /></div>
               <div
                 className={`h-brand-text ${sidebarOpen ? "h-show" : "h-hide"}`}
               >
