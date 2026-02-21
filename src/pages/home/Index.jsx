@@ -12,9 +12,30 @@ import {
 } from "lucide-react";
 import "./homecss/home.css";
 import Projects from "../components/projectsCards";
+import "../../assets/style/theme.css"
+
+function useTheme() {
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved) return saved;
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  return { theme, setTheme };
+}
 
 export default function Index() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const toggleTheme = () =>
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
 
   const toggleBtnRef = useRef(null);
 
@@ -77,7 +98,9 @@ export default function Index() {
           <div className="h-sidebar-header">
             <div className="h-brand">
               <div className="h-brand-badge">U</div>
-              <div className={`h-brand-text ${sidebarOpen ? "h-show" : "h-hide"}`}>
+              <div
+                className={`h-brand-text ${sidebarOpen ? "h-show" : "h-hide"}`}
+              >
                 UzWork
               </div>
             </div>
@@ -160,8 +183,8 @@ export default function Index() {
             >
               <Bell size={20} />
             </button>
-            <button className="icon-btn" type="button" aria-label="Sozlamalar">
-              <Settings size={20} />
+            <button className="icon-btn" type="button" onClick={toggleTheme} aria-label="Sozlamalar">
+              {theme === "dark" ? "☀" : "🌙"}
             </button>
           </div>
         </div>
@@ -185,28 +208,6 @@ export default function Index() {
               himoyalangan • Birinchi loyihangizga 0 % komissiya!
             </p>
           </div>
-
-          <svg
-            className="wave-svg"
-            viewBox="0 0 1200 120"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M0,60 C300,120 600,0 900,60 C1050,90 1150,90 1200,60 L1200,120 L0,120 Z"
-              fill="white"
-              opacity="0.3"
-            />
-            <path
-              d="M0,80 C300,140 600,20 900,80 C1050,110 1150,110 1200,80 L1200,120 L0,120 Z"
-              fill="white"
-              opacity="0.5"
-            />
-            <path
-              d="M0,90 C300,150 600,30 900,90 C1050,120 1150,120 1200,90 L1200,120 L0,120 Z"
-              fill="#f5f5f5"
-            />
-          </svg>
         </section>
 
         <section className="content">
