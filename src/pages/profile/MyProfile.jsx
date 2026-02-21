@@ -54,7 +54,11 @@ import {
   Smartphone,
   Laptop,
   Clock,
-  RefreshCw
+  RefreshCw,
+  Crown,
+  Sparkles,
+  Rocket,
+  Gift
 } from "lucide-react";
 import "../profile/profile-css/profile.css";
 
@@ -69,14 +73,14 @@ const MyProfile = () => {
   const [notifications, setNotifications] = useState(3);
   const [message, setMessage] = useState({ type: "", text: "" });
   
-  // Password visibility states - ishlatiladi
+  // Password visibility states
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
     confirm: false
   });
   
-  const [isLoading, setIsLoading] = useState(false); // ishlatiladi
+  const [isLoading, setIsLoading] = useState(false);
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const [editingPortfolio, setEditingPortfolio] = useState(null);
   const [portfolioForm, setPortfolioForm] = useState({
@@ -106,6 +110,12 @@ const MyProfile = () => {
     passwordExpiry: false
   });
 
+  // Membership state
+  const [billingCycle, setBillingCycle] = useState("monthly");
+  // selectedPlan o'rniga to'g'ridan-to'g'ri planId ishlatamiz
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [selectedPlanForModal, setSelectedPlanForModal] = useState(null);
+
   const showMessage = (type, text) => {
     setMessage({ type, text });
   };
@@ -130,6 +140,9 @@ const MyProfile = () => {
     language: "English (US)",
     accountType: "Freelancer",
     membership: "Pro",
+    membershipStatus: "Active",
+    membershipStartDate: "Jan 15, 2024",
+    membershipNextBilling: "Feb 15, 2024",
     title: "Senior Full-Stack Developer",
     bio: "Passionate full-stack developer specializing in React, Node.js, and cloud architecture. 7+ years building scalable web applications for startups and enterprises. Experienced in leading development teams and delivering high-quality products on time.",
     profilePicture: "https://i.pravatar.cc/300?img=12",
@@ -194,6 +207,118 @@ const MyProfile = () => {
     confirm: ""
   });
 
+  // Membership plans
+  const membershipPlans = [
+    {
+      id: "basic",
+      name: "Basic",
+      icon: <Star size={24} />,
+      price: {
+        monthly: 0,
+        yearly: 0
+      },
+      features: [
+        "5 job proposals per month",
+        "Basic profile visibility",
+        "Standard support (24h response)",
+        "Basic analytics",
+        "5MB portfolio space",
+        "Basic search ranking"
+      ],
+      limitations: [
+        "No skill assessments",
+        "No featured profile",
+        "Limited search visibility",
+        "No priority support"
+      ],
+      color: "#64748b",
+      popular: false,
+      current: userData.membership === "Basic"
+    },
+    {
+      id: "plus",
+      name: "Plus",
+      icon: <Zap size={24} />,
+      price: {
+        monthly: 14.99,
+        yearly: 149.99
+      },
+      yearlyDiscount: 17,
+      features: [
+        "20 job proposals per month",
+        "Enhanced profile visibility",
+        "Priority support (12h response)",
+        "Advanced analytics",
+        "50MB portfolio space",
+        "Better search ranking",
+        "5 skill assessments per month",
+        "Profile badge"
+      ],
+      limitations: [
+        "No featured profile",
+        "No exclusive events"
+      ],
+      color: "#3b82f6",
+      popular: false,
+      current: userData.membership === "Plus"
+    },
+    {
+      id: "professional",
+      name: "Professional",
+      icon: <Crown size={24} />,
+      price: {
+        monthly: 29.99,
+        yearly: 299.99
+      },
+      yearlyDiscount: 17,
+      features: [
+        "Unlimited job proposals",
+        "Featured profile visibility",
+        "Premium support (4h response)",
+        "Real-time analytics",
+        "500MB portfolio space",
+        "Top search ranking",
+        "Unlimited skill assessments",
+        "Exclusive profile badge",
+        "Early access to new features",
+        "Invitation to exclusive events"
+      ],
+      limitations: [],
+      color: "#8b5cf6",
+      popular: true,
+      current: userData.membership === "Professional" || userData.membership === "Pro"
+    },
+    {
+      id: "enterprise",
+      name: "Enterprise",
+      icon: <Rocket size={24} />,
+      price: {
+        monthly: 59.99,
+        yearly: 599.99
+      },
+      yearlyDiscount: 17,
+      features: [
+        "Unlimited everything",
+        "Verified expert badge",
+        "Dedicated account manager",
+        "API access",
+        "Custom analytics",
+        "White-label options",
+        "Team management",
+        "Bulk job posting",
+        "Advanced security",
+        "SLA guarantee"
+      ],
+      limitations: [],
+      color: "#f59e0b",
+      popular: false,
+      current: userData.membership === "Enterprise"
+    }
+  ];
+
+  // Current membership details
+  const currentPlan = membershipPlans.find(plan => plan.current) || membershipPlans[2]; // Professional default
+
   const navSections = [
     {
       title: "SETTINGS",
@@ -202,7 +327,7 @@ const MyProfile = () => {
         { id: "cv-upload", label: "CV Upload", icon: <FileText size={18} />, badge: null },
         { id: "billing", label: "Billing & Payments", icon: <CreditCard size={18} />, badge: null },
         { id: "password", label: "Password & Security", icon: <Shield size={18} />, badge: null },
-        { id: "membership", label: "Membership", icon: <Award size={18} />, badge: "Pro" },
+        { id: "membership", label: "Membership", icon: <Award size={18} />, badge: userData.membership },
         { id: "notifications", label: "Notification Settings", icon: <Bell size={18} />, badge: null },
         { id: "appeals", label: "Appeals Tracker", icon: <AlertTriangle size={18} />, badge: null }
       ]
@@ -360,7 +485,7 @@ const MyProfile = () => {
     }
   };
 
-  // Password functions - ishlatiladi
+  // Password functions
   const handlePasswordChange = (field, value) => {
     const updated = { ...passwordForm, [field]: value };
     setPasswordForm(updated);
@@ -431,7 +556,7 @@ const MyProfile = () => {
     }, 1000);
   };
 
-  // Certificate functions - ishlatiladi
+  // Certificate functions
   const addCertificate = () => {
     const newCert = { 
       id: Date.now(), 
@@ -446,6 +571,42 @@ const MyProfile = () => {
   const removeCertificate = (id) => {
     setCertificates(certificates.filter(c => c.id !== id));
     showMessage("success", "Certificate removed");
+  };
+
+  // Membership functions
+  const handleUpgradeClick = (planId) => {
+    const plan = membershipPlans.find(p => p.id === planId);
+    setSelectedPlanForModal(plan);
+    setShowUpgradeModal(true);
+  };
+
+  const handleUpgradeConfirm = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setUserData(prev => ({
+        ...prev,
+        membership: selectedPlanForModal.name,
+        membershipStatus: "Active"
+      }));
+      setShowUpgradeModal(false);
+      setIsLoading(false);
+      showMessage("success", `Successfully upgraded to ${selectedPlanForModal.name} plan!`);
+    }, 1500);
+  };
+
+  const handleCancelMembership = () => {
+    if (window.confirm("Are you sure you want to cancel your membership? This action cannot be undone.")) {
+      setIsLoading(true);
+      setTimeout(() => {
+        setUserData(prev => ({
+          ...prev,
+          membership: "Basic",
+          membershipStatus: "Cancelled"
+        }));
+        setIsLoading(false);
+        showMessage("info", "Your membership has been cancelled");
+      }, 1500);
+    }
   };
 
   return (
@@ -1383,13 +1544,109 @@ const MyProfile = () => {
                 </div>
               </div>
 
-              <div className="placeholder-card">
-                <Award size={64} />
-                <h2>Membership Plans</h2>
-                <p>Upgrade your membership to unlock premium features and boost your profile visibility.</p>
-                <p style={{ fontSize: '13px', marginTop: '12px', color: 'var(--light-text-tertiary)' }}>
-                  This section is under development and will be available soon.
-                </p>
+              {/* Current Membership Card */}
+              <div className="membership-current-card">
+                <div className="membership-current-header">
+                  <div className="membership-current-icon">
+                    {currentPlan.icon}
+                  </div>
+                  <div className="membership-current-info">
+                    <h2>{currentPlan.name} Plan</h2>
+                    <p className="membership-status">{userData.membershipStatus}</p>
+                    <div className="membership-dates">
+                      <span>Started: {userData.membershipStartDate}</span>
+                      <span>Next billing: {userData.membershipNextBilling}</span>
+                    </div>
+                  </div>
+                  {currentPlan.id !== "basic" && (
+                    <button 
+                      className="btn-outline" 
+                      onClick={handleCancelMembership}
+                      disabled={isLoading}
+                    >
+                      Cancel Membership
+                    </button>
+                  )}
+                </div>
+
+                <div className="membership-features-list">
+                  <h3>Your benefits:</h3>
+                  <div className="features-grid">
+                    {currentPlan.features.map((feature, index) => (
+                      <div key={index} className="feature-item">
+                        <CheckCircle size={16} className="feature-check" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Billing Cycle Toggle */}
+              <div className="billing-cycle-toggle">
+                <span className={billingCycle === "monthly" ? "active" : ""} onClick={() => setBillingCycle("monthly")}>
+                  Monthly
+                </span>
+                <span className={billingCycle === "yearly" ? "active" : ""} onClick={() => setBillingCycle("yearly")}>
+                  Yearly <span className="save-badge">Save 17%</span>
+                </span>
+              </div>
+
+              {/* Available Plans */}
+              <div className="membership-plans-grid">
+                {membershipPlans.map((plan) => (
+                  <div 
+                    key={plan.id} 
+                    className={`membership-plan-card ${plan.popular ? 'popular' : ''} ${plan.current ? 'current' : ''}`}
+                    style={{ borderColor: plan.color }}
+                  >
+                    {plan.popular && <div className="popular-badge">Most Popular</div>}
+                    <div className="plan-header" style={{ color: plan.color }}>
+                      <div className="plan-icon">{plan.icon}</div>
+                      <h3>{plan.name}</h3>
+                    </div>
+                    
+                    <div className="plan-price">
+                      {plan.price[billingCycle] === 0 ? (
+                        <span className="price-free">Free</span>
+                      ) : (
+                        <>
+                          <span className="price">${plan.price[billingCycle]}</span>
+                          <span className="period">/{billingCycle === "monthly" ? "mo" : "yr"}</span>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="plan-features">
+                      {plan.features.map((feature, index) => (
+                        <div key={index} className="plan-feature">
+                          <Check size={14} className="feature-icon" />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                      {plan.limitations.map((limitation, index) => (
+                        <div key={index} className="plan-feature limitation">
+                          <X size={14} className="feature-icon" />
+                          <span>{limitation}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {plan.current ? (
+                      <button className="btn-outline" disabled>
+                        Current Plan
+                      </button>
+                    ) : (
+                      <button 
+                        className={`btn-${plan.id === "basic" ? "outline" : "primary"}`}
+                        onClick={() => handleUpgradeClick(plan.id)}
+                        disabled={isLoading}
+                      >
+                        {plan.price[billingCycle] === 0 ? "Downgrade" : "Upgrade"}
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -1441,6 +1698,88 @@ const MyProfile = () => {
           )}
         </main>
       </div>
+
+      {/* UPGRADE MODAL */}
+      {showUpgradeModal && selectedPlanForModal && (
+        <div className="modal-overlay" onClick={() => setShowUpgradeModal(false)}>
+          <div className="modal-content upgrade-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Upgrade to {selectedPlanForModal.name}</h2>
+              <button className="modal-close" onClick={() => setShowUpgradeModal(false)} disabled={isLoading}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="upgrade-summary">
+                <div className="plan-comparison">
+                  <div className="current-plan">
+                    <h4>Current Plan</h4>
+                    <p className="plan-name">{currentPlan.name}</p>
+                    <p className="plan-price">
+                      {currentPlan.price[billingCycle] === 0 ? "Free" : `$${currentPlan.price[billingCycle]}/${billingCycle === "monthly" ? "mo" : "yr"}`}
+                    </p>
+                  </div>
+                  <div className="upgrade-arrow">
+                    <ChevronRight size={24} />
+                  </div>
+                  <div className="new-plan">
+                    <h4>New Plan</h4>
+                    <p className="plan-name">{selectedPlanForModal.name}</p>
+                    <p className="plan-price">
+                      ${selectedPlanForModal.price[billingCycle]}/{billingCycle === "monthly" ? "mo" : "yr"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="upgrade-benefits">
+                  <h4>You'll get:</h4>
+                  <ul>
+                    {selectedPlanForModal.features
+                      .filter(feature => !currentPlan.features.includes(feature))
+                      .slice(0, 5)
+                      .map((feature, index) => (
+                        <li key={index}>
+                          <CheckCircle size={16} className="benefit-icon" />
+                          {feature}
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="upgrade-total">
+                <div className="total-row">
+                  <span>Subtotal</span>
+                  <span>${selectedPlanForModal.price[billingCycle]}</span>
+                </div>
+                <div className="total-row">
+                  <span>Tax</span>
+                  <span>$0.00</span>
+                </div>
+                <div className="total-row final">
+                  <span>Total</span>
+                  <span>${selectedPlanForModal.price[billingCycle]}</span>
+                </div>
+              </div>
+
+              <div className="upgrade-note">
+                <Info size={16} />
+                <p>You will be charged immediately. Your billing cycle will reset today.</p>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-outline" onClick={() => setShowUpgradeModal(false)} disabled={isLoading}>
+                Cancel
+              </button>
+              <button className="btn-primary" onClick={handleUpgradeConfirm} disabled={isLoading}>
+                {isLoading ? <><RefreshCw size={16} className="spinning" /> Processing...</> : `Confirm Upgrade`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* PORTFOLIO MODAL */}
       {showPortfolioModal && (

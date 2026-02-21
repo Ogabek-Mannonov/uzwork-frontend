@@ -68,7 +68,7 @@ import {
   Flag,
   MoreHorizontal
 } from "lucide-react";
-import "./profile-css/klient.css";
+import "../profile/profile-css/klient.css";
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState("my-info");
@@ -472,7 +472,6 @@ const Settings = () => {
               <Menu size={20} />
             </button>
             
-            {/* Logo — nav dan 40px ajratilgan */}
             <div className="brand-section" style={{ marginRight: '40px' }}>
               <div className="logo" onClick={() => handleUserMenuClick("Logo")}>
                 <span className="logo-text">UzWork</span>
@@ -480,7 +479,6 @@ const Settings = () => {
               </div>
             </div>
             
-            {/* Nav */}
             <nav className="header-nav">
               {headerNav.map((item) => (
                 <button 
@@ -579,7 +577,6 @@ const Settings = () => {
       {/* MAIN CONTENT */}
       <div className="settings-main">
         
-        {/* ===== SIDEBAR — sticky, page bilan scroll bo'lmaydi ===== */}
         <aside className={`settings-sidebar ${showMobileMenu ? 'open' : ''}`}>
           <div className="cl-sidebar-header">
             <h2>Settings</h2>
@@ -614,7 +611,6 @@ const Settings = () => {
             ))}
           </nav>
           
-          {/* Footer — flex-shrink: 0, har doim pastda qoladi */}
           <div className="sidebar-footer">
             <button className="sidebar-footer-btn" onClick={() => handleUserMenuClick("Help & Support")}>
               <HelpCircle size={16} />
@@ -627,7 +623,6 @@ const Settings = () => {
           </div>
         </aside>
 
-        {/* CONTENT AREA */}
         <main className="settings-content">
           
           {message.text && (
@@ -666,11 +661,8 @@ const Settings = () => {
               </div>
               
               <div className="profile-card">
-                {/* ── COVER ── */}
                 <div className="profile-cover">
                   <img src={userData.coverPhoto} alt="Cover" className="cover-image" />
-
-                  {/* Faqat Change Cover — cover ichida */}
                   {isEditing && (
                     <button className="change-cover-btn" onClick={() => handleUserMenuClick("Change cover")}>
                       <Camera size={15} /> Change Cover
@@ -678,12 +670,9 @@ const Settings = () => {
                   )}
                 </div>
 
-                {/* ── PROFILE CONTENT ── */}
                 <div className="profile-content">
-                  <div className="profile-header-row">
-
-                    {/* Chap — avatar + ism */}
-                    <div className="profile-left">
+                  <div className="profile-header-row-client">
+                    <div className="profile-left-client">
                       <div className="avatar-wrapper">
                         <img src={userData.profilePicture} alt="Profile" className="profile-avatar" />
                         {isEditing && (
@@ -693,71 +682,98 @@ const Settings = () => {
                         )}
                         <span className="avatar-status online" />
                       </div>
-                      <div className="profile-name-section">
+                    </div>
+
+                    <div className="profile-center-client">
+                      <div className="profile-name-section-client">
                         {isEditing ? (
-                          <input type="text" value={userData.fullName} onChange={(e) => handleInputChange('fullName', e.target.value)} className="edit-input name-edit-input" />
+                          <input 
+                            type="text" 
+                            value={userData.fullName} 
+                            onChange={(e) => handleInputChange('fullName', e.target.value)} 
+                            className="edit-input name-edit-input" 
+                          />
                         ) : (
-                          <h2 className="profile-fullname">{userData.fullName}</h2>
+                          <h2 className="profile-fullname-client">{userData.fullName}</h2>
                         )}
+                        
                         {isEditing ? (
-                          <input type="text" value={userData.username} onChange={(e) => handleInputChange('username', e.target.value)} className="edit-input" placeholder="@username" style={{ marginTop: '6px' }} />
+                          <input 
+                            type="text" 
+                            value={userData.username} 
+                            onChange={(e) => handleInputChange('username', e.target.value)} 
+                            className="edit-input" 
+                            placeholder="@username" 
+                          />
                         ) : (
-                          <p className="profile-username">{userData.username}</p>
+                          <p className="profile-username-client">{userData.username}</p>
                         )}
+                        
                         {isEditing ? (
-                          <input type="text" value={userData.company} onChange={(e) => handleInputChange('company', e.target.value)} className="edit-input" placeholder="Company" style={{ marginTop: '4px' }} />
+                          <input 
+                            type="text" 
+                            value={userData.company} 
+                            onChange={(e) => handleInputChange('company', e.target.value)} 
+                            className="edit-input" 
+                            placeholder="Company" 
+                          />
                         ) : (
-                          <p className="profile-company">{userData.company}</p>
+                          <p className="profile-company-client">{userData.company}</p>
                         )}
                       </div>
                     </div>
 
-                    {/* O'rta — bio + location + rating */}
-                    <div className="profile-center">
-                      {isEditing ? (
-                        <textarea
-                          value={userData.bio}
-                          onChange={(e) => handleInputChange('bio', e.target.value)}
-                          className="edit-textarea"
-                          rows={3}
-                          placeholder="Tell about yourself..."
-                          style={{ fontSize: '13px' }}
-                        />
-                      ) : (
-                        <p className="profile-bio-text">"{userData.bio}"</p>
-                      )}
-                      <div className="profile-meta-row">
-                        <span className="profile-meta-item">
-                          <MapPin size={13} />
-                          {userData.location}
+                    <div className="profile-right-client">
+                      <div className="profile-badges-row-client">
+                        <span
+                          className="profile-badge-item profile-badge-membership"
+                          onClick={() => handleSectionChange('membership', 'Membership')}
+                          title="Upgrade membership"
+                        >
+                          <Award size={14} />
+                          {userData.membership}
                         </span>
-                        <span className="profile-meta-item">
-                          <Star size={13} fill="currentColor" />
-                          {userData.rating} rating
-                        </span>
-                        <span className="profile-meta-item">
-                          <Briefcase size={13} />
-                          {userData.accountType}
+                        <span className="profile-badge-item profile-badge-verified">
+                          <CheckCircle size={14} />
+                          Verified
                         </span>
                       </div>
                     </div>
+                  </div>
 
-                    {/* O'ng — badges */}
-                    <div className="profile-badges-row">
-                      <span
-                        className="profile-badge-item profile-badge-membership"
-                        onClick={() => handleSectionChange('membership', 'Membership')}
-                        title="Upgrade membership"
-                      >
-                        <Award size={14} />
-                        {userData.membership}
+                  <div className="profile-bio-section-client">
+                    {isEditing ? (
+                      <textarea
+                        className="edit-textarea-bio-client"
+                        value={userData.bio}
+                        onChange={(e) => handleInputChange('bio', e.target.value)}
+                        rows={4}
+                        placeholder="Tell about yourself and your company..."
+                      />
+                    ) : (
+                      <div className="profile-bio-text-client">
+                        {userData.bio}
+                      </div>
+                    )}
+                    
+                    <div className="profile-meta-row-client">
+                      <span className="profile-meta-item-client">
+                        <MapPin size={14} />
+                        {userData.location}
                       </span>
-                      <span className="profile-badge-item profile-badge-verified">
-                        <CheckCircle size={14} />
-                        Verified
+                      <span className="profile-meta-item-client">
+                        <Star size={14} fill="currentColor" />
+                        {userData.rating} rating
+                      </span>
+                      <span className="profile-meta-item-client">
+                        <Briefcase size={14} />
+                        {userData.accountType}
+                      </span>
+                      <span className="profile-meta-item-client">
+                        <DollarSign size={14} />
+                        ${(userData.totalSpent / 1000).toFixed(1)}k spent
                       </span>
                     </div>
-
                   </div>
                   
                   <div className="profile-stats">
@@ -863,15 +879,6 @@ const Settings = () => {
                           )}
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="bio-section">
-                      <span className="bio-label">Bio</span>
-                      {isEditing ? (
-                        <textarea value={userData.bio} onChange={(e) => handleInputChange('bio', e.target.value)} className="edit-textarea" rows="4" />
-                      ) : (
-                        <p className="bio-text">{userData.bio}</p>
-                      )}
                     </div>
                   </div>
                   
