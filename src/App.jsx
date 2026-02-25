@@ -15,6 +15,7 @@ import Login from "./pages/auth/Login.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 
 import Info from "./pages/info/Info.jsx";
+import CategoryPage from "./pages/hire/CategoryPage.jsx";
 import Home from "./pages/home/Index.jsx";
 
 import JobsList from "./pages/jobs/List.jsx";
@@ -48,6 +49,7 @@ function App() {
       <Routes>
         {/* Public landing */}
         <Route path="/" element={<Info />} />
+        <Route path="/hire/cold-callers" element={<CategoryPage />} />
 
         {/* Auth pages (separate layout) */}
         <Route element={<AuthLayout />}>
