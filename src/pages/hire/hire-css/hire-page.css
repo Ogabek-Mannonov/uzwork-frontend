@@ -1,14 +1,14 @@
+/* ================= Theme (Landing vibe, clean + tidy) ================= */
 .uz-hire{
   --bg: #ffffff;
-  --card: rgba(255,255,255,0.92);      /* kartalar oqroq */
+  --card: rgba(255,255,255,0.92);
   --stroke: rgba(15,23,42,0.10);
   --text: #0f172a;
   --muted: rgba(15,23,42,0.70);
 
   --primary: #2563eb;
   --primary2: #1d4ed8;
-  --accent: #7c3aed;
- 
+  --accent: #183ce1;
 
   --shadow: 0 10px 28px rgba(2, 6, 23, 0.06);
   --shadow2: 0 6px 18px rgba(2, 6, 23, 0.05);
@@ -17,6 +17,7 @@
   --r-lg: 18px;
   --r-md: 14px;
 
+  /* ✅ Bitta background: (soft aura) */
   background:
     radial-gradient(1100px 520px at 18% 0%, rgba(37,99,235,0.06), transparent 62%),
     radial-gradient(900px 480px at 92% 8%, rgba(124,58,237,0.05), transparent 62%),
@@ -24,48 +25,6 @@
     var(--bg);
 
   color: var(--text);
-}
-
-.uz-hire{ background: #fff; }
-
-
-.uz-card,
-.uz-step,
-.uz-why__card,
-.uz-faq__item,
-.uz-similar__link,
-.uz-hire__heroBox{
-  box-shadow: var(--shadow);
-}
-
-.uz-card:hover,
-.uz-similar__link:hover{
-  box-shadow: 0 14px 34px rgba(2,6,23,0.08);
-}
-
-
-.uz-hire__heroBox{
-  border: 1px solid rgba(15,23,42,0.08);
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(10px);
-}
-
-.uz-hire__boxSearch{
-  background: rgba(255,255,255,0.92);
-  border: 1px solid rgba(15,23,42,0.10);
-  box-shadow: var(--shadow2);
-}
-
-
-.uz-trust__item{
-  background: rgba(255,255,255,0.90);
-  border: 1px solid rgba(15,23,42,0.08);
-}
-
-.uz-hire__section--soft{
-  background: rgba(255,255,255,0.65);
-  border-top: 1px solid rgba(15,23,42,0.06);
-  border-bottom: 1px solid rgba(15,23,42,0.06);
 }
 
 /* Container */
@@ -84,7 +43,6 @@
   font-weight: 800;
   cursor: pointer;
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
-  backdrop-filter: blur(10px);
 }
 
 .uz-btn:hover{
@@ -129,11 +87,13 @@
   color: rgba(15,23,42,0.60);
   margin-bottom: 12px;
 }
+
 .uz-hire__crumbs a{
   color: rgba(15,23,42,0.72);
   text-decoration:none;
   font-weight:800;
 }
+
 .uz-hire__crumbs a:hover{ text-decoration: underline; }
 
 .uz-hire__title{
@@ -151,10 +111,12 @@
   font-size: 14px;
   color: rgba(15,23,42,0.70);
 }
+
 .uz-hire__ratingLabel{
   font-weight: 900;
   color: rgba(15,23,42,0.86);
 }
+
 .uz-hire__ratingValue{ color: var(--text); }
 .uz-hire__reviews{ color: rgba(15,23,42,0.55); }
 
@@ -185,36 +147,31 @@
   flex-wrap:wrap;
   margin-top: 16px;
 }
+
 .uz-trust__item{
   padding: 9px 12px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.65);
+  background: rgba(255,255,255,0.90);
   border: 1px solid rgba(15,23,42,0.08);
   font-size: 12px;
   font-weight: 900;
   color: rgba(15,23,42,0.78);
-  backdrop-filter: blur(10px);
 }
 
-/* Right box (glass landing style) */
+/* Right box */
 .uz-hire__heroBox{
-  border: 1px solid rgba(255,255,255,0.25);
+  border: 1px solid rgba(15,23,42,0.08);
   border-radius: var(--r-xl);
   padding: 16px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.45));
+  background: rgba(255,255,255,0.92);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(14px);
 }
 
 /* Search box inside hero box */
 .uz-hire__boxSearch{
   padding: 12px;
   border-radius: 18px;
-  /* background:
-    radial-gradient(500px 200px at 20% 0%, rgba(37,99,235,0.18), transparent 60%),
-    radial-gradient(500px 200px at 90% 0%, rgba(124,58,237,0.14), transparent 60%),
-    rgba(255,255,255,0.75); */
+  background: #fff;
   border: 1px solid rgba(15,23,42,0.10);
   box-shadow: var(--shadow2);
   margin-bottom: 12px;
@@ -244,7 +201,7 @@
   font-weight: 850;
   font-size: 13px;
   color: var(--text);
-  background: rgba(255,255,255,0.90);
+  background: rgba(255,255,255,0.95);
 }
 
 .uz-hire__boxSearchInput:focus{
@@ -288,21 +245,24 @@
   gap: 10px;
   margin-top: 10px;
 }
+
 .uz-metric{
   display:flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 12px;
   border-radius: 16px;
-  background: rgba(255,255,255,0.82);
+  background: #fff;
   border: 1px solid rgba(15,23,42,0.08);
-  box-shadow: 0 10px 22px rgba(2,6,23,0.05);
+  box-shadow: var(--shadow2);
 }
+
 .uz-metric__k{
   color: rgba(15,23,42,0.65);
   font-weight: 850;
   font-size: 13px;
 }
+
 .uz-metric__v{
   font-weight: 950;
   color: var(--text);
@@ -311,6 +271,7 @@
 .uz-hire__heroBoxCta{
   margin-top: 12px;
 }
+
 .uz-hire__miniNote{
   margin-top: 10px;
   font-size: 12px;
@@ -323,11 +284,9 @@
   padding: 34px 0;
 }
 
+/* ✅ soft section endi ham oq (tartibli) */
 .uz-hire__section--soft{
-  /* background:
-    radial-gradient(900px 400px at 30% 0%, rgba(37,99,235,0.10), transparent 60%),
-    radial-gradient(900px 400px at 80% 0%, rgba(124,58,237,0.08), transparent 62%),
-    rgba(255,255,255,0.55); */
+  background: rgba(255,255,255,0.65);
   border-top: 1px solid rgba(15,23,42,0.06);
   border-bottom: 1px solid rgba(15,23,42,0.06);
 }
@@ -357,6 +316,7 @@
   align-items: center;
   gap: 12px;
 }
+
 .uz-hire__pill{
   padding: 8px 12px;
   border-radius: 999px;
@@ -368,37 +328,37 @@
 }
 
 /* ================= Grid / Cards ================= */
+/* ✅ bitta grid */
 .uz-hire__grid{
   display:grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
+  align-items: stretch;
 }
 
-/* ====== CARD: Upwork-like layout ====== */
+/* ====== CARD: Upwork-like layout (tartibli) ====== */
 .uz-card{
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: 100%;                /* grid ichida bir xil bo‘lishi uchun */
+  height: 100%;
   background: #fff;
   border: 1px solid rgba(15,23,42,0.08);
   border-radius: var(--r-xl);
   padding: 18px;
-  box-shadow: var(--shadow2);  /* yengil shadow */
-  backdrop-filter: none;
+  box-shadow: var(--shadow2);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }
 
-/* hover yengil */
 .uz-card:hover{
   transform: translateY(-2px);
   box-shadow: var(--shadow);
   border-color: rgba(37,99,235,0.18);
 }
 
-/* ====== TOP (avatar + meta) ====== */
 .uz-card__top{
-  display: flex;
-  align-items: center;
+  display:flex;
+  align-items:center;
   gap: 12px;
 }
 
@@ -408,47 +368,40 @@
   border-radius: 999px;
   object-fit: cover;
   border: 1px solid rgba(15,23,42,0.10);
-  box-shadow: none; /* upworkga o‘xshash toza */
 }
 
 /* meta konteyner */
 .uz-card__meta{
-  min-width: 0; /* text truncate ishlashi uchun */
+  min-width: 0;
   flex: 1;
 }
 
-/* ism */
 .uz-card__name{
   font-weight: 950;
   font-size: 18px;
   line-height: 1.15;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* location */
 .uz-card__loc{
   margin-top: 4px;
   color: rgba(15,23,42,0.60);
   font-size: 13px;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* rate + rating + jobs qatori (upwork kabi bir qator) */
 .uz-card__row{
   margin-top: 8px;
-  display: flex;
-  align-items: center;
+  display:flex;
+  align-items:center;
   gap: 8px;
-  flex-wrap: nowrap; /* ✅ tartib */
+  flex-wrap: nowrap;
   font-size: 13px;
   color: rgba(15,23,42,0.78);
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -463,75 +416,53 @@
   color: rgba(15,23,42,0.35);
 }
 
-/* ====== BIO (3 qator + …) ====== */
+/* BIO (3 qator + …) */
 .uz-card__bio{
   margin: 0;
   color: rgba(15,23,42,0.70);
   line-height: 1.6;
-
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;  /* ✅ upwork vibe */
+  -webkit-line-clamp: 3;
   overflow: hidden;
 }
 
-/* ====== TAGS (1 qator, kesiladi) ====== */
+/* TAGS (1 qator, bir tekis) */
 .uz-card__tags{
-  display: flex;
+  display:flex;
+  align-items:center;
   gap: 8px;
-  flex-wrap: nowrap;       /* ✅ bitta qator */
+  flex-wrap: nowrap;
   overflow: hidden;
-  margin: 0;               /* ortiqcha bo‘shliq bo‘lmasin */
+  margin: 0;
 }
 
-/* taglar upworkga yaqinroq: kichikroq va tartibli */
 .uz-tag{
   flex: 0 0 auto;
-  padding: 7px 10px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height: 32px;
+  padding: 0 12px;
+  line-height: 1;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 900;
-
+  white-space: nowrap;
   background: rgba(37,99,235,0.08);
   border: 1px solid rgba(37,99,235,0.14);
   color: rgba(37,99,235,0.92);
-
-  white-space: nowrap;
 }
 
-/* ====== BUTTON pastga yopishadi ====== */
+/* Button always bottom */
 .uz-card__actions{
-  margin-top: auto;         /* ✅ har doim pastda */
-  display: flex;
+  margin-top: auto;
+  display:flex;
 }
 
-/* card ichidagi button upwork kabi keng bo‘lsin */
 .uz-card__actions .uz-btn{
   width: 100%;
   height: 44px;
-}
-
-/* primary rang o‘sha-o‘sha qoladi */
-.uz-btn--primary{
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: #fff;
-  border-color: transparent;
-}
-
-/* ====== GRID: kartalar bir xil bo‘lishi uchun ====== */
-.uz-hire__grid{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  align-items: stretch; /* ✅ cardlar bir xil balandlikka */
-}
-
-/* responsive */
-@media (max-width: 980px){
-  .uz-hire__grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 560px){
-  .uz-hire__grid{ grid-template-columns: 1fr; }
 }
 
 /* Center button */
@@ -550,12 +481,11 @@
 }
 
 .uz-step{
-  background: rgba(255,255,255,0.82);
+  background: #fff;
   border: 1px solid rgba(15,23,42,0.08);
   border-radius: var(--r-xl);
   padding: 16px;
-  box-shadow: 0 16px 50px rgba(2,6,23,0.08);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow2);
 }
 
 .uz-step__icon{
@@ -564,7 +494,6 @@
   border-radius: 16px;
   background: linear-gradient(135deg, rgba(37,99,235,0.22), rgba(124,58,237,0.18));
   margin-bottom: 10px;
-  box-shadow: 0 10px 24px rgba(37,99,235,0.16);
 }
 
 .uz-step__title{
@@ -586,12 +515,11 @@
 }
 
 .uz-why__card{
-  background: rgba(255,255,255,0.82);
+  background: #fff;
   border: 1px solid rgba(15,23,42,0.08);
   border-radius: var(--r-xl);
   padding: 16px;
-  box-shadow: 0 16px 50px rgba(2,6,23,0.08);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow2);
 }
 
 .uz-why__card h3{
@@ -599,6 +527,7 @@
   font-size: 18px;
   letter-spacing: -0.01em;
 }
+
 .uz-why__card p{
   margin: 0;
   color: rgba(15,23,42,0.72);
@@ -618,6 +547,7 @@
   color: rgba(15,23,42,0.72);
   line-height: 1.7;
 }
+
 .uz-hire__list li{
   margin: 6px 0;
 }
@@ -632,10 +562,9 @@
 .uz-faq__item{
   border: 1px solid rgba(15,23,42,0.08);
   border-radius: 18px;
-  background: rgba(255,255,255,0.82);
+  background: #fff;
   padding: 12px 14px;
-  box-shadow: 0 16px 50px rgba(2,6,23,0.08);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow2);
 }
 
 .uz-faq__q{
@@ -664,19 +593,18 @@
   text-decoration: none;
   color: var(--text);
   font-weight: 950;
-  background: rgba(255,255,255,0.82);
+  background: #fff;
   display:flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 16px 50px rgba(2,6,23,0.08);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow2);
   transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
 
 .uz-similar__link:hover{
   transform: translateY(-2px);
   border-color: rgba(37,99,235,0.24);
-  box-shadow: 0 22px 70px rgba(2,6,23,0.12);
+  box-shadow: var(--shadow);
 }
 
 .uz-similar__arrow{
@@ -689,23 +617,20 @@
   margin-top: 18px;
   border-radius: 24px;
   border: 1px solid rgba(37,99,235,0.16);
-  /* background:
-    radial-gradient(900px 260px at 20% 0%, rgba(37,99,235,0.18), transparent 62%),
-    radial-gradient(900px 260px at 80% 0%, rgba(124,58,237,0.14), transparent 62%),
-    rgba(255,255,255,0.70); */
+  background: rgba(255,255,255,0.80);
   padding: 16px;
   display:flex;
   justify-content: space-between;
   align-items: center;
   gap: 14px;
   box-shadow: var(--shadow);
-  backdrop-filter: blur(14px);
 }
 
 .uz-hire__finalText h3{
   margin: 0 0 6px;
   letter-spacing: -0.02em;
 }
+
 .uz-hire__finalText p{
   margin: 0;
   color: rgba(15,23,42,0.70);

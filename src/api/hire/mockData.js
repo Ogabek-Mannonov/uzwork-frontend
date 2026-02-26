@@ -18,7 +18,7 @@ export const mockFreelancers = [
     rating: 5.0,
     jobs: 3,
     bio:
-      "Cold Calling, Telemarketing, and Appointment Setting specialist focused on meeting scheduling and promotional calls.",
+      "I specialize in driving sales growth and building strong pipelines through strategic cold calling and lead generation.",
     tags: ["Cold Calling", "Telemarketing Script", "B2B Leads"],
     avatar:
       "https://i.pravatar.cc/120?img=47",
@@ -44,7 +44,7 @@ export const mockFreelancers = [
     rating: 4.6,
     jobs: 7,
     bio:
-      "Skilled cold caller who can help generate more leads and set appointments with structured outreach.",
+      "I specialize in driving sales growth and building strong pipelines through strategic cold calling and lead generation.",
     tags: ["Cold Calling", "Outbound Sales", "Phone Communication"],
     avatar:
       "https://i.pravatar.cc/120?img=12",
@@ -57,7 +57,7 @@ export const mockFreelancers = [
     rating: 5.0,
     jobs: 8,
     bio:
-      "Tired of unresponsive cold callers? I deliver results with proven scripts and consistent follow-ups.",
+      "I specialize in driving sales growth and building strong pipelines through strategic cold calling and lead generation.",
     tags: ["Cold Calling", "Telemarketing Script", "Sales"],
     avatar:
       "https://i.pravatar.cc/120?img=7",
@@ -70,7 +70,7 @@ export const mockFreelancers = [
     rating: 4.6,
     jobs: 49,
     bio:
-      "I can help you start strong with consistent lead flow and more contracts under a clear outreach process.",
+      "I specialize in driving sales growth and building strong pipelines through strategic cold calling and lead generation.",
     tags: ["Cold Calling", "Phone Communication", "Telemarketing"],
     avatar:
       "https://i.pravatar.cc/120?img=14",
@@ -83,7 +83,7 @@ export const mockFreelancers = [
     rating: 4.9,
     jobs: 87,
     bio:
-      "Diligent, adaptable, and resourceful — experienced in customer support and sales with structured calling.",
+      "I specialize in driving sales growth and building strong pipelines through strategic cold calling and lead generation.",
     tags: ["Cold Calling", "Sales", "Customer Support"],
     avatar:
       "https://i.pravatar.cc/120?img=21",
