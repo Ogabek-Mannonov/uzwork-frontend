@@ -74,24 +74,24 @@ const Settings = () => {
   const [activeSection, setActiveSection] = useState("my-info");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  // const [darkMode, setDarkMode] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
-  const [searchQuery, setSearchQuery] = useState("");
-  const [notifications, setNotifications] = useState(3);
-  const [activeHeaderTab, setActiveHeaderTab] = useState("hire");
-  const [showUserMenu, setShowUserMenu] = useState(false);
+  // const [searchQuery, setSearchQuery] = useState("");
+  // const [notifications, setNotifications] = useState(3);
+  // const [activeHeaderTab, setActiveHeaderTab] = useState("hire");
+  // const [showUserMenu, setShowUserMenu] = useState(false);
   
-  useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-  }, [darkMode]);
+  // useEffect(() => {
+  //   if (darkMode) {
+  //     document.body.classList.add('dark-mode');
+  //   } else {
+  //     document.body.classList.remove('dark-mode');
+  //   }
+  // }, [darkMode]);
 
   useEffect(() => {
     if (message.text) {
@@ -144,32 +144,32 @@ const Settings = () => {
     }
   ];
 
-  const headerNav = [
-    { id: "hire", label: "Hire talent", icon: <Briefcase size={16} />, active: activeHeaderTab === "hire" },
-    { id: "manage", label: "Manage work", icon: <BarChart size={16} />, active: activeHeaderTab === "manage" },
-    { id: "reports", label: "Reports", icon: <FileText size={16} />, active: activeHeaderTab === "reports" },
-    { id: "messages", label: "Messages", icon: <MessageCircle size={16} />, active: activeHeaderTab === "messages", badge: notifications }
-  ];
+  // const headerNav = [
+  //   { id: "hire", label: "Hire talent", icon: <Briefcase size={16} />, active: activeHeaderTab === "hire" },
+  //   { id: "manage", label: "Manage work", icon: <BarChart size={16} />, active: activeHeaderTab === "manage" },
+  //   { id: "reports", label: "Reports", icon: <FileText size={16} />, active: activeHeaderTab === "reports" },
+  //   { id: "messages", label: "Messages", icon: <MessageCircle size={16} />, active: activeHeaderTab === "messages", badge: notifications }
+  // ];
 
-  const handleHeaderNavClick = (id) => {
-    setActiveHeaderTab(id);
-    showMessage("info", `Navigating to ${headerNav.find(item => item.id === id).label}...`);
-  };
+  // const handleHeaderNavClick = (id) => {
+  //   setActiveHeaderTab(id);
+  //   showMessage("info", `Navigating to ${headerNav.find(item => item.id === id).label}...`);
+  // };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      showMessage("info", `Searching for "${searchQuery}"...`);
-    }
-  };
+  // const handleSearch = (e) => {
+  //   e.preventDefault();
+  //   if (searchQuery.trim()) {
+  //     showMessage("info", `Searching for "${searchQuery}"...`);
+  //   }
+  // };
 
-  const handleNotificationClick = () => {
-    setNotifications(0);
-    showMessage("success", "All notifications marked as read");
-  };
+  // const handleNotificationClick = () => {
+  //   setNotifications(0);
+  //   showMessage("success", "All notifications marked as read");
+  // };
 
   const handleUserMenuClick = (action) => {
-    setShowUserMenu(false);
+    // setShowUserMenu(false);
     showMessage("info", `${action} clicked`);
   };
 
@@ -444,10 +444,10 @@ const Settings = () => {
     showMessage("success", "Profile updated successfully!");
   };
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    showMessage("success", `${!darkMode ? 'Dark' : 'Light'} mode activated`);
-  };
+  // const toggleDarkMode = () => {
+  //   setDarkMode(!darkMode);
+  //   showMessage("success", `${!darkMode ? 'Dark' : 'Light'} mode activated`);
+  // };
 
   const passwordStrength = calculatePasswordStrength(passwordForm.newPassword);
 
@@ -458,9 +458,9 @@ const Settings = () => {
   };
 
   return (
-    <div className={`settings-container ${darkMode ? 'dark' : 'light'}`}>
+    <div className="settings-container">
       
-      {/* HEADER */}
+      {/* HEADER
       <header className="settings-header">
         <div className="header-container">
           <div className="header-left">
@@ -572,7 +572,7 @@ const Settings = () => {
             </div>
           </div>
         </div>
-      </header>
+      </header> */}
 
       {/* MAIN CONTENT */}
       <div className="settings-main">

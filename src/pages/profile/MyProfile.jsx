@@ -63,14 +63,14 @@ import {
 import "../profile/profile-css/profile.css";
 
 const MyProfile = () => {
-  const [darkMode, setDarkMode] = useState(false);
+  // const [darkMode, setDarkMode] = useState(false);
   const [activeSection, setActiveSection] = useState("my-info");
-  const [activeHeaderTab, setActiveHeaderTab] = useState("find");
+  // const [activeHeaderTab, setActiveHeaderTab] = useState("find");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [notifications, setNotifications] = useState(3);
+  // const [showUserDropdown, setShowUserDropdown] = useState(false);
+  // const [searchQuery, setSearchQuery] = useState("");
+  // const [notifications, setNotifications] = useState(3);
   const [message, setMessage] = useState({ type: "", text: "" });
   
   // Password visibility states
@@ -334,24 +334,24 @@ const MyProfile = () => {
     }
   ];
 
-  const headerNav = [
-    { id: "find", label: "Find work", icon: <Search size={16} />, active: activeHeaderTab === "find" },
-    { id: "manage", label: "My jobs", icon: <BarChart size={16} />, active: activeHeaderTab === "manage" },
-    { id: "reports", label: "Reports", icon: <FileText size={16} />, active: activeHeaderTab === "reports" },
-    { id: "messages", label: "Messages", icon: <MessageCircle size={16} />, active: activeHeaderTab === "messages", badge: notifications }
-  ];
+  // const headerNav = [
+  //   { id: "find", label: "Find work", icon: <Search size={16} />, active: activeHeaderTab === "find" },
+  //   { id: "manage", label: "My jobs", icon: <BarChart size={16} />, active: activeHeaderTab === "manage" },
+  //   { id: "reports", label: "Reports", icon: <FileText size={16} />, active: activeHeaderTab === "reports" },
+  //   { id: "messages", label: "Messages", icon: <MessageCircle size={16} />, active: activeHeaderTab === "messages", badge: notifications }
+  // ];
 
-  const handleHeaderNavClick = (id) => {
-    setActiveHeaderTab(id);
-    showMessage("info", `Navigating to ${headerNav.find(item => item.id === id).label}...`);
-  };
+  // const handleHeaderNavClick = (id) => {
+  //   setActiveHeaderTab(id);
+  //   showMessage("info", `Navigating to ${headerNav.find(item => item.id === id).label}...`);
+  // };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      showMessage("info", `Searching for: ${searchQuery}`);
-    }
-  };
+  // const handleSearch = (e) => {
+  //   e.preventDefault();
+  //   if (searchQuery.trim()) {
+  //     showMessage("info", `Searching for: ${searchQuery}`);
+  //   }
+  // };
 
   const handleSectionChange = (id, label) => {
     setActiveSection(id);
@@ -360,7 +360,7 @@ const MyProfile = () => {
   };
 
   const handleUserMenuClick = (action) => {
-    setShowUserDropdown(false);
+    // setShowUserDropdown(false);
     showMessage("info", `${action} clicked`);
   };
 
@@ -610,9 +610,9 @@ const MyProfile = () => {
   };
 
   return (
-    <div className={`settings-container ${darkMode ? 'dark' : 'light'}`}>
+    <div className="settings-container">
       
-      {/* HEADER */}
+      {/* HEADER
       <header className="settings-header">
         <div className="header-container">
           <div className="header-left">
@@ -706,7 +706,7 @@ const MyProfile = () => {
             </div>
           </div>
         </div>
-      </header>
+      </header> */}
 
       {/* MAIN CONTENT */}
       <div className="settings-main">
