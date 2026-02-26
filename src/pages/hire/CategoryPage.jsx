@@ -287,7 +287,7 @@ export default function CategoryPage() {
           <h2 className="uz-hire__h2">Cold caller kim va nima qiladi?</h2>
           <p className="uz-hire__p">
             Cold caller — bu potensial mijozlarga qo'ng'iroq qilib, mahsulot yoki xizmatni tanishtiradigan
-            va lead’larni saralab beradigan mutaxassis. Ular savdo jarayonini tezlashtiradi va uchrashuvlar
+            va lead'larni saralab beradigan mutaxassis. Ular savdo jarayonini tezlashtiradi va uchrashuvlar
             (appointment) belgilashda yordam beradi.
           </p>
 
