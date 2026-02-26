@@ -18,27 +18,27 @@ import Info from "./pages/info/Info.jsx";
 import CategoryPage from "./pages/hire/CategoryPage.jsx";
 import Home from "./pages/home/Index.jsx";
 
-import JobsList from "./pages/jobs/List.jsx";
-import JobDetail from "./pages/jobs/Detail.jsx";
-import CreateJob from "./pages/jobs/Create.jsx";
+import JobsList from "./pages/Landing/jobs/List.jsx";
+import JobDetail from "./pages/Landing/jobs/Detail.jsx";
+import CreateJob from "./pages/Landing/jobs/Create.jsx";
 
 import MyProfile from "./pages/profile/MyProfile.jsx";
 import PublicProfile from "./pages/profile/PublicProfile.jsx";
 
-import MyProposals from "./pages/proposals/MyProposals.jsx";
-import Proposal from "./pages/proposals/Proposal.jsx";
+import MyProposals from "./pages/Landing/proposals/MyProposals.jsx";
+import Proposal from "./pages/Landing/proposals/Proposal.jsx";
 
-import ContractsList from "./pages/contracts/List.jsx";
-import ContractDetail from "./pages/contracts/Detail.jsx";
+import ContractsList from "./pages/Landing/contracts/List.jsx";
+import ContractDetail from "./pages/Landing/contracts/Detail.jsx";
 
-import ChatList from "./pages/chat/List.jsx";
-import ChatDetail from "./pages/chat/Detail.jsx";
+import ChatList from "./pages/Landing/chat/List.jsx";
+import ChatDetail from "./pages/Landing/chat/Detail.jsx";
 
-import Wallet from "./pages/wallet/Wallet.jsx";
-import Transactions from "./pages/wallet/Transactions.jsx";
+import Wallet from "./pages/Landing/wallet/Wallet.jsx";
+import Transactions from "./pages/Landing/wallet/Transactions.jsx";
 
-import DisputesList from "./pages/disputes/List.jsx";
-import DisputeDetail from "./pages/disputes/Detail.jsx";
+import DisputesList from "./pages/Landing/disputes/List.jsx";
+import DisputeDetail from "./pages/Landing/disputes/Detail.jsx";
 
 import NotFound from "./pages/NotFound.jsx";
 import Client from './pages/profile/Client.jsx';
