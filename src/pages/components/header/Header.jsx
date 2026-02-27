@@ -7,8 +7,6 @@ import "./Header.css";
 export default function Header({
   isDarkMode,
   toggleDarkMode,
-
-  // ✅ Category page uchun header search
   hireSearchEnabled = false,
   hireSearchValue = "",
   onHireSearchChange = () => {},
@@ -172,7 +170,8 @@ export default function Header({
     <header className={`uw-header ${scrolled ? "uw-header--scrolled" : ""}`}>
       <div className="uw-header__container">
         {/* Left: Brand */}
-        <Link to="/" className="uw-brand" aria-label="Uzwork home">
+        <div className="uw-left">
+          <Link to="/" className="uw-brand" aria-label="Uzwork home">
           <span className="uw-brand__icon">
             <img
               className="uw-brand__logo"
@@ -337,6 +336,7 @@ export default function Header({
             </div>
           </div>
         </nav>
+        </div>
 
         {/* ✅ Right: Actions + optional search */}
         <div className="uw-actions">
