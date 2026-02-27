@@ -284,7 +284,7 @@ body {
 
 .preview-glow{
   position:absolute;
-  inset:-30px;
+  
   background:
     radial-gradient(280px 200px at 25% 20%, rgba(59,130,246,0.28), transparent 60%),
     radial-gradient(260px 200px at 85% 45%, rgba(139,92,246,0.22), transparent 60%);
@@ -3164,6 +3164,108 @@ body {
   50% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+
+/* ================= 1084px TUNING (NO OVERLAP) ================= */
+@media (max-width: 1084px) {
+  /* umumiy */
+  .section-container {
+    max-width: 1180px;
+    padding: 0 14px;
+  }
+
+  /* Navbar (Header ichida ham ishlashi uchun universal) */
+  .navbar-container,
+  .uzwork-navbar .navbar-container {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .navbar-actions,
+  .uzwork-navbar .navbar-actions {
+    gap: 8px;
+    flex-wrap: wrap;              /* ✅ linklar ustma-ust chiqmaydi */
+    justify-content: flex-end;
+  }
+
+  .navbar-logo .logo,
+  .logo {
+    width: 46px;
+    height: 46px;
+  }
+
+  .logo-text {
+    font-size: 1.25rem;           /* ✅ kichraytirildi */
+    white-space: nowrap;
+  }
+
+  .l-nav-link,
+  .l-nav-btn {
+    padding: 8px 12px;            /* ✅ kichik padding */
+    font-size: 13px;              /* ✅ kichik font */
+    border-radius: 10px;
+    white-space: nowrap;          /* ✅ so‘z bo‘linmasin */
+    line-height: 1;
+  }
+
+  /* Agar Header ichida oddiy link classlari bo‘lsa ham */
+  .uzwork-navbar a,
+  .uzwork-navbar button {
+    max-width: 100%;
+  }
+
+  /* Hero layout */
+  .hero-container {
+    gap: 24px;
+  }
+
+  .hero-title {
+    font-size: clamp(2.1rem, 3.6vw, 3.3rem); /* ✅ 1084da silliq kichrayadi */
+  }
+
+  .hero-desc {
+    font-size: 1rem;
+    max-width: 520px;
+  }
+
+  .hero-quick {
+    max-width: 660px;
+    border-radius: 18px;
+  }
+
+  .hero-quick__tab {
+    font-size: 13px;
+    height: 40px;
+  }
+
+  .hero-quick__input {
+    height: 46px;
+    font-size: 12px;
+  }
+
+  .hero-quick__btn {
+    height: 46px;
+    font-size: 13px;
+    padding: 0 14px;
+    gap: 8px;
+  }
+
+  /* Find box */
+  .find-box {
+    padding: 54px 22px;
+    border-radius: 26px;
+  }
+  .find-box__title {
+    font-size: 26px;
+  }
+  .find-box__desc {
+    font-size: 14px;
+  }
+  .find-box__btn {
+    font-size: 13px;
+    padding: 12px 20px;
   }
 }
 
