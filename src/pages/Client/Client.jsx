@@ -68,7 +68,7 @@ import {
   Flag,
   MoreHorizontal
 } from "lucide-react";
-import "../profile/profile-css/klient.css";
+import "../Client/css/klient.css";
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState("my-info");
@@ -84,7 +84,7 @@ const Settings = () => {
   // const [notifications, setNotifications] = useState(3);
   // const [activeHeaderTab, setActiveHeaderTab] = useState("hire");
   // const [showUserMenu, setShowUserMenu] = useState(false);
-  
+
   // useEffect(() => {
   //   if (darkMode) {
   //     document.body.classList.add('dark-mode');

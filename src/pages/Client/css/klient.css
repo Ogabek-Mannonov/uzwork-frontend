@@ -3482,7 +3482,7 @@ input:checked + .slider:before {
     width: 36px;
     height: 36px;
   }
-  
+    
   .section-header {
     flex-direction: column;
     gap: var(--space-md);

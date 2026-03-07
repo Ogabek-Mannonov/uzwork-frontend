@@ -41,7 +41,8 @@ import DisputesList from "./pages/Landing/disputes/List.jsx";
 import DisputeDetail from "./pages/Landing/disputes/Detail.jsx";
 
 import NotFound from "./pages/NotFound.jsx";
-import Client from './pages/profile/Client.jsx';
+import Client from './pages/Client/Client.jsx';
+import ClientHome from "./pages/Client/Landing.jsx";
 
 function App() {
   return (
@@ -86,6 +87,7 @@ function App() {
             <Route element={<RoleRoute allow={["client"]} />}>
               <Route path="/jobs/create" element={<CreateJob />} />
             </Route>
+            <Route path="/client/home" element={<ClientHome />} />
 
             {/* Contracts */}
             <Route path="/contracts" element={<ContractsList />} />
