@@ -43,6 +43,8 @@ import DisputeDetail from "./pages/Landing/disputes/Detail.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Client from './pages/Client/Client.jsx';
 import ClientHome from "./pages/Client/Landing.jsx";
+import FindTalent from "./pages/Client/FindTalent.jsx";
+import PostJob from "./pages/Client/PostJob.jsx";
 
 function App() {
   return (
@@ -88,6 +90,8 @@ function App() {
               <Route path="/jobs/create" element={<CreateJob />} />
             </Route>
             <Route path="/client/home" element={<ClientHome />} />
+            <Route path="/client/talent" element={<FindTalent />} />
+            <Route path="/client/postjob" element={<PostJob />} />
 
             {/* Contracts */}
             <Route path="/contracts" element={<ContractsList />} />
