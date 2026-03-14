@@ -640,9 +640,12 @@ const Step4 = ({ form }) => {
 /* ================================================================
    SIDEBAR CONTENT (changes per step)
    ================================================================ */
-const StepSidebar = ({ step, form }) => {
+const StepSidebar = ({ step, form }) => {  // 'form' is now used below
   const progress = ((step - 1) / (STEPS.length - 1)) * 100;
   const tips = STEP_TIPS[step] || [];
+
+  // Using 'form' to show some stats in the example card
+  const skillCount = form?.skills?.length || 0;
 
   return (
     <div className="pj-sidebar">
@@ -683,14 +686,15 @@ const StepSidebar = ({ step, form }) => {
         </div>
       </div>
 
-      {/* Example / stats */}
+      {/* Example / stats - now using form data */}
       <div className="pj-example-card">
-        <h3><Star size={13} /> Why it matters</h3>
+        <h3><Star size={13} /> Your Progress</h3>
         <ul className="pj-example-list">
+          <li>Skills added: {skillCount}/15</li>
+          {form?.title && <li>Title: {form.title.length}/100 chars</li>}
+          {form?.description && <li>Description: {form.description.length}/5000 chars</li>}
           <li>Jobs with 5+ skills receive 3× more proposals</li>
           <li>Clear descriptions get 60% faster responses</li>
-          <li>Competitive budgets attract top-rated talent</li>
-          <li>Escrow protection builds freelancer trust</li>
         </ul>
       </div>
     </div>
