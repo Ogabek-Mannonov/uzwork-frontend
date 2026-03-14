@@ -188,7 +188,6 @@ body { font-family: var(--font); color: var(--text); background: var(--bg); -web
   background: var(--surface);
 }
 
-.pj-step-info {}
 .pj-step-label {
   font-size: 13px;
   font-weight: 600;
@@ -470,7 +469,6 @@ body { font-family: var(--font); color: var(--text); background: var(--bg); -web
 }
 .pj-exp-item.selected .pj-exp-radio-dot { opacity: 1; }
 
-.pj-exp-info {}
 .pj-exp-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
 .pj-exp-desc { font-size: 12.5px; color: var(--text-3); line-height: 1.5; }
 
@@ -842,7 +840,6 @@ body { font-family: var(--font); color: var(--text); background: var(--bg); -web
   border-radius: 3px;
   transition: width .4s var(--ease);
 }
-.pj-progress-steps {}
 .pj-progress-step {
   display: flex;
   align-items: center;
