@@ -3,17 +3,11 @@ import {
   Home,
   Users,
   Settings,
-  FileText,
-  ChevronRight,
-  ChevronLeft,
-  Search,
-  Bell,
-  Menu,
+  FileText
 } from "lucide-react";
-import "./homecss/home.css";
-import Projects from "../components/projectsCards";
-import "../../assets/style/theme.css"
-import logo from "../../assets/UzWork Logo.png"
+import "../../../assets/Freelancer/FindW/FindWork.css";
+import Projects from "../../components/projectsCards";
+import "../../../assets/style/theme.css"
 
 function useTheme() {
   const [theme, setTheme] = useState(() => {
@@ -32,7 +26,7 @@ function useTheme() {
   return { theme, setTheme };
 }
 
-export default function Index() {
+export default function FindWork() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const toggleTheme = () =>
@@ -103,6 +97,7 @@ export default function Index() {
     </div>
   );
 }
+
 
 
 
