@@ -46,6 +46,10 @@ import ClientHome from "./pages/Client/Landing.jsx";
 import FindTalent from "./pages/Client/FindTalent.jsx";
 import PostJob from "./pages/Client/PostJob.jsx";
 
+
+// =================== Freelancer Pages =====================
+import FindWork from "./pages/Freelancer/FindW/FindWork.jsx";
+
 function App() {
   return (
     <Router>
@@ -67,7 +71,7 @@ function App() {
           <Route path="/app" element={<Navigate to="/home" replace />} />
 
           {/* Public-ish inside app */}
-          <Route path="/home" element={<Home />} />
+          <Route path="/find-work" element={<FindWork />} />
           <Route path="/jobs" element={<JobsList />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/profile/:id" element={<PublicProfile />} />
