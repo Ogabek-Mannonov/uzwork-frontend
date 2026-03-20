@@ -16,7 +16,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 
 import Info from "./pages/info/Info.jsx";
 import CategoryPage from "./pages/hire/CategoryPage.jsx";
-import Home from "./pages/home/Index.jsx";
+
 
 import JobsList from "./pages/Landing/jobs/List.jsx";
 import JobDetail from "./pages/Landing/jobs/Detail.jsx";
