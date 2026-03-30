@@ -1,7 +1,7 @@
 // src/pages/Client/JobDetails/JobDetails.jsx
 
-import { useState, useCallback } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useState, useCallback, useEffect } from "react";
+import { useNavigate, NavLink, useParams } from "react-router-dom";
 import {
   Search, Bell, Settings, Moon, HelpCircle,
   Bookmark, Share2, Edit, XCircle, Users, DollarSign,
@@ -12,6 +12,8 @@ import {
   TrendingUp, AlertTriangle, UserSearch, ArrowRight,
 } from "lucide-react";
 import "../Client/css/landing.css";
+import { getJobById, updateJob } from "../../api/jobs";
+import { getProjectProposals, acceptProposal } from "../../api/proposals";
 
 /* ================================================================
    MOCK DATA
@@ -423,23 +425,115 @@ const EditPanel = ({ job, onSave, onCancel }) => {
    MAIN COMPONENT
    ================================================================ */
 const JobDetails = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  const [job,       setJob]       = useState(MOCK_JOB);
+  const [job,       setJob]       = useState(null);
+  const [loading,   setLoading]   = useState(true);
   const [status,    setStatus]    = useState("active");
   const [tab,       setTab]       = useState("overview");
   const [step,      setStep]      = useState("view");
   const [saved,     setSaved]     = useState(false);
   const [toast,     setToast]     = useState(null);
   const [showClose, setShowClose] = useState(false);
-  const proposals = MOCK_PROPOSALS;
+  const [proposals, setProposals] = useState([]);
 
   const notify = useCallback((msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
   }, []);
 
-  const handleSaveJob = useCallback((form) => {
+  useEffect(() => {
+    let active = true;
+    const fetchJobData = async () => {
+      if (!id) {
+        if (active) setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        const [jobRes, propRes] = await Promise.all([
+          getJobById(id),
+          getProjectProposals(id)
+        ]);
+        if (active) {
+          const fetchedJob = jobRes?.data || jobRes || null;
+          if (fetchedJob) {
+            setJob({
+              id: fetchedJob.id,
+              title: fetchedJob.title,
+              status: fetchedJob.status || "active",
+              type: fetchedJob.budget_type === "hourly" ? "Hourly" : "Fixed Price",
+              location: "Worldwide",
+              posted: new Date(fetchedJob.created_at).toLocaleDateString(),
+              postedDate: new Date(fetchedJob.created_at).toLocaleDateString(),
+              budget: fetchedJob.budget_type === "fixed" ? `$${fetchedJob.budget_amount}` : `$${fetchedJob.hourly_rate_min} - $${fetchedJob.hourly_rate_max}`,
+              budgetMin: fetchedJob.budget_amount || fetchedJob.hourly_rate_min || 0,
+              budgetMax: fetchedJob.budget_amount || fetchedJob.hourly_rate_max || 0,
+              duration: fetchedJob.project_duration || "N/A",
+              experience: fetchedJob.experience_level || "Any",
+              hiring: 1,
+              proposals: 0, // updated below
+              invites: 0,
+              interviews: 0,
+              views: 0,
+              skills: fetchedJob.skills || [],
+              description: fetchedJob.description || "",
+              requirements: [],
+              client: MOCK_JOB.client // Using mock for now until client details are fully supported
+            });
+            setStatus(fetchedJob.status || "active");
+          }
+
+          const fetchedProps = Array.isArray(propRes?.data) ? propRes.data : (Array.isArray(propRes) ? propRes : []);
+          const mappedProps = fetchedProps.map(p => ({
+            id: p.id,
+            avatar: p.freelancer_avatar || `https://ui-avatars.com/api/?name=${p.freelancer_name}&background=random`,
+            name: p.freelancer_name || "Freelancer",
+            role: "Freelancer",
+            rate: `$${p.proposed_price || 0}`,
+            score: "N/A",
+            shortlisted: p.status === "shortlisted",
+            text: p.cover_letter
+          }));
+          if (fetchedJob) {
+            setJob(prev => ({ ...prev, proposals: mappedProps.length }));
+          }
+          setProposals(mappedProps);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      if (active) setLoading(false);
+    };
+
+    fetchJobData();
+    return () => { active = false; };
+  }, [id]);
+
+  const handleSaveJob = useCallback(async (form) => {
+    // API call to save job updates
+    const updatedData = {
+      title: form.title,
+      description: form.description,
+      skills: form.skills,
+      experience_level: form.experience,
+      project_duration: form.duration
+    };
+    if (job?.type === "Fixed Price") {
+      updatedData.budget_amount = form.budgetMax || form.budgetMin;
+    } else {
+      updatedData.hourly_rate_min = form.budgetMin;
+      updatedData.hourly_rate_max = form.budgetMax;
+    }
+    
+    notify("Saving updates...", "info");
+    const res = await updateJob(id, updatedData);
+    if(res?.success === false) {
+      notify(res?.message || "Failed to update", "error");
+      return;
+    }
+
     setJob(prev => ({
       ...prev,
       title:       form.title,
@@ -455,13 +549,19 @@ const JobDetails = () => {
     }));
     setTab("overview");
     notify("Job post updated successfully!");
-  }, [notify]);
+  }, [id, job, notify]);
 
-  const handleCloseJob = useCallback(() => {
+  const handleCloseJob = useCallback(async () => {
+    notify("Closing job...", "info");
+    const res = await updateJob(id, { status: "closed" });
+    if (res?.success === false) {
+      notify(res?.message || "Failed to close job", "error");
+      return;
+    }
     setStatus("closed");
     setShowClose(false);
     notify("Job post has been closed.");
-  }, [notify]);
+  }, [id, notify]);
 
   const handleHire = useCallback((name) => {
     notify(`Offer sent to ${name}!`);
@@ -522,6 +622,9 @@ const JobDetails = () => {
   /* ================================================================
      RENDER
      ================================================================ */
+  if (loading) return <div style={{textAlign:"center", padding: "100px", color: "#666"}}>Yuklanmoqda...</div>;
+  if (!job) return <div style={{textAlign:"center", padding: "100px", color: "#dc2626"}}>Job topilmadi</div>;
+
   return (
     <div className="jd-page">
 

@@ -93,7 +93,7 @@ function App() {
             <Route element={<RoleRoute allow={["client"]} />}>
               <Route path="/jobs/create" element={<CreateJob />} />
             </Route>
-            <Route path="/client/home" element={<ClientHome />} />
+            <Route path="/client/job/:id" element={<ClientHome />} />
             <Route path="/client/talent" element={<FindTalent />} />
             <Route path="/client/postjob" element={<PostJob />} />
 
