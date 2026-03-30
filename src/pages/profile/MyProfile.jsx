@@ -61,6 +61,8 @@ import {
   Gift
 } from "lucide-react";
 import "../profile/profile-css/profile.css";
+import { getMyProfile, updateMyProfile } from "../../api/common";
+import { getMyPortfolio, createPortfolioItem, updatePortfolioItem, deletePortfolioItem } from "../../api/freelancer";
 
 const MyProfile = () => {
   // const [darkMode, setDarkMode] = useState(false);
@@ -129,42 +131,87 @@ const MyProfile = () => {
     }
   }, [message]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const profileRes = await getMyProfile();
+        if (profileRes?.data) {
+          // [FIX]: Backenddan ma'lumotlar { user: {...}, profile: {...} } shaklida keladi.
+          // Oldin to'g'ridan to'g'ri .data ga murojaat qilingani uchun hamma qiymat undefined bo'lib qolardi.
+          const u = profileRes.data.user || {};
+          const p = profileRes.data.profile || {};
+          setUserData(prev => ({
+            ...prev,
+            name: u.first_name || "",
+            fullName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || "",
+            username: u.username ? `@${u.username}` : "",
+            email: u.email || "",
+            phone: u.phone || "",
+            location: p.location || "",
+            title: p.title || "",
+            bio: p.bio || "",
+            profilePicture: p.avatar_url || u.avatar_url || "",
+            hourlyRate: p.hourly_rate || 0,
+            accountType: u.role || "",
+          }));
+          if (p.skills && Array.isArray(p.skills) && p.skills.length > 0) {
+            setSkills(p.skills.map((s, i) => ({ id: i, name: s, level: "Intermediate", years: 1 })));
+          } else {
+            setSkills([]);
+          }
+        }
+
+        const portRes = await getMyPortfolio();
+        // [FIX]: Portfel ma'lumotlari to'g'ridan to'g'ri array emas, balki .data.items ni ichida keladi.
+        if (portRes?.data?.items && Array.isArray(portRes.data.items)) {
+          setPortfolio(portRes.data.items.map(p => ({
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            url: p.project_url,
+            images: p.media && p.media.length > 0 ? p.media.map(m => m.url) : [],
+            skills: p.skills || [],
+            created_at: p.created_at
+          })));
+        }
+      } catch (err) {
+        console.error("fetchData error:", err);
+      }
+      setIsLoading(false);
+    };
+    fetchData();
+  }, []);
+
   const [userData, setUserData] = useState({
-    name: "Alisher",
-    fullName: "Alisher Ergashev",
-    username: "@alisher_dev",
-    email: "alisher.e@gmail.com",
-    phone: "+998 91 234 56 78",
-    location: "Tashkent, Uzbekistan",
+    name: "",
+    fullName: "",
+    username: "",
+    email: "",
+    phone: "",
+    location: "",
     timezone: "GMT+5",
     language: "English (US)",
     accountType: "Freelancer",
     membership: "Pro",
     membershipStatus: "Active",
-    membershipStartDate: "Jan 15, 2024",
-    membershipNextBilling: "Feb 15, 2024",
-    title: "Senior Full-Stack Developer",
-    bio: "Passionate full-stack developer specializing in React, Node.js, and cloud architecture. 7+ years building scalable web applications for startups and enterprises. Experienced in leading development teams and delivering high-quality products on time.",
-    profilePicture: "https://i.pravatar.cc/300?img=12",
-    coverPhoto: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200",
-    hourlyRate: 45,
-    totalEarned: 87500,
-    jobsCompleted: 156,
-    activeProjects: 5,
-    rating: 4.95,
-    successScore: 99,
+    membershipStartDate: "",
+    membershipNextBilling: "",
+    title: "",
+    bio: "",
+    profilePicture: "",
+    coverPhoto: "",
+    hourlyRate: 0,
+    totalEarned: 0,
+    jobsCompleted: 0,
+    activeProjects: 0,
+    rating: 0,
+    successScore: 0,
     responseTime: "< 1 hour",
     availability: "Available now"
   });
 
-  const [skills, setSkills] = useState([
-    { id: 1, name: "React.js", level: "Expert", years: 5 },
-    { id: 2, name: "Node.js", level: "Expert", years: 6 },
-    { id: 3, name: "TypeScript", level: "Advanced", years: 4 },
-    { id: 4, name: "MongoDB", level: "Advanced", years: 5 },
-    { id: 5, name: "AWS", level: "Intermediate", years: 3 },
-    { id: 6, name: "Docker", level: "Advanced", years: 4 }
-  ]);
+  const [skills, setSkills] = useState([]);
 
   const [certificates, setCertificates] = useState([
     { id: 1, name: "AWS Solutions Architect", issuer: "Amazon", year: 2023 },
@@ -449,39 +496,65 @@ const MyProfile = () => {
     setShowPortfolioModal(true);
   };
 
-  const handleSavePortfolio = () => {
-    if (!portfolioForm.title.trim()) {
-      showMessage("error", "Title is required");
-      return;
-    }
-    if (!portfolioForm.url.trim()) {
-      showMessage("error", "URL is required");
+  const handleSavePortfolio = async () => {
+    if (!portfolioForm.title.trim() || !portfolioForm.url.trim()) {
+      showMessage("error", "Title and URL are required");
       return;
     }
 
-    if (editingPortfolio) {
-      setPortfolio(prev => prev.map(item =>
-        item.id === editingPortfolio.id
-          ? { ...item, ...portfolioForm }
-          : item
-      ));
-      showMessage("success", "Portfolio updated successfully");
-    } else {
-      const newItem = {
-        id: Date.now(),
-        ...portfolioForm,
-        created_at: new Date().toISOString().split('T')[0]
-      };
-      setPortfolio(prev => [...prev, newItem]);
-      showMessage("success", "Portfolio added successfully");
+    setIsLoading(true);
+    const payload = {
+      title: portfolioForm.title,
+      description: portfolioForm.description,
+      project_url: portfolioForm.url,
+      image_url: portfolioForm.images[0] || ""
+    };
+
+    try {
+      if (editingPortfolio) {
+        const res = await updatePortfolioItem(editingPortfolio.id, payload);
+        if (res?.success === false) throw new Error(res.message);
+
+        setPortfolio(prev => prev.map(item =>
+          item.id === editingPortfolio.id
+            ? { ...item, ...portfolioForm }
+            : item
+        ));
+        showMessage("success", "Portfolio updated successfully");
+      } else {
+        const res = await createPortfolioItem(payload);
+        if (res?.success === false) throw new Error(res.message);
+
+        const newItem = {
+          id: res?.data?.id || Date.now(),
+          ...portfolioForm,
+          created_at: new Date().toISOString().split('T')[0]
+        };
+        setPortfolio(prev => [...prev, newItem]);
+        showMessage("success", "Portfolio added successfully");
+      }
+      setShowPortfolioModal(false);
+    } catch (err) {
+      showMessage("error", err.message || "Failed to save portfolio");
+    } finally {
+      setIsLoading(false);
     }
-    setShowPortfolioModal(false);
   };
 
-  const handleDeletePortfolio = (id) => {
+  const handleDeletePortfolio = async (id) => {
     if (window.confirm("Are you sure you want to delete this portfolio item?")) {
-      setPortfolio(prev => prev.filter(item => item.id !== id));
-      showMessage("success", "Portfolio deleted successfully");
+      setIsLoading(true);
+      try {
+        const res = await deletePortfolioItem(id);
+        if (res?.success === false) throw new Error(res.message);
+        
+        setPortfolio(prev => prev.filter(item => item.id !== id));
+        showMessage("success", "Portfolio deleted successfully");
+      } catch (err) {
+        showMessage("error", err.message || "Failed to delete portfolio");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -547,13 +620,26 @@ const MyProfile = () => {
     return "Strong";
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      const payload = {
+        title: userData.title,
+        bio: userData.bio,
+        hourly_rate: Number(userData.hourlyRate) || 0,
+        location: userData.location,
+        skills: skills.map(s => s.name)
+      };
+      const res = await updateMyProfile(payload);
+      if (res?.success === false) throw new Error(res.error || res.message);
+
       setIsEditing(false);
-      setIsLoading(false);
       showMessage("success", "Profile updated successfully!");
-    }, 1000);
+    } catch (err) {
+      showMessage("error", err.message || "Failed to update profile");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Certificate functions
