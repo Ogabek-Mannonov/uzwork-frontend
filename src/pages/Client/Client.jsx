@@ -69,6 +69,7 @@ import {
   MoreHorizontal
 } from "lucide-react";
 import "../Client/css/klient.css";
+import { getMyProfile, updateMyProfile } from "../../api/common";
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState("my-info");
@@ -102,22 +103,52 @@ const Settings = () => {
     }
   }, [message]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const profileRes = await getMyProfile();
+        if (profileRes?.data) {
+          const u = profileRes.data.user || {};
+          const p = profileRes.data.profile || {};
+          setUserData(prev => ({
+            ...prev,
+            name: u.first_name || "",
+            fullName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || "",
+            username: u.username ? `@${u.username}` : "",
+            email: u.email || "",
+            phone: u.phone || "",
+            location: p.location || "",
+            company: p.company_name || "",
+            companyDetails: p.company_description || "",
+            bio: p.bio || "",
+            profilePicture: p.avatar_url || u.avatar_url || "",
+            accountType: u.role || "",
+          }));
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      setIsLoading(false);
+    };
+    fetchData();
+  }, []);
+
   const [userData, setUserData] = useState({
-    name: "Ogabek",
-    fullName: "Ogabek Karimov",
-    username: "@ogabek_k",
-    email: "ogabek.k@gmail.com",
-    phone: "+998 90 123 45 67",
-    location: "Tashkent, Uzbekistan",
+    name: "",
+    fullName: "",
+    username: "",
+    email: "",
+    phone: "",
+    location: "",
     timezone: "GMT+5",
     language: "English (US)",
-    accountType: "Client Account",
-    membership: "Basic",
-    company: "Ogabek Karimov",
-    companyDetails: "Freelance Designer",
-    bio: "Experienced UI/UX designer with 5+ years of experience creating beautiful and functional digital products.",
-    profilePicture: "https://i.pravatar.cc/300?img=8",
-    coverPhoto: "https://images.unsplash.com/photo-1579547944212-c4f4961a8dd8?w=1200",
+    accountType: "Client",
+    company: "",
+    companyDetails: "",
+    bio: "",
+    profilePicture: "",
+    coverPhoto: "",
     jobSuccessScore: 98,
     totalSpent: 24850,
     pendingAmount: 1200,
@@ -439,9 +470,28 @@ const Settings = () => {
     showMessage("info", "2FA setup wizard will open...");
   };
 
-  const handleSaveProfile = () => {
-    setIsEditing(false);
-    showMessage("success", "Profile updated successfully!");
+  const handleSaveProfile = async () => {
+    setIsLoading(true);
+    try {
+      const payload = {
+        first_name: userData.fullName.split(" ")[0] || userData.name,
+        last_name: userData.fullName.split(" ").slice(1).join(" ") || "",
+        phone: userData.phone,
+        location: userData.location,
+        bio: userData.bio,
+        company_name: userData.company,
+        company_description: userData.companyDetails
+      };
+      const res = await updateMyProfile(payload);
+      if (res?.success === false) throw new Error(res.error || res.message);
+
+      setIsEditing(false);
+      showMessage("success", "Profile updated successfully!");
+    } catch (err) {
+      showMessage("error", err.message || "Failed to update profile");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // const toggleDarkMode = () => {

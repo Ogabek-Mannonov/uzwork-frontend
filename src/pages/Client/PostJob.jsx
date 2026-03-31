@@ -13,6 +13,7 @@ import {
   Rocket, ArrowLeft, Eye,
 } from "lucide-react";
 import "../Client/css/post.css";
+import { createJob } from "../../api/jobs";
 
 /* ================================================================
    CONSTANTS
@@ -778,13 +779,30 @@ const PostJob = () => {
   };
 
   /* ── Publish ────────────────────────────────────────────── */
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!validate(step)) {
       notify("Please review all fields before publishing.", "error");
       return;
     }
-    // Backend: POST /api/jobs  → { ...form, status: "active" }
-    setSuccess(true);
+    
+    const res = await createJob({
+      title: form.title,
+      description: form.desc,
+      category: form.category,
+      skills: form.skills,
+      budget_type: form.payType,     // 'hourly' yoki 'fixed'
+      budget_amount: form.payType === "fixed" ? Number(form.budget) : null,
+      hourly_rate_min: form.payType === "hourly" ? Number(form.rateMin) : null,
+      hourly_rate_max: form.payType === "hourly" ? Number(form.rateMax) : null,
+      experience_level: form.experience,
+      status: "active"
+    });
+
+    if (res?.success === false) {
+      notify(res?.message || "Xatolik yuz berdi", "error");
+    } else {
+      setSuccess(true);
+    }
   };
 
   /* ── Step content config ─────────────────────────────────── */

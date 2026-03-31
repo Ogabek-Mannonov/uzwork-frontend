@@ -13,6 +13,8 @@ import {
   SlidersHorizontal, ArrowUpDown, Check,
 } from "lucide-react";
 import "../Client/css/find.css";
+import { getFreelancers } from "../../api/freelancer";
+import { useEffect } from "react";
 
 /* ================================================================
    MOCK DATA
@@ -309,8 +311,33 @@ const FindTalent = () => {
   const [sort,        setSort]        = useState("relevance");
   const [toast,       setToast]       = useState("");
 
-  // Backend: replace with API filtered list
-  const [freelancers] = useState(FREELANCERS);
+  // API dan olingan freelancers
+  const [freelancers, setFreelancers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      setLoading(true);
+      const res = await getFreelancers();
+      const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      const mapped = list.map(item => ({
+        id: item.id,
+        avatar: item.avatar_url,
+        name: item.name || (item.first_name ? `${item.first_name} ${item.last_name || ""}` : "Freelancer"),
+        title: item.title || "Freelancer",
+        rate: `$${item.hourly_rate || 0}/hr`,
+        jobSuccess: item.job_success_score || 0,
+        earned: item.total_earned ? `$${item.total_earned}k+` : "$0",
+        location: item.location || "N/A",
+        skills: item.skills || [],
+        overview: item.bio || "",
+        badges: item.job_success_score > 90 ? ["top_rated"] : []
+      }));
+      setFreelancers(mapped);
+      setLoading(false);
+    };
+    fetch();
+  }, []);
 
   /* ── helpers ──────────────────────────────────────────────── */
   const notify = useCallback((msg) => {
@@ -329,11 +356,11 @@ const FindTalent = () => {
 
   /* client-side filter (Backend tayyor bo'lganda olib tashlang) */
   const shown = freelancers.filter(fl => {
-    const rateNum = parseInt(fl.rate.replace(/\D/g, ""));
+    const rateNum = parseInt((fl.rate || "").replace(/\D/g, "")) || 0;
     const matchSearch = !search ||
-      fl.name.toLowerCase().includes(search.toLowerCase()) ||
-      fl.title.toLowerCase().includes(search.toLowerCase()) ||
-      fl.skills.some(s => s.toLowerCase().includes(search.toLowerCase()));
+      (fl.name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (fl.title || "").toLowerCase().includes(search.toLowerCase()) ||
+      (fl.skills || []).some(s => s.toLowerCase().includes(search.toLowerCase()));
     const matchRate = rateNum >= minRate && rateNum <= maxRate;
     const matchSuccess = !successRate ||
       fl.jobSuccess >= parseInt(successRate);
