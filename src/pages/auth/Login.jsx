@@ -2,10 +2,11 @@
 import React, { useState } from "react";
 import { FaUser, FaLock, FaPhoneAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useGoogleLogin } from "@react-oauth/google";
 import "./authcss/login.css";
 
 import { Toast } from "../components/Toast";
-import { login as loginRequest } from "../../api/auth"; // sizdagi auth helper
+import { login as loginRequest, googleLogin as googleLoginRequest } from "../../api/auth"; // sizdagi auth helper
 
 const Login = () => {
   const navigate = useNavigate();
@@ -130,142 +131,183 @@ const Login = () => {
     }
   };
 
-  const handleGoogleClick = () => setShowToast(true);
-  const handlePhoneClick = () => setShowToast(true);
+  const gLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+    try {
+      setLoading(true);
+      setError("");
 
-  const handleBack = (e) => {
-    e?.preventDefault();
-    setStep("email");
-    setPassword("");
-    setError("");
-  };
+      const accessToken = tokenResponse?.access_token;
+      if (!accessToken) return;
 
-  return (
-    <div className="login-container">
-      <div className="login-card">
-        <h1 className="title-login">
-          {step === "email" ? "Uzworkga kirish" : "Xush kelibsiz"}
-        </h1>
+      // Backend expects 'credential' as Google access_token
+      // We can pass role if needed (default in backend is freelancer)
+      const payload = { credential: accessToken, role: "freelancer" };
+      const res = await googleLoginRequest(payload);
 
-        {error && <div className="alert-error">{error}</div>}
+      if (!res?.success) {
+        setError(res?.message || "Google tizimiga kirishda xato!");
+        return;
+      }
 
-        {/* 1-bosqich: Email/phone */}
-        {step === "email" && (
-          <>
-            <form onSubmit={handleEmailSubmit}>
-              <div className="input-group">
-                <FaUser className="input-icon" />
-                <input
-                  type="text"
-                  className="login-input"
-                  placeholder="Email yoki telefon raqam"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  autoFocus
-                />
-              </div>
+      const { token, role } = persistAuth(res);
 
-              <button type="submit" className="cont-btn" disabled={loading}>
-                {loading ? "Tekshirilmoqda..." : "Davom etish"}
-              </button>
-            </form>
+      if (!token) {
+        setError("Token kelmadi. Backend login response'ni tekshiring.");
+        return;
+      }
 
-            <div className="login-or">yoki</div>
+      if (role === "freelancer") navigate("/profile", { replace: true });
+      else if (role === "client") navigate("/profile/client", { replace: true });
+      else if (role === "admin") navigate("/home", { replace: true });
+      else navigate("/profile", { replace: true });
 
-            <button
-              className="google-btn"
-              onClick={handleGoogleClick}
-              disabled={loading}
-              type="button"
-            >
-              <img
-                src="https://www.google.com/favicon.ico"
-                alt="Google"
-                width={20}
-                height={20}
+    } catch (e) {
+      setError("Google bilan ulanishda kutilmagan xatolik.");
+    } finally {
+      setLoading(false);
+    }
+  },
+  onError: () => {
+    setError("Google tizimida avtorizatsiyadan o‘tish bekor qilindi.");
+  }
+});
+
+const handlePhoneClick = () => setShowToast(true);
+
+const handleBack = (e) => {
+  e?.preventDefault();
+  setStep("email");
+  setPassword("");
+  setError("");
+};
+
+return (
+  <div className="login-container">
+    <div className="login-card">
+      <h1 className="title-login">
+        {step === "email" ? "Uzworkga kirish" : "Xush kelibsiz"}
+      </h1>
+
+      {error && <div className="alert-error">{error}</div>}
+
+      {/* 1-bosqich: Email/phone */}
+      {step === "email" && (
+        <>
+          <form onSubmit={handleEmailSubmit}>
+            <div className="input-group">
+              <FaUser className="input-icon" />
+              <input
+                type="text"
+                className="login-input"
+                placeholder="Email yoki telefon raqam"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                autoFocus
               />
-              Google orqali kirish
+            </div>
+
+            <button type="submit" className="cont-btn" disabled={loading}>
+              {loading ? "Tekshirilmoqda..." : "Davom etish"}
             </button>
+          </form>
+
+          <div className="login-or">yoki</div>
+
+          <button
+            className="google-btn"
+            onClick={() => gLogin()}
+            disabled={loading}
+            type="button"
+          >
+            <img
+              src="https://www.google.com/favicon.ico"
+              alt="Google"
+              width={20}
+              height={20}
+            />
+            Google orqali kirish
+          </button>
+
+          <button
+            className="apple-btn"
+            onClick={handlePhoneClick}
+            disabled={loading}
+            type="button"
+          >
+            <FaPhoneAlt size={20} />
+            Telefon orqali kirish
+          </button>
+
+          <div className="text-center">
+            <p>Hisobingiz yo‘qmi?</p>
+            <a href="/signup" className="signup-btn-link">
+              Ro‘yxatdan o‘tish
+            </a>
+          </div>
+        </>
+      )}
+
+      {/* 2-bosqich: Parol */}
+      {step === "password" && (
+        <>
+          <div className="email-preview">{identifier}</div>
+
+          <form onSubmit={handleLogin}>
+            <div className="input-group password-group">
+              <FaLock className="input-icon" />
+              <input
+                type={showPassword ? "text" : "password"}
+                className="login-input"
+                placeholder="Parol"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="toggle-password"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+
+            <div className="options-row">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={keepLoggedIn}
+                  onChange={(e) => setKeepLoggedIn(e.target.checked)}
+                />
+                <span>Meni eslab qol</span>
+              </label>
+
+              <a href="/forgot-password" className="forgot-link">
+                Parolni unutdingizmi?
+              </a>
+            </div>
 
             <button
-              className="apple-btn"
-              onClick={handlePhoneClick}
+              type="submit"
+              className="cont-btn login-btn"
               disabled={loading}
-              type="button"
             >
-              <FaPhoneAlt size={20} />
-              Telefon orqali kirish
+              {loading ? "Yuklanmoqda..." : "Kirish"}
             </button>
+          </form>
 
-            <div className="text-center">
-              <p>Hisobingiz yo‘qmi?</p>
-              <a href="/signup" className="signup-btn-link">
-                Ro‘yxatdan o‘tish
-              </a>
-            </div>
-          </>
-        )}
+          <div className="text-center not-you">
+            <a href="#" onClick={handleBack} className="not-you-link">
+              Bu siz emassizmi?
+            </a>
+          </div>
+        </>
+      )}
+    </div>
 
-        {/* 2-bosqich: Parol */}
-        {step === "password" && (
-          <>
-            <div className="email-preview">{identifier}</div>
-
-            <form onSubmit={handleLogin}>
-              <div className="input-group password-group">
-                <FaLock className="input-icon" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  className="login-input"
-                  placeholder="Parol"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  className="toggle-password"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              </div>
-
-              <div className="options-row">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={keepLoggedIn}
-                    onChange={(e) => setKeepLoggedIn(e.target.checked)}
-                  />
-                  <span>Meni eslab qol</span>
-                </label>
-
-                <a href="/forgot-password" className="forgot-link">
-                  Parolni unutdingizmi?
-                </a>
-              </div>
-
-              <button
-                type="submit"
-                className="cont-btn login-btn"
-                disabled={loading}
-              >
-                {loading ? "Yuklanmoqda..." : "Kirish"}
-              </button>
-            </form>
-
-            <div className="text-center not-you">
-              <a href="#" onClick={handleBack} className="not-you-link">
-                Bu siz emassizmi?
-              </a>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Google bosilganda (demo) */}
-        {/* {step === "google" && (
+    {/* Google bosilganda (demo) */}
+    {/* {step === "google" && (
           <>
             <div className="input-group" style={{ marginBottom: "2rem" }}>
               <FaUser className="input-icon" />
@@ -300,8 +342,8 @@ const Login = () => {
           </>
         )} */}
 
-        {/* Telefon raqami bosilganda */}
-        {/* {step === "phone" && (
+    {/* Telefon raqami bosilganda */}
+    {/* {step === "phone" && (
           <>
             <form
               onSubmit={(e) => {
@@ -343,14 +385,14 @@ const Login = () => {
           </>
         )} */}
 
-      {showToast && (
-        <Toast
-          message="Bu xususiyat vaqtinchalik ishlamayapti"
-          onClose={() => setShowToast(false)}
-        />
-      )}
-    </div>
-  );
+    {showToast && (
+      <Toast
+        message="Bu xususiyat vaqtinchalik ishlamayapti"
+        onClose={() => setShowToast(false)}
+      />
+    )}
+  </div>
+);
 };
 
 export default Login;

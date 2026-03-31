@@ -5,7 +5,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate, Link } from "react-router-dom";
 
 import "./authcss/signup.css";
-import { signup as signupRequest } from "../../api/auth";
+import { signup as signupRequest, verifySignup } from "../../api/auth";
 
 function Signup() {
   const navigate = useNavigate();
@@ -21,14 +21,16 @@ function Signup() {
     firstName: "",
     lastName: "",
     username: "",
-    email: "",
-    phone: "",
+    identifier: "",
     password: "",
     country: "Uzbekistan",
     sendEmails: true,
     agreeTerms: false,
     role: "",
   });
+
+  const [createdUserId, setCreatedUserId] = useState(null);
+  const [otpCode, setOtpCode] = useState("");
 
   const handleRoleChange = (e) => {
     setFormData({ ...formData, role: e.target.value });
@@ -54,12 +56,13 @@ function Signup() {
 
   // Agar user username kiritmasa — avtomatik generatsiya
   const genUsername = () => {
+    const isEmail = formData.identifier.includes("@");
     const base =
       (formData.firstName || "user") +
       "_" +
       (formData.lastName || "") +
       "_" +
-      (formData.email ? formData.email.split("@")[0] : "uzwork");
+      (isEmail ? formData.identifier.split("@")[0] : "uzwork");
 
     const cleaned = base.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 20);
     return cleaned || `user_${Date.now()}`;
@@ -120,8 +123,8 @@ function Signup() {
       return;
     }
 
-    if (!formData.phone.trim()) {
-      setServerError("Telefon raqamni kiriting.");
+    if (!formData.identifier.trim()) {
+      setServerError("Email yoki telefon raqamni kiriting.");
       return;
     }
 
@@ -139,8 +142,7 @@ function Signup() {
         role: formData.role,
         first_name: formData.firstName.trim(),
         last_name: formData.lastName.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone.trim(),
+        identifier: formData.identifier.trim(),
         password: formData.password,
         username: formData.username.trim()
           ? formData.username.trim()
@@ -155,13 +157,38 @@ function Signup() {
         return;
       }
 
-      // token/user kelgan bo'lsa saqlab qo'yamiz (ammo baribir login pagega yuboramiz)
-      persistAuth(res);
-
-      // ✅ Success card ko'rsatamiz
-      setShowSuccess(true);
+      if (res?.needs_verification) {
+        setCreatedUserId(res.data.userId);
+        setStep(3); // OTP step
+      } else {
+        persistAuth(res);
+        setShowSuccess(true);
+      }
     } catch (err) {
       setServerError(err?.message || "Server bilan ulanishda xato");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setServerError("");
+    if (!otpCode.trim()) {
+      setServerError("Tasdiqlash kodini kiriting.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await verifySignup({ userId: createdUserId, code: otpCode.trim() });
+      if (!res?.success) {
+        setServerError(res?.message || "Kodni tasdiqlashda xatolik.");
+        return;
+      }
+      setShowSuccess(true);
+    } catch (err) {
+      setServerError(err?.message || "Tasdiqlashda xatolik.");
     } finally {
       setSubmitting(false);
     }
@@ -322,7 +349,7 @@ function Signup() {
                     <input
                       type="text"
                       name="username"
-                      placeholder="masalan: ogabek_dev"
+                      placeholder="ogabek_dev"
                       value={formData.username}
                       onChange={handleChange}
                     />
@@ -332,23 +359,12 @@ function Signup() {
                   </div>
 
                   <div className="input-group full-width">
-                    <label>Email</label>
+                    <label>Email yoki Telefon raqam</label>
                     <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="input-group full-width">
-                    <label>Telefon</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      placeholder="+998901234567"
-                      value={formData.phone}
+                      type="text"
+                      name="identifier"
+                      placeholder="example@gmail.com yoki +998901234567"
+                      value={formData.identifier}
                       onChange={handleChange}
                       required
                     />
@@ -398,6 +414,41 @@ function Signup() {
                     disabled={submitting}
                   >
                     {submitting ? "Yaratilmoqda..." : "Hisobni yaratish"}
+                  </button>
+                </form>
+              </>
+            )}
+
+            {/* STEP 3: OTP VERIFICATION */}
+            {step === 3 && (
+              <>
+                <div className="selected-role-header">
+                  <h3 className="selected-role-title">
+                    Tasdiqlash kodi yuborildi
+                  </h3>
+                  <p>Siz ko'rsatgan manzilga 6-xonali kod yuborilgan. Iltimos tekshiring.</p>
+                </div>
+
+                <form onSubmit={handleVerifyOtp} className="upwork-signup-form">
+                  <div className="input-group full-width">
+                    <label>Tasdiqlash kodi (OTP)</label>
+                    <input
+                      type="text"
+                      placeholder="123456"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value)}
+                      required
+                      style={{ letterSpacing: '2px', textAlign: 'center', fontSize: '1.2rem', padding: '15px' }}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="create-account-btn"
+                    disabled={submitting}
+                    style={{ marginTop: '20px' }}
+                  >
+                    {submitting ? "Tasdiqlanmoqda..." : "Tasdiqlash"}
                   </button>
                 </form>
               </>

@@ -2,13 +2,9 @@
 // Proposals API helper (fetch wrapper)
 // Sizda token localStorage'da bo'lsa: accessToken
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL ?? "";
 
-if (!API_URL) {
-  throw new Error(
-    "❌ VITE_API_URL is not defined. Create .env.local and set VITE_API_URL=http://localhost:3000"
-  );
-}
+
 
 const getToken = () => localStorage.getItem("accessToken");
 
