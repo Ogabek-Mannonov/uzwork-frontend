@@ -1,7 +1,8 @@
 // src/api/auth.js
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL ?? "";
+
 
 const api = axios.create({
   baseURL: API_URL,
@@ -60,6 +61,16 @@ export const signup = async (payload) => {
   }
 };
 
+export const verifySignup = async (payload) => {
+  try {
+    const res = await api.post("/auth/verify-signup", payload);
+    return unwrap(res);
+  } catch (err) {
+    const msg = err?.response?.data?.message || err?.message || "Verify signup failed";
+    return { success: false, message: msg };
+  }
+};
+
 export const login = async (payload) => {
   try {
     const res = await api.post("/auth/login", payload);
@@ -72,6 +83,21 @@ export const login = async (payload) => {
   } catch (err) {
     const msg =
       err?.response?.data?.message || err?.message || "Login request failed";
+    return { success: false, message: msg };
+  }
+};
+
+export const googleLogin = async (payload) => {
+  try {
+    const res = await api.post("/auth/google", payload);
+    const body = unwrap(res);
+
+    const data = body?.data;
+    if (data?.accessToken || data?.user) saveAuth(data);
+
+    return body;
+  } catch (err) {
+    const msg = err?.response?.data?.message || err?.message || "Google login failed";
     return { success: false, message: msg };
   }
 };
