@@ -71,7 +71,6 @@ function App() {
           <Route path="/app" element={<Navigate to="/home" replace />} />
 
           {/* Public-ish inside app */}
-          <Route path="/find-work" element={<FindWork />} />
           <Route path="/jobs" element={<JobsList />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/profile/:id" element={<PublicProfile />} />
@@ -84,6 +83,7 @@ function App() {
 
             {/* Proposals (freelancer) */}
             <Route element={<RoleRoute allow={["freelancer"]} />}>
+              <Route path="/find-work" element={<FindWork />} />
               <Route path="/proposals" element={<Proposal />} />
               <Route path="/my-proposals" element={<MyProposals />} />
               <Route path="/proposals/new/:jobId" element={<Proposal />} />

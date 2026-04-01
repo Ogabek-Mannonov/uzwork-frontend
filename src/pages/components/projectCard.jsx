@@ -2,13 +2,16 @@ import "../../assets/style/projectCard.css";
 import "../../assets/style/theme.css"
 
 export default function ProjectCard({
-  img, // ixtiyoriy (rasmda yo'q, xohlasangiz olib tashlaysiz)
+  img,
   title,
   description,
   tags = [],
   price,
-  posted = "Posted yesterday",
-  meta = "Hourly · Intermediate · Est. Time: Less than 1 week, Less than 30 hrs/week",
+  posted = "Yaqinda joylashdi",
+  meta = "Fixed · Intermediate",
+  location = "O'zbekiston",
+  paymentVerified = true,
+  proposalsCount = "0",
   onReadMore,
   onToggleLike,
   liked = false,
@@ -51,16 +54,18 @@ export default function ProjectCard({
 
       <div className="pc-bottom">
         <div className="pc-bottomLeft">
-          <span className="pc-badge">
-            <span className="pc-badgeDot">✔</span>
-            Payment verified
-          </span>
+          {paymentVerified && (
+            <span className="pc-badge">
+              <span className="pc-badgeDot">✔</span>
+              To'lov tasdiqlangan
+            </span>
+          )}
 
           <span className="pc-stars">★★★★★</span>
 
           {price && <span className="pc-spent">{price}</span>}
 
-          <span className="pc-loc">Germany</span>
+          <span className="pc-loc">{location}</span>
         </div>
 
         <button className="pc-btn" onClick={onReadMore} type="button">
@@ -68,7 +73,7 @@ export default function ProjectCard({
         </button>
       </div>
 
-      <div className="pc-footnote">Proposals: 50+</div>
+      <div className="pc-footnote">Takliflar: {proposalsCount}</div>
     </article>
   );
 }

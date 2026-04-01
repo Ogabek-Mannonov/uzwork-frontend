@@ -1,7 +1,8 @@
 // src/pages/components/header/Header.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Sun, Moon, Menu, X, ChevronDown, Search } from "lucide-react";
+import { Sun, Moon, Menu, X, ChevronDown, Search, Globe } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import "./Header.css";
 
 export default function Header({
@@ -10,12 +11,13 @@ export default function Header({
   hireSearchEnabled = false,
   hireSearchValue = "",
   onHireSearchChange = () => {},
-  hireSearchPlaceholder = "Mutaxassis qidiring...",
 }) {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
 
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
 
   // ---------- More dropdown ----------
   const [moreOpen, setMoreOpen] = useState(false);
@@ -62,6 +64,12 @@ export default function Header({
     }, 200);
   };
 
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+    localStorage.setItem("appLanguage", lng);
+    setLangOpen(false);
+  };
+
   // ---------- effects ----------
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -91,6 +99,7 @@ export default function Header({
       if (!megaRoot.contains(e.target)) {
         closeAllMegas();
         setMoreOpen(false);
+        setLangOpen(false);
       }
     };
     document.addEventListener("mousedown", onDocClick);
@@ -162,8 +171,6 @@ export default function Header({
 
   const onSearchSubmit = (e) => {
     e.preventDefault();
-    // hozircha faqat UI: xohlasang keyin /search?query=... qilamiz
-    // navigate(`/search?query=${encodeURIComponent(hireSearchValue)}`);
   };
 
   return (
@@ -172,16 +179,17 @@ export default function Header({
         {/* Left: Brand */}
         <div className="uw-left">
           <Link to="/" className="uw-brand" aria-label="Uzwork home">
-          <span className="uw-brand__icon">
-            <img
-              className="uw-brand__logo"
-              src="/UzWork transparent.png"
-              alt="UzWork logo"
-              loading="eager"
-            />
-          </span>
-          <span className="uw-brand__name">UZWORK</span>
-        </Link>
+            <span className="uw-brand__icon">
+              <img
+                className="uw-brand__logo"
+                src="/UzWork transparent.png"
+                alt="UzWork logo"
+                loading="eager"
+              />
+            </span>
+            <span className="uw-brand__name">UZWORK</span>
+          </Link>
+        </div>
 
         {/* Center: Desktop Nav */}
         <nav className="uw-nav" aria-label="Primary">
@@ -336,10 +344,67 @@ export default function Header({
             </div>
           </div>
         </nav>
-        </div>
 
-        {/* ✅ Right: Actions + optional search */}
+        {/* Right: Actions */}
         <div className="uw-actions">
+          {/* Language Switcher */}
+          <div style={{ position: "relative" }}>
+            <button
+              className="uw-iconbtn"
+              onClick={() => setLangOpen(!langOpen)}
+              title="Tilni o'zgartirish"
+              style={{ display: "flex", alignItems: "center", gap: "4px" }}
+            >
+              <Globe size={18} />
+              <span style={{ fontSize: "11px", textTransform: "uppercase", fontWeight: 600 }}>
+                {i18n.language === "uz" ? "UZ" : i18n.language === "ru" ? "RU" : "EN"}
+              </span>
+            </button>
+            {langOpen && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 8px)",
+                  right: 0,
+                  background: "var(--surface, #fff)",
+                  border: "1px solid var(--border, #e2e8f0)",
+                  borderRadius: "10px",
+                  padding: "6px",
+                  zIndex: 9999,
+                  minWidth: "120px",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                }}
+              >
+                {[
+                  { code: "uz", label: "O'zbek 🇺🇿" },
+                  { code: "ru", label: "Русский 🇷🇺" },
+                  { code: "en", label: "English 🇬🇧" },
+                ].map((lng) => (
+                  <button
+                    key={lng.code}
+                    onClick={() => changeLanguage(lng.code)}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "8px 12px",
+                      border: "none",
+                      borderRadius: "6px",
+                      background: i18n.language === lng.code ? "var(--brand, #3b82f6)" : "transparent",
+                      color: i18n.language === lng.code ? "#fff" : "var(--text, #1e293b)",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      fontWeight: i18n.language === lng.code ? 600 : 400,
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {lng.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {hireSearchEnabled && (
             <form className="uw-hireSearch" onSubmit={onSearchSubmit}>
               <Search size={16} />
@@ -347,13 +412,12 @@ export default function Header({
                 className="uw-hireSearch__input"
                 value={hireSearchValue}
                 onChange={(e) => onHireSearchChange(e.target.value)}
-                placeholder={hireSearchPlaceholder}
+                placeholder="Mutaxassis qidiring..."
               />
               <button
                 type="button"
                 className="uw-hireSearch__btn"
                 onClick={() => navigate("/hire")}
-                title="Qidirish"
               >
                 Qidirish
               </button>
@@ -391,6 +455,32 @@ export default function Header({
       <div className={`uw-drawer ${menuOpen ? "uw-drawer--open" : ""}`}>
         <div className="uw-drawer__inner">
           <div className="uw-drawer__links">
+            {/* Lang switcher - mobile */}
+            <div style={{ display: "flex", gap: "8px", padding: "12px 16px" }}>
+              {[
+                { code: "uz", label: "UZ" },
+                { code: "ru", label: "RU" },
+                { code: "en", label: "EN" },
+              ].map((lng) => (
+                <button
+                  key={lng.code}
+                  onClick={() => changeLanguage(lng.code)}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "6px",
+                    border: "1px solid var(--border, #e2e8f0)",
+                    background: i18n.language === lng.code ? "var(--brand, #3b82f6)" : "transparent",
+                    color: i18n.language === lng.code ? "#fff" : "var(--text, #1e293b)",
+                    cursor: "pointer",
+                    fontWeight: 600,
+                    fontSize: "13px",
+                  }}
+                >
+                  {lng.label}
+                </button>
+              ))}
+            </div>
+
             <NavLink to="/hire" onClick={() => setMenuOpen(false)} className="uw-drawer__link">
               Mutaxassis yollash
             </NavLink>
@@ -425,7 +515,7 @@ export default function Header({
               onClick={() => setMenuOpen(false)}
               className="uw-drawer__link"
             >
-              Support
+              Qo'llab-quvvatlash
             </NavLink>
           </div>
 

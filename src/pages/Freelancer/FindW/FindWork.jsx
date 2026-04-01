@@ -1,106 +1,62 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Home,
-  Users,
-  Settings,
-  FileText
-} from "lucide-react";
+import { useState } from "react";
+import { Search } from "lucide-react";
 import "../../../assets/Freelancer/FindW/FindWork.css";
 import Projects from "../../components/projectsCards";
-import "../../../assets/style/theme.css"
-
-function useTheme() {
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem("theme");
-    if (saved) return saved;
-    return window.matchMedia?.("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  });
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  return { theme, setTheme };
-}
+import "../../../assets/style/theme.css";
 
 export default function FindWork() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
-  const toggleTheme = () =>
-    setTheme((t) => (t === "dark" ? "light" : "dark"));
+  const [activeTab, setActiveTab] = useState("recommended");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const toggleBtnRef = useRef(null);
+  const tabs = [
+    { id: "recommended", label: "Tavsiya etilgan" },
+    { id: "recent", label: "Eng yangi" },
+    { id: "saved", label: "Saqlangan ishlar" },
+  ];
 
-  const menuItems = useMemo(
-    () => [
-      { icon: Home, label: "Bosh sahifa", path: "/" },
-      { icon: Users, label: "Foydalanuvchilar", path: "/users" },
-      { icon: FileText, label: "Hujjatlar", path: "/documents" },
-      { icon: Settings, label: "Sozlamalar", path: "/settings" },
-    ],
-    [],
-  );
-
-  const toggleSidebar = () => setSidebarOpen((v) => !v);
-  const closeSidebar = () => setSidebarOpen(false);
-
-  // ESC bilan yopish
-  useEffect(() => {
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") closeSidebar();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
-
-  // Mobile overlay ochilganda scroll lock
-  useEffect(() => {
-    document.body.classList.toggle("no-scroll", sidebarOpen);
-    return () => document.body.classList.remove("no-scroll");
-  }, [sidebarOpen]);
-
-  const onMenuClick = (path) => {
-    console.log("Navigate to:", path);
-    // router bo'lsa navigate(path)
-    closeSidebar();
+  const handleSearch = (e) => {
+    e.preventDefault();
+    // Search mantig'i Projects komponentiga o'tadi
   };
 
   return (
-    <div className={`layout ${sidebarOpen ? "sidebar-is-open" : ""}`}>
-      {/* Main */}
-      <main
-        id="main"
-        className={`h-main ${sidebarOpen ? "h-main-open" : "h-main-closed"}`}
-      >
-        <section className="hed-section">
-          <div className="hed-content">
-            <h1 className="hed-title">UzWork</h1>
-            <h2 className="hed-subtitle">
-              O&apos;zbekistonning eng arzon freelance platformasi !
-            </h2>
-            <p className="hed-text">
-              Biz bilan o&apos;z ishingizni boshlang — tez, xavfsiz va davomli
-              tekin. 5 % komissiya • So&apos;mda to&apos;lov • Payme/Click bilan
-              10 soniyada • Mahaliy mijoz va freelancerlar • Pul escrowda 100 %
-              himoyalangan • Birinchi loyihangizga 0 % komissiya!
-            </p>
-          </div>
-        </section>
+    <div className="find-work-layout">
+      {/* Search & Tabs Header */}
+      <section className="fw-header-section">
+        <div className="fw-header-content">
+          <h1 className="fw-title">Ish qidirish</h1>
+          
+          <form className="fw-search-container" onSubmit={handleSearch}>
+            <Search className="fw-search-icon" size={20} />
+            <input 
+              type="text" 
+              className="fw-search-input"
+              placeholder="Qobiliyatlar, ishlar, yoki kalit so'zlarni qidiring..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button type="submit" className="fw-search-btn">Qidirish</button>
+          </form>
 
-        <section className="content">
-          <Projects />
-        </section>
-      </main>
+          <div className="fw-tabs">
+            {tabs.map(tab => (
+              <button 
+                key={tab.id}
+                className={`fw-tab ${activeTab === tab.id ? "active" : ""}`}
+                onClick={() => setActiveTab(tab.id)}
+                type="button"
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="fw-content">
+        <Projects activeTab={activeTab} searchQuery={searchQuery} />
+      </section>
     </div>
   );
 }
-
-
-
-
-
-
-

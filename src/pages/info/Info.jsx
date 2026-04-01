@@ -35,9 +35,11 @@ import {
 import "./infocss/info.css";
 import Footer from "../footer/Footer";
 import { Link, useNavigate } from "react-router-dom";
-import Header from "../components/header/Header";
+import AppHeader from "../components/AppHeader/AppHeader";
+import { useTranslation } from "react-i18next";
 
 const Info = () => {
+  const { t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   const [activeTab, setActiveTab] = useState("client");
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -46,11 +48,16 @@ const Info = () => {
     const saved = localStorage.getItem("darkMode");
     return saved ? JSON.parse(saved) : false;
   });
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(prev => {
+      const next = !prev;
+      localStorage.setItem("darkMode", JSON.stringify(next));
+      return next;
+    });
+  };
   const [heroTab, setHeroTab] = useState("hire"); // "hire" | "work"
-  const [heroQuery, setHeroQuery] = useState("");
-  const [showPopular, setShowPopular] = useState(false);
   const navigate = useNavigate();
-  const [isHeroOpen, setIsHeroOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -67,92 +74,65 @@ const Info = () => {
     }
   }, [isDarkMode]);
 
-  useEffect(() => {
-    const onDocClick = (e) => {
-      if (!e.target.closest(".hero-quick")) setIsHeroOpen(false);
-    };
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, []);
 
 
-  const popularHire = [
-    "AI chatbot dasturchisi",
-    "Brend identifikatsiya dizayneri",
-    "Ma'lumotlar tahlilchisi",
-    "Video montajchi",
-    "Avtomatlashtirish mutaxassisi (n8n)",
-    "Veb dasturchi",
-  ];
 
 
-  const onHeroSearch = () => {
-    const q = heroQuery.trim();
-    navigate(`/search/talent${q ? `?q=${encodeURIComponent(q)}` : ""}`);
-  };
 
-  const pickPopular = (text) => {
-    setHeroQuery(text);
-    setShowPopular(false);
-  };
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
 
   const categories = [
     {
       icon: <Sparkles />,
-      title: "Sun'iy intellekt xizmatlari",
+      title: t("info.categories.ai"),
       count: "25K+",
       color: "#22c55e",
     },
     {
       icon: <Code />,
-      title: "Rivojlanish va IT",
+      title: t("info.categories.dev"),
       count: "18K+",
       color: "#3b82f6",
     },
     {
       icon: <Palette />,
-      title: "Dizayn va ijodiy",
+      title: t("info.categories.design"),
       count: "9.5K+",
       color: "#a855f7",
     },
     {
       icon: <BarChart />,
-      title: "Savdo va marketing",
+      title: t("info.categories.marketing"),
       count: "12K+",
       color: "#f97316",
     },
     {
       icon: <FileText />,
-      title: "Yozish va tarjima",
+      title: t("info.categories.writing"),
       count: "15K+",
       color: "#eab308",
     },
     {
       icon: <Settings />,
-      title: "Administrator va qo'llab-quvvatlash",
+      title: t("info.categories.admin"),
       count: "8K+",
       color: "#10b981",
     },
     {
       icon: <Landmark />,
-      title: "Moliya va buxgalteriya hisobi",
+      title: t("info.categories.finance"),
       count: "11K+",
       color: "#06b6d4",
     },
-    { icon: <Scale />, title: "Huquqiy", count: "6K+", color: "#14b8a6" },
+    { icon: <Scale />, title: t("info.categories.legal"), count: "6K+", color: "#14b8a6" },
     {
       icon: <UserCog />,
-      title: "HR va trening",
+      title: t("info.categories.hr"),
       count: "7.5K+",
       color: "#6366f1",
     },
     {
       icon: <Wrench />,
-      title: "Muhandislik va arxitektura",
+      title: t("info.categories.engineering"),
       count: "5K+",
       color: "#8b5cf6",
     },
@@ -161,19 +141,19 @@ const Info = () => {
   const features = [
     {
       icon: <Shield />,
-      title: "Xavfsiz to'lov",
-      desc: "Escrow tizimi bilan himoyalangan",
+      title: t("info.features.safeTitle"),
+      desc: t("info.features.safeDesc"),
     },
-    { icon: <Zap />, title: "AI Matching", desc: "Sun'iy intellekt yordamida" },
+    { icon: <Zap />, title: t("info.features.aiTitle"), desc: t("info.features.aiDesc") },
     {
       icon: <Globe />,
-      title: "Global reach",
-      desc: "150+ mamlakatdan mutaxassislar",
+      title: t("info.features.globalTitle"),
+      desc: t("info.features.globalDesc"),
     },
     {
       icon: <Award />,
-      title: "Tasdiqlangan",
-      desc: "Barcha frilanserlar tekshirilgan",
+      title: t("info.features.verifiedTitle"),
+      desc: t("info.features.verifiedDesc"),
     },
   ];
 
@@ -186,20 +166,20 @@ const Info = () => {
 
   const clientSteps = [
     {
-      title: "Loyiha e'lon qiling",
-      desc: "Loyihangiz haqida batafsil ma'lumot yozing va budjetni belgilang",
+      title: t("info.clientSteps.step1Title"),
+      desc: t("info.clientSteps.step1Desc"),
       image:
         "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop",
     },
     {
-      title: "Takliflarni ko'rib chiqing",
-      desc: "Professional frilanserlardan kelgan takliflarni taqqoslang",
+      title: t("info.clientSteps.step2Title"),
+      desc: t("info.clientSteps.step2Desc"),
       image:
         "https://images.unsplash.com/photo-1553028826-f4804a6dba3b?w=800&h=600&fit=crop",
     },
     {
-      title: "Ishni boshlang",
-      desc: "Eng yaxshi mutaxassisni tanlab, ishni xavfsiz boshlang",
+      title: t("info.clientSteps.step3Title"),
+      desc: t("info.clientSteps.step3Desc"),
       image:
         "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&h=600&fit=crop",
     },
@@ -207,20 +187,20 @@ const Info = () => {
 
   const freelancerSteps = [
     {
-      title: "Profil yarating",
-      desc: "Portfolio va ko'nikmalaringizni ko'rsating, mijozlarni hayratda qoldiring",
+      title: t("info.freelancerSteps.step1Title"),
+      desc: t("info.freelancerSteps.step1Desc"),
       image:
         "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&h=600&fit=crop",
     },
     {
-      title: "Loyihalarni toping",
-      desc: "O'zingizga mos loyihalarni toping va professional taklif yuboring",
+      title: t("info.freelancerSteps.step2Title"),
+      desc: t("info.freelancerSteps.step2Desc"),
       image:
         "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=600&fit=crop",
     },
     {
-      title: "Pul ishlang",
-      desc: "Ishingizni tugatib, xavfsiz va tez pul oling",
+      title: t("info.freelancerSteps.step3Title"),
+      desc: t("info.freelancerSteps.step3Desc"),
       image:
         "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&h=600&fit=crop",
     },
@@ -519,69 +499,23 @@ const Info = () => {
     ],
   };
 
-  const testimonials = [
-    {
-      name: "Aziz Karimov",
-      role: "CEO, TechStartup",
-      text: "UZWORK orqali ajoyib developer topdim. Loyihamiz vaqtida bajarildi!",
-      rating: 5,
-      avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop",
-      company: "TechStartup",
-    },
-    {
-      name: "Malika Yusupova",
-      role: "Marketing Director",
-      text: "Professional dizaynerlar bilan ishlash juda qulay. Har bir loyiha uchun mutaxassis topamiz.",
-      rating: 5,
-      avatar:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop",
-      company: "Digital Agency",
-    },
-    {
-      name: "Sardor Alimov",
-      role: "Biznes egasi",
-      text: "3 oy 0% komissiya ajoyib taklif! Endi barcha ishlarimni UZWORK orqali bajaraman.",
-      rating: 5,
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop",
-      company: "E-commerce",
-    },
-    {
-      name: "Sardor Alimov",
-      role: "Biznes egasi",
-      text: "3 oy 0% komissiya ajoyib taklif! Endi barcha ishlarimni UZWORK orqali bajaraman.",
-      rating: 5,
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop",
-      company: "E-commerce",
-    },
-    {
-      name: "Sardor Alimov",
-      role: "Biznes egasi",
-      text: "3 oy 0% komissiya ajoyib taklif! Endi barcha ishlarimni UZWORK orqali bajaraman.",
-      rating: 5,
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop",
-      company: "E-commerce",
-    },
-    {
-      name: "Sardor Alimov",
-      role: "Biznes egasi",
-      text: "3 oy 0% komissiya ajoyib taklif! Endi barcha ishlarimni UZWORK orqali bajaraman.",
-      rating: 5,
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop",
-      company: "E-commerce",
-    },
+  const avatarMap = [
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop",
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop",
+    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop",
+    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop",
   ];
+
+  const testimonials = (t("info.testimonials", { returnObjects: true }) || []).map((item, i) => ({
+    ...item,
+    rating: 5,
+    avatar: avatarMap[i % avatarMap.length],
+  }));
+
 
   return (
     <div className="uzwork-landing">
-      {/* Navbar */}
-
-      <Header isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
-
+      <AppHeader />
 
       {/* Hero */}
       <section className="hero-section">
@@ -641,16 +575,16 @@ const Info = () => {
           <div className="hero-left">
             <div className="hero-badge">
               <Sparkles className="w-3 h-3 text-blue-600" />
-              <span>3 OY 0% KOMISSIYA</span>
+              <span>{t("info.heroBadge")}</span>
             </div>
 
             <h1 className="hero-title">
-              <span className="title-dark">Professional frilanserlar </span>
-              <span className="title-gradient">bir joyda</span>
+              <span className="title-dark">{t("info.heroTitle1")} </span>
+              <span className="title-gradient">{t("info.heroTitle2")}</span>
             </h1>
 
             <p className="hero-desc">
-              AI bilan mutaxassislarni toping. Payme, Click orqali to'lov
+              {t("info.heroDesc")}
             </p>
 
             <div className="hero-quick">
@@ -666,7 +600,7 @@ const Info = () => {
                   role="tab"
                   aria-selected={heroTab === "hire"}
                 >
-                  Mutaxassis yollash
+                  {t("info.tabHire")}
                 </button>
 
                 <button
@@ -680,53 +614,28 @@ const Info = () => {
                   role="tab"
                   aria-selected={heroTab === "work"}
                 >
-                  Ish topish
+                  {t("info.tabWork")}
                 </button>
               </div>
 
               {/* HIRE */}
               {heroTab === "hire" && (
                 <div className="hero-quick__panel">
-                  <div className="hero-quick__search">
-                    <input
-                      value={heroQuery}
-                      onChange={(e) => setHeroQuery(e.target.value)}
-                      onFocus={() => setIsHeroOpen(true)}
-                      onClick={() => setIsHeroOpen(true)}
-                      onKeyDown={(e) => e.key === "Enter" && onHeroSearch()}
-                      placeholder="Qanday mutaxassis kerakligini yozing..."
-                      className="hero-quick__input"
-                    />
-
-                    <button
-                      type="button"
-                      className="hero-quick__btn"
-                      onClick={onHeroSearch}
-                    >
-                      Qidirish <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {isHeroOpen && (
-                    <div className="hero-quick__popular">
-                      <div className="hero-quick__popularTitle">Ommabop qidiruvlar</div>
-
-                      <div className="hero-quick__popularList">
-                        {popularHire.map((item) => (
-                          <button
-                            key={item}
-                            type="button"
-                            className="hero-quick__popularItem"
-                            onMouseDown={(e) => e.preventDefault()} // blur bo‘lishidan oldin
-                            onClick={() => pickPopular(item)}
-                          >
-                            <span className="hero-quick__popularDot" />
-                            {item}
-                          </button>
-                        ))}
-                      </div>
+                  <div className="hero-quick__workText">
+                    <div className="hero-quick__workTitle">
+                      {t("info.heroTitle1")}
                     </div>
-                  )}
+                    <div className="hero-quick__workDesc">
+                       {t("info.heroDesc")}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="hero-quick__btn hero-quick__btn--full"
+                    onClick={() => navigate("/search/talent")}
+                  >
+                    {t("info.browseFreelancers")} <ArrowRight className="w-4 h-4" />
+                  </button>
                 </div>
               )}
               {/* WORK */}
@@ -734,10 +643,10 @@ const Info = () => {
                 <div className="hero-quick__panel hero-quick__panel--work">
                   <div className="hero-quick__workText">
                     <div className="hero-quick__workTitle">
-                      UZWORK bilan frilanserlik karyerangizni boshlang va rivojlantiring
+                      {t("info.workTitle")}
                     </div>
                     <div className="hero-quick__workDesc">
-                      Har hafta minglab yangi ish e'lonlari sizni kutmoqda.
+                      {t("info.workDesc")}
                     </div>
                   </div>
 
@@ -746,7 +655,7 @@ const Info = () => {
                     className="hero-quick__btn hero-quick__btn--green hero-quick__btn--full"
                     onClick={() => navigate("/jobs?sort=recent")}
                   >
-                    So'nggi e'lon qilingan ishlarni ko'rish<ArrowRight className="w-4 h-4" />
+                    {t("info.viewLatestJobs")}<ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               )}
@@ -777,10 +686,10 @@ const Info = () => {
 
                   <div className="preview-row">
                     <span className="badge badge-safe">
-                      <Shield className="w-4 h-4" /> Xavfsiz to'lov
+                      <Shield className="w-4 h-4" /> {t("info.safeBadge")}
                     </span>
                     <span className="badge badge-ai">
-                      <Sparkles className="w-4 h-4" /> AI moslashtirish
+                      <Sparkles className="w-4 h-4" /> {t("info.aiBadge")}
                     </span>
                   </div>
                 </div>
@@ -808,13 +717,13 @@ const Info = () => {
                 </div>
 
                 <button className="preview-btn">
-                  Freelancerni ko'rish <ArrowRight className="w-4 h-4" />
+                  {t("info.viewFreelancer")} <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
 
               <div className="preview-floating">
                 <CheckCircle className="w-4 h-4" />
-                <span>Tasdiqlangan profillar</span>
+                <span>{t("info.verifiedProfiles")}</span>
               </div>
             </div>
           </div>
@@ -826,9 +735,9 @@ const Info = () => {
         <div className="section-container">
           <div className="section-header">
             <h2 className="section-title">
-              Millionlab professionallarni o'rganing
+              {t("info.headers.exploreTitle")}
             </h2>
-            <p className="section-subtitle">Professional mutaxassislar</p>
+            <p className="section-subtitle">{t("info.headers.exploreSub")}</p>
           </div>
           <div className="categories-grid">
             {categories.map((cat, i) => (
@@ -861,7 +770,7 @@ const Info = () => {
           {selectedCategory && topFreelancers[selectedCategory] && (
             <div className="top-freelancers-section">
               <h3 className="freelancers-title">
-                Top {selectedCategory} Mutaxassislari
+                {t("info.headers.topSpecialists", { category: selectedCategory })}
               </h3>
               <div className="freelancers-grid">
                 {topFreelancers[selectedCategory].map((freelancer, i) => (
@@ -887,10 +796,10 @@ const Info = () => {
                         </div>
                       </div>
                       <div className="freelancer-rate">
-                        {freelancer.hourlyRate}/soat
+                        {freelancer.hourlyRate}{t("info.perHour")}
                       </div>
                     </div>
-                    <button className="freelancer-btn">Ko'rish</button>
+                    <button className="freelancer-btn">{t("info.viewBtn")}</button>
                   </div>
                 ))}
               </div>
@@ -898,7 +807,7 @@ const Info = () => {
                 className="close-freelancers-btn"
                 onClick={() => setSelectedCategory(null)}
               >
-                Yopish
+                {t("info.closeBtn")}
               </button>
             </div>
           )}
@@ -909,9 +818,9 @@ const Info = () => {
       <section className="work-section">
         <div className="section-container">
           <div className="section-header">
-            <h2 className="section-title">Qanday ishlaydi?</h2>
+            <h2 className="section-title">{t("info.headers.howItWorks")}</h2>
             <p className="section-subtitle">
-              O'zingizga mos yo'nalishni tanlang
+              {t("info.headers.chooseDirection")}
             </p>
             <div className="work-tabs">
               <button
@@ -919,7 +828,7 @@ const Info = () => {
                 onClick={() => setActiveTab("client")}
               >
                 <Users className="w-4 h-4" />
-                Mijozlar uchun
+                {t("info.headers.forClients")}
               </button>
               <button
                 className={`work-tab ${activeTab === "freelancer" ? "active" : ""
@@ -927,7 +836,7 @@ const Info = () => {
                 onClick={() => setActiveTab("freelancer")}
               >
                 <Briefcase className="w-4 h-4" />
-                Frilanserlar uchun
+                {t("info.headers.forFreelancers")}
               </button>
             </div>
           </div>
@@ -979,8 +888,8 @@ const Info = () => {
           <div className="work-cta">
             <button className="work-cta-btn">
               {activeTab === "client"
-                ? "Loyiha yaratish"
-                : "Ish topishni boshlash"}
+                ? t("info.workCTAClient")
+                : t("info.workCTAFreelancer")}
               <ArrowRight className="w-5 h-5" />
             </button>
           </div>
@@ -991,8 +900,8 @@ const Info = () => {
       <section className="features-section">
         <div className="section-container">
           <div className="section-header">
-            <h2 className="section-title">Nega UZWORK?</h2>
-            <p className="section-subtitle">Ishonchli yechim</p>
+            <h2 className="section-title">{t("info.headers.whyUzwork")}</h2>
+            <p className="section-subtitle">{t("info.headers.trustedSolution")}</p>
           </div>
           <div className="features-grid">
             {features.map((feat, i) => (
@@ -1014,9 +923,9 @@ const Info = () => {
       <section className="testimonials-section">
         <div className="section-container">
           <div className="section-header">
-            <h2 className="section-title">Mijozlar fikri</h2>
+            <h2 className="section-title">{t("info.headers.testimonials")}</h2>
             <p className="section-subtitle">
-              Minglab kompaniyalar UZWORK ga ishonadi
+              {t("info.headers.testimonialsSub")}
             </p>
           </div>
           <div className="testimonials-grid">
@@ -1047,16 +956,13 @@ const Info = () => {
         <div className="find-box">
           <div className="find-box__content">
             <h3 className="find-box__title">
-              Ishonchli va tajribali frilanserni toping
+              {t("info.findTrustedTitle")}
             </h3>
-
             <p className="find-box__desc">
-              Eng yaxshi mutaxassislarni bir joyda toping. Tekshirilgan profillar,
-              reytinglar va real tajriba.
+              {t("info.findTrustedDesc")}
             </p>
-
             <Link to="/search/talent" className="find-box__btn">
-              Frilanserlarni ko'rib chiqish →
+              {t("info.browseFreelancers")} →
             </Link>
           </div>
         </div>
@@ -1068,10 +974,9 @@ const Info = () => {
       <section className="faq-section">
         <div className="faq-container">
           <div className="faq-left">
-            <h2 className="faq-main-title">Tez-tez so'raladigan savollar</h2>
+            <h2 className="faq-main-title">{t("info.headers.faq")}</h2>
             <p className="faq-subtitle">
-              UZWORK platformasi haqida eng ko'p beriladigan savollarga
-              javoblar. Qo'shimcha savollaringiz bo'lsa, biz bilan bog'laning.
+              {t("info.faqSubtitle")}
             </p>
 
             <div className="faq-stats">
@@ -1080,7 +985,7 @@ const Info = () => {
                   <Users className="w-6 h-6 text-white" />
                 </div>
                 <div className="faq-stat-value">50K+</div>
-                <div className="faq-stat-label">Faol foydalanuvchilar</div>
+                <div className="faq-stat-label">{t("info.activeUsers")}</div>
               </div>
 
               <div className="faq-stat-card">
@@ -1088,7 +993,7 @@ const Info = () => {
                   <Briefcase className="w-6 h-6 text-white" />
                 </div>
                 <div className="faq-stat-value">100K+</div>
-                <div className="faq-stat-label">Bajarilgan loyihalar</div>
+                <div className="faq-stat-label">{t("info.completedProjects")}</div>
               </div>
 
               <div className="faq-stat-card">
@@ -1096,7 +1001,7 @@ const Info = () => {
                   <DollarSign className="w-6 h-6 text-white" />
                 </div>
                 <div className="faq-stat-value">$5M+</div>
-                <div className="faq-stat-label">To'langan summa</div>
+                <div className="faq-stat-label">{t("info.paidAmount")}</div>
               </div>
 
               <div className="faq-stat-card">
@@ -1104,7 +1009,7 @@ const Info = () => {
                   <Star className="w-6 h-6 text-white" />
                 </div>
                 <div className="faq-stat-value">4.9</div>
-                <div className="faq-stat-label">O'rtacha reyting</div>
+                <div className="faq-stat-label">{t("info.avgRating")}</div>
               </div>
             </div>
           </div>
@@ -1122,7 +1027,7 @@ const Info = () => {
                         }`}
                     />
                   </div>
-                  <h3 className="faq-question">UZWORK nima?</h3>
+                  <h3 className="faq-question">{t("info.faqQ1")}</h3>
                 </div>
                 <div className="faq-toggle">
                   <ChevronDown
@@ -1133,18 +1038,8 @@ const Info = () => {
               </div>
               <div className="faq-answer-wrapper">
                 <div className="faq-answer">
-                  <p>
-                    UZWORK - bu biznes, agentliklar va frilanserlarni
-                    bog'laydigan global ish bozori. Unda istalgan kishi
-                    ro'yxatdan o'tishi va ishga kirishishi mumkin.
-                  </p>
-                  <p>
-                    Bizneslar va jamoalar o'z imkoniyatlarini kengaytirish,
-                    asosiy loyihalarini tezlashtirish va AI, Mashinasozlik,
-                    Dizayn, Marketing, Dasturiy ta'minotni ishlab chiqish va
-                    boshqa sohalarda ixtisoslashgan tajribaga ega bo'lish uchun
-                    UZWORK'dan foydalanadilar.
-                  </p>
+                  <p>{t("info.faqA1p1")}</p>
+                  <p>{t("info.faqA1p2")}</p>
                 </div>
               </div>
             </div>
@@ -1161,7 +1056,7 @@ const Info = () => {
                         }`}
                     />
                   </div>
-                  <h3 className="faq-question">UZWORK qanday ishlaydi?</h3>
+                  <h3 className="faq-question">{t("info.faqQ2")}</h3>
                 </div>
                 <div className="faq-toggle">
                   <ChevronDown
@@ -1172,20 +1067,8 @@ const Info = () => {
               </div>
               <div className="faq-answer-wrapper">
                 <div className="faq-answer">
-                  <p>
-                    Mijozlar platformada frilanserlarni qidiradillar,
-                    loyihalarini joylashtiradillar, takliflarni ko'rib
-                    chiqadillar va intervyular o'tkazadillar. Frilanserlar
-                    loyihalarni ko'rib chiqadilar, takliflar yuboradilar yoki
-                    mijozlar tomonidan to'g'ridan-to'g'ri taklif qilinishi
-                    mumkin.
-                  </p>
-                  <p>
-                    Freelancerlar va mijozlar xabar almashish, fayllarni
-                    almashish, vaqtni kuzatish va xavfsiz to'lovlar kabi
-                    funksiyalarni taklif qiluvchi UZWORK'ning ishonchli
-                    platformasida hamkorlik qilishlari mumkin.
-                  </p>
+                  <p>{t("info.faqA2p1")}</p>
+                  <p>{t("info.faqA2p2")}</p>
                 </div>
               </div>
             </div>
@@ -1202,7 +1085,7 @@ const Info = () => {
                         }`}
                     />
                   </div>
-                  <h3 className="faq-question">UZWORK kim uchun?</h3>
+                  <h3 className="faq-question">{t("info.faqQ3")}</h3>
                 </div>
                 <div className="faq-toggle">
                   <ChevronDown
@@ -1213,20 +1096,8 @@ const Info = () => {
               </div>
               <div className="faq-answer-wrapper">
                 <div className="faq-answer">
-                  <p>
-                    UZWORK moslashuvchan va ishonchli frilanserlarga muhtoj
-                    bo'lgan har qanday hajmdagi kompaniyalar tomonidan eng
-                    yaxshi qo'llaniladi. Yakka tartibdagi tadbirkorlar
-                    UZWORK'dan bir martalik loyihalar uchun foydalanishlari
-                    mumkin.
-                  </p>
-                  <p>
-                    Frilanserlar UZWORK'dan butun dunyo bo'ylab barcha
-                    o'lchamdagi bizneslar bilan bog'lanish, doimiy ish topish va
-                    martabalarini oshirish uchun foydalanadilar. Bu yangi
-                    boshlanuvchilar uchun frilanserlikni boshlash uchun ajoyib
-                    platforma.
-                  </p>
+                  <p>{t("info.faqA3p1")}</p>
+                  <p>{t("info.faqA3p2")}</p>
                 </div>
               </div>
             </div>
@@ -1237,12 +1108,11 @@ const Info = () => {
                   <Gift className="w-6 h-6 text-green-600" />
                 </div>
                 <span className="faq-promo-text">
-                  Yangi Business Plus a'zosi sifatida 1000 dollar sarflasangiz,
-                  500 dollar kredit oling.
+                  {t("info.promoText")}
                 </span>
               </div>
               <button className="faq-promo-btn">
-                Taklif oling <ArrowRight className="w-4 h-4" />
+                {t("info.getOffer")} <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -1253,8 +1123,8 @@ const Info = () => {
       <section className="pricing-section">
         <div className="pricing-container">
           <div className="section-header">
-            <h2 className="section-title white">Shaffof narxlar</h2>
-            <p className="section-subtitle light">Mos rejani tanlang</p>
+            <h2 className="section-title white">{t("info.headers.pricing")}</h2>
+            <p className="section-subtitle light">{t("info.headers.chooseDirection")}</p>
           </div>
           <div className="pricing-grid">
             <div className="pricing-card basic">
@@ -1319,14 +1189,14 @@ const Info = () => {
           {/* Badge */}
           <div className="cta-badge">
             <Sparkles className="cta-badge-icon" />
-            <span className="cta-badge-text">3 oy 0% komissiya</span>
+            <span className="cta-badge-text">{t("info.ctaBadge")}</span>
           </div>
 
-          <h2 className="cta-title">Tayyor boshlashga?</h2>
+          <h2 className="cta-title">{t("info.ctaTitle")}</h2>
           <p className="cta-desc">
-            Professional mutaxassislar bilan ishni bugun boshlang
+            {t("info.ctaDesc")}
           </p>
-          <button className="cta-btn">Bepul boshlash</button>
+          <button className="cta-btn">{t("info.ctaBtn")}</button>
         </div>
       </section>
       <Footer />

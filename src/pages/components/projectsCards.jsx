@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import ProjectCard from "../components/projectCard";
-import { getJobs } from "../../api/jobs";
+import { getJobs, getRecommendedJobs, getSavedJobs, saveJob } from "../../api/jobs";
 import "../../assets/style/projectsCards.css";
 
-export default function Projects() {
+export default function Projects({ activeTab = "recommended", searchQuery = "" }) {
   const [jobs, setJobs] = useState([]);
   const [likedIds, setLikedIds] = useState(() => new Set());
   const [loading, setLoading] = useState(true);
@@ -13,30 +13,83 @@ export default function Projects() {
 
   const PAGE_SIZE = 20;
 
+  // Reset page on tab or search change
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab, searchQuery]);
+
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);
-      const res = await getJobs({ page, limit: PAGE_SIZE });
-      if (res?.success === false) {
-        setError(res?.message || "Ma'lumotlarni yuklashda xato");
-      } else {
-        const data = res?.data || res?.projects || res || [];
-        setJobs(Array.isArray(data) ? data : []);
-        if (res?.total) setTotalPages(Math.ceil(res.total / PAGE_SIZE));
-        if (res?.pages) setTotalPages(res.pages);
+      setError("");
+      
+      let res;
+      try {
+        const params = { page, limit: PAGE_SIZE, search: searchQuery };
+        
+        if (activeTab === "recommended") {
+          res = await getRecommendedJobs(params);
+        } else if (activeTab === "saved") {
+          res = await getSavedJobs(params);
+        } else {
+          res = await getJobs(params);
+        }
+
+        if (res?.success === false) {
+          setError(res?.message || "Ma'lumotlarni yuklashda xato");
+        } else {
+          const data = res?.data || res?.projects || res || [];
+          const jobsList = Array.isArray(data) ? data : [];
+          setJobs(jobsList);
+          
+          if (res?.total) setTotalPages(Math.ceil(res.total / PAGE_SIZE));
+          if (res?.pages) setTotalPages(res.pages);
+          if (res?.pagination?.total_pages) setTotalPages(res.pagination.total_pages);
+          
+          // Initialize liked state appropriately
+          const currentLikes = new Set(likedIds);
+          jobsList.forEach(job => {
+             // Agar "saved" tabda bo'lsak u albatta liked, yoki backenddan `is_saved: true` kelsa
+             if (activeTab === "saved" || job.is_saved) {
+                currentLikes.add(job.id);
+             }
+          });
+          setLikedIds(currentLikes);
+        }
+      } catch (err) {
+        setError("Tarmoq xatosi yoki server ishlamayapti");
       }
       setLoading(false);
     };
-    fetchJobs();
-  }, [page]);
 
-  const toggleLike = (id) => {
+    // Debounce to avoid too many requests while typing in search
+    const timer = setTimeout(() => {
+      fetchJobs();
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [page, activeTab, searchQuery]);
+
+  const toggleLike = async (id) => {
+    // Optimistik yangilash (darhol UI o'zgaradi)
     setLikedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
+
+    const res = await saveJob(id);
+    if (res?.success === false) {
+      // Agar xato bo'lsa oldingi holatga qaytaramiz
+      setLikedIds((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+      alert(res.message || "Saqlashda xatolik yuz berdi");
+    }
   };
 
   const goPrev = () => setPage((p) => Math.max(1, p - 1));
@@ -56,13 +109,13 @@ export default function Projects() {
     return pages.filter((v, idx, arr) => arr.indexOf(v) === idx);
   }, [page, totalPages]);
 
-  if (loading) {
+  if (loading && page === 1) {
     return (
       <div className="projects-wrap">
-        <div className="projects-header">
-          <h2 className="projects-title">Loyihalar</h2>
+        <div style={{ textAlign: "center", padding: 40, color: "#888", fontSize: "1.1rem" }}>
+          <div className="spinner"></div> 
+          Ma'lumotlar yuklanmoqda...
         </div>
-        <div style={{ textAlign: "center", padding: 40, color: "#aaa" }}>Yuklanmoqda...</div>
       </div>
     );
   }
@@ -70,10 +123,9 @@ export default function Projects() {
   if (error) {
     return (
       <div className="projects-wrap">
-        <div className="projects-header">
-          <h2 className="projects-title">Loyihalar</h2>
+        <div style={{ textAlign: "center", padding: 40, color: "#dc2626", background: "#fef2f2", borderRadius: "12px" }}>
+          {error}
         </div>
-        <div style={{ textAlign: "center", padding: 40, color: "#dc2626" }}>{error}</div>
       </div>
     );
   }
@@ -86,20 +138,21 @@ export default function Projects() {
     description: job.description,
     tags: job.skills || [],
     price: job.budget_amount
-      ? `$${job.budget_amount}`
+      ? `${job.budget_amount.toLocaleString()} UZS` // Statically mapping it to UZS since it's an Uzbek platform
       : job.hourly_rate_min
-      ? `$${job.hourly_rate_min}–$${job.hourly_rate_max}/soat`
+      ? `${job.hourly_rate_min}–${job.hourly_rate_max} UZS/soat`
       : "Kelishiladi",
+    type: job.type || "Fixed",
+    experience: job.experience_level || "Intermediate",
+    posted: job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "Yaqinda joylandi",
   }));
 
   return (
     <div className="projects-wrap">
-      <div className="projects-header">
-        <h2 className="projects-title">Loyihalar</h2>
-      </div>
-
       {mappedJobs.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 40, color: "#aaa" }}>Loyihalar topilmadi</div>
+        <div style={{ textAlign: "center", padding: 60, color: "#6b7280", background: "#f9fafb", borderRadius: "16px", border: "1px dashed #d1d5db" }}>
+          Loyihalar topilmadi. Boshqa kalit so'z yoki tabni sinab ko'ring.
+        </div>
       ) : (
         <div className="projects-grid">
           {mappedJobs.map((item) => (
@@ -110,6 +163,8 @@ export default function Projects() {
               description={item.description}
               tags={item.tags}
               price={item.price}
+              meta={`${item.type} · ${item.experience}`}
+              posted={item.posted}
               liked={likedIds.has(item.id)}
               onToggleLike={() => toggleLike(item.id)}
               onReadMore={() => window.location.href = `/jobs/${item.id}`}
@@ -119,9 +174,9 @@ export default function Projects() {
       )}
 
       {totalPages > 1 && (
-        <div className="pg-wrap">
+        <div className="pg-wrap" style={{ marginTop: "2rem" }}>
           <button className="pg-nav" onClick={goPrev} disabled={page === 1} type="button">
-            ‹ Oldingisi
+            ‹ Oldingi
           </button>
           <div className="pg-pages">
             {pageItems.map((p) => {
@@ -139,7 +194,7 @@ export default function Projects() {
             })}
           </div>
           <button className="pg-nav" onClick={goNext} disabled={page === totalPages} type="button">
-            Keyingisi ›
+            Keyingi ›
           </button>
         </div>
       )}

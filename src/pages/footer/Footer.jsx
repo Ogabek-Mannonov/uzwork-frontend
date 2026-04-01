@@ -9,104 +9,62 @@ import {
   FaPhone,
   FaMapMarkerAlt,
 } from "react-icons/fa";
-import "../footer/footerCss/footer.css";
+import { useTranslation } from "react-i18next";
+import "./footerCss/footer.css";
 
 function Footer() {
+  const { t } = useTranslation();
   return (
     <footer className="footer">
       <div className="footer-container">
-        {/* Footer Top */}
         <div className="footer-top">
           <div className="footer-column">
             <h3 className="footer-title">UzWork</h3>
-            <p className="footer-description">
-              O'zbekistondagi eng yirik freelance platformasi. Professionallar
-              va mijozlarni bir-biriga bog'laymiz.
-            </p>
+            <p className="footer-description">{t("footer.desc")}</p>
             <div className="footer-social">
-              <a href="#" className="social-link" aria-label="Facebook">
-                <FaFacebookF />
-              </a>
-              <a href="#" className="social-link" aria-label="Twitter">
-                <FaTwitter />
-              </a>
-              <a href="#" className="social-link" aria-label="LinkedIn">
-                <FaLinkedinIn />
-              </a>
-              <a href="#" className="social-link" aria-label="Instagram">
-                <FaInstagram />
-              </a>
-              <a href="#" className="social-link" aria-label="YouTube">
-                <FaYoutube />
-              </a>
+              <a href="#" className="social-link" aria-label="Facebook"><FaFacebookF /></a>
+              <a href="#" className="social-link" aria-label="Twitter"><FaTwitter /></a>
+              <a href="#" className="social-link" aria-label="LinkedIn"><FaLinkedinIn /></a>
+              <a href="#" className="social-link" aria-label="Instagram"><FaInstagram /></a>
+              <a href="#" className="social-link" aria-label="YouTube"><FaYoutube /></a>
             </div>
           </div>
 
           <div className="footer-column">
-            <h4 className="footer-heading">Mijozlar uchun</h4>
+            <h4 className="footer-heading">{t("footer.forClients")}</h4>
             <ul className="footer-links">
-              <li>
-                <a href="#">Loyiha joylashtirish</a>
-              </li>
-              <li>
-                <a href="#">Freelancer topish</a>
-              </li>
-              <li>
-                <a href="#">Narxlar</a>
-              </li>
-              <li>
-                <a href="#">Enterprise</a>
-              </li>
-              <li>
-                <a href="#">Qo'llanma</a>
-              </li>
+              <li><a href="#">{t("footer.postProject")}</a></li>
+              <li><a href="#">{t("footer.findFreelancer")}</a></li>
+              <li><a href="#">{t("footer.pricing")}</a></li>
+              <li><a href="#">{t("footer.enterprise")}</a></li>
+              <li><a href="#">{t("footer.guide")}</a></li>
             </ul>
           </div>
 
           <div className="footer-column">
-            <h4 className="footer-heading">Freelancerlar uchun</h4>
+            <h4 className="footer-heading">{t("footer.forFreelancers")}</h4>
             <ul className="footer-links">
-              <li>
-                <a href="#">Ish topish</a>
-              </li>
-              <li>
-                <a href="#">Profil yaratish</a>
-              </li>
-              <li>
-                <a href="#">Portfolio</a>
-              </li>
-              <li>
-                <a href="#">Muvaffaqiyat hikoyalari</a>
-              </li>
-              <li>
-                <a href="#">Resurslar</a>
-              </li>
+              <li><a href="#">{t("footer.findWork")}</a></li>
+              <li><a href="#">{t("footer.createProfile")}</a></li>
+              <li><a href="#">{t("footer.portfolio")}</a></li>
+              <li><a href="#">{t("footer.successStories")}</a></li>
+              <li><a href="#">{t("footer.resources")}</a></li>
             </ul>
           </div>
 
           <div className="footer-column">
-            <h4 className="footer-heading">Kompaniya</h4>
+            <h4 className="footer-heading">{t("footer.company")}</h4>
             <ul className="footer-links">
-              <li>
-                <a href="#">Biz haqimizda</a>
-              </li>
-              <li>
-                <a href="#">Blog</a>
-              </li>
-              <li>
-                <a href="#">Jamoamiz</a>
-              </li>
-              <li>
-                <a href="#">Ish o'rinlari</a>
-              </li>
-              <li>
-                <a href="#">Aloqa</a>
-              </li>
+              <li><a href="#">{t("footer.aboutUs")}</a></li>
+              <li><a href="#">{t("footer.blog")}</a></li>
+              <li><a href="#">{t("footer.team")}</a></li>
+              <li><a href="#">{t("footer.jobs")}</a></li>
+              <li><a href="#">{t("footer.contact")}</a></li>
             </ul>
           </div>
 
           <div className="footer-column">
-            <h4 className="footer-heading">Aloqa</h4>
+            <h4 className="footer-heading">{t("footer.contact")}</h4>
             <ul className="footer-contact">
               <li>
                 <FaMapMarkerAlt className="contact-icon" />
@@ -124,17 +82,16 @@ function Footer() {
           </div>
         </div>
 
-        {/* Footer Bottom */}
         <div className="footer-bottom">
           <div className="footer-bottom-left">
-            <p>&copy; 2025 UzWork. Barcha huquqlar himoyalangan.</p>
+            <p>{t("footer.copyright")}</p>
           </div>
           <div className="footer-bottom-right">
-            <a href="#">Maxfiylik siyosati</a>
+            <a href="#">{t("footer.privacy")}</a>
             <span className="separator">|</span>
-            <a href="#">Foydalanish shartlari</a>
+            <a href="#">{t("footer.terms")}</a>
             <span className="separator">|</span>
-            <a href="#">Cookie siyosati</a>
+            <a href="#">{t("footer.cookies")}</a>
           </div>
         </div>
       </div>
