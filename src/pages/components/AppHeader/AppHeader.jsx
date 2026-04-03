@@ -6,7 +6,7 @@ import {
   Bell, HelpCircle, Settings, User, Search, Check,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import useTheme from "../Theme/useTheme";
+import { useThemeContext } from "../Theme/ThemeContext";
 
 import "../header/Header.css";
 import "../../../assets/style/FreeNavbar.css";
@@ -65,7 +65,7 @@ function LangSwitcher({ i18n, changeLanguage }) {
 // ══════════════════════════════════════════════════════════
 function LandingHeader({ i18n, changeLanguage }) {
   const { t } = useTranslation();
-  const { isDark, toggle } = useTheme();
+  const { isDark, toggle } = useThemeContext();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [hireOpen, setHireOpen] = useState(false);
@@ -288,7 +288,7 @@ function LandingHeader({ i18n, changeLanguage }) {
 // ══════════════════════════════════════════════════════════
 function AuthHeader({ i18n, changeLanguage }) {
   const { t } = useTranslation();
-  const { isDark, toggle } = useTheme();
+  const { isDark, toggle } = useThemeContext();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [jobsOpen, setJobsOpen] = useState(false);
   const jobsRef = useRef(null);

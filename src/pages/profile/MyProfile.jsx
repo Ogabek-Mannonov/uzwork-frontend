@@ -64,9 +64,11 @@ import "../profile/profile-css/profile.css";
 import { getMyProfile, updateMyProfile } from "../../api/common";
 import { getMyPortfolio, createPortfolioItem, updatePortfolioItem, deletePortfolioItem } from "../../api/freelancer";
 import { useTranslation } from "react-i18next";
+import { useThemeContext } from "../../pages/components/Theme/ThemeContext";
 
 const MyProfile = () => {
   const { t } = useTranslation();
+  const { isDark } = useThemeContext();
   // const [darkMode, setDarkMode] = useState(false);
   const [activeSection, setActiveSection] = useState("my-info");
   // const [activeHeaderTab, setActiveHeaderTab] = useState("find");
@@ -698,7 +700,7 @@ const MyProfile = () => {
   };
 
   return (
-    <div className="settings-container">
+    <div className={`settings-container ${isDark ? "dark" : "light"}`}>
       
       {/* HEADER
       <header className="settings-header">

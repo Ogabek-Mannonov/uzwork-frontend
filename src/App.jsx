@@ -12,6 +12,7 @@ import RoleRoute from "./pages/components/routing/RoleRoute.jsx";
 /* Pages */
 import Signup from "./pages/auth/Signup.jsx";
 import Login from "./pages/auth/Login.jsx";
+import { ThemeProvider } from "./pages/components/Theme/ThemeContext.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 
 import Info from "./pages/info/Info.jsx";
@@ -52,8 +53,9 @@ import FindWork from "./pages/Freelancer/FindW/FindWork.jsx";
 
 function App() {
   return (
-    <Router>
-      <Routes>
+    <ThemeProvider>
+      <Router>
+        <Routes>
         {/* Public landing */}
         <Route path="/" element={<Info />} />
         <Route path="/hire/cold-callers" element={<CategoryPage />} />
@@ -120,6 +122,7 @@ function App() {
         </Route>
       </Routes>
     </Router>
+  </ThemeProvider>
   );
 }
 

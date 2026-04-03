@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <div className="bg-white rounded-2xl shadow p-8 max-w-lg w-full text-center">
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--bg)' }}>
+      <div className="rounded-2xl shadow p-8 max-w-lg w-full text-center" style={{ background: 'var(--surface)', color: 'var(--text)' }}>
         <h1 className="text-3xl font-bold">404</h1>
-        <p className="text-gray-600 mt-2">Bu sahifa topilmadi.</p>
+        <p className="mt-2" style={{ color: 'var(--muted)' }}>Bu sahifa topilmadi.</p>
 
         <div className="mt-6 flex gap-3 justify-center">
           <Link

@@ -527,4 +527,49 @@
   }
 }
 
+/* Dark Mode Overrides */
+body.dark-mode .signup-container {
+  background: var(--bg);
+}
+body.dark-mode .signup-card {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+}
+body.dark-mode .title-signup {
+  color: var(--text);
+}
+body.dark-mode .form-input,
+body.dark-mode .upwork-signup-form input,
+body.dark-mode .country-select {
+  background: var(--input-bg);
+  color: var(--input-text);
+  border-color: var(--input-border);
+}
+body.dark-mode .signup-or,
+body.dark-mode .text-center-signup,
+body.dark-mode .role-box p,
+body.dark-mode .upwork-checkbox-group {
+  color: var(--muted);
+}
+body.dark-mode .step-item {
+  color: var(--muted);
+}
+body.dark-mode .step-item.active {
+  color: var(--brand);
+}
+body.dark-mode .role-box {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+body.dark-mode .role-box:hover {
+  background: var(--surface);
+  border-color: var(--brand);
+}
+body.dark-mode .role-box.selected {
+  background: var(--brand-ghost);
+  border-color: var(--brand);
+}
+
+
 

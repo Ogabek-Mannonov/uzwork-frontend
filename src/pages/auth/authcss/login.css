@@ -317,3 +317,29 @@ body {
     font-size: 1.5rem;
   }
 }
+
+/* Dark Mode Overrides */
+body.dark-mode .login-container {
+  background: var(--bg);
+}
+body.dark-mode .login-card {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+}
+body.dark-mode .title-login {
+  color: var(--text);
+}
+body.dark-mode .login-input {
+  background: var(--input-bg);
+  color: var(--input-text);
+  border-color: var(--input-border);
+}
+body.dark-mode .login-or,
+body.dark-mode .text-center {
+  color: var(--muted);
+}
+body.dark-mode .options-row {
+  color: var(--text-2);
+}
+

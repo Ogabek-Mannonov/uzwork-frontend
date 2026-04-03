@@ -14,10 +14,11 @@ export default function MainLayout() {
       <div
         style={{
           flex: 1,
-          background: isChatPage ? "transparent" : undefined,
+          background: isChatPage ? "transparent" : "var(--bg)",
+          color: "var(--text)",
           overflow: isChatPage ? "hidden" : undefined,
         }}
-        className={isChatPage ? "" : "min-h-screen bg-gray-50"}
+        className={isChatPage ? "" : "min-h-screen"}
       >
         <Outlet />
       </div>
