@@ -1,9 +1,9 @@
 // src/api/messages.js
 import api from "./auth";
 
-// ===================== MESSAGES / CHATS =====================
+// ─── CHATS ──────────────────────────────────────────────
 
-/** Barcha chatlar */
+/** Barcha chatlarni olish */
 export const getChats = async () => {
   try {
     const res = await api.get("/messages");
@@ -13,7 +13,7 @@ export const getChats = async () => {
   }
 };
 
-/** Chat tarixi */
+/** Bitta chatning tarixini olish */
 export const getChatHistory = async (chatId) => {
   try {
     const res = await api.get(`/messages/${chatId}`);
@@ -23,10 +23,13 @@ export const getChatHistory = async (chatId) => {
   }
 };
 
-/** Xabar yuborish */
-export const sendMessage = async (payload) => {
+/**
+ * Xabar yuborish
+ * Backend kutadi: { chat_id, message_text, type?, file_url? }
+ */
+export const sendMessage = async ({ chat_id, message_text, type = "text", file_url }) => {
   try {
-    const res = await api.post("/messages", payload);
+    const res = await api.post("/messages", { chat_id, message_text, type, file_url });
     return res?.data;
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err?.message };
@@ -43,10 +46,30 @@ export const markMessagesAsRead = async (chatId) => {
   }
 };
 
-/** Ovozli xabar yuborish */
-export const sendVoiceMessage = async (chatId, formData) => {
+/** Xabarni tahrirlash */
+export const editMessage = async (messageId, { content }) => {
   try {
-    const res = await api.post(`/messages/${chatId}/voice`, formData, {
+    const res = await api.put(`/messages/${messageId}`, { content });
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Xabarni o'chirish (soft delete) */
+export const deleteMessage = async (messageId) => {
+  try {
+    const res = await api.delete(`/messages/${messageId}`);
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Ovozli xabar uchun maxsus upload */
+export const uploadVoice = async (formData) => {
+  try {
+    const res = await api.post(`/upload/voice`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res?.data;
@@ -56,29 +79,9 @@ export const sendVoiceMessage = async (chatId, formData) => {
 };
 
 /** Video qo'ng'iroq boshlash */
-export const startVideoCall = async (chatId) => {
+export const startVideoCall = async (chatId, video_call_link) => {
   try {
-    const res = await api.post(`/messages/${chatId}/video-call`);
-    return res?.data;
-  } catch (err) {
-    return { success: false, message: err?.response?.data?.message || err?.message };
-  }
-};
-
-/** Xabarni tahrirlash */
-export const editMessage = async (messageId, payload) => {
-  try {
-    const res = await api.put(`/messages/${messageId}`, payload);
-    return res?.data;
-  } catch (err) {
-    return { success: false, message: err?.response?.data?.message || err?.message };
-  }
-};
-
-/** Xabarni o'chirish */
-export const deleteMessage = async (messageId) => {
-  try {
-    const res = await api.delete(`/messages/${messageId}`);
+    const res = await api.post(`/messages/${chatId}/video-call`, { video_call_link });
     return res?.data;
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err?.message };

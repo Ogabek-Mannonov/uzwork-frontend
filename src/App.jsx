@@ -102,8 +102,9 @@ function App() {
             <Route path="/contracts/:id" element={<ContractDetail />} />
 
             {/* Messages */}
-            <Route path="/messages" element={<ChatList />} />
-            <Route path="/messages/:id" element={<ChatDetail />} />
+            <Route path="/messages" element={<ChatList />}>
+              <Route path=":id" element={<ChatDetail />} />
+            </Route>
 
             {/* Wallet */}
             <Route path="/wallet" element={<Wallet />} />

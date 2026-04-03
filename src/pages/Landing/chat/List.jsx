@@ -1,85 +1,234 @@
-import { useEffect, useState } from "react";
+// src/pages/Landing/chat/List.jsx
+import { useEffect, useState, useRef, useCallback } from "react";
+import { useNavigate, useParams, Outlet, useLocation } from "react-router-dom";
 import { getChats } from "../../../api/messages";
-import { useNavigate } from "react-router-dom";
+import { getSocket } from "../../../hooks/useSocket";
+import "./chat.css";
 
-export default function ChatList() {
-  const navigate = useNavigate();
-  const [chats, setChats] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+// ── helpers ──────────────────────────────────────────────
+const BACKEND = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
 
-  useEffect(() => {
-    const fetch = async () => {
-      setLoading(true);
-      const res = await getChats();
-      if (res?.success === false) setError(res?.message || "Xato");
-      else setChats(res?.data || res?.chats || res || []);
-      setLoading(false);
-    };
-    fetch();
-  }, []);
+function avatarSrc(url) {
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  return `${BACKEND}${url}`;
+}
+
+function formatTime(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now - d;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Hozir";
+  if (diffMins < 60) return `${diffMins}m`;
+  if (diffHours < 24) return `${diffHours}s`;
+  if (diffDays < 7) return `${diffDays}k`;
+  return d.toLocaleDateString("uz-UZ", { month: "short", day: "numeric" });
+}
+
+function Avatar({ user, size = "md" }) {
+  const name = user
+    ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "?"
+    : "?";
+  const initials = name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+  const src = avatarSrc(user?.avatar_url);
 
   return (
-    <div style={{ maxWidth: 700, margin: "0 auto", padding: "32px 16px" }}>
-      <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 24 }}>Xabarlar</h1>
-
-      {loading && <p style={{ textAlign: "center", color: "#666" }}>Yuklanmoqda...</p>}
-      {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
-
-      {!loading && chats.length === 0 && (
-        <div style={{ textAlign: "center", padding: 60, color: "#aaa" }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>💬</div>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>Hali xabarlar yo'q</div>
-        </div>
+    <div className={`avatar-circle ${size}`}>
+      {src ? (
+        <img src={src} alt={name} onError={(e) => (e.target.style.display = "none")} />
+      ) : (
+        initials
       )}
+    </div>
+  );
+}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {chats.map((chat) => (
-          <div
-            key={chat.id}
-            onClick={() => navigate(`/messages/${chat.id}`)}
-            style={{
-              display: "flex", alignItems: "center", gap: 14,
-              background: "#fff", border: "1px solid #e0e0e0",
-              borderRadius: 12, padding: "16px 20px", cursor: "pointer",
-              transition: "all 0.2s"
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = "#f9f9f9"; e.currentTarget.style.borderColor = "#14a800"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.borderColor = "#e0e0e0"; }}
-          >
-            <div style={{
-              width: 44, height: 44, borderRadius: "50%", background: "#14a800",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              color: "#fff", fontWeight: 800, fontSize: 16, flexShrink: 0
-            }}>
-              {(chat.other_user_name || chat.name || "?")[0]?.toUpperCase()}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ fontWeight: 700, fontSize: 14, color: "#1a1a1a" }}>
-                  {chat.other_user_name || chat.name || `Chat #${chat.id}`}
-                </div>
-                {chat.last_message_at && (
-                  <div style={{ fontSize: 11, color: "#aaa" }}>
-                    {new Date(chat.last_message_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </div>
-                )}
-              </div>
-              <div style={{ fontSize: 13, color: "#888", marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {chat.last_message || "Xabar yo'q"}
-              </div>
-            </div>
-            {chat.unread_count > 0 && (
-              <span style={{
-                background: "#14a800", color: "#fff",
-                borderRadius: "50%", width: 20, height: 20,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 11, fontWeight: 800, flexShrink: 0
-              }}>{chat.unread_count}</span>
+// ── Main component ────────────────────────────────────────
+export default function ChatPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { id: activeChatId } = useParams();
+
+  const [chats, setChats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+  // ── load chats ─────────
+  const loadChats = useCallback(async () => {
+    const res = await getChats();
+    if (res?.success !== false) {
+      const raw = res?.data?.chats || res?.chats || res?.data || res || [];
+      setChats(Array.isArray(raw) ? raw : []);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadChats();
+  }, [loadChats]);
+
+  // ── socket: unread update ──
+  useEffect(() => {
+    const socket = getSocket();
+    const handleUnread = () => loadChats();
+    const handleRead = () => loadChats();
+    socket.on("unreadUpdate", handleUnread);
+    socket.on("messagesRead", handleRead);
+    socket.on("newMessage", handleUnread);
+    return () => {
+      socket.off("unreadUpdate", handleUnread);
+      socket.off("messagesRead", handleRead);
+      socket.off("newMessage", handleUnread);
+    };
+  }, [loadChats]);
+
+  // ── helpers ──────────────
+  const getPartner = (chat) => chat.partner || null;
+
+  const getPartnerName = (chat) => {
+    const p = getPartner(chat);
+    if (!p) return `Chat #${chat.chat_id || chat.id}`;
+    const full = `${p.first_name || ""} ${p.last_name || ""}`.trim();
+    return full || p.username || "Foydalanuvchi";
+  };
+
+  const getChatType = (chat) => {
+    if (chat.contract_id) return "Shartnoma";
+    if (chat.job_id) return "Ish";
+    return null;
+  };
+
+  const filteredChats = chats.filter((c) => {
+    if (!search) return true;
+    const name = getPartnerName(c).toLowerCase();
+    return name.includes(search.toLowerCase());
+  });
+
+  const totalUnread = chats.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+
+  const openChat = (chatId) => {
+    setSidebarOpen(false);
+    navigate(`/messages/${chatId}`);
+  };
+
+  // ── render ───────────────
+  return (
+    <div className="chat-wrapper">
+      {/* ── SIDEBAR ── */}
+      <aside className={`chat-sidebar ${sidebarOpen ? "open" : ""}`}>
+        <div className="chat-sidebar-header">
+          <h1 className="chat-sidebar-title">
+            Xabarlar
+            {totalUnread > 0 && (
+              <span
+                className="unread-badge"
+                style={{ display: "inline-flex", marginLeft: 10, width: "auto", borderRadius: 12, padding: "0 8px" }}
+              >
+                {totalUnread}
+              </span>
             )}
+          </h1>
+          <div className="chat-search-box">
+            <span className="chat-search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="Qidirish..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
-        ))}
-      </div>
+        </div>
+
+        <div className="chat-list">
+          {loading ? (
+            <div className="chat-skeleton">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="skeleton-row">
+                  <div className="skeleton-avatar" />
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div className="skeleton-bubble" style={{ height: 14, width: "60%", borderRadius: 6 }} />
+                    <div className="skeleton-bubble" style={{ height: 12, width: "80%", borderRadius: 6 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredChats.length === 0 ? (
+            <div className="chat-list-empty">
+              <div className="chat-list-empty-icon">💬</div>
+              <p>{search ? "Topilmadi" : "Hali chatlar yo'q"}</p>
+            </div>
+          ) : (
+            filteredChats.map((chat) => {
+              const cid = chat.chat_id || chat.id;
+              const partner = getPartner(chat);
+              const type = getChatType(chat);
+              const isActive = cid === activeChatId;
+              const hasUnread = chat.unread_count > 0;
+
+              return (
+                <div
+                  key={cid}
+                  className={`chat-item ${isActive ? "active" : ""}`}
+                  onClick={() => openChat(cid)}
+                >
+                  <div className="chat-item-avatar">
+                    <Avatar user={partner} size="md" />
+                  </div>
+
+                  <div className="chat-item-info">
+                    <div className="chat-item-top">
+                      <span className="chat-item-name">{getPartnerName(chat)}</span>
+                      <span className="chat-item-time">
+                        {formatTime(chat.last_message_at || chat.chat_created_at)}
+                      </span>
+                    </div>
+                    <div className="chat-item-bottom">
+                      <span className={`chat-item-preview ${hasUnread ? "unread" : ""}`}>
+                        {chat.last_message_content
+                          ? chat.last_message_content.slice(0, 38) +
+                            (chat.last_message_content.length > 38 ? "…" : "")
+                          : "Xabar yo'q"}
+                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        {type && <span className="chat-item-badge">{type}</span>}
+                        {hasUnread && (
+                          <span className="unread-badge">{chat.unread_count}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </aside>
+
+      {/* ── CHAT AREA ── */}
+      <main className="chat-area">
+        {!activeChatId ? (
+          <div className="chat-empty-state">
+            <div className="chat-empty-state-icon">💬</div>
+            <h2>Suhbat tanlang</h2>
+            <p>Chap tarafdan chatni tanlang yoki yangi muloqot boshlang</p>
+          </div>
+        ) : (
+          <Outlet context={{ onBack: () => setSidebarOpen(true), reloadList: loadChats }} />
+        )}
+      </main>
     </div>
   );
 }
