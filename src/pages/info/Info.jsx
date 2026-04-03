@@ -31,6 +31,7 @@ import {
   DollarSign,
   Moon,
   Sun,
+  Search,
 } from "lucide-react";
 import "./infocss/info.css";
 import Footer from "../footer/Footer";
@@ -57,7 +58,17 @@ const Info = () => {
     });
   };
   const [heroTab, setHeroTab] = useState("hire"); // "hire" | "work"
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search/talent?q=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate("/search/talent");
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -621,21 +632,41 @@ const Info = () => {
               {/* HIRE */}
               {heroTab === "hire" && (
                 <div className="hero-quick__panel">
-                  <div className="hero-quick__workText">
-                    <div className="hero-quick__workTitle">
-                      {t("info.heroTitle1")}
+                  <form className="hero-quick__search" onSubmit={handleSearch}>
+                    <div className="hero-quick__input-wrapper">
+                      <Search className="hero-quick__search-icon" />
+                      <input
+                        type="text"
+                        className="hero-quick__input"
+                        placeholder={t("info.searchPlaceholder")}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
                     </div>
-                    <div className="hero-quick__workDesc">
-                       {t("info.heroDesc")}
+                    <button type="submit" className="hero-quick__btn">
+                      {t("info.searchBtn")}
+                    </button>
+                  </form>
+                  <div className="hero-quick__popular">
+                    <span className="hero-quick__popular-title">{t("info.popularSearches")}:</span>
+                    <div className="hero-quick__tags">
+                      {(t("info.popularTags", { returnObjects: true }) || []).map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          className="hero-quick__tag"
+                          onClick={() => {
+                            setSearchQuery(tag);
+                            navigate(
+                              `/search/talent?q=${encodeURIComponent(tag)}`
+                            );
+                          }}
+                        >
+                          {tag}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    className="hero-quick__btn hero-quick__btn--full"
-                    onClick={() => navigate("/search/talent")}
-                  >
-                    {t("info.browseFreelancers")} <ArrowRight className="w-4 h-4" />
-                  </button>
                 </div>
               )}
               {/* WORK */}
