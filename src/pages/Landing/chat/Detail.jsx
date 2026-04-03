@@ -10,6 +10,8 @@ import {
   uploadVoice,
 } from "../../../api/messages";
 import { getSocket } from "../../../hooks/useSocket";
+import i18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 
 // ── constants ────────────────────────────────────────────
 const BACKEND =
@@ -35,9 +37,9 @@ function formatDateLabel(dateStr) {
   const d = new Date(dateStr);
   const now = new Date();
   const diffDays = Math.floor((now - d) / 86400000);
-  if (diffDays === 0) return "Bugun";
-  if (diffDays === 1) return "Kecha";
-  return d.toLocaleDateString("uz-UZ", {
+  if (diffDays === 0) return i18n.t("chat.today", "Bugun");
+  if (diffDays === 1) return i18n.t("chat.yesterday", "Kecha");
+  return d.toLocaleDateString(i18n.language === 'uz' ? "uz-UZ" : (i18n.language === 'ru' ? "ru-RU" : "en-US"), {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -109,18 +111,18 @@ function ContextMenu({ x, y, isOwn, onEdit, onDelete, onCopy, onClose }) {
   return (
     <div ref={ref} className="msg-context-menu" style={style}>
       <div className="msg-context-item" onClick={onCopy}>
-        📋 Nusxalash
+        📋 {i18n.t("chat.copy", "Nusxalash")}
       </div>
       {isOwn && (
         <>
           <div className="msg-context-item" onClick={onEdit}>
-            ✏️ Tahrirlash
+            ✏️ {i18n.t("chat.edit", "Tahrirlash")}
           </div>
           <div
             className="msg-context-item danger"
             onClick={onDelete}
           >
-            🗑️ O'chirish
+            🗑️ {i18n.t("chat.delete", "O'chirish")}
           </div>
         </>
       )}
@@ -241,7 +243,7 @@ function MessageBubble({
           <div className="msg-sender-name">
             {`${partner.first_name || ""} ${partner.last_name || ""}`.trim() ||
               partner.username ||
-              "Foydalanuvchi"}
+              i18n.t("chat.user", "Foydalanuvchi")}
           </div>
         )}
 
@@ -256,7 +258,7 @@ function MessageBubble({
           }}
         >
           {isDeleted ? (
-            <span className="msg-deleted">🚫 Xabar o'chirildi</span>
+            <span className="msg-deleted">🚫 {i18n.t("chat.msgDeleted", "Xabar o'chirildi")}</span>
           ) : isImage && msg.file_url ? (
             <a href={avatarSrc(msg.file_url)} target="_blank" rel="noreferrer">
               <img
@@ -278,7 +280,7 @@ function MessageBubble({
                 <div className="file-name">
                   {msg.file_url.split("/").pop()}
                 </div>
-                <div className="file-download">Yuklab olish</div>
+                <div className="file-download">{i18n.t("chat.download", "Yuklab olish")}</div>
               </div>
             </a>
           ) : isVoice && msg.file_url ? (
@@ -292,7 +294,7 @@ function MessageBubble({
         {isLast && (
           <div className={`msg-time ${isOwn ? "sent" : "received"}`}>
             {msg.is_edited && (
-              <span className="msg-edited">tahrirlangan</span>
+              <span className="msg-edited">{i18n.t("chat.edited", "tahrirlangan")}</span>
             )}
             <span>{formatMsgTime(msg.created_at)}</span>
             {isOwn && (
@@ -360,7 +362,7 @@ export default function ChatDetail() {
     try {
       const res = await getChatHistory(chatId);
       if (res?.success === false) {
-        setError(res.message || "Xato yuz berdi");
+        setError(res.message || i18n.t("chat.errorOccurred", "Xato yuz berdi"));
         setLoading(false);
         return;
       }
@@ -377,7 +379,7 @@ export default function ChatDetail() {
       if (data?.chat) setChatInfo(data.chat);
       if (data?.job) setJobInfo(data.job);
     } catch (e) {
-      setError("Xabarlarni yuklab bo'lmadi");
+      setError(i18n.t("chat.failLoadMsgs", "Xabarlarni yuklab bo'lmadi"));
     } finally {
       setLoading(false);
     }
@@ -456,7 +458,7 @@ export default function ChatDetail() {
     };
 
     const onTyping = ({ userId, username }) => {
-      if (userId !== currentUser?.id) setTypingUser(username || "Yozmoqda");
+      if (userId !== currentUser?.id) setTypingUser(username || i18n.t("chat.typing", "Yozmoqda"));
     };
     const onStopTyping = () => setTypingUser(null);
     const onRead = () => {
@@ -536,7 +538,7 @@ export default function ChatDetail() {
         setRecordTime((prev) => prev + 1);
       }, 1000);
     } catch (err) {
-      notify("Mikrofonga ruxsat yo'q", "error");
+      notify(i18n.t("chat.noMicrophone", "Mikrofonga ruxsat yo'q"), "error");
     }
   };
 
@@ -566,7 +568,7 @@ export default function ChatDetail() {
     const uploadRes = await uploadVoice(formData);
     if (!uploadRes?.success) {
       setSending(false);
-      notify(uploadRes?.message || "Ovoz yuklanmadi", "error");
+      notify(uploadRes?.message || i18n.t("chat.voiceUploadFail", "Ovoz yuklanmadi"), "error");
       return;
     }
 
@@ -575,7 +577,7 @@ export default function ChatDetail() {
     setSending(false);
     
     if (res?.success === false) {
-      notify(res.message || "Xabar yuborilmadi", "error");
+      notify(res.message || i18n.t("chat.sendFail", "Xabar yuborilmadi"), "error");
     } else {
       reloadList?.();
     }
@@ -591,7 +593,7 @@ export default function ChatDetail() {
       setEditingMsg(null);
       textareaRef.current && (textareaRef.current.style.height = "auto");
       const res = await editMessage(editingMsg.id, { content });
-      if (res?.success === false) notify(res.message || "Xato", "error");
+      if (res?.success === false) notify(res.message || i18n.t("chat.error", "Xato"), "error");
       else {
         setMessages((prev) =>
           prev.map((m) =>
@@ -616,7 +618,7 @@ export default function ChatDetail() {
     setSending(false);
 
     if (res?.success === false) {
-      notify(res.message || "Xabar yuborilmadi", "error");
+      notify(res.message || i18n.t("chat.sendFail", "Xabar yuborilmadi"), "error");
       setText(content);
     } else {
       reloadList?.();
@@ -639,14 +641,14 @@ export default function ChatDetail() {
   const handleCopy = () => {
     if (contextMenu?.msg?.content) {
       navigator.clipboard.writeText(contextMenu.msg.content);
-      notify("Nusxalandi ✓");
+      notify(i18n.t("chat.copied", "Nusxalandi ✓"));
     }
     setContextMenu(null);
   };
 
   const handleEdit = () => {
     const msg = contextMenu?.msg;
-    if (!msg || msg.type !== "text") { notify("Faqat matn xabarlarni tahrirlash mumkin", "error"); setContextMenu(null); return; }
+    if (!msg || msg.type !== "text") { notify(i18n.t("chat.onlyTextCanBeEdited", "Faqat matn xabarlarni tahrirlash mumkin"), "error"); setContextMenu(null); return; }
     setEditingMsg(msg);
     setText(msg.content || "");
     setContextMenu(null);
@@ -661,7 +663,7 @@ export default function ChatDetail() {
     setContextMenu(null);
     if (!msg) return;
     const res = await deleteMessage(msg.id);
-    if (res?.success === false) notify(res.message || "O'chirib bo'lmadi", "error");
+    if (res?.success === false) notify(res.message || i18n.t("chat.deleteFail", "O'chirib bo'lmadi"), "error");
     else {
       setMessages((prev) =>
         prev.map((m) =>
@@ -739,7 +741,7 @@ export default function ChatDetail() {
             fontWeight: 600,
           }}
         >
-          Qayta urinish
+          {i18n.t("chat.retry", "Qayta urinish")}
         </button>
       </div>
     );
@@ -765,10 +767,10 @@ export default function ChatDetail() {
               {typingUser ? (
                 <>
                   <span className="chat-header-status-dot" />
-                  <span className="typing">{typingUser} yozmoqda…</span>
+                  <span className="typing">{typingUser} {i18n.t("chat.typingFull", "yozmoqda…")}</span>
                 </>
               ) : (
-                <span className="online">Online</span>
+                <span className="online">{i18n.t("chat.online", "Online")}</span>
               )}
             </p>
           </div>
@@ -805,10 +807,10 @@ export default function ChatDetail() {
           >
             <div style={{ fontSize: 52, marginBottom: 14 }}>👋</div>
             <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 6 }}>
-              Suhbat boshlang!
+              {i18n.t("chat.startChat", "Suhbat boshlang!")}
             </div>
             <div style={{ fontSize: 14 }}>
-              {partnerName} bilan birinchi xabarni yuboring
+              {partnerName} {i18n.t("chat.sendFirstMsg", "bilan birinchi xabarni yuboring")}
             </div>
           </div>
         )}
@@ -877,7 +879,7 @@ export default function ChatDetail() {
         <button
           className="scroll-to-bottom"
           onClick={() => scrollToBottom()}
-          title="Pastga"
+          title={i18n.t("chat.scrollDown", "Pastga")}
         >
           ↓
         </button>
@@ -889,7 +891,7 @@ export default function ChatDetail() {
         {editingMsg && (
           <div className="edit-mode-bar">
             <span>✏️</span>
-            <span>Tahrirlash: {editingMsg.content?.slice(0, 60)}{editingMsg.content?.length > 60 ? "…" : ""}</span>
+            <span>{i18n.t("chat.editing", "Tahrirlash:")} {editingMsg.content?.slice(0, 60)}{editingMsg.content?.length > 60 ? "…" : ""}</span>
             <button
               className="edit-cancel-btn"
               onClick={() => { setEditingMsg(null); setText(""); }}
@@ -910,14 +912,14 @@ export default function ChatDetail() {
               <button
                 className="record-cancel-btn"
                 onClick={cancelRecording}
-                title="Bekor qilish"
+                title={i18n.t("chat.cancel", "Bekor qilish")}
               >
                 🗑️
               </button>
               <button
                 className="record-send-btn"
                 onClick={sendRecording}
-                title="Yuborish"
+                title={i18n.t("chat.send", "Yuborish")}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -933,7 +935,7 @@ export default function ChatDetail() {
                 value={text}
                 onChange={handleTextChange}
                 onKeyDown={handleKey}
-                placeholder="Xabar yozing... (Enter — yuborish, Shift+Enter — satr)"
+                placeholder={i18n.t("chat.typeMsgPlaceholder", "Xabar yozing... (Enter — yuborish, Shift+Enter — satr)")}
                 rows={1}
               />
             </>
@@ -945,7 +947,7 @@ export default function ChatDetail() {
                   className="chat-action-btn telegram-mic-btn"
                   onClick={startRecording}
                   disabled={sending}
-                  title="Ovozli xabar"
+                  title={i18n.t("chat.voiceMsg", "Ovozli xabar")}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <path d="M12 15C13.6569 15 15 13.6569 15 12V6C15 4.34315 13.6569 3 12 3C10.3431 3 9 4.34315 9 6V12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -957,7 +959,7 @@ export default function ChatDetail() {
                 className={`chat-send-btn ${text.trim() ? "active" : ""}`}
                 onClick={handleSend}
                 disabled={sending || (!text.trim() && !editingMsg)}
-                title="Yuborish"
+                title={i18n.t("chat.send", "Yuborish")}
               >
                   {sending ? (
                     <div style={{ width: 16, height: 16, border: "2px solid #fff", borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />

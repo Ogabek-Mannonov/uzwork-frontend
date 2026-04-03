@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { FaUser, FaLock, FaPhoneAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
+import { useTranslation } from "react-i18next";
 import "./authcss/login.css";
 
 import { Toast } from "../components/Toast";
@@ -10,6 +11,7 @@ import { login as loginRequest, googleLogin as googleLoginRequest } from "../../
 
 const Login = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [step, setStep] = useState("email"); // email, password
   const [identifier, setIdentifier] = useState(""); // email yoki phone
@@ -76,7 +78,7 @@ const Login = () => {
   const handleEmailSubmit = (e) => {
     e.preventDefault();
     if (!identifier.trim()) {
-      setError("Iltimos, email yoki telefon raqamni kiriting");
+      setError(t("auth.enterEmailPhone", "Iltimos, email yoki telefon raqamni kiriting"));
       return;
     }
     setError("");
@@ -87,7 +89,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!password.trim()) {
-      setError("Parolni kiriting");
+      setError(t("auth.enterPassword", "Parolni kiriting"));
       return;
     }
 
@@ -104,7 +106,7 @@ const Login = () => {
       const res = await loginRequest(payload);
 
       if (!res?.success) {
-        setError(res?.message || "Kirishda xatolik");
+        setError(res?.message || t("auth.loginError", "Kirishda xatolik"));
         return;
       }
 
@@ -112,8 +114,7 @@ const Login = () => {
       const { token, role } = persistAuth(res);
 
       if (!token) {
-        // token kelmasa route'lar ishlamaydi
-        setError("Token kelmadi. Backend login response'ni tekshiring.");
+        setError(t("auth.noToken", "Token kelmadi. Backend login response'ni tekshiring."));
         return;
       }
 
@@ -124,8 +125,7 @@ const Login = () => {
       else if (role === "admin") navigate("/home", { replace: true });
       else navigate("/profile", { replace: true });
     } catch (err) {
-      // loginRequest fetch bo'lsa err.response bo'lmaydi
-      setError(err?.message || "Server bilan ulanishda xato");
+      setError(err?.message || t("auth.serverError", "Server bilan ulanishda xato"));
     } finally {
       setLoading(false);
     }
@@ -146,14 +146,14 @@ const Login = () => {
       const res = await googleLoginRequest(payload);
 
       if (!res?.success) {
-        setError(res?.message || "Google tizimiga kirishda xato!");
+        setError(res?.message || t("auth.googleError", "Google tizimiga kirishda xato!"));
         return;
       }
 
       const { token, role } = persistAuth(res);
 
       if (!token) {
-        setError("Token kelmadi. Backend login response'ni tekshiring.");
+        setError(t("auth.noToken", "Token kelmadi. Backend login response'ni tekshiring."));
         return;
       }
 
@@ -163,13 +163,13 @@ const Login = () => {
       else navigate("/profile", { replace: true });
 
     } catch (e) {
-      setError("Google bilan ulanishda kutilmagan xatolik.");
+      setError(t("auth.googleUnexpectedError", "Google bilan ulanishda kutilmagan xatolik."));
     } finally {
       setLoading(false);
     }
   },
   onError: () => {
-    setError("Google tizimida avtorizatsiyadan o‘tish bekor qilindi.");
+    setError(t("auth.googleCancel", "Google tizimida avtorizatsiyadan o‘tish bekor qilindi."));
   }
 });
 
@@ -186,7 +186,7 @@ return (
   <div className="login-container">
     <div className="login-card">
       <h1 className="title-login">
-        {step === "email" ? "Uzworkga kirish" : "Xush kelibsiz"}
+        {step === "email" ? t("auth.loginToUzwork", "Uzworkga kirish") : t("auth.welcome", "Xush kelibsiz")}
       </h1>
 
       {error && <div className="alert-error">{error}</div>}
@@ -200,7 +200,7 @@ return (
               <input
                 type="text"
                 className="login-input"
-                placeholder="Email yoki telefon raqam"
+                placeholder={t("auth.emailOrPhonePlaceholder", "Email yoki telefon raqam")}
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 autoFocus
@@ -208,11 +208,11 @@ return (
             </div>
 
             <button type="submit" className="cont-btn" disabled={loading}>
-              {loading ? "Tekshirilmoqda..." : "Davom etish"}
+              {loading ? t("auth.checking", "Tekshirilmoqda...") : t("auth.continue", "Davom etish")}
             </button>
           </form>
 
-          <div className="login-or">yoki</div>
+          <div className="login-or">{t("auth.or", "yoki")}</div>
 
           <button
             className="google-btn"
@@ -226,7 +226,7 @@ return (
               width={20}
               height={20}
             />
-            Google orqali kirish
+            {t("auth.loginWithGoogle", "Google orqali kirish")}
           </button>
 
           <button
@@ -236,13 +236,13 @@ return (
             type="button"
           >
             <FaPhoneAlt size={20} />
-            Telefon orqali kirish
+            {t("auth.loginWithPhone", "Telefon orqali kirish")}
           </button>
 
           <div className="text-center">
-            <p>Hisobingiz yo‘qmi?</p>
+            <p>{t("auth.noAccount", "Hisobingiz yo‘qmi?")}</p>
             <a href="/signup" className="signup-btn-link">
-              Ro‘yxatdan o‘tish
+              {t("auth.signUp", "Ro‘yxatdan o‘tish")}
             </a>
           </div>
         </>
@@ -259,7 +259,7 @@ return (
               <input
                 type={showPassword ? "text" : "password"}
                 className="login-input"
-                placeholder="Parol"
+                placeholder={t("auth.password", "Parol")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoFocus
@@ -280,11 +280,11 @@ return (
                   checked={keepLoggedIn}
                   onChange={(e) => setKeepLoggedIn(e.target.checked)}
                 />
-                <span>Meni eslab qol</span>
+                <span>{t("auth.rememberMe", "Meni eslab qol")}</span>
               </label>
 
               <a href="/forgot-password" className="forgot-link">
-                Parolni unutdingizmi?
+                {t("auth.forgotPassword", "Parolni unutdingizmi?")}
               </a>
             </div>
 
@@ -293,13 +293,13 @@ return (
               className="cont-btn login-btn"
               disabled={loading}
             >
-              {loading ? "Yuklanmoqda..." : "Kirish"}
+              {loading ? t("auth.loading", "Yuklanmoqda...") : t("auth.loginBtn", "Kirish")}
             </button>
           </form>
 
           <div className="text-center not-you">
             <a href="#" onClick={handleBack} className="not-you-link">
-              Bu siz emassizmi?
+              {t("auth.notYou", "Bu siz emassizmi?")}
             </a>
           </div>
         </>
@@ -387,7 +387,7 @@ return (
 
     {showToast && (
       <Toast
-        message="Bu xususiyat vaqtinchalik ishlamayapti"
+        message={t("auth.featureUnavail", "Bu xususiyat vaqtinchalik ishlamayapti")}
         onClose={() => setShowToast(false)}
       />
     )}

@@ -3,6 +3,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useParams, Outlet, useLocation } from "react-router-dom";
 import { getChats } from "../../../api/messages";
 import { getSocket } from "../../../hooks/useSocket";
+import i18n from "../../../i18n";
 import "./chat.css";
 
 // ── helpers ──────────────────────────────────────────────
@@ -23,11 +24,11 @@ function formatTime(dateStr) {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return "Hozir";
-  if (diffMins < 60) return `${diffMins}m`;
-  if (diffHours < 24) return `${diffHours}s`;
-  if (diffDays < 7) return `${diffDays}k`;
-  return d.toLocaleDateString("uz-UZ", { month: "short", day: "numeric" });
+  if (diffMins < 1) return i18n.t("chat.now", "Hozir");
+  if (diffMins < 60) return `${diffMins}${i18n.t("chat.min", "m")}`;
+  if (diffHours < 24) return `${diffHours}${i18n.t("chat.hour", "s")}`;
+  if (diffDays < 7) return `${diffDays}${i18n.t("chat.day", "k")}`;
+  return d.toLocaleDateString(i18n.language === 'uz' ? "uz-UZ" : (i18n.language === 'ru' ? "ru-RU" : "en-US"), { month: "short", day: "numeric" });
 }
 
 function Avatar({ user, size = "md" }) {
@@ -102,12 +103,12 @@ export default function ChatPage() {
     const p = getPartner(chat);
     if (!p) return `Chat #${chat.chat_id || chat.id}`;
     const full = `${p.first_name || ""} ${p.last_name || ""}`.trim();
-    return full || p.username || "Foydalanuvchi";
+    return full || p.username || i18n.t("chat.user", "Foydalanuvchi");
   };
 
   const getChatType = (chat) => {
-    if (chat.contract_id) return "Shartnoma";
-    if (chat.job_id) return "Ish";
+    if (chat.contract_id) return i18n.t("chat.contract", "Shartnoma");
+    if (chat.job_id) return i18n.t("chat.job", "Ish");
     return null;
   };
 
@@ -131,7 +132,7 @@ export default function ChatPage() {
       <aside className={`chat-sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="chat-sidebar-header">
           <h1 className="chat-sidebar-title">
-            Xabarlar
+            {i18n.t("chat.messages", "Xabarlar")}
             {totalUnread > 0 && (
               <span
                 className="unread-badge"
@@ -145,7 +146,7 @@ export default function ChatPage() {
             <span className="chat-search-icon">🔍</span>
             <input
               type="text"
-              placeholder="Qidirish..."
+              placeholder={i18n.t("chat.search", "Qidirish...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -168,7 +169,7 @@ export default function ChatPage() {
           ) : filteredChats.length === 0 ? (
             <div className="chat-list-empty">
               <div className="chat-list-empty-icon">💬</div>
-              <p>{search ? "Topilmadi" : "Hali chatlar yo'q"}</p>
+              <p>{search ? i18n.t("chat.notFound", "Topilmadi") : i18n.t("chat.noChatsYet", "Hali chatlar yo'q")}</p>
             </div>
           ) : (
             filteredChats.map((chat) => {
@@ -200,7 +201,7 @@ export default function ChatPage() {
                         {chat.last_message_content
                           ? chat.last_message_content.slice(0, 38) +
                             (chat.last_message_content.length > 38 ? "…" : "")
-                          : "Xabar yo'q"}
+                          : i18n.t("chat.noMessagesOut", "Xabar yo'q")}
                       </span>
                       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                         {type && <span className="chat-item-badge">{type}</span>}
@@ -222,8 +223,8 @@ export default function ChatPage() {
         {!activeChatId ? (
           <div className="chat-empty-state">
             <div className="chat-empty-state-icon">💬</div>
-            <h2>Suhbat tanlang</h2>
-            <p>Chap tarafdan chatni tanlang yoki yangi muloqot boshlang</p>
+            <h2>{i18n.t("chat.selectChat", "Suhbat tanlang")}</h2>
+            <p>{i18n.t("chat.chooseFromLeft", "Chap tarafdan chatni tanlang yoki yangi muloqot boshlang")}</p>
           </div>
         ) : (
           <Outlet context={{ onBack: () => setSidebarOpen(true), reloadList: loadChats }} />

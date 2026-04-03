@@ -3,12 +3,14 @@ import { useState } from "react";
 import { FaBriefcase, FaUser, FaCheckCircle } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import "./authcss/signup.css";
 import { signup as signupRequest, verifySignup } from "../../api/auth";
 
 function Signup() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -114,23 +116,23 @@ function Signup() {
 
     // basic validations
     if (!formData.role) {
-      setServerError("Role tanlanmagan.");
+      setServerError(t("auth.roleNotSelected", "Role tanlanmagan."));
       return;
     }
 
     if (!formData.agreeTerms) {
-      setServerError("Shartlarga rozilik bildiring.");
+      setServerError(t("auth.agreeTermsReq", "Shartlarga rozilik bildiring."));
       return;
     }
 
     if (!formData.identifier.trim()) {
-      setServerError("Email yoki telefon raqamni kiriting.");
+      setServerError(t("auth.enterEmailPhone", "Email yoki telefon raqamni kiriting."));
       return;
     }
 
     if (formData.username && !/^[a-zA-Z0-9_]+$/.test(formData.username)) {
       setServerError(
-        "Username faqat harflar, raqamlar va _ belgisidan iborat bo‘lishi kerak."
+        t("auth.invalidUsername", "Username faqat harflar, raqamlar va _ belgisidan iborat bo‘lishi kerak.")
       );
       return;
     }
@@ -153,7 +155,7 @@ function Signup() {
       const res = await signupRequest(payload);
 
       if (!res?.success) {
-        setServerError(res?.message || "Ro‘yxatdan o‘tishda xato");
+        setServerError(res?.message || t("auth.signupError", "Ro‘yxatdan o‘tishda xato"));
         return;
       }
 
@@ -165,7 +167,7 @@ function Signup() {
         setShowSuccess(true);
       }
     } catch (err) {
-      setServerError(err?.message || "Server bilan ulanishda xato");
+      setServerError(err?.message || t("auth.serverError", "Server bilan ulanishda xato"));
     } finally {
       setSubmitting(false);
     }
@@ -175,7 +177,7 @@ function Signup() {
     e.preventDefault();
     setServerError("");
     if (!otpCode.trim()) {
-      setServerError("Tasdiqlash kodini kiriting.");
+      setServerError(t("auth.enterCode", "Tasdiqlash kodini kiriting."));
       return;
     }
 
@@ -183,12 +185,12 @@ function Signup() {
     try {
       const res = await verifySignup({ userId: createdUserId, code: otpCode.trim() });
       if (!res?.success) {
-        setServerError(res?.message || "Kodni tasdiqlashda xatolik.");
+        setServerError(res?.message || t("auth.verifyError", "Kodni tasdiqlashda xatolik."));
         return;
       }
       setShowSuccess(true);
     } catch (err) {
-      setServerError(err?.message || "Tasdiqlashda xatolik.");
+      setServerError(err?.message || t("auth.verifyFail", "Tasdiqlashda xatolik."));
     } finally {
       setSubmitting(false);
     }
@@ -212,20 +214,19 @@ function Signup() {
               <FaCheckCircle className="success-icon" />
             </div>
 
-            <h2 className="success-title">Muvaffaqiyatli ro‘yxatdan o‘tdingiz!</h2>
+            <h2 className="success-title">{t("auth.signupSuccessTitle", "Muvaffaqiyatli ro‘yxatdan o‘tdingiz!")}</h2>
 
             <p className="success-text">
-              Hisobingiz muvaffaqiyatli yaratildi. Endi login qilib tizimga
-              kirishingiz mumkin.
+              {t("auth.signupSuccessDesc", "Hisobingiz muvaffaqiyatli yaratildi. Endi login qilib tizimga kirishingiz mumkin.")}
             </p>
 
             <button className="success-btn" onClick={handleGoLogin}>
-              Davom etish
+              {t("auth.continue", "Davom etish")}
             </button>
           </div>
         ) : (
           <>
-            <h2 className="title-signup">Ro'yxatdan o'tish</h2>
+            <h2 className="title-signup">{t("auth.signUp", "Ro'yxatdan o'tish")}</h2>
 
             {serverError && (
               <div
@@ -261,8 +262,8 @@ function Signup() {
                     />
                     <div className="role-content">
                       <FaBriefcase size={60} className="role-icon" />
-                      <h3>Men ish beruvchiman</h3>
-                      <p>Loyiha joylashtirib, freelancer yollamoqchiman</p>
+                      <h3>{t("auth.iAmClient", "Men ish beruvchiman")}</h3>
+                      <p>{t("auth.clientDesc", "Loyiha joylashtirib, freelancer yollamoqchiman")}</p>
                     </div>
                   </label>
 
@@ -280,8 +281,8 @@ function Signup() {
                     />
                     <div className="role-content">
                       <FaUser size={60} className="role-icon" />
-                      <h3>Men freelancer man</h3>
-                      <p>Ish topib, daromad qilmoqchiman</p>
+                      <h3>{t("auth.iAmFreelancer", "Men freelancer man")}</h3>
+                      <p>{t("auth.freelancerDesc", "Ish topib, daromad qilmoqchiman")}</p>
                     </div>
                   </label>
                 </div>
@@ -292,11 +293,11 @@ function Signup() {
                   disabled={!formData.role}
                   className="continue-btn"
                 >
-                  Davom etish
+                  {t("auth.continue", "Davom etish")}
                 </button>
                 <div className="link-box">
                   <Link to="/login" className="text-center-signup">
-                    Mavjud hisobga kiring
+                    {t("auth.loginExisting", "Mavjud hisobga kiring")}
                   </Link>
                 </div>
               </>
@@ -312,16 +313,16 @@ function Signup() {
                 <div className="selected-role-header">
                   <h3 className="selected-role-title">
                     {formData.role === "client"
-                      ? "Ish beruvchi sifatida"
-                      : "Freelancer sifatida"}{" "}
-                    ro'yxatdan o'tish
+                      ? t("auth.asClient", "Ish beruvchi sifatida")
+                      : t("auth.asFreelancer", "Freelancer sifatida")}{" "}
+                    {t("auth.signupAsTitle", "ro'yxatdan o'tish")}
                   </h3>
                 </div>
 
                 <form onSubmit={handleSubmit} className="upwork-signup-form">
                   <div className="input-row">
                     <div className="input-group">
-                      <label>Ismingiz</label>
+                      <label>{t("auth.firstName", "Ismingiz")}</label>
                       <input
                         type="text"
                         name="firstName"
@@ -332,7 +333,7 @@ function Signup() {
                     </div>
 
                     <div className="input-group">
-                      <label>Familiyangiz</label>
+                      <label>{t("auth.lastName", "Familiyangiz")}</label>
                       <input
                         type="text"
                         name="lastName"
@@ -345,7 +346,7 @@ function Signup() {
 
                   {/* USERNAME */}
                   <div className="input-group full-width">
-                    <label>Username</label>
+                    <label>{t("auth.username", "Username")}</label>
                     <input
                       type="text"
                       name="username"
@@ -354,12 +355,12 @@ function Signup() {
                       onChange={handleChange}
                     />
                     <small style={{ opacity: 0.7 }}>
-                      Ixtiyoriy. Bo‘sh qoldirsangiz avtomatik yaratiladi.
+                      {t("auth.optionalUsername", "Ixtiyoriy. Bo‘sh qoldirsangiz avtomatik yaratiladi.")}
                     </small>
                   </div>
 
                   <div className="input-group full-width">
-                    <label>Email yoki Telefon raqam</label>
+                    <label>{t("auth.emailOrPhone", "Email yoki Telefon raqam")}</label>
                     <input
                       type="text"
                       name="identifier"
@@ -371,11 +372,11 @@ function Signup() {
                   </div>
 
                   <div className="input-group full-width">
-                    <label>Parol</label>
+                    <label>{t("auth.passwordLabel", "Parol")}</label>
                     <input
                       type="password"
                       name="password"
-                      placeholder="Kamida 8 ta belgi"
+                      placeholder={t("auth.min8char", "Kamida 8 ta belgi")}
                       value={formData.password}
                       onChange={handleChange}
                       required
@@ -392,19 +393,19 @@ function Signup() {
                       required
                     />
                     <label htmlFor="agreeTerms">
-                      Ha, men{" "}
+                      {t("auth.agreePrefix", "Ha, men ")}
                       <a href="#" className="terms-link">
-                        UzWork shartlari
+                        {t("auth.terms", "UzWork shartlari")}
                       </a>{" "}
                       ,{" "}
                       <a href="#" className="terms-link">
-                        Foydalanuvchi kelishuvi
+                        {t("auth.userAgreement", "Foydalanuvchi kelishuvi")}
                       </a>{" "}
-                      va{" "}
+                      {t("auth.and", "va")}{" "}
                       <a href="#" className="terms-link">
-                        Maxfiylik siyosati
+                        {t("auth.privacyPolicy", "Maxfiylik siyosati")}
                       </a>{" "}
-                      bilan tanishib chiqdim va roziman.
+                      {t("auth.agreeSuffix", "bilan tanishib chiqdim va roziman.")}
                     </label>
                   </div>
 
@@ -413,7 +414,7 @@ function Signup() {
                     className="create-account-btn"
                     disabled={submitting}
                   >
-                    {submitting ? "Yaratilmoqda..." : "Hisobni yaratish"}
+                    {submitting ? t("auth.creatingAcc", "Yaratilmoqda...") : t("auth.createAcc", "Hisobni yaratish")}
                   </button>
                 </form>
               </>
@@ -424,14 +425,14 @@ function Signup() {
               <>
                 <div className="selected-role-header">
                   <h3 className="selected-role-title">
-                    Tasdiqlash kodi yuborildi
+                    {t("auth.otpSentTitle", "Tasdiqlash kodi yuborildi")}
                   </h3>
-                  <p>Siz ko'rsatgan manzilga 6-xonali kod yuborilgan. Iltimos tekshiring.</p>
+                  <p>{t("auth.otpSentDesc", "Siz ko'rsatgan manzilga 6-xonali kod yuborilgan. Iltimos tekshiring.")}</p>
                 </div>
 
                 <form onSubmit={handleVerifyOtp} className="upwork-signup-form">
                   <div className="input-group full-width">
-                    <label>Tasdiqlash kodi (OTP)</label>
+                    <label>{t("auth.otpLabel", "Tasdiqlash kodi (OTP)")}</label>
                     <input
                       type="text"
                       placeholder="123456"
@@ -448,7 +449,7 @@ function Signup() {
                     disabled={submitting}
                     style={{ marginTop: '20px' }}
                   >
-                    {submitting ? "Tasdiqlanmoqda..." : "Tasdiqlash"}
+                    {submitting ? t("auth.verifying", "Tasdiqlanmoqda...") : t("auth.verify", "Tasdiqlash")}
                   </button>
                 </form>
               </>

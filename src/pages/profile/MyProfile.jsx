@@ -63,8 +63,10 @@ import {
 import "../profile/profile-css/profile.css";
 import { getMyProfile, updateMyProfile } from "../../api/common";
 import { getMyPortfolio, createPortfolioItem, updatePortfolioItem, deletePortfolioItem } from "../../api/freelancer";
+import { useTranslation } from "react-i18next";
 
 const MyProfile = () => {
+  const { t } = useTranslation();
   // const [darkMode, setDarkMode] = useState(false);
   const [activeSection, setActiveSection] = useState("my-info");
   // const [activeHeaderTab, setActiveHeaderTab] = useState("find");
@@ -368,15 +370,15 @@ const MyProfile = () => {
 
   const navSections = [
     {
-      title: "SETTINGS",
+      title: t("profile.settings", "SETTINGS").toUpperCase(),
       items: [
-        { id: "my-info", label: "My Info", icon: <User size={18} />, badge: null },
-        { id: "cv-upload", label: "CV Upload", icon: <FileText size={18} />, badge: null },
-        { id: "billing", label: "Billing & Payments", icon: <CreditCard size={18} />, badge: null },
-        { id: "password", label: "Password & Security", icon: <Shield size={18} />, badge: null },
-        { id: "membership", label: "Membership", icon: <Award size={18} />, badge: userData.membership },
-        { id: "notifications", label: "Notification Settings", icon: <Bell size={18} />, badge: null },
-        { id: "appeals", label: "Appeals Tracker", icon: <AlertTriangle size={18} />, badge: null }
+        { id: "my-info", label: t("profile.myInfo", "My Info"), icon: <User size={18} />, badge: null },
+        { id: "cv-upload", label: t("profile.cvUpload", "CV Upload"), icon: <FileText size={18} />, badge: null },
+        { id: "billing", label: t("profile.billing", "Billing & Payments"), icon: <CreditCard size={18} />, badge: null },
+        { id: "password", label: t("profile.password", "Password & Security"), icon: <Shield size={18} />, badge: null },
+        { id: "membership", label: t("profile.membership", "Membership"), icon: <Award size={18} />, badge: userData.membership },
+        { id: "notifications", label: t("profile.notifications", "Notification Settings"), icon: <Bell size={18} />, badge: null },
+        { id: "appeals", label: t("profile.appeals", "Appeals Tracker"), icon: <AlertTriangle size={18} />, badge: null }
       ]
     }
   ];
@@ -830,10 +832,10 @@ const MyProfile = () => {
           
           <div className="sidebar-footer">
             <button className="sidebar-footer-btn" onClick={() => handleUserMenuClick("Help & Support")}>
-              <HelpCircle size={16} /> Help & Support
+              <HelpCircle size={16} /> {t("profile.helpSupport", "Help & Support")}
             </button>
             <button className="sidebar-footer-btn" onClick={() => handleUserMenuClick("Sign Out")}>
-              <LogOut size={16} /> Sign Out
+              <LogOut size={16} /> {t("profile.signOut", "Sign Out")}
             </button>
           </div>
         </aside>
@@ -858,9 +860,9 @@ const MyProfile = () => {
             <div className="content-section">
               <div className="section-header">
                 <div className="header-left">
-                  <h1 className="section-title">My Info</h1>
+                  <h1 className="section-title">{t("profile.myInfo", "My Info")}</h1>
                   <span className="section-badge">
-                    <User size={14} />Professional Profile
+                    <User size={14} />{t("profile.professionalProfile", "Professional Profile")}
                   </span>
                 </div>
                 <button 
@@ -868,7 +870,7 @@ const MyProfile = () => {
                   onClick={() => setIsEditing(!isEditing)}
                   disabled={isLoading}
                 >
-                  {isEditing ? <><X size={16} />Cancel</> : <><Edit size={16} />Edit Profile</>}
+                  {isEditing ? <><X size={16} />{t("profile.cancel", "Cancel")}</> : <><Edit size={16} />{t("profile.editProfile", "Edit Profile")}</>}
                 </button>
               </div>
               
@@ -877,7 +879,7 @@ const MyProfile = () => {
                   <img src={userData.coverPhoto} alt="Cover" className="cover-image" />
                   {isEditing && (
                     <button className="change-cover-btn" onClick={() => handleUserMenuClick("Change cover")}>
-                      <Camera size={15} /> Change Cover
+                      <Camera size={15} /> {t("profile.changeCover", "Change Cover")}
                     </button>
                   )}
                 </div>
@@ -925,7 +927,7 @@ const MyProfile = () => {
                         <Award size={14} />{userData.membership}
                       </span>
                       <span className="profile-badge-item profile-badge-verified">
-                        <CheckCircle size={14} />Verified
+                        <CheckCircle size={14} />{t("profile.verified", "Verified")}
                       </span>
                     </div>
                   </div>
@@ -955,7 +957,7 @@ const MyProfile = () => {
                       </span>
                       <span className="profile-meta-item">
                         <Star size={14} fill="currentColor" />
-                        {userData.rating} rating
+                        {userData.rating} {t("profile.rating", "rating")}
                       </span>
                       <span className="profile-meta-item">
                         <DollarSign size={14} />
@@ -972,19 +974,19 @@ const MyProfile = () => {
                   <div className="profile-stats">
                     <div className="stat-item">
                       <span className="stat-value">${(userData.totalEarned / 1000).toFixed(1)}k</span>
-                      <span className="stat-label">Total Earned</span>
+                      <span className="stat-label">{t("profile.totalEarned", "Total Earned")}</span>
                     </div>
                     <div className="stat-item">
                       <span className="stat-value">{userData.jobsCompleted}</span>
-                      <span className="stat-label">Jobs Completed</span>
+                      <span className="stat-label">{t("profile.jobsCompleted", "Jobs Completed")}</span>
                     </div>
                     <div className="stat-item">
                       <span className="stat-value">{userData.successScore}%</span>
-                      <span className="stat-label">Success Score</span>
+                      <span className="stat-label">{t("profile.successScore", "Success Score")}</span>
                     </div>
                     <div className="stat-item">
                       <span className="stat-value">{userData.activeProjects}</span>
-                      <span className="stat-label">Active Projects</span>
+                      <span className="stat-label">{t("profile.activeProjects", "Active Projects")}</span>
                     </div>
                   </div>
 
@@ -993,13 +995,13 @@ const MyProfile = () => {
                     <div className="freelancer-section-header">
                       <div>
                         <h3 className="freelancer-section-title">
-                          <Code size={18} />Skills & Expertise
+                          <Code size={18} />{t("profile.skillsExpertise", "Skills & Expertise")}
                         </h3>
-                        <p className="freelancer-section-subtitle">Your professional capabilities</p>
+                        <p className="freelancer-section-subtitle">{t("profile.skillsDesc", "Your professional capabilities")}</p>
                       </div>
                       {isEditing && (
                         <button className="btn-secondary" onClick={addSkill} disabled={isLoading}>
-                          <Plus size={16} />Add Skill
+                          <Plus size={16} />{t("profile.addSkill", "Add Skill")}
                         </button>
                       )}
                     </div>
@@ -1033,7 +1035,7 @@ const MyProfile = () => {
                                   {skill.level}
                                 </span>
                               </div>
-                              <div className="skill-meta">{skill.years}+ years experience</div>
+                              <div className="skill-meta">{skill.years}+ {t("profile.yearsExp", "years experience")}</div>
                             </>
                           )}
                         </div>
@@ -1046,9 +1048,9 @@ const MyProfile = () => {
                     <div className="freelancer-section-header">
                       <div>
                         <h3 className="freelancer-section-title">
-                          <Package size={18} />Documents
+                          <Package size={18} />{t("profile.documents", "Documents")}
                         </h3>
-                        <p className="freelancer-section-subtitle">Resume and professional documents</p>
+                        <p className="freelancer-section-subtitle">{t("profile.docsDesc", "Resume and professional documents")}</p>
                       </div>
                     </div>
                     <div className="quick-link-card" onClick={() => handleSectionChange('cv-upload', 'CV Upload')}>
@@ -1056,8 +1058,8 @@ const MyProfile = () => {
                         <FileText size={24} />
                       </div>
                       <div className="quick-link-content">
-                        <h4>Resume / CV Upload</h4>
-                        <p>Upload and manage your professional CV</p>
+                        <h4>{t("profile.resumeUploadTitle", "Resume / CV Upload")}</h4>
+                        <p>{t("profile.resumeUploadDesc", "Upload and manage your professional CV")}</p>
                       </div>
                       <ExternalLink size={18} className="quick-link-arrow" />
                     </div>
@@ -1068,9 +1070,9 @@ const MyProfile = () => {
                     <div className="freelancer-section-header">
                       <div>
                         <h3 className="freelancer-section-title">
-                          <Award size={18} />Certifications
+                          <Award size={18} />{t("profile.certifications", "Certifications")}
                         </h3>
-                        <p className="freelancer-section-subtitle">Professional credentials</p>
+                        <p className="freelancer-section-subtitle">{t("profile.certificationsDesc", "Professional credentials")}</p>
                       </div>
                       {isEditing && (
                         <button className="btn-secondary" onClick={addCertificate} disabled={isLoading}>
@@ -1103,7 +1105,7 @@ const MyProfile = () => {
                     <div className="detail-item">
                       <span className="detail-icon"><Mail size={16} /></span>
                       <div className="detail-content">
-                        <span className="detail-label">Email</span>
+                        <span className="detail-label">{t("profile.email", "Email")}</span>
                         {isEditing ? (
                           <input 
                             type="email" 
@@ -1115,7 +1117,7 @@ const MyProfile = () => {
                         ) : (
                           <div className="detail-value-wrapper">
                             <span className="detail-value">{userData.email}</span>
-                            <span className="verified-tag">Verified</span>
+                            <span className="verified-tag">{t("profile.verified", "Verified")}</span>
                           </div>
                         )}
                       </div>
@@ -1123,7 +1125,7 @@ const MyProfile = () => {
                     <div className="detail-item">
                       <span className="detail-icon"><Phone size={16} /></span>
                       <div className="detail-content">
-                        <span className="detail-label">Phone</span>
+                        <span className="detail-label">{t("profile.phone", "Phone")}</span>
                         {isEditing ? (
                           <input 
                             type="tel" 
@@ -1140,7 +1142,7 @@ const MyProfile = () => {
                     <div className="detail-item">
                       <span className="detail-icon"><MapPin size={16} /></span>
                       <div className="detail-content">
-                        <span className="detail-label">Location</span>
+                        <span className="detail-label">{t("profile.location", "Location")}</span>
                         {isEditing ? (
                           <input 
                             type="text" 
