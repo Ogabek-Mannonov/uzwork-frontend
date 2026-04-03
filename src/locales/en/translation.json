@@ -59,6 +59,7 @@
     "tabWork": "Find work",
     "searchPlaceholder": "What kind of specialist are you looking for...",
     "searchBtn": "Search",
+    "popularTags": ["UI/UX Designer", "React Developer", "Python Expert", "Copywriter", "Mobile Developer"],
     "popularSearches": "Popular searches",
     "workTitle": "Start and grow your freelancing career with UZWORK",
     "workDesc": "Thousands of new job listings wait for you every week.",
