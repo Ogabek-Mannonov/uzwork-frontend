@@ -73,7 +73,10 @@ const MyProfile = () => {
   const [activeSection, setActiveSection] = useState("my-info");
   // const [activeHeaderTab, setActiveHeaderTab] = useState("find");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [editingSection, setEditingSection] = useState(null); // 'name', 'bio', 'rate', 'skills', 'contact'
+  const [editFormData, setEditFormData] = useState({});
+
+
   // const [showUserDropdown, setShowUserDropdown] = useState(false);
   // const [searchQuery, setSearchQuery] = useState("");
   // const [notifications, setNotifications] = useState(3);
@@ -147,6 +150,7 @@ const MyProfile = () => {
           const p = profileRes.data.profile || {};
           setUserData(prev => ({
             ...prev,
+            id: u.id || "",
             name: u.first_name || "",
             fullName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || "",
             username: u.username ? `@${u.username}` : "",
@@ -159,6 +163,7 @@ const MyProfile = () => {
             hourlyRate: p.hourly_rate || 0,
             accountType: u.role || "",
           }));
+
           if (p.skills && Array.isArray(p.skills) && p.skills.length > 0) {
             setSkills(p.skills.map((s, i) => ({ id: i, name: s, level: "Intermediate", years: 1 })));
           } else {
@@ -188,8 +193,10 @@ const MyProfile = () => {
   }, []);
 
   const [userData, setUserData] = useState({
+    id: "",
     name: "",
     fullName: "",
+
     username: "",
     email: "",
     phone: "",
@@ -415,7 +422,12 @@ const MyProfile = () => {
     showMessage("info", `${action} clicked`);
   };
 
+  const handleEditInputChange = (field, value) => {
+    setEditFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleInputChange = (field, value) => {
+
     setUserData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -624,27 +636,68 @@ const MyProfile = () => {
     return "Strong";
   };
 
-  const handleSave = async () => {
+  const handleSectionEdit = (section, initialData = {}) => {
+    setEditingSection(section);
+    setEditFormData({ ...userData, ...initialData });
+  };
+
+  const handleSectionCancel = () => {
+    setEditingSection(null);
+    setEditFormData({});
+  };
+
+  const handleSectionSave = async (section) => {
     setIsLoading(true);
     try {
-      const payload = {
-        title: userData.title,
-        bio: userData.bio,
-        hourly_rate: Number(userData.hourlyRate) || 0,
-        location: userData.location,
-        skills: skills.map(s => s.name)
-      };
+      let payload = {};
+      
+      switch(section) {
+        case 'name':
+          payload = {
+            first_name: editFormData.fullName.split(' ')[0] || "",
+            last_name: editFormData.fullName.split(' ').slice(1).join(' ') || "",
+            title: editFormData.title
+          };
+          break;
+        case 'bio':
+          payload = { bio: editFormData.bio };
+          break;
+        case 'rate':
+          payload = { hourly_rate: Number(editFormData.hourlyRate) || 0 };
+          break;
+        case 'contact':
+          payload = {
+            location: editFormData.location,
+            email: editFormData.email,
+            phone: editFormData.phone
+          };
+          break;
+        case 'skills':
+          payload = { skills: skills.map(s => s.name) };
+          break;
+        default:
+          payload = editFormData;
+      }
+
       const res = await updateMyProfile(payload);
       if (res?.success === false) throw new Error(res.error || res.message);
 
-      setIsEditing(false);
-      showMessage("success", "Profile updated successfully!");
+      // Update local state
+      setUserData(prev => ({ ...prev, ...editFormData }));
+      setEditingSection(null);
+      showMessage("success", `${section.charAt(0).toUpperCase() + section.slice(1)} updated successfully!`);
     } catch (err) {
-      showMessage("error", err.message || "Failed to update profile");
+      showMessage("error", err.message || `Failed to update ${section}`);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleSave = async () => {
+    // This was the old global save, we keep it for now but we will use handleSectionSave mostly
+    await handleSectionSave(editingSection || 'all');
+  };
+
 
   // Certificate functions
   const addCertificate = () => {
@@ -867,23 +920,27 @@ const MyProfile = () => {
                     <User size={14} />{t("profile.professionalProfile", "Professional Profile")}
                   </span>
                 </div>
-                <button 
-                  className={`edit-btn ${isEditing ? 'editing' : ''}`} 
-                  onClick={() => setIsEditing(!isEditing)}
-                  disabled={isLoading}
+                <a 
+                  href={`/profile/${userData.id}`}
+                  className="view-profile-btn"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  {isEditing ? <><X size={16} />{t("profile.cancel", "Cancel")}</> : <><Edit size={16} />{t("profile.editProfile", "Edit Profile")}</>}
-                </button>
+
+                  <Eye size={16} />{t("profile.viewPublicProfile", "View Public Profile")}
+                </a>
+
               </div>
               
-              <div className="profile-card">
+              <div className="profile-card soft-fade-in stagger-1">
                 <div className="profile-cover">
                   <img src={userData.coverPhoto} alt="Cover" className="cover-image" />
-                  {isEditing && (
+                  {editingSection === 'name' && (
                     <button className="change-cover-btn" onClick={() => handleUserMenuClick("Change cover")}>
                       <Camera size={15} /> {t("profile.changeCover", "Change Cover")}
                     </button>
                   )}
+
                 </div>
                 
                 <div className="profile-content">
@@ -891,37 +948,53 @@ const MyProfile = () => {
                   <div className="profile-avatar-section">
                     <div className="avatar-wrapper">
                       <img src={userData.profilePicture} alt="Profile" className="profile-avatar" />
-                      {isEditing && (
+                      {editingSection === 'name' && (
                         <button className="change-avatar-btn" onClick={() => handleUserMenuClick("Change avatar")}>
                           <Camera size={14} />
                         </button>
                       )}
+
                       <span className="avatar-status online" />
                     </div>
                     <div className="profile-name-section">
-                      {isEditing ? (
-                        <input 
-                          type="text" 
-                          value={userData.fullName} 
-                          onChange={(e) => handleInputChange('fullName', e.target.value)} 
-                          className="edit-input name-edit-input" 
-                        />
+                      {editingSection === 'name' ? (
+                        <div className="inline-edit-container">
+                          <input 
+                            type="text" 
+                            value={editFormData.fullName} 
+                            onChange={(e) => handleEditInputChange('fullName', e.target.value)} 
+                            className="inline-edit-input name-edit-input" 
+                            placeholder="Full Name"
+                          />
+                          <input 
+                            type="text" 
+                            value={editFormData.title} 
+                            onChange={(e) => handleEditInputChange('title', e.target.value)} 
+                            className="inline-edit-input" 
+                            placeholder="Professional title" 
+                          />
+                          <div className="inline-edit-actions">
+                            <button className="btn-cancel-inline" onClick={handleSectionCancel}>{t("profile.cancel", "Cancel")}</button>
+                            <button className="btn-save-inline" onClick={() => handleSectionSave('name')}>
+                              {isLoading ? <RefreshCw size={14} className="spinning" /> : <Save size={14} />}
+                              {t("profile.save", "Save")}
+                            </button>
+                          </div>
+                        </div>
                       ) : (
-                        <h2 className="profile-fullname">{userData.fullName}</h2>
+                        <div className="section-edit-trigger" onClick={() => handleSectionEdit('name', { fullName: userData.fullName, title: userData.title })}>
+                          <div>
+                            <h2 className="profile-fullname">{userData.fullName}</h2>
+                            <p className="profile-title">{userData.title || "Professional title"}</p>
+                            <p className="profile-username">{userData.username}</p>
+                          </div>
+                          <button className="edit-pencil-btn">
+                            <Edit size={14} />
+                          </button>
+                        </div>
                       )}
-                      {isEditing ? (
-                        <input 
-                          type="text" 
-                          value={userData.title} 
-                          onChange={(e) => handleInputChange('title', e.target.value)} 
-                          className="edit-input" 
-                          placeholder="Professional title" 
-                        />
-                      ) : (
-                        <p className="profile-title">{userData.title}</p>
-                      )}
-                      <p className="profile-username">{userData.username}</p>
                     </div>
+
                     
                     {/* Badges */}
                     <div className="profile-badges-row">
@@ -935,21 +1008,36 @@ const MyProfile = () => {
                   </div>
 
                   {/* BIO SECTION */}
-                  <div className="profile-bio-section">
-                    {isEditing ? (
-                      <textarea
-                        className="edit-textarea-bio"
-                        value={userData.bio}
-                        onChange={(e) => handleInputChange('bio', e.target.value)}
-                        rows={5}
-                        placeholder="Write about your professional experience, skills, and expertise..."
-                        disabled={isLoading}
-                      />
+                  <div className="profile-bio-section soft-fade-in stagger-2">
+                    {editingSection === 'bio' ? (
+                      <div className="inline-edit-container">
+                        <textarea
+                          className="inline-edit-textarea"
+                          value={editFormData.bio}
+                          onChange={(e) => handleEditInputChange('bio', e.target.value)}
+                          rows={6}
+                          placeholder="Write about your professional experience, skills, and expertise..."
+                          disabled={isLoading}
+                        />
+                        <div className="inline-edit-actions">
+                          <button className="btn-cancel-inline" onClick={handleSectionCancel}>{t("profile.cancel", "Cancel")}</button>
+                          <button className="btn-save-inline" onClick={() => handleSectionSave('bio')}>
+                            {isLoading ? <RefreshCw size={14} className="spinning" /> : <Save size={14} />}
+                            {t("profile.save", "Save")}
+                          </button>
+                        </div>
+                      </div>
                     ) : (
-                      <div className="profile-bio-text">
-                        {userData.bio}
+                      <div className="section-edit-trigger bio-edit-trigger" onClick={() => handleSectionEdit('bio', { bio: userData.bio })}>
+                        <div className="profile-bio-text">
+                          {userData.bio || t("profile.noBio", "No bio provided. Click to add one.")}
+                        </div>
+                        <button className="edit-pencil-btn">
+                          <Edit size={14} />
+                        </button>
                       </div>
                     )}
+
                     
                     {/* META INFO */}
                     <div className="profile-meta-row">
@@ -961,19 +1049,44 @@ const MyProfile = () => {
                         <Star size={14} fill="currentColor" />
                         {userData.rating} {t("profile.rating", "rating")}
                       </span>
-                      <span className="profile-meta-item">
-                        <DollarSign size={14} />
-                        ${userData.hourlyRate}/hr
-                      </span>
+                      {editingSection === 'rate' ? (
+                        <div className="inline-edit-container meta-edit-inline">
+                          <div className="rate-input-group">
+                            <DollarSign size={14} />
+                            <input 
+                              type="number" 
+                              value={editFormData.hourlyRate} 
+                              onChange={(e) => handleEditInputChange('hourlyRate', e.target.value)}
+                              className="inline-edit-input rate-input"
+                            />
+                            <span>/hr</span>
+                          </div>
+                          <div className="inline-edit-actions">
+                            <button className="btn-cancel-inline" onClick={handleSectionCancel}>{t("profile.cancel", "Cancel")}</button>
+                            <button className="btn-save-inline" onClick={() => handleSectionSave('rate')}>
+                              {isLoading ? <RefreshCw size={14} className="spinning" /> : <Save size={14} />}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="profile-meta-item section-edit-trigger" onClick={() => handleSectionEdit('rate', { hourlyRate: userData.hourlyRate })}>
+                          <DollarSign size={14} />
+                          ${userData.hourlyRate}/hr
+                          <button className="edit-pencil-btn mini">
+                            <Edit size={10} />
+                          </button>
+                        </span>
+                      )}
                       <span className="profile-meta-item">
                         <Zap size={14} />
                         {userData.availability}
                       </span>
                     </div>
+
                   </div>
                   
                   {/* STATS */}
-                  <div className="profile-stats">
+                  <div className="profile-stats soft-fade-in stagger-3">
                     <div className="stat-item">
                       <span className="stat-value">${(userData.totalEarned / 1000).toFixed(1)}k</span>
                       <span className="stat-label">{t("profile.totalEarned", "Total Earned")}</span>
@@ -992,8 +1105,8 @@ const MyProfile = () => {
                     </div>
                   </div>
 
-                  {/* SKILLS SECTION */}
-                  <div className="freelancer-section">
+                  <div className="freelancer-section soft-fade-in stagger-4">
+
                     <div className="freelancer-section-header">
                       <div>
                         <h3 className="freelancer-section-title">
@@ -1001,34 +1114,51 @@ const MyProfile = () => {
                         </h3>
                         <p className="freelancer-section-subtitle">{t("profile.skillsDesc", "Your professional capabilities")}</p>
                       </div>
-                      {isEditing && (
-                        <button className="btn-secondary" onClick={addSkill} disabled={isLoading}>
-                          <Plus size={16} />{t("profile.addSkill", "Add Skill")}
+                      {editingSection === 'skills' ? (
+                        <div className="inline-edit-actions">
+                          <button className="btn-cancel-inline" onClick={handleSectionCancel}>{t("profile.cancel", "Cancel")}</button>
+                          <button className="btn-save-inline" onClick={() => handleSectionSave('skills')}>
+                            {isLoading ? <RefreshCw size={14} className="spinning" /> : <Save size={14} />}
+                            {t("profile.save", "Save")}
+                          </button>
+                        </div>
+                      ) : (
+                        <button className="edit-pencil-btn visible" onClick={() => handleSectionEdit('skills')}>
+                          <Edit size={14} />
                         </button>
                       )}
                     </div>
+
+                    {editingSection === 'skills' && (
+                      <div className="skills-edit-top">
+                        <button className="btn-secondary" onClick={addSkill} disabled={isLoading}>
+                          <Plus size={16} />{t("profile.addSkill", "Add Skill")}
+                        </button>
+                      </div>
+                    )}
+
                     <div className="skills-grid">
                       {skills.map(skill => (
                         <div key={skill.id} className="skill-card">
-                          {isEditing ? (
-                            <>
+                          {editingSection === 'skills' ? (
+                            <div className="skill-edit-mode">
                               <input 
                                 type="text" 
                                 value={skill.name} 
                                 onChange={(e) => {
                                   setSkills(skills.map(s => s.id === skill.id ? {...s, name: e.target.value} : s));
                                 }} 
-                                className="edit-input" 
+                                className="inline-edit-input" 
                                 disabled={isLoading}
                               />
                               <button 
-                                className="btn-outline" 
+                                className="skill-remove-btn" 
                                 onClick={() => removeSkill(skill.id)}
                                 disabled={isLoading}
                               >
-                                <Trash2 size={14} />Remove
+                                <Trash2 size={14} />
                               </button>
-                            </>
+                            </div>
                           ) : (
                             <>
                               <div className="skill-header">
@@ -1045,8 +1175,10 @@ const MyProfile = () => {
                     </div>
                   </div>
 
+
                   {/* DOCUMENTS SECTION */}
-                  <div className="freelancer-section">
+                  <div className="freelancer-section soft-fade-in stagger-5">
+
                     <div className="freelancer-section-header">
                       <div>
                         <h3 className="freelancer-section-title">
@@ -1067,8 +1199,8 @@ const MyProfile = () => {
                     </div>
                   </div>
 
-                  {/* CERTIFICATES */}
-                  <div className="freelancer-section">
+                  <div className="freelancer-section soft-fade-in stagger-6">
+
                     <div className="freelancer-section-header">
                       <div>
                         <h3 className="freelancer-section-title">
@@ -1076,12 +1208,29 @@ const MyProfile = () => {
                         </h3>
                         <p className="freelancer-section-subtitle">{t("profile.certificationsDesc", "Professional credentials")}</p>
                       </div>
-                      {isEditing && (
-                        <button className="btn-secondary" onClick={addCertificate} disabled={isLoading}>
-                          <Plus size={16} />Add Certificate
+                      {editingSection === 'certificates' ? (
+                        <div className="inline-edit-actions">
+                          <button className="btn-cancel-inline" onClick={handleSectionCancel}>{t("profile.cancel", "Cancel")}</button>
+                          <button className="btn-save-inline" onClick={() => handleSectionSave('contact')}> {/* Reuse contact save for simplicity if it updates profiles */}
+                            {isLoading ? <RefreshCw size={14} className="spinning" /> : <Save size={14} />}
+                            {t("profile.save", "Save")}
+                          </button>
+                        </div>
+                      ) : (
+                        <button className="edit-pencil-btn visible" onClick={() => handleSectionEdit('certificates')}>
+                          <Edit size={14} />
                         </button>
                       )}
                     </div>
+                    
+                    {editingSection === 'certificates' && (
+                      <div className="skills-edit-top">
+                        <button className="btn-secondary" onClick={addCertificate} disabled={isLoading}>
+                          <Plus size={16} />Add Certificate
+                        </button>
+                      </div>
+                    )}
+
                     <div className="certificates-list">
                       {certificates.map(cert => (
                         <div key={cert.id} className="certificate-item">
@@ -1092,8 +1241,8 @@ const MyProfile = () => {
                             <h4>{cert.name}</h4>
                             <p>{cert.issuer} · {cert.year}</p>
                           </div>
-                          {isEditing && (
-                            <button className="btn-outline" onClick={() => removeCertificate(cert.id)} disabled={isLoading}>
+                          {editingSection === 'certificates' && (
+                            <button className="skill-remove-btn" onClick={() => removeCertificate(cert.id)} disabled={isLoading}>
                               <Trash2 size={14} />
                             </button>
                           )}
@@ -1102,91 +1251,86 @@ const MyProfile = () => {
                     </div>
                   </div>
 
+
                   {/* CONTACT DETAILS */}
-                  <div className="details-grid">
-                    <div className="detail-item">
-                      <span className="detail-icon"><Mail size={16} /></span>
-                      <div className="detail-content">
-                        <span className="detail-label">{t("profile.email", "Email")}</span>
-                        {isEditing ? (
-                          <input 
-                            type="email" 
-                            value={userData.email} 
-                            onChange={(e) => handleInputChange('email', e.target.value)} 
-                            className="edit-input" 
-                            disabled={isLoading}
-                          />
-                        ) : (
-                          <div className="detail-value-wrapper">
-                            <span className="detail-value">{userData.email}</span>
-                            <span className="verified-tag">{t("profile.verified", "Verified")}</span>
+                  <div className="freelancer-section">
+                    <div className="freelancer-section-header">
+                      <h3 className="freelancer-section-title">
+                        <Mail size={18} />{t("profile.contactDetails", "Contact Details")}
+                      </h3>
+                      {editingSection !== 'contact' && (
+                        <button className="edit-pencil-btn visible" onClick={() => handleSectionEdit('contact', { email: userData.email, phone: userData.phone, location: userData.location, language: userData.language })}>
+                          <Edit size={14} />
+                        </button>
+                      )}
+                    </div>
+
+                    {editingSection === 'contact' ? (
+                      <div className="inline-edit-container contact-edit-container">
+                        <div className="details-grid editing">
+                          <div className="form-group">
+                            <label><Mail size={14} /> {t("profile.email", "Email")}</label>
+                            <input type="email" value={editFormData.email} onChange={(e) => handleEditInputChange('email', e.target.value)} className="inline-edit-input" />
                           </div>
-                        )}
+                          <div className="form-group">
+                            <label><Phone size={14} /> {t("profile.phone", "Phone")}</label>
+                            <input type="tel" value={editFormData.phone} onChange={(e) => handleEditInputChange('phone', e.target.value)} className="inline-edit-input" />
+                          </div>
+                          <div className="form-group">
+                            <label><MapPin size={14} /> {t("profile.location", "Location")}</label>
+                            <input type="text" value={editFormData.location} onChange={(e) => handleEditInputChange('location', e.target.value)} className="inline-edit-input" />
+                          </div>
+                          <div className="form-group">
+                            <label><Globe size={14} /> Language </label>
+                            <input type="text" value={editFormData.language} onChange={(e) => handleEditInputChange('language', e.target.value)} className="inline-edit-input" />
+                          </div>
+                        </div>
+                        <div className="inline-edit-actions">
+                          <button className="btn-cancel-inline" onClick={handleSectionCancel}>{t("profile.cancel", "Cancel")}</button>
+                          <button className="btn-save-inline" onClick={() => handleSectionSave('contact')}>
+                            {isLoading ? <RefreshCw size={14} className="spinning" /> : <Save size={14} />}
+                            {t("profile.save", "Save")}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="detail-item">
-                      <span className="detail-icon"><Phone size={16} /></span>
-                      <div className="detail-content">
-                        <span className="detail-label">{t("profile.phone", "Phone")}</span>
-                        {isEditing ? (
-                          <input 
-                            type="tel" 
-                            value={userData.phone} 
-                            onChange={(e) => handleInputChange('phone', e.target.value)} 
-                            className="edit-input" 
-                            disabled={isLoading}
-                          />
-                        ) : (
-                          <span className="detail-value">{userData.phone}</span>
-                        )}
+                    ) : (
+                      <div className="details-grid">
+                        <div className="detail-item">
+                          <span className="detail-icon"><Mail size={16} /></span>
+                          <div className="detail-content">
+                            <span className="detail-label">{t("profile.email", "Email")}</span>
+                            <div className="detail-value-wrapper">
+                              <span className="detail-value">{userData.email}</span>
+                              <span className="verified-tag">{t("profile.verified", "Verified")}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="detail-item">
+                          <span className="detail-icon"><Phone size={16} /></span>
+                          <div className="detail-content">
+                            <span className="detail-label">{t("profile.phone", "Phone")}</span>
+                            <span className="detail-value">{userData.phone}</span>
+                          </div>
+                        </div>
+                        <div className="detail-item">
+                          <span className="detail-icon"><MapPin size={16} /></span>
+                          <div className="detail-content">
+                            <span className="detail-label">{t("profile.location", "Location")}</span>
+                            <span className="detail-value">{userData.location}</span>
+                          </div>
+                        </div>
+                        <div className="detail-item">
+                          <span className="detail-icon"><Globe size={16} /></span>
+                          <div className="detail-content">
+                            <span className="detail-label">Language</span>
+                            <span className="detail-value">{userData.language}</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="detail-item">
-                      <span className="detail-icon"><MapPin size={16} /></span>
-                      <div className="detail-content">
-                        <span className="detail-label">{t("profile.location", "Location")}</span>
-                        {isEditing ? (
-                          <input 
-                            type="text" 
-                            value={userData.location} 
-                            onChange={(e) => handleInputChange('location', e.target.value)} 
-                            className="edit-input" 
-                            disabled={isLoading}
-                          />
-                        ) : (
-                          <span className="detail-value">{userData.location}</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="detail-item">
-                      <span className="detail-icon"><Globe size={16} /></span>
-                      <div className="detail-content">
-                        <span className="detail-label">Language</span>
-                        {isEditing ? (
-                          <input 
-                            type="text" 
-                            value={userData.language} 
-                            onChange={(e) => handleInputChange('language', e.target.value)} 
-                            className="edit-input" 
-                            disabled={isLoading}
-                          />
-                        ) : (
-                          <span className="detail-value">{userData.language}</span>
-                        )}
-                      </div>
-                    </div>
+                    )}
                   </div>
 
-                  {isEditing && (
-                    <div className="edit-actions">
-                      <button className="btn-secondary" onClick={() => setIsEditing(false)} disabled={isLoading}>
-                        Cancel
-                      </button>
-                      <button className="btn-primary" onClick={handleSave} disabled={isLoading}>
-                        {isLoading ? <><RefreshCw size={16} className="spinning" /> Saving...</> : <><Save size={16} /> Save Changes</>}
-                      </button>
-                    </div>
-                  )}
+
                 </div>
               </div>
             </div>
@@ -1213,6 +1357,7 @@ const MyProfile = () => {
                         <Briefcase size={20} />Portfolio Projects
                       </h2>
                       <p className="cv-section-desc">Showcase your best work with project images and descriptions</p>
+
                     </div>
                     <button className="btn-primary" onClick={openAddPortfolio} disabled={isLoading}>
                       <Plus size={16} />Add Project

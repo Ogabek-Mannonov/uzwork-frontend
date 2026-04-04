@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getFreelancerById, getPublicPortfolio } from "../../api/freelancer";
 import { getUserProfile } from "../../api/common";
+import { FiArrowLeft, FiMapPin, FiDollarSign, FiStar, FiBriefcase, FiAward, FiGlobe } from "react-icons/fi";
+import "./profile-css/public-profile.css";
+import "../../assets/style/theme.css";
 
 export default function PublicProfile() {
   const { id } = useParams();
@@ -13,91 +16,155 @@ export default function PublicProfile() {
   useEffect(() => {
     const fetch = async () => {
       setLoading(true);
-      const [profileRes, portfolioRes] = await Promise.all([
-        getUserProfile(id),
-        getPublicPortfolio(id),
-      ]);
-      const pData = profileRes?.data || profileRes || {};
-      const mergedProfile = { ...(pData.user || {}), ...(pData.profile || {}) };
-      setProfile(mergedProfile);
+      try {
+        const [profileRes, portfolioRes] = await Promise.all([
+          getUserProfile(id),
+          getPublicPortfolio(id),
+        ]);
 
-      const portData = portfolioRes?.data?.items || portfolioRes?.data || portfolioRes || [];
-      setPortfolio(Array.isArray(portData) ? portData : []);
-      setLoading(false);
+        console.log("Profile Data:", profileRes); // Useful for debugging
+
+        // Normalize profile data
+        // API response might be: { success: true, data: { user, profile } } 
+        // OR it might be just { user, profile }
+        const rawData = profileRes?.data || (profileRes?.user ? profileRes : null);
+        
+        if (rawData) {
+          const u = rawData.user || {};
+          const p = rawData.profile || {};
+          
+          setProfile({
+            id: u.id || "",
+            fullName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || u.name || "User",
+            first_name: u.first_name,
+            last_name: u.last_name,
+            username: u.username,
+            email: u.email,
+            avatar_url: p.avatar_url || u.avatar_url || "",
+            title: p.title || "",
+            bio: p.bio || "",
+            location: p.location || "",
+            hourly_rate: p.hourly_rate || 0,
+            job_success_score: p.job_success_score || 0,
+            total_earned: p.total_earned || 0,
+            skills: Array.isArray(p.skills) ? p.skills : (p.skills ? [p.skills] : []),
+          });
+        } else {
+          // Fallback if structure is unknown or empty
+          setProfile(null);
+        }
+
+        // Normalize portfolio data
+        const portData = portfolioRes?.data?.items || portfolioRes?.data || portfolioRes || [];
+        setPortfolio(Array.isArray(portData) ? portData : []);
+      } catch (error) {
+        console.error("Error fetching public profile:", error);
+        setProfile(null);
+      } finally {
+        setLoading(false);
+      }
     };
     fetch();
   }, [id]);
 
-  if (loading) return <p style={{ textAlign: "center", padding: 60 }}>Yuklanmoqda...</p>;
-  if (!profile) return <p style={{ textAlign: "center", padding: 60, color: "red" }}>Profil topilmadi</p>;
+  if (loading) return (
+    <div className="public-profile-container">
+      <div className="public-profile-card soft-fade-in" style={{ textAlign: "center", padding: "100px 0" }}>
+        <p>Yuklanmoqda...</p>
+      </div>
+    </div>
+  );
+
+  if (!profile) return (
+    <div className="public-profile-container">
+      <div className="public-profile-card soft-fade-in" style={{ textAlign: "center", padding: "100px 0", color: "var(--danger)" }}>
+        <p>Profil topilmadi yoki ma'lumotlar yuklanmadi.</p>
+        <p style={{ fontSize: "12px", opacity: 0.7 }}>{profileRes?.message || "Noma'lum xatolik"}</p>
+        <button className="back-link" style={{ marginTop: 20 }} onClick={() => navigate(-1)}><FiArrowLeft /> Orqaga</button>
+      </div>
+    </div>
+  );
+
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 16px" }}>
-      <button onClick={() => navigate(-1)} style={{ background: "none", border: "none", color: "#14a800", cursor: "pointer", fontWeight: 600, marginBottom: 20 }}>
-        ← Orqaga
+    <div className="public-profile-container">
+      <button className="back-link soft-fade-in stagger-1" onClick={() => navigate(-1)}>
+        <FiArrowLeft /> Orqaga
       </button>
 
       {/* Profile header */}
-      <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #e0e0e0", padding: 28, marginBottom: 20 }}>
-        <div style={{ display: "flex", gap: 20, alignItems: "flex-start", flexWrap: "wrap" }}>
-          <div style={{
-            width: 80, height: 80, borderRadius: "50%", flexShrink: 0,
-            background: "#14a800", display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#fff", fontSize: 32, fontWeight: 900,
-            overflow: "hidden"
-          }}>
+      <div className="public-profile-card soft-fade-in stagger-2">
+        <div className="profile-main-info">
+          <div className="public-avatar-wrapper">
             {profile.avatar_url
-              ? <img src={profile.avatar_url} alt={profile.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              : (profile.name || "?")[0]?.toUpperCase()
+              ? <img src={profile.avatar_url} alt={profile.fullName} className="public-avatar-img" />
+              : (profile.fullName || "?")[0]?.toUpperCase()
             }
           </div>
-          <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>
-              {profile.name || profile.first_name + " " + profile.last_name}
-            </h1>
-            {profile.title && <p style={{ fontSize: 15, color: "#555", marginBottom: 8 }}>{profile.title}</p>}
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontSize: 13, color: "#888" }}>
-              {profile.location && <span>📍 {profile.location}</span>}
-              {profile.hourly_rate && <span>💰 ${profile.hourly_rate}/soat</span>}
-              {profile.job_success_score && <span>⭐ {profile.job_success_score}% muvaffaqiyat</span>}
-              {profile.total_earned && <span>💵 ${profile.total_earned} daromad</span>}
+          <div className="profile-header-details">
+            <h1 className="public-fullname">{profile.fullName}</h1>
+            {profile.title && <p className="public-title">{profile.title}</p>}
+            
+            <div className="public-meta-grid">
+              {profile.location && (
+                <span className="public-meta-item">
+                  <FiMapPin size={14} /> {profile.location}
+                </span>
+              )}
+              {profile.hourly_rate > 0 && (
+                <span className="public-meta-item">
+                  <FiDollarSign size={14} /> ${profile.hourly_rate}/soat
+                </span>
+              )}
+              {profile.job_success_score > 0 && (
+                <span className="public-meta-item">
+                  <FiStar size={14} /> {profile.job_success_score}% muvaffaqiyat
+                </span>
+              )}
+              {profile.total_earned > 0 && (
+                <span className="public-meta-item">
+                  <FiBriefcase size={14} /> ${profile.total_earned} daromad
+                </span>
+              )}
             </div>
           </div>
         </div>
 
         {profile.bio && (
-          <>
-            <hr style={{ margin: "20px 0", border: "none", borderTop: "1px solid #f0f0f0" }} />
-            <p style={{ fontSize: 14, color: "#444", lineHeight: 1.75 }}>{profile.bio}</p>
-          </>
+          <div className="bio-section soft-fade-in stagger-3">
+            <hr className="public-divider" />
+            <p className="public-bio">{profile.bio}</p>
+          </div>
         )}
 
         {profile.skills?.length > 0 && (
-          <>
-            <hr style={{ margin: "20px 0", border: "none", borderTop: "1px solid #f0f0f0" }} />
-            <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>Ko'nikmalar</h3>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div className="public-skills-section soft-fade-in stagger-4">
+            <hr className="public-divider" />
+            <h3>Ko'nikmalar</h3>
+            <div className="public-skills-grid">
               {profile.skills.map((sk, i) => (
-                <span key={i} style={{ fontSize: 13, padding: "4px 12px", background: "#f0f0f0", borderRadius: 20, fontWeight: 600 }}>{sk}</span>
+                <span key={i} className="public-skill-chip">{sk}</span>
               ))}
             </div>
-          </>
+          </div>
         )}
       </div>
 
       {/* Portfolio */}
       {portfolio.length > 0 && (
-        <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #e0e0e0", padding: 28 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 20 }}>Portfolio</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
+        <div className="public-portfolio-section soft-fade-in stagger-5">
+          <h2>Portfolio</h2>
+          <div className="public-portfolio-grid">
             {portfolio.map((item, i) => (
-              <div key={i} style={{ border: "1px solid #e0e0e0", borderRadius: 10, overflow: "hidden" }}>
-                {item.cover_image_url && (
-                  <img src={item.cover_image_url} alt={item.title} style={{ width: "100%", height: 140, objectFit: "cover" }} />
+              <div key={i} className="portfolio-item-card">
+                {(item.cover_image_url || (item.media && item.media[0]?.url)) && (
+                  <div className="portfolio-img-wrapper">
+                    <img src={item.cover_image_url || item.media[0]?.url} alt={item.title} />
+                  </div>
                 )}
-                <div style={{ padding: 12 }}>
-                  <div style={{ fontWeight: 700, fontSize: 14 }}>{item.title}</div>
-                  {item.description && <p style={{ fontSize: 12, color: "#666", marginTop: 4 }}>{item.description?.slice(0, 80)}</p>}
+                <div className="portfolio-content">
+                  <h4 className="portfolio-title">{item.title}</h4>
+                  {item.description && <p className="portfolio-desc">{item.description?.slice(0, 120)}...</p>}
                 </div>
               </div>
             ))}

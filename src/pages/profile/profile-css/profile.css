@@ -1037,7 +1037,254 @@ body.dark-mode {
   background: rgba(0, 0, 0, 0.05);
 }
 
-/* ===== PROFILE CARD ===== */
+.view-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--blue);
+  border: 1px solid var(--blue);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.view-profile-btn:hover {
+  background: var(--blue-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.dark .view-profile-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Meta Edit */
+.meta-edit-inline {
+  display: flex !important;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 120px;
+}
+
+.rate-input-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--light-text);
+  font-weight: 600;
+}
+
+.dark .rate-input-group {
+  color: var(--dark-text);
+}
+
+.rate-input {
+  width: 70px !important;
+  padding: 4px 8px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Contact Edit */
+.contact-edit-container {
+  padding: 24px;
+  background: var(--light-surface);
+  border-radius: var(--radius-xl);
+  border: 1px dashed var(--blue);
+}
+
+.dark .contact-edit-container {
+  background: var(--dark-surface);
+  border-color: var(--blue);
+}
+
+.details-grid.editing {
+  gap: 20px;
+}
+
+.details-grid.editing .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.details-grid.editing label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--light-text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dark .details-grid.editing label {
+  color: var(--dark-text-tertiary);
+}
+
+/* Skills Edit */
+.skills-edit-top {
+  margin-bottom: 16px;
+  padding-left: 20px;
+}
+
+.skill-edit-mode {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.skill-edit-mode .inline-edit-input {
+  margin-bottom: 0 !important;
+  font-size: 13px;
+}
+
+.skill-remove-btn {
+  width: 28px;
+  height: 28px;
+  background: var(--danger-light);
+  color: var(--danger);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.skill-remove-btn:hover {
+  background: var(--danger);
+  color: white;
+}
+
+.dark .skill-remove-btn {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.dark .skill-remove-btn:hover {
+  background: var(--danger);
+}
+
+
+.edit-pencil-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--light-border);
+  background: var(--light-surface);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.section-edit-trigger:hover .edit-pencil-btn,
+.edit-pencil-btn.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.edit-pencil-btn:hover {
+  background: var(--blue-bg);
+  transform: scale(1.1);
+}
+
+.dark .edit-pencil-btn {
+  background: var(--dark-surface);
+  border-color: var(--dark-border);
+}
+
+.inline-edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn-save-inline {
+  background: var(--blue);
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition);
+}
+
+.btn-save-inline:hover {
+  background: var(--blue-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-cancel-inline {
+  background: transparent;
+  color: var(--light-text-secondary);
+  border: 1px solid var(--light-border);
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.dark .btn-cancel-inline {
+  color: var(--dark-text-secondary);
+  border-color: var(--dark-border);
+}
+
+.btn-cancel-inline:hover {
+  background: var(--light-hover);
+}
+
+.dark .btn-cancel-inline:hover {
+  background: var(--dark-hover);
+}
+
+.inline-edit-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--blue);
+  border-radius: var(--radius-md);
+  background: var(--light-surface);
+  color: var(--light-text);
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.dark .inline-edit-input {
+  background: var(--dark-card-alt);
+  color: var(--dark-text);
+}
+
+.inline-edit-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--blue);
+  border-radius: var(--radius-md);
+  background: var(--light-surface);
+  color: var(--light-text);
+  font-size: 14px;
+  min-height: 120px;
+  resize: vertical;
+}
+
+.dark .inline-edit-textarea {
+  background: var(--dark-card-alt);
+  color: var(--dark-text);
+}
+
 .profile-card {
   background: var(--light-card);
   border: 1px solid var(--light-border);
@@ -1219,14 +1466,18 @@ body.dark-mode {
 }
 
 .dark .profile-fullname {
-  color: var(--dark-text);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
 }
 
 .profile-title {
   font-size: 18px;
-  color: var(--light-text-secondary);
-  margin-bottom: 2px;
   font-weight: 500;
+  color: var(--brand);
+  margin-bottom: 8px;
 }
 
 .dark .profile-title {
@@ -1483,14 +1734,19 @@ body.dark-mode {
 
 /* ===== FREELANCER SECTIONS ===== */
 .freelancer-section {
-  margin-top: 32px;
-  padding-top: 32px;
-  border-top: 1px solid var(--light-border);
-  margin-bottom: 16px;
+  padding: 32px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition);
 }
 
-.dark .freelancer-section {
-  border-color: var(--dark-border);
+.freelancer-section:hover {
+  box-shadow: var(--shadow-lg);
 }
 
 .freelancer-section-header {

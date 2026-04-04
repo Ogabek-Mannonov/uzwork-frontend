@@ -313,7 +313,7 @@ function AuthHeader({ i18n, changeLanguage }) {
 
   return (
     <>
-      <header className="nav">
+      <header className="nav glass-header">
         <div className="nav__inner">
           <div className="nav__left">
             <button className="nav__hamburger" onClick={() => setDrawerOpen(true)} aria-label="Open menu">
