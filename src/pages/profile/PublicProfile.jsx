@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getFreelancerById, getPublicPortfolio } from "../../api/freelancer";
 import { getUserProfile } from "../../api/common";
-import { FiArrowLeft, FiMapPin, FiDollarSign, FiStar, FiBriefcase, FiAward, FiGlobe } from "react-icons/fi";
+import { FiArrowLeft, FiMapPin, FiDollarSign, FiStar, FiBriefcase, FiAward, FiGlobe, FiFileText } from "react-icons/fi";
+
 import "./profile-css/public-profile.css";
 import "../../assets/style/theme.css";
 
@@ -48,7 +49,9 @@ export default function PublicProfile() {
             job_success_score: p.job_success_score || 0,
             total_earned: p.total_earned || 0,
             skills: Array.isArray(p.skills) ? p.skills : (p.skills ? [p.skills] : []),
+            cv_url: p.cv_url || "", // NEW: Added CVS link
           });
+
         } else {
           // Fallback if structure is unknown or empty
           setProfile(null);
@@ -126,7 +129,19 @@ export default function PublicProfile() {
                   <FiBriefcase size={14} /> ${profile.total_earned} daromad
                 </span>
               )}
+              {profile.cv_url && (
+                <a 
+                  href={profile.cv_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="public-meta-item cv-link"
+                  style={{ color: 'var(--blue)', fontWeight: '600', textDecoration: 'none' }}
+                >
+                  <FiFileText size={14} /> Rezume ko'rish
+                </a>
+              )}
             </div>
+
           </div>
         </div>
 

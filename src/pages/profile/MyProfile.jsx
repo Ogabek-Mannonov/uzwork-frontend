@@ -63,7 +63,8 @@ import {
   Gift
 } from "lucide-react";
 import "../profile/profile-css/profile.css";
-import { getMyProfile, updateMyProfile } from "../../api/common";
+import { getMyProfile, updateMyProfile, uploadFile } from "../../api/common";
+
 import { logout } from "../../api/auth";
 import { getMyPortfolio, createPortfolioItem, updatePortfolioItem, deletePortfolioItem } from "../../api/freelancer";
 import { PROFESSIONAL_SKILLS } from "../../utils/skills";
@@ -177,7 +178,9 @@ const MyProfile = () => {
             profilePicture: p.avatar_url || u.avatar_url || "",
             hourlyRate: p.hourly_rate || 0,
             accountType: u.role || "",
+            cv_url: p.cv_url || "", // NEW: Added CVS link
           }));
+
 
           if (p.skills && Array.isArray(p.skills)) {
             setSkills(p.skills);
@@ -234,8 +237,10 @@ const MyProfile = () => {
     rating: 0,
     successScore: 0,
     responseTime: "< 1 hour",
-    availability: "Available now"
+    availability: "Available now",
+    cv_url: "", // NEW: Added CVS link
   });
+
 
   const [skills, setSkills] = useState([]);
 
@@ -623,6 +628,64 @@ const MyProfile = () => {
       } finally {
         setIsLoading(false);
       }
+    }
+  };
+
+  const handleCvUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validation
+    const allowedTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    const ext = file.name.split('.').pop().toLowerCase();
+    const isDoc = allowedTypes.includes(file.type) || ["pdf", "doc", "docx"].includes(ext);
+
+    if (!isDoc) {
+      showMessage("error", "Only PDF and Word documents are allowed.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showMessage("error", "File size must be less than 5MB.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const uploadRes = await uploadFile(formData);
+      if (!uploadRes.success) throw new Error(uploadRes.message);
+
+      const cvUrl = uploadRes.data.url;
+      const updateRes = await updateMyProfile({ cv_url: cvUrl });
+      if (!updateRes.success) throw new Error(updateRes.message || updateRes.error);
+
+      setUserData(prev => ({ ...prev, cv_url: cvUrl }));
+      showMessage("success", "CV uploaded successfully!");
+    } catch (err) {
+      showMessage("error", err.message || "Failed to upload CV");
+    } finally {
+      setIsLoading(false);
+      // Reset input value to allow uploading same file again if needed
+      e.target.value = "";
+    }
+  };
+
+  const handleDeleteCv = async () => {
+    if (!window.confirm("Are you sure you want to delete your CV?")) return;
+
+    setIsLoading(true);
+    try {
+      const updateRes = await updateMyProfile({ cv_url: null });
+      if (!updateRes.success) throw new Error(updateRes.message || updateRes.error);
+
+      setUserData(prev => ({ ...prev, cv_url: "" }));
+      showMessage("success", "CV deleted successfully");
+    } catch (err) {
+      showMessage("error", err.message || "Failed to delete CV");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -1425,53 +1488,76 @@ const MyProfile = () => {
                   <div className="cv-section-title-bar">
                     <div>
                       <h2 className="cv-section-main-title">
-                        <FileText size={20} />Upload Your Resume
+                        <FileText size={20} />{userData.cv_url ? "Update Your Resume" : "Upload Your Resume"}
                       </h2>
                       <p className="cv-section-desc">Share your professional CV with potential clients</p>
                     </div>
                   </div>
 
-                  <div className="cv-upload-zone">
-                    <Upload size={48} />
-                    <h3>Upload Your Resume</h3>
-                    <p>Drag and drop your CV here, or click to browse</p>
-                    <p className="cv-upload-hint">Supported formats: PDF, DOCX (Max 5MB)</p>
-                    <button className="btn-primary" disabled={isLoading}>
-                      <Upload size={16} />Browse Files
-                    </button>
-                  </div>
-                </div>
-
-                <div className="cv-current-file">
-                  <div className="cv-file-header">
-                    <h3>Current Resume</h3>
-                  </div>
-                  <div className="cv-file-item">
-                    <div className="cv-file-icon">
-                      <FileText size={32} />
+                  {!userData.cv_url ? (
+                    <div className="cv-upload-zone" onClick={() => document.getElementById('cv-file-input').click()}>
+                      <Upload size={48} />
+                      <h3>Upload Your Resume</h3>
+                      <p>Drag and drop your CV here, or click to browse</p>
+                      <p className="cv-upload-hint">Supported formats: PDF, DOCX (Max 5MB)</p>
+                      <input 
+                        type="file" 
+                        id="cv-file-input" 
+                        style={{ display: 'none' }} 
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleCvUpload}
+                      />
+                      <button className="btn-primary" disabled={isLoading}>
+                        <Upload size={16} />Browse Files
+                      </button>
                     </div>
-                    <div className="cv-file-info">
-                      <h4>Alisher_Ergashev_CV.pdf</h4>
-                      <p>Last updated: Jan 15, 2024 · 245 KB</p>
-                      <div className="cv-file-meta">
-                        <span className="cv-file-status cv-file-verified">
-                          <CheckCircle size={14} />Verified
-                        </span>
-                        <span className="cv-file-views">
-                          <Eye size={14} />128 views
-                        </span>
+                  ) : (
+                    <div className="cv-current-file">
+                      <div className="cv-file-header">
+                        <h3>Current Resume</h3>
+                        <button className="btn-outline btn-small" onClick={() => document.getElementById('cv-file-input').click()} disabled={isLoading}>
+                          <RefreshCw size={14} /> Replace
+                        </button>
+                        <input 
+                          type="file" 
+                          id="cv-file-input" 
+                          style={{ display: 'none' }} 
+                          accept=".pdf,.doc,.docx"
+                          onChange={handleCvUpload}
+                        />
+                      </div>
+                      <div className="cv-file-item">
+                        <div className="cv-file-icon">
+                          <FileText size={32} />
+                        </div>
+                        <div className="cv-file-info">
+                          <h4>{userData.cv_url.split('/').pop() || "Your_Resume.pdf"}</h4>
+                          <p>Ready to share with clients</p>
+                          <div className="cv-file-meta">
+                            <span className="cv-file-status cv-file-verified">
+                              <CheckCircle size={14} />Professional
+                            </span>
+                          </div>
+                        </div>
+                        <div className="cv-file-actions">
+                          <a 
+                            href={userData.cv_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="btn-secondary"
+                            style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}
+                          >
+                            <Eye size={14} />View
+                          </a>
+                          <button className="btn-outline" onClick={handleDeleteCv} disabled={isLoading}>
+                            <Trash2 size={14} />Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div className="cv-file-actions">
-                      <button className="btn-secondary" disabled={isLoading}>
-                        <Download size={14} />Download
-                      </button>
-                      <button className="btn-outline" disabled={isLoading}>
-                        <Trash2 size={14} />Delete
-                      </button>
-                    </div>
-                  </div>
+                  )}
                 </div>
+
 
                 <div className="cv-tips-card">
                   <div className="cv-tips-header">
