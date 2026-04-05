@@ -42,6 +42,14 @@
   
   /* Animations */
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Inputs / Search (Light) */
+  --input-bg: #f1f5f9;
+  --input-border: rgba(15, 23, 42, 0.08);
+  --input-text: #0f172a;
+  --input-placeholder: #94a3b8;
+  --chip-bg: rgba(15, 23, 42, 0.04);
+  --btn-ghost: rgba(37, 99, 235, 0.08);
 }
 
 /* DARK MODE REFINEMENT */
@@ -68,6 +76,14 @@
   /* Borders */
   --border: rgba(255, 255, 255, 0.1);
   --brand-light: rgba(37, 99, 235, 0.15);
+
+  /* Inputs / Search (Dark) */
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --input-text: #f8fafc;
+  --input-placeholder: #64748b;
+  --chip-bg: rgba(255, 255, 255, 0.06);
+  --btn-ghost: rgba(37, 99, 235, 0.15);
 }
 
 /* Premium Utilities */

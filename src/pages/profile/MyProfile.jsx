@@ -63,7 +63,8 @@ import {
   Gift
 } from "lucide-react";
 import "../profile/profile-css/profile.css";
-import { getMyProfile, updateMyProfile, uploadFile } from "../../api/common";
+import { getMyProfile, updateMyProfile, uploadFile, uploadImage } from "../../api/common";
+
 
 import { logout } from "../../api/auth";
 import { getMyPortfolio, createPortfolioItem, updatePortfolioItem, deletePortfolioItem } from "../../api/freelancer";
@@ -177,9 +178,10 @@ const MyProfile = () => {
             bio: p.bio || "",
             profilePicture: p.avatar_url || u.avatar_url || "",
             hourlyRate: p.hourly_rate || 0,
-            accountType: u.role || "",
-            cv_url: p.cv_url || "", // NEW: Added CVS link
+            cv_url: p.cv_url || "",
+            coverPhoto: p.cover_url || "", // Added cover_url
           }));
+
 
 
           if (p.skills && Array.isArray(p.skills)) {
@@ -229,8 +231,9 @@ const MyProfile = () => {
     title: "",
     bio: "",
     profilePicture: "",
-    coverPhoto: "",
+    coverPhoto: "", // Updated
     hourlyRate: 0,
+
     totalEarned: 0,
     jobsCompleted: 0,
     activeProjects: 0,
@@ -667,12 +670,80 @@ const MyProfile = () => {
       showMessage("error", err.message || "Failed to upload CV");
     } finally {
       setIsLoading(false);
-      // Reset input value to allow uploading same file again if needed
+    }
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validation
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+    if (!allowedTypes.includes(file.type)) {
+      showMessage("error", "Only JPG, PNG and WebP images are allowed.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "avatar"); // Send type for resizing
+
+      const uploadRes = await uploadImage(formData);
+      if (!uploadRes.success) throw new Error(uploadRes.message);
+
+      const imageUrl = uploadRes.data.url;
+      // Update profile with new avatar_url
+      const updateRes = await updateMyProfile({ avatar_url: imageUrl });
+      if (!updateRes.success) throw new Error(updateRes.message || updateRes.error);
+
+      setUserData(prev => ({ ...prev, profilePicture: imageUrl }));
+      showMessage("success", "Profile picture updated successfully!");
+    } catch (err) {
+      showMessage("error", err.message || "Failed to update avatar");
+    } finally {
+      setIsLoading(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validation
+    if (!file.type.startsWith("image/")) {
+      showMessage("error", "Please upload an image file.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "cover"); // Send type for resizing
+
+      const uploadRes = await uploadImage(formData);
+      if (!uploadRes.success) throw new Error(uploadRes.message);
+
+      const imageUrl = uploadRes.data.url;
+      // Update profile with new cover_url
+      const updateRes = await updateMyProfile({ cover_url: imageUrl });
+      if (!updateRes.success) throw new Error(updateRes.message || updateRes.error);
+
+      setUserData(prev => ({ ...prev, coverPhoto: imageUrl }));
+      showMessage("success", "Cover photo updated successfully!");
+    } catch (err) {
+      showMessage({ type: "error", text: err.message || "Failed to update cover" });
+    } finally {
+      setIsLoading(false);
       e.target.value = "";
     }
   };
 
   const handleDeleteCv = async () => {
+
     if (!window.confirm("Are you sure you want to delete your CV?")) return;
 
     setIsLoading(true);
@@ -1055,27 +1126,37 @@ const MyProfile = () => {
               <div className="profile-card soft-fade-in stagger-1">
                 <div className="profile-cover">
                   <img src={userData.coverPhoto} alt="Cover" className="cover-image" />
-                  {editingSection === 'name' && (
-                    <button className="change-cover-btn" onClick={() => handleUserMenuClick("Change cover")}>
-                      <Camera size={15} /> {t("profile.changeCover", "Change Cover")}
-                    </button>
-                  )}
-
+                  <button className="change-cover-btn" onClick={() => document.getElementById('cover-upload-input').click()} disabled={isLoading}>
+                    <Camera size={15} /> {t("profile.edit", "Edit")}
+                  </button>
+                  <input 
+                    type="file" 
+                    id="cover-upload-input" 
+                    style={{ display: 'none' }} 
+                    accept="image/*" 
+                    onChange={handleCoverUpload} 
+                  />
                 </div>
+
                 
                 <div className="profile-content">
                   {/* Avatar va ism qismi */}
                   <div className="profile-avatar-section">
                     <div className="avatar-wrapper">
                       <img src={userData.profilePicture} alt="Profile" className="profile-avatar" />
-                      {editingSection === 'name' && (
-                        <button className="change-avatar-btn" onClick={() => handleUserMenuClick("Change avatar")}>
-                          <Camera size={14} />
-                        </button>
-                      )}
-
+                      <button className="change-avatar-btn" onClick={() => document.getElementById('avatar-upload-input').click()} disabled={isLoading}>
+                        <Camera size={14} />
+                      </button>
+                      <input 
+                        type="file" 
+                        id="avatar-upload-input" 
+                        style={{ display: 'none' }} 
+                        accept="image/*" 
+                        onChange={handleAvatarUpload} 
+                      />
                       <span className="avatar-status online" />
                     </div>
+
                     <div className="profile-name-section">
                       {editingSection === 'name' ? (
                         <div className="inline-edit-container">

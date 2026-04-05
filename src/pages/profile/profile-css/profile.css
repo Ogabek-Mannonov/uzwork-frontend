@@ -1317,36 +1317,49 @@ body.dark-mode {
 }
 
 .change-cover-btn {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: rgba(255,255,255,0.92);
-  border: 1px solid rgba(0,0,0,0.1);
-  border-radius: var(--radius-md);
-  color: var(--light-text);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-  backdrop-filter: blur(8px);
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 6px 12px !important;
+  height: 32px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: var(--radius-full) !important;
+  color: white !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.25s ease !important;
+  z-index: 50 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  width: auto !important;
+  min-width: unset !important;
+  box-sizing: border-box !important;
 }
 
-.dark .change-cover-btn {
-  background: rgba(30,41,59,0.92);
-  color: var(--dark-text);
-  border-color: var(--dark-border);
+.change-cover-btn svg {
+  color: white !important;
 }
 
 .change-cover-btn:hover {
-  background: #fff;
+  background: rgba(0, 0, 0, 0.6) !important;
+  transform: translateY(-1px) scale(1.05) !important;
 }
 
+
+
 .dark .change-cover-btn:hover {
-  background: var(--dark-surface);
+  background: rgba(30, 41, 59, 0.6);
+}
+
+.change-cover-btn:active {
+  transform: translateY(0) scale(0.95);
 }
 
 .change-cover-btn:disabled {
@@ -1384,38 +1397,45 @@ body.dark-mode {
 }
 
 .profile-avatar {
-  width: 120px;
-  height: 120px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid var(--light-card);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border: 5px solid var(--light-card);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   display: block;
   background: white;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark .profile-avatar {
   border-color: var(--dark-card);
   background: var(--dark-surface);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.avatar-wrapper:hover .profile-avatar {
+  transform: scale(1.02);
+  filter: brightness(0.95);
 }
 
 .change-avatar-btn {
   position: absolute;
-  bottom: 6px;
-  right: 6px;
-  width: 32px;
-  height: 32px;
+  bottom: 8px;
+  right: 8px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: var(--blue);
-  border: 2px solid var(--light-card);
+  border: 4px solid var(--light-card);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 20;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 .dark .change-avatar-btn {
@@ -1424,13 +1444,19 @@ body.dark-mode {
 
 .change-avatar-btn:hover {
   background: var(--blue-dark);
-  transform: scale(1.1);
+  transform: scale(1.15) rotate(15deg);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+}
+
+.change-avatar-btn:active {
+  transform: scale(0.95);
 }
 
 .change-avatar-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
 
 .avatar-status {
   position: absolute;

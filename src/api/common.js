@@ -129,3 +129,16 @@ export const uploadFile = async (formData) => {
     return { success: false, message: err?.response?.data?.message || err?.message };
   }
 };
+
+/** Rasm yuklash (Avatar, Cover) */
+export const uploadImage = async (formData) => {
+  try {
+    const res = await api.post("/upload/image", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+

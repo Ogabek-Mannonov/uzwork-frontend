@@ -218,6 +218,20 @@
     "maxSkillsHint": "Максимум 20 навыков.",
     "skillsUpdated": "Навыки успешно обновлены!"
   },
+  "publicProfile": {
+    "aboutMe": "О себе",
+    "skills": "Навыки",
+    "hourlyRate": "В час",
+    "muvaffaqiyat": "Успех",
+    "daromad": "Доход",
+    "manzil": "Адрес",
+    "viewResume": "Посмотреть резюме",
+    "portfolio": "Портфолио",
+    "verified": "Проверенный эксперт",
+    "loading": "Загрузка...",
+    "notFound": "Профиль не найден или данные не загружены.",
+    "back": "Назад"
+  },
   "chat": {
     "today": "Сегодня",
     "yesterday": "Вчера",

@@ -3,11 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getFreelancerById, getPublicPortfolio } from "../../api/freelancer";
 import { getUserProfile } from "../../api/common";
 import { FiArrowLeft, FiMapPin, FiDollarSign, FiStar, FiBriefcase, FiAward, FiGlobe, FiFileText } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 
 import "./profile-css/public-profile.css";
 import "../../assets/style/theme.css";
 
 export default function PublicProfile() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
@@ -49,7 +51,8 @@ export default function PublicProfile() {
             job_success_score: p.job_success_score || 0,
             total_earned: p.total_earned || 0,
             skills: Array.isArray(p.skills) ? p.skills : (p.skills ? [p.skills] : []),
-            cv_url: p.cv_url || "", // NEW: Added CVS link
+            cv_url: p.cv_url || "",
+            cover_url: p.cover_url || "", // Added cover_url
           });
 
         } else {
@@ -70,10 +73,18 @@ export default function PublicProfile() {
     fetch();
   }, [id]);
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/profile");
+    }
+  };
+
   if (loading) return (
     <div className="public-profile-container">
       <div className="public-profile-card soft-fade-in" style={{ textAlign: "center", padding: "100px 0" }}>
-        <p>Yuklanmoqda...</p>
+        <p>{t("publicProfile.loading")}</p>
       </div>
     </div>
   );
@@ -81,9 +92,10 @@ export default function PublicProfile() {
   if (!profile) return (
     <div className="public-profile-container">
       <div className="public-profile-card soft-fade-in" style={{ textAlign: "center", padding: "100px 0", color: "var(--danger)" }}>
-        <p>Profil topilmadi yoki ma'lumotlar yuklanmadi.</p>
-        <p style={{ fontSize: "12px", opacity: 0.7 }}>{profileRes?.message || "Noma'lum xatolik"}</p>
-        <button className="back-link" style={{ marginTop: 20 }} onClick={() => navigate(-1)}><FiArrowLeft /> Orqaga</button>
+        <p>{t("publicProfile.notFound")}</p>
+        <button className="back-link" style={{ marginTop: 20 }} onClick={handleBack}>
+          <FiArrowLeft /> {t("publicProfile.back")}
+        </button>
       </div>
     </div>
   );
@@ -91,84 +103,123 @@ export default function PublicProfile() {
 
   return (
     <div className="public-profile-container">
-      <button className="back-link soft-fade-in stagger-1" onClick={() => navigate(-1)}>
-        <FiArrowLeft /> Orqaga
+      <button className="back-link soft-fade-in stagger-1" onClick={handleBack}>
+        <FiArrowLeft /> {t("publicProfile.back")}
       </button>
 
       {/* Profile header */}
       <div className="public-profile-card soft-fade-in stagger-2">
+        <div className="public-profile-cover">
+          {profile.cover_url ? (
+            <img src={profile.cover_url} alt="Cover" className="public-cover-img" />
+          ) : (
+            <div className="public-cover-placeholder" />
+          )}
+          <div className="cover-overlay"></div>
+        </div>
+
         <div className="profile-main-info">
           <div className="public-avatar-wrapper">
             {profile.avatar_url
               ? <img src={profile.avatar_url} alt={profile.fullName} className="public-avatar-img" />
               : (profile.fullName || "?")[0]?.toUpperCase()
             }
+            <div className="online-indicator"></div>
           </div>
+          
           <div className="profile-header-details">
-            <h1 className="public-fullname">{profile.fullName}</h1>
+            <div className="name-wrapper">
+              <h1 className="public-fullname">{profile.fullName}</h1>
+              <span className="verify-badge" title={t("publicProfile.verified")}>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                </svg>
+              </span>
+            </div>
+            
             {profile.title && <p className="public-title">{profile.title}</p>}
             
-            <div className="public-meta-grid">
+            {/* Stats Dashboard */}
+            <div className="stats-dashboard">
+              <div className="stat-card">
+                <FiDollarSign className="stat-icon" />
+                <div className="stat-info">
+                  <span className="stat-value">${profile.hourly_rate || 0}</span>
+                  <span className="stat-label">{t("publicProfile.hourlyRate")}</span>
+                </div>
+              </div>
+              
+              <div className="stat-card">
+                <FiStar className="stat-icon" />
+                <div className="stat-info">
+                  <span className="stat-value">{profile.job_success_score || 0}%</span>
+                  <span className="stat-label">{t("publicProfile.muvaffaqiyat")}</span>
+                </div>
+              </div>
+              
+              <div className="stat-card">
+                <FiBriefcase className="stat-icon" />
+                <div className="stat-info">
+                  <span className="stat-value">${profile.total_earned || 0}</span>
+                  <span className="stat-label">{t("publicProfile.daromad")}</span>
+                </div>
+              </div>
+
               {profile.location && (
-                <span className="public-meta-item">
-                  <FiMapPin size={14} /> {profile.location}
-                </span>
+                <div className="stat-card">
+                  <FiMapPin className="stat-icon" />
+                  <div className="stat-info">
+                    <span className="stat-value">{profile.location}</span>
+                    <span className="stat-label">{t("publicProfile.manzil")}</span>
+                  </div>
+                </div>
               )}
-              {profile.hourly_rate > 0 && (
-                <span className="public-meta-item">
-                  <FiDollarSign size={14} /> ${profile.hourly_rate}/soat
-                </span>
-              )}
-              {profile.job_success_score > 0 && (
-                <span className="public-meta-item">
-                  <FiStar size={14} /> {profile.job_success_score}% muvaffaqiyat
-                </span>
-              )}
-              {profile.total_earned > 0 && (
-                <span className="public-meta-item">
-                  <FiBriefcase size={14} /> ${profile.total_earned} daromad
-                </span>
-              )}
-              {profile.cv_url && (
+            </div>
+
+            {profile.cv_url && (
+              <div className="action-row">
                 <a 
                   href={profile.cv_url} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="public-meta-item cv-link"
-                  style={{ color: 'var(--blue)', fontWeight: '600', textDecoration: 'none' }}
+                  className="premium-btn primary"
                 >
-                  <FiFileText size={14} /> Rezume ko'rish
+                  <FiFileText /> {t("publicProfile.viewResume")}
                 </a>
-              )}
-            </div>
-
+              </div>
+            )}
           </div>
         </div>
 
-        {profile.bio && (
-          <div className="bio-section soft-fade-in stagger-3">
-            <hr className="public-divider" />
-            <p className="public-bio">{profile.bio}</p>
+        <div className="profile-content-grid">
+          <div className="profile-main-content">
+            {profile.bio && (
+              <div className="bio-section soft-fade-in stagger-3">
+                <h3 className="section-title">{t("publicProfile.aboutMe")}</h3>
+                <p className="public-bio">{profile.bio}</p>
+              </div>
+            )}
           </div>
-        )}
 
-        {profile.skills?.length > 0 && (
-          <div className="public-skills-section soft-fade-in stagger-4">
-            <hr className="public-divider" />
-            <h3>Ko'nikmalar</h3>
-            <div className="public-skills-grid">
-              {profile.skills.map((sk, i) => (
-                <span key={i} className="public-skill-chip">{sk}</span>
-              ))}
-            </div>
-          </div>
-        )}
+          <aside className="profile-sidebar">
+            {profile.skills?.length > 0 && (
+              <div className="public-skills-section soft-fade-in stagger-4">
+                <h3 className="section-title">{t("publicProfile.skills")}</h3>
+                <div className="public-skills-grid">
+                  {profile.skills.map((sk, i) => (
+                    <span key={i} className="public-skill-chip">{sk}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </aside>
+        </div>
       </div>
 
       {/* Portfolio */}
       {portfolio.length > 0 && (
         <div className="public-portfolio-section soft-fade-in stagger-5">
-          <h2>Portfolio</h2>
+          <h2>{t("publicProfile.portfolio")}</h2>
           <div className="public-portfolio-grid">
             {portfolio.map((item, i) => (
               <div key={i} className="portfolio-item-card">

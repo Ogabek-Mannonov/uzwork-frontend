@@ -218,6 +218,20 @@
     "maxSkillsHint": "Maksimal 20 ta ko'nikma.",
     "skillsUpdated": "Ko'nikmalar muvaffaqiyatli yangilandi!"
   },
+  "publicProfile": {
+    "aboutMe": "O'zim haqimda",
+    "skills": "Ko'nikmalar",
+    "hourlyRate": "Soatbay",
+    "muvaffaqiyat": "Muvaffaqiyat",
+    "daromad": "Daromad",
+    "manzil": "Manzil",
+    "viewResume": "Rezume ko'rish",
+    "portfolio": "Portfolio",
+    "verified": "Tasdiqlangan mutaxassis",
+    "loading": "Yuklanmoqda...",
+    "notFound": "Profil topilmadi yoki ma'lumotlar yuklanmadi.",
+    "back": "Orqaga"
+  },
   "chat": {
     "today": "Bugun",
     "yesterday": "Kecha",

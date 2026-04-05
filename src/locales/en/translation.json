@@ -218,6 +218,20 @@
     "maxSkillsHint": "Maximum 20 skills.",
     "skillsUpdated": "Skills updated successfully!"
   },
+  "publicProfile": {
+    "aboutMe": "About Me",
+    "skills": "Skills",
+    "hourlyRate": "Hourly",
+    "muvaffaqiyat": "Success",
+    "daromad": "Earned",
+    "manzil": "Location",
+    "viewResume": "View Resume",
+    "portfolio": "Portfolio",
+    "verified": "Verified Professional",
+    "loading": "Loading...",
+    "notFound": "Profile not found or data failed to load.",
+    "back": "Back"
+  },
   "chat": {
     "today": "Today",
     "yesterday": "Yesterday",
