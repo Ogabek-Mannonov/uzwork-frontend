@@ -210,7 +210,13 @@
     "resumeUploadTitle": "Rezyume / CV Yuklash",
     "resumeUploadDesc": "O'zingizning professional rezyumengizni yuklang va boshqaring",
     "certifications": "Sertifikatlar",
-    "certificationsDesc": "Professional guvohnomalar"
+    "certificationsDesc": "Professional guvohnomalar",
+    "noSkills": "Hali hech qanday ko'nikmalar qo'shilmagan.",
+    "editSkills": "Ko'nikmalarni tahrirlash",
+    "yourSkills": "Sizning ko'nikmalaringiz",
+    "searchSkills": "Ko'nikmalarni qidirish",
+    "maxSkillsHint": "Maksimal 20 ta ko'nikma.",
+    "skillsUpdated": "Ko'nikmalar muvaffaqiyatli yangilandi!"
   },
   "chat": {
     "today": "Bugun",

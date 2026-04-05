@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
   User,
   Settings as SettingsIcon,
@@ -62,13 +64,19 @@ import {
 } from "lucide-react";
 import "../profile/profile-css/profile.css";
 import { getMyProfile, updateMyProfile } from "../../api/common";
+import { logout } from "../../api/auth";
 import { getMyPortfolio, createPortfolioItem, updatePortfolioItem, deletePortfolioItem } from "../../api/freelancer";
+import { PROFESSIONAL_SKILLS } from "../../utils/skills";
+
+
 import { useTranslation } from "react-i18next";
 import { useThemeContext } from "../../pages/components/Theme/ThemeContext";
 
 const MyProfile = () => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { isDark } = useThemeContext();
+
   // const [darkMode, setDarkMode] = useState(false);
   const [activeSection, setActiveSection] = useState("my-info");
   // const [activeHeaderTab, setActiveHeaderTab] = useState("find");
@@ -125,6 +133,13 @@ const MyProfile = () => {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedPlanForModal, setSelectedPlanForModal] = useState(null);
 
+  const [showSkillsModal, setShowSkillsModal] = useState(false);
+  const [tempSkills, setTempSkills] = useState([]);
+  const [skillSearch, setSkillSearch] = useState("");
+  const [skillSuggestions, setSkillSuggestions] = useState([]);
+  const [activeSuggestion, setActiveSuggestion] = useState(0);
+
+
   const showMessage = (type, text) => {
     setMessage({ type, text });
   };
@@ -164,8 +179,8 @@ const MyProfile = () => {
             accountType: u.role || "",
           }));
 
-          if (p.skills && Array.isArray(p.skills) && p.skills.length > 0) {
-            setSkills(p.skills.map((s, i) => ({ id: i, name: s, level: "Intermediate", years: 1 })));
+          if (p.skills && Array.isArray(p.skills)) {
+            setSkills(p.skills);
           } else {
             setSkills([]);
           }
@@ -417,12 +432,48 @@ const MyProfile = () => {
     showMessage("info", `Opening ${label}...`);
   };
 
-  const handleUserMenuClick = (action) => {
+  const handleUserMenuClick = async (action) => {
     // setShowUserDropdown(false);
-    showMessage("info", `${action} clicked`);
+    if (action === "Sign Out") {
+      setIsLoading(true);
+      try {
+        await logout();
+        navigate("/login");
+      } catch (err) {
+        showMessage("error", "Logout failed. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      showMessage("info", `${action} clicked`);
+    }
+  };
+
+
+  useEffect(() => {
+    if (skillSearch.trim()) {
+      const filtered = PROFESSIONAL_SKILLS.filter(
+        skill => 
+          skill.toLowerCase().includes(skillSearch.toLowerCase()) && 
+          !tempSkills.includes(skill)
+      ).slice(0, 10);
+      setSkillSuggestions(filtered);
+      setActiveSuggestion(0);
+    } else {
+      setSkillSuggestions([]);
+    }
+  }, [skillSearch, tempSkills]);
+
+  const handleAddSkillFromList = (skill) => {
+    if (skill && !tempSkills.includes(skill) && tempSkills.length < 20) {
+      setTempSkills([...tempSkills, skill]);
+      setSkillSearch("");
+      setSkillSuggestions([]);
+    }
   };
 
   const handleEditInputChange = (field, value) => {
+
     setEditFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -431,14 +482,15 @@ const MyProfile = () => {
     setUserData(prev => ({ ...prev, [field]: value }));
   };
 
-  const addSkill = () => {
-    const newSkill = { id: Date.now(), name: "New Skill", level: "Beginner", years: 0 };
-    setSkills([...skills, newSkill]);
-    showMessage("success", "Skill added successfully");
+  const addSkill = (skillName) => {
+    if (skillName && !skills.includes(skillName)) {
+      setSkills([...skills, skillName]);
+      showMessage("success", "Skill added successfully");
+    }
   };
 
-  const removeSkill = (id) => {
-    setSkills(skills.filter(s => s.id !== id));
+  const removeSkill = (skillName) => {
+    setSkills(skills.filter(s => s !== skillName));
     showMessage("success", "Skill removed");
   };
 
@@ -637,6 +689,11 @@ const MyProfile = () => {
   };
 
   const handleSectionEdit = (section, initialData = {}) => {
+    if (section === 'skills') {
+      setTempSkills([...skills]);
+      setShowSkillsModal(true);
+      return;
+    }
     setEditingSection(section);
     setEditFormData({ ...userData, ...initialData });
   };
@@ -673,7 +730,7 @@ const MyProfile = () => {
           };
           break;
         case 'skills':
-          payload = { skills: skills.map(s => s.name) };
+          payload = { skills: skills };
           break;
         default:
           payload = editFormData;
@@ -1106,7 +1163,6 @@ const MyProfile = () => {
                   </div>
 
                   <div className="freelancer-section soft-fade-in stagger-4">
-
                     <div className="freelancer-section-header">
                       <div>
                         <h3 className="freelancer-section-title">
@@ -1114,64 +1170,21 @@ const MyProfile = () => {
                         </h3>
                         <p className="freelancer-section-subtitle">{t("profile.skillsDesc", "Your professional capabilities")}</p>
                       </div>
-                      {editingSection === 'skills' ? (
-                        <div className="inline-edit-actions">
-                          <button className="btn-cancel-inline" onClick={handleSectionCancel}>{t("profile.cancel", "Cancel")}</button>
-                          <button className="btn-save-inline" onClick={() => handleSectionSave('skills')}>
-                            {isLoading ? <RefreshCw size={14} className="spinning" /> : <Save size={14} />}
-                            {t("profile.save", "Save")}
-                          </button>
-                        </div>
-                      ) : (
-                        <button className="edit-pencil-btn visible" onClick={() => handleSectionEdit('skills')}>
-                          <Edit size={14} />
-                        </button>
-                      )}
+                      <button className="edit-pencil-btn visible" onClick={() => handleSectionEdit('skills')}>
+                        <Edit size={14} />
+                      </button>
                     </div>
 
-                    {editingSection === 'skills' && (
-                      <div className="skills-edit-top">
-                        <button className="btn-secondary" onClick={addSkill} disabled={isLoading}>
-                          <Plus size={16} />{t("profile.addSkill", "Add Skill")}
-                        </button>
-                      </div>
-                    )}
-
                     <div className="skills-grid">
-                      {skills.map(skill => (
-                        <div key={skill.id} className="skill-card">
-                          {editingSection === 'skills' ? (
-                            <div className="skill-edit-mode">
-                              <input 
-                                type="text" 
-                                value={skill.name} 
-                                onChange={(e) => {
-                                  setSkills(skills.map(s => s.id === skill.id ? {...s, name: e.target.value} : s));
-                                }} 
-                                className="inline-edit-input" 
-                                disabled={isLoading}
-                              />
-                              <button 
-                                className="skill-remove-btn" 
-                                onClick={() => removeSkill(skill.id)}
-                                disabled={isLoading}
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="skill-header">
-                                <span className="skill-name">{skill.name}</span>
-                                <span className={`skill-level skill-level-${skill.level.toLowerCase()}`}>
-                                  {skill.level}
-                                </span>
-                              </div>
-                              <div className="skill-meta">{skill.years}+ {t("profile.yearsExp", "years experience")}</div>
-                            </>
-                          )}
-                        </div>
-                      ))}
+                      {skills.length > 0 ? (
+                        skills.map((skill, idx) => (
+                          <div key={idx} className="skill-card-simple">
+                            <span className="skill-name">{skill}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="no-data-text">{t("profile.noSkills", "No skills added yet.")}</p>
+                      )}
                     </div>
                   </div>
 
@@ -2142,6 +2155,129 @@ const MyProfile = () => {
               <button className="btn-primary" onClick={handleSavePortfolio} disabled={isLoading}>
                 {isLoading ? <><RefreshCw size={16} className="spinning" /> Saving...</> : <><Save size={16} /> {editingPortfolio ? "Update Project" : "Add Project"}</>}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* SKILLS MODAL */}
+      {showSkillsModal && (
+        <div className="modal-overlay" onClick={() => setShowSkillsModal(false)}>
+          <div className="modal-content skills-edit-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{t("profile.editSkills", "Edit skills")}</h2>
+              <button 
+                className="modal-close" 
+                onClick={() => setShowSkillsModal(false)}
+                disabled={isLoading}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="form-group">
+                <label>{t("profile.yourSkills", "Your skills")}</label>
+                <div className="skills-tag-input-container">
+                  <div className="skills-tags-wrap">
+                    {tempSkills.map((skill, idx) => (
+                      <span key={idx} className="skill-tag-editable">
+                        {skill}
+                        <button 
+                          onClick={() => setTempSkills(tempSkills.filter(s => s !== skill))}
+                          disabled={isLoading}
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                    <input
+                      type="text"
+                      className="tag-input-bare"
+                      placeholder={t("profile.searchSkills", "Search skills")}
+                      value={skillSearch}
+                      onChange={(e) => setSkillSearch(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "ArrowDown") {
+                          e.preventDefault();
+                          setActiveSuggestion(prev => Math.min(prev + 1, skillSuggestions.length - 1));
+                        } else if (e.key === "ArrowUp") {
+                          e.preventDefault();
+                          setActiveSuggestion(prev => Math.max(prev - 1, 0));
+                        } else if (e.key === "Enter") {
+                          e.preventDefault();
+                          if (skillSuggestions.length > 0) {
+                            handleAddSkillFromList(skillSuggestions[activeSuggestion]);
+                          }
+                        }
+                      }}
+                      disabled={isLoading}
+                    />
+
+                    {skillSearch && (
+                      <button 
+                        className="clear-search-btn" 
+                        onClick={() => {
+                          setSkillSearch("");
+                          setSkillSuggestions([]);
+                        }}
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+
+                    {skillSuggestions.length > 0 && (
+
+                      <div className="skills-suggestions-list">
+                        {skillSuggestions.map((suggestion, index) => (
+                          <div
+                            key={suggestion}
+                            className={`suggestion-item ${index === activeSuggestion ? "active" : ""}`}
+                            onClick={() => handleAddSkillFromList(suggestion)}
+                            onMouseEnter={() => setActiveSuggestion(index)}
+                          >
+                            {suggestion}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <span className="skills-count-hint">
+                {t("profile.maxSkillsHint", "Maximum 20 skills.")}
+              </span>
+              <div className="modal-footer-btns">
+                <button 
+                  className="btn-cancel-flat" 
+                  onClick={() => setShowSkillsModal(false)}
+                  disabled={isLoading}
+                >
+                  {t("profile.cancel", "Cancel")}
+                </button>
+                <button 
+                  className="btn-save-premium" 
+                  onClick={async () => {
+                    setIsLoading(true);
+                    try {
+                      const res = await updateMyProfile({ skills: tempSkills });
+                      if (!res.success) throw new Error(res.message);
+                      setSkills(tempSkills);
+                      setShowSkillsModal(false);
+                      showMessage("success", t("profile.skillsUpdated", "Skills updated successfully!"));
+                    } catch (err) {
+                      showMessage("error", err.message);
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
+                  disabled={isLoading}
+                >
+                  {isLoading ? <RefreshCw size={16} className="spinning" /> : t("profile.save", "Save")}
+                </button>
+              </div>
             </div>
           </div>
         </div>

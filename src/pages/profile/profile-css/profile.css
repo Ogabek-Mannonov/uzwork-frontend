@@ -4344,3 +4344,378 @@ input:disabled + .toggle-slider {
     text-align: center;
   }
 }
+
+/* ===== IMPROVED SKILLS DESIGN ===== */
+
+/* View Mode Tags */
+.skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.skill-card-simple {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 20px;
+  background: var(--blue-bg);
+  color: var(--blue);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 600;
+  transition: var(--transition);
+  cursor: default;
+  box-shadow: 0 2px 5px rgba(59, 130, 246, 0.05);
+}
+
+.dark .skill-card-simple {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.skill-card-simple:hover {
+  background: var(--blue);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+/* Edit Modal Enhancements */
+.skills-edit-modal {
+  max-width: 550px !important;
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--light-border);
+}
+
+.dark .skills-edit-modal {
+  border-color: var(--dark-border);
+}
+
+.skills-edit-modal {
+  max-width: 750px !important;
+  border-radius: 24px !important;
+  overflow: visible !important;
+}
+
+.skills-edit-modal .modal-header {
+  padding: 32px 32px 10px 32px !important;
+}
+
+.skills-edit-modal .modal-body {
+  padding: 0 32px 32px 32px !important;
+}
+
+.skills-tag-input-container {
+  border: 1px solid var(--light-border);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  min-height: 180px;
+  background: var(--light-bg);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
+
+.dark .skills-tag-input-container {
+  border-color: var(--dark-border);
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.skills-tag-input-container:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.skill-tag-editable {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: rgba(59, 130, 246, 0.08); /* Light blue bg */
+  color: var(--blue); /* Blue text */
+  border: 1.5px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 600;
+  animation: scaleIn 0.2s ease-out;
+  transition: all 0.2s;
+}
+
+.dark .skill-tag-editable {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+}
+
+.skill-tag-editable:hover {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: var(--blue);
+  transform: translateY(-1px);
+}
+
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.skill-tag-editable button {
+  background: rgba(59, 130, 246, 0.1);
+  border: none;
+  color: var(--blue);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dark .skill-tag-editable button {
+  background: rgba(255, 255, 255, 0.1);
+  color: #60a5fa;
+}
+
+.skill-tag-editable button:hover {
+  background: var(--blue);
+  color: white;
+  transform: rotate(90deg);
+}
+
+
+.skill-tag-editable button:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: rotate(90deg);
+}
+
+.tag-input-bare {
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 8px;
+  color: var(--light-text);
+  font-size: 15px;
+  flex: 1;
+  min-width: 150px;
+  font-weight: 500;
+}
+
+.dark .tag-input-bare {
+  color: var(--dark-text);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  background: var(--light-bg);
+  border-top: 1px solid var(--light-border);
+}
+
+.dark .modal-footer {
+  background: rgba(15, 23, 42, 0.3);
+  border-color: var(--dark-border);
+}
+
+.btn-cancel-flat {
+  background: transparent;
+  border: 1px solid var(--light-border);
+  color: var(--light-text-secondary);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  transition: var(--transition);
+}
+
+.dark .btn-cancel-flat {
+  border-color: var(--dark-border);
+  color: var(--dark-text-secondary);
+}
+
+.btn-cancel-flat:hover {
+  background: var(--light-hover);
+}
+
+.dark .btn-cancel-flat:hover {
+  background: var(--dark-hover);
+}
+
+.btn-save-premium {
+  background: var(--success);
+  color: white;
+  border: none;
+  padding: 10px 28px;
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.btn-save-premium:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+}
+
+.btn-save-premium:active {
+  transform: translateY(0);
+}
+
+.no-data-text {
+  color: var(--light-text-tertiary);
+  font-style: italic;
+  padding: 10px 0;
+}
+
+/* ===== SKILLS SUGGESTIONS DROPDOWN ===== */
+
+/* suggestions positioning handled in container above */
+
+
+.skills-suggestions-list {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--light-surface);
+  border: 1px solid var(--light-border);
+  border-radius: calc(var(--radius-lg) + 4px);
+  z-index: 1000;
+  max-height: 350px;
+  overflow-y: auto;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  animation: slideDownFade 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px 0;
+}
+
+
+.dark .skills-suggestions-list {
+  background: var(--dark-surface);
+  border-color: var(--dark-border);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes slideDownFade {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.suggestion-item {
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--light-text);
+  transition: var(--transition);
+  border-bottom: 1px solid var(--light-border-light);
+}
+
+.dark .suggestion-item {
+  color: var(--dark-text);
+  border-color: var(--dark-border-light);
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover,
+.suggestion-item.active {
+  background: var(--blue-bg);
+  color: var(--blue);
+}
+
+.dark .suggestion-item:hover,
+.dark .suggestion-item.active {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--light-border);
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--light-text-secondary);
+  transition: var(--transition);
+  z-index: 5;
+}
+
+.dark .clear-search-btn {
+  background: var(--dark-border);
+  color: var(--dark-text-secondary);
+}
+
+.clear-search-btn:hover {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+/* Modal Footer Refinement */
+
+.modal-footer {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+}
+
+.modal-footer-btns {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.btn-cancel-flat {
+  background: transparent !important;
+  border: none !important;
+  color: #14a800 !important; /* Specialized green color for Upwork-like experience */
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  padding: 8px 16px !important;
+  box-shadow: none !important;
+}
+
+.btn-cancel-flat:hover {
+  text-decoration: underline;
+  background: transparent !important;
+}
+
+.btn-save-premium {
+  background: #14a800 !important; /* Proper success green */
+  border-radius: var(--radius-full) !important;
+  padding: 12px 32px !important;
+  font-size: 15px !important;
+}
+
+.btn-save-premium:hover {
+  background: #108a00 !important;
+  box-shadow: 0 4px 12px rgba(20, 168, 0, 0.3) !important;
+}
+

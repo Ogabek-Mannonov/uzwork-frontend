@@ -210,7 +210,13 @@
     "resumeUploadTitle": "Загрузка резюме / CV",
     "resumeUploadDesc": "Загрузите и управляйте своим профессиональным резюме",
     "certifications": "Сертификаты",
-    "certificationsDesc": "Профессиональные учетные данные"
+    "certificationsDesc": "Профессиональные учетные данные",
+    "noSkills": "Навыки еще не добавлены.",
+    "editSkills": "Редактировать навыки",
+    "yourSkills": "Ваши навыки",
+    "searchSkills": "Поиск навыков",
+    "maxSkillsHint": "Максимум 20 навыков.",
+    "skillsUpdated": "Навыки успешно обновлены!"
   },
   "chat": {
     "today": "Сегодня",

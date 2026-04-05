@@ -210,7 +210,13 @@
     "resumeUploadTitle": "Resume / CV Upload",
     "resumeUploadDesc": "Upload and manage your professional CV",
     "certifications": "Certifications",
-    "certificationsDesc": "Professional credentials"
+    "certificationsDesc": "Professional credentials",
+    "noSkills": "No skills added yet.",
+    "editSkills": "Edit skills",
+    "yourSkills": "Your skills",
+    "searchSkills": "Search skills",
+    "maxSkillsHint": "Maximum 20 skills.",
+    "skillsUpdated": "Skills updated successfully!"
   },
   "chat": {
     "today": "Today",

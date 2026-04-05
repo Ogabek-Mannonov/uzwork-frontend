@@ -149,22 +149,30 @@
 }
 
 .public-skill-chip {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  padding: 6px 16px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  color: var(--text-2);
+  padding: 8px 20px;
+  background: rgba(59, 130, 246, 0.06); /* Light premium theme */
+  border: 1.5px solid rgba(59, 130, 246, 0.15);
+  color: var(--brand);
   border-radius: var(--radius-full);
-  transition: var(--transition);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+}
+
+.dark .public-skill-chip {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
 }
 
 .public-skill-chip:hover {
-  background: var(--brand);
-  color: #fff;
+  background: rgba(59, 130, 246, 0.12);
   border-color: var(--brand);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
 }
+
 
 /* Portfolio Grid */
 .public-portfolio-section {
