@@ -166,3 +166,77 @@ export const deletePortfolioMedia = async (itemId, mediaId) => {
     return { success: false, message: err?.response?.data?.message || err?.message };
   }
 };
+
+// ===================== CERTIFICATIONS =====================
+
+/** O'z sertifikatlarim (freelancer) */
+export const getMyCertifications = async () => {
+  try {
+    const res = await api.get("/freelancers/me/certifications");
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Sertifikat qo'shish (freelancer) */
+export const createCertification = async (payload) => {
+  try {
+    const res = await api.post("/freelancers/me/certifications", payload);
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Sertifikatni yangilash (freelancer) */
+export const updateCertification = async (certId, payload) => {
+  try {
+    const res = await api.put(`/freelancers/me/certifications/${certId}`, payload);
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Sertifikatni o'chirish (freelancer) */
+export const deleteCertification = async (certId) => {
+  try {
+    const res = await api.delete(`/freelancers/me/certifications/${certId}`);
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Public: freelancer sertifikatlari */
+export const getPublicCertifications = async (freelancerId) => {
+  try {
+    const res = await api.get(`/freelancers/${freelancerId}/certifications`);
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Sertifikat faylini yuklash (freelancer) */
+export const uploadCertificationFile = async (certId, formData) => {
+  try {
+    const res = await api.post(`/freelancers/me/certifications/${certId}/file`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Sertifikat faylini o'chirish (freelancer) */
+export const deleteCertificationFile = async (certId) => {
+  try {
+    const res = await api.delete(`/freelancers/me/certifications/${certId}/file`);
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};

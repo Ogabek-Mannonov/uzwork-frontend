@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getFreelancerById, getPublicPortfolio } from "../../api/freelancer";
+import {
+  getFreelancerById,
+  getPublicPortfolio,
+  getPublicCertifications,
+} from "../../api/freelancer";
 import { getUserProfile } from "../../api/common";
-import { FiArrowLeft, FiMapPin, FiDollarSign, FiStar, FiBriefcase, FiAward, FiGlobe, FiFileText } from "react-icons/fi";
+import {
+  FiArrowLeft, FiMapPin, FiDollarSign, FiStar,
+  FiBriefcase, FiAward, FiFileText, FiExternalLink,
+  FiShield, FiCalendar,
+} from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 
 import "./profile-css/public-profile.css";
@@ -14,28 +22,26 @@ export default function PublicProfile() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [portfolio, setPortfolio] = useState([]);
+  const [certifications, setCertifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetch = async () => {
       setLoading(true);
       try {
-        const [profileRes, portfolioRes] = await Promise.all([
+        const [profileRes, portfolioRes, certRes] = await Promise.all([
           getUserProfile(id),
           getPublicPortfolio(id),
+          getPublicCertifications(id),
         ]);
 
-        console.log("Profile Data:", profileRes); // Useful for debugging
-
         // Normalize profile data
-        // API response might be: { success: true, data: { user, profile } } 
-        // OR it might be just { user, profile }
         const rawData = profileRes?.data || (profileRes?.user ? profileRes : null);
-        
+
         if (rawData) {
           const u = rawData.user || {};
           const p = rawData.profile || {};
-          
+
           setProfile({
             id: u.id || "",
             fullName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || u.name || "User",
@@ -52,17 +58,25 @@ export default function PublicProfile() {
             total_earned: p.total_earned || 0,
             skills: Array.isArray(p.skills) ? p.skills : (p.skills ? [p.skills] : []),
             cv_url: p.cv_url || "",
-            cover_url: p.cover_url || "", // Added cover_url
+            cover_url: p.cover_url || "",
           });
-
         } else {
-          // Fallback if structure is unknown or empty
           setProfile(null);
         }
 
-        // Normalize portfolio data
+        // Portfolio
         const portData = portfolioRes?.data?.items || portfolioRes?.data || portfolioRes || [];
         setPortfolio(Array.isArray(portData) ? portData : []);
+
+        // Certifications
+        const certData =
+          certRes?.data?.certifications ||
+          certRes?.data?.items ||
+          certRes?.data ||
+          certRes?.certifications ||
+          [];
+        setCertifications(Array.isArray(certData) ? certData : []);
+
       } catch (error) {
         console.error("Error fetching public profile:", error);
         setProfile(null);
@@ -80,6 +94,8 @@ export default function PublicProfile() {
       navigate("/profile");
     }
   };
+
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
   if (loading) return (
     <div className="public-profile-container">
@@ -100,14 +116,13 @@ export default function PublicProfile() {
     </div>
   );
 
-
   return (
     <div className="public-profile-container">
       <button className="back-link soft-fade-in stagger-1" onClick={handleBack}>
         <FiArrowLeft /> {t("publicProfile.back")}
       </button>
 
-      {/* Profile header */}
+      {/* Profile header card */}
       <div className="public-profile-card soft-fade-in stagger-2">
         <div className="public-profile-cover">
           {profile.cover_url ? (
@@ -126,7 +141,7 @@ export default function PublicProfile() {
             }
             <div className="online-indicator"></div>
           </div>
-          
+
           <div className="profile-header-details">
             <div className="name-wrapper">
               <h1 className="public-fullname">{profile.fullName}</h1>
@@ -136,32 +151,32 @@ export default function PublicProfile() {
                 </svg>
               </span>
             </div>
-            
+
             {profile.title && <p className="public-title">{profile.title}</p>}
-            
+
             {/* Stats Dashboard */}
             <div className="stats-dashboard">
               <div className="stat-card">
                 <FiDollarSign className="stat-icon" />
                 <div className="stat-info">
-                  <span className="stat-value">${profile.hourly_rate || 0}</span>
+                  <span className="stat-value">${profile.hourly_rate || 0}/hr</span>
                   <span className="stat-label">{t("publicProfile.hourlyRate")}</span>
                 </div>
               </div>
-              
+
               <div className="stat-card">
                 <FiStar className="stat-icon" />
                 <div className="stat-info">
                   <span className="stat-value">{profile.job_success_score || 0}%</span>
-                  <span className="stat-label">{t("publicProfile.muvaffaqiyat")}</span>
+                  <span className="stat-label">{t("publicProfile.successScore")}</span>
                 </div>
               </div>
-              
+
               <div className="stat-card">
                 <FiBriefcase className="stat-icon" />
                 <div className="stat-info">
                   <span className="stat-value">${profile.total_earned || 0}</span>
-                  <span className="stat-label">{t("publicProfile.daromad")}</span>
+                  <span className="stat-label">{t("publicProfile.totalEarned")}</span>
                 </div>
               </div>
 
@@ -170,7 +185,7 @@ export default function PublicProfile() {
                   <FiMapPin className="stat-icon" />
                   <div className="stat-info">
                     <span className="stat-value">{profile.location}</span>
-                    <span className="stat-label">{t("publicProfile.manzil")}</span>
+                    <span className="stat-label">{t("publicProfile.location")}</span>
                   </div>
                 </div>
               )}
@@ -178,10 +193,10 @@ export default function PublicProfile() {
 
             {profile.cv_url && (
               <div className="action-row">
-                <a 
-                  href={profile.cv_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <a
+                  href={profile.cv_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="premium-btn primary"
                 >
                   <FiFileText /> {t("publicProfile.viewResume")}
@@ -193,17 +208,83 @@ export default function PublicProfile() {
 
         <div className="profile-content-grid">
           <div className="profile-main-content">
+            {/* About Me */}
             {profile.bio && (
               <div className="bio-section soft-fade-in stagger-3">
                 <h3 className="section-title">{t("publicProfile.aboutMe")}</h3>
                 <p className="public-bio">{profile.bio}</p>
               </div>
             )}
+
+            {/* Certifications */}
+            {certifications.length > 0 && (
+              <div className="pub-cert-section soft-fade-in stagger-4">
+                <h3 className="section-title">
+                  <FiAward size={20} />
+                  {t("publicProfile.certifications", "Certifications")}
+                </h3>
+                <div className="pub-cert-list">
+                  {certifications.map((cert) => (
+                    <div key={cert.id} className="pub-cert-card">
+                      {/* Header: icon + title/issuer */}
+                      <div className="pub-cert-header">
+                        <div className="pub-cert-icon">
+                          <FiAward size={20} />
+                        </div>
+                        <div className="pub-cert-body">
+                          <h4 className="pub-cert-title">{cert.title}</h4>
+                          {cert.issuer && <p className="pub-cert-issuer">{cert.issuer}</p>}
+                        </div>
+                      </div>
+
+                      {/* Divider */}
+                      {(cert.issue_month || cert.issue_year || cert.credential_id || cert.credential_url) && (
+                        <div className="pub-cert-divider" />
+                      )}
+
+                      {/* Meta tags */}
+                      {(cert.issue_month || cert.issue_year || cert.credential_id) && (
+                        <div className="pub-cert-meta">
+                          {(cert.issue_month || cert.issue_year) && (
+                            <span className="pub-cert-tag">
+                              <FiCalendar size={11} />
+                              {cert.issue_month
+                                ? `${MONTHS[cert.issue_month - 1]} ${cert.issue_year || ""}`
+                                : cert.issue_year}
+                            </span>
+                          )}
+                          {cert.credential_id && (
+                            <span className="pub-cert-tag">
+                              <FiShield size={11} />
+                              ID: {cert.credential_id}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Credential link */}
+                      {cert.credential_url && (
+                        <a
+                          href={cert.credential_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="pub-cert-link"
+                        >
+                          <FiExternalLink size={13} />
+                          {t("publicProfile.showCredential", "Show Credential")}
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <aside className="profile-sidebar">
+            {/* Skills */}
             {profile.skills?.length > 0 && (
-              <div className="public-skills-section soft-fade-in stagger-4">
+              <div className="public-skills-section soft-fade-in stagger-5">
                 <h3 className="section-title">{t("publicProfile.skills")}</h3>
                 <div className="public-skills-grid">
                   {profile.skills.map((sk, i) => (
@@ -218,7 +299,7 @@ export default function PublicProfile() {
 
       {/* Portfolio */}
       {portfolio.length > 0 && (
-        <div className="public-portfolio-section soft-fade-in stagger-5">
+        <div className="public-portfolio-section soft-fade-in stagger-6">
           <h2>{t("publicProfile.portfolio")}</h2>
           <div className="public-portfolio-grid">
             {portfolio.map((item, i) => (

@@ -67,7 +67,7 @@ import { getMyProfile, updateMyProfile, uploadFile, uploadImage } from "../../ap
 
 
 import { logout } from "../../api/auth";
-import { getMyPortfolio, createPortfolioItem, updatePortfolioItem, deletePortfolioItem } from "../../api/freelancer";
+import { getMyPortfolio, createPortfolioItem, updatePortfolioItem, deletePortfolioItem, getMyCertifications, createCertification, updateCertification, deleteCertification } from "../../api/freelancer";
 import { PROFESSIONAL_SKILLS } from "../../utils/skills";
 
 
@@ -100,6 +100,10 @@ const MyProfile = () => {
   });
   
   const [isLoading, setIsLoading] = useState(false);
+  const [certLoading, setCertLoading] = useState(false);
+  const [showCertModal, setShowCertModal] = useState(false);
+  const [editingCert, setEditingCert] = useState(null); // null = add, obj = edit
+  const [certForm, setCertForm] = useState({ title: "", issuer: "", issue_year: "", issue_month: "", credential_id: "", credential_url: "" });
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const [editingPortfolio, setEditingPortfolio] = useState(null);
   const [portfolioForm, setPortfolioForm] = useState({
@@ -204,6 +208,15 @@ const MyProfile = () => {
             created_at: p.created_at
           })));
         }
+
+        // Sertifikatlarni backenddan olish
+        const certRes = await getMyCertifications();
+        console.log("[Cert FETCH] backend response:", certRes);
+        // Backend response strukturasiga robust ishlov
+        const certList = certRes?.data?.certifications || certRes?.data?.items || certRes?.data || certRes?.certifications;
+        if (Array.isArray(certList)) {
+          setCertificates(certList);
+        }
       } catch (err) {
         console.error("fetchData error:", err);
       }
@@ -247,10 +260,7 @@ const MyProfile = () => {
 
   const [skills, setSkills] = useState([]);
 
-  const [certificates, setCertificates] = useState([
-    { id: 1, name: "AWS Solutions Architect", issuer: "Amazon", year: 2023 },
-    { id: 2, name: "React Advanced Patterns", issuer: "Meta", year: 2022 }
-  ]);
+  const [certificates, setCertificates] = useState([]);
 
   const [portfolio, setPortfolio] = useState([
     {
@@ -890,21 +900,81 @@ const MyProfile = () => {
   };
 
 
-  // Certificate functions
-  const addCertificate = () => {
-    const newCert = { 
-      id: Date.now(), 
-      name: "New Certificate", 
-      issuer: "Issuer", 
-      year: 2024 
-    };
-    setCertificates([...certificates, newCert]);
-    showMessage("success", "Certificate added");
+  // =================== Certificate functions (API) ===================
+  const openAddCert = () => {
+    setEditingCert(null);
+    setCertForm({ title: "", issuer: "", issue_year: "", issue_month: "", credential_id: "", credential_url: "" });
+    setShowCertModal(true);
   };
 
-  const removeCertificate = (id) => {
-    setCertificates(certificates.filter(c => c.id !== id));
-    showMessage("success", "Certificate removed");
+  const openEditCert = (cert) => {
+    setEditingCert(cert);
+    setCertForm({
+      title: cert.title || "",
+      issuer: cert.issuer || "",
+      issue_year: cert.issue_year || "",
+      issue_month: cert.issue_month || "",
+      credential_id: cert.credential_id || "",
+      credential_url: cert.credential_url || ""
+    });
+    setShowCertModal(true);
+  };
+
+  const handleSaveCert = async () => {
+    if (!certForm.title.trim()) {
+      showMessage("error", "Sertifikat nomi majburiy!");
+      return;
+    }
+    setCertLoading(true);
+    try {
+      const payload = {
+        title: certForm.title.trim(),
+        issuer: certForm.issuer.trim() || null,
+        issue_year: certForm.issue_year ? parseInt(certForm.issue_year) : null,
+        issue_month: certForm.issue_month ? parseInt(certForm.issue_month) : null,
+        credential_id: certForm.credential_id.trim() || null,
+        credential_url: certForm.credential_url.trim() || null
+      };
+
+      if (editingCert) {
+        const res = await updateCertification(editingCert.id, payload);
+        console.log("[Cert UPDATE] backend response:", res);
+        if (res?.success === false) throw new Error(res.message);
+        // Backend response strukturasiga robust ishlov: data.certification, data, yoki certification
+        const updatedCert = res?.data?.certification || res?.data || res?.certification || { ...editingCert, ...payload };
+        setCertificates(prev => prev.map(c => c.id === editingCert.id ? updatedCert : c));
+        showMessage("success", "Sertifikat yangilandi!");
+      } else {
+        const res = await createCertification(payload);
+        console.log("[Cert CREATE] backend response:", res);
+        if (res?.success === false) throw new Error(res.message);
+        // Backend response strukturasiga robust ishlov: data.certification, data, yoki certification
+        const newCert = res?.data?.certification || res?.data || res?.certification || { id: Date.now(), ...payload };
+        setCertificates(prev => [...prev, newCert]);
+        showMessage("success", "Sertifikat qo'shildi!");
+      }
+      setShowCertModal(false);
+    } catch (err) {
+      console.error("[Cert SAVE] xato:", err);
+      showMessage("error", err.message || "Sertifikatni saqlashda xato");
+    } finally {
+      setCertLoading(false);
+    }
+  };
+
+  const handleDeleteCert = async (id) => {
+    if (!window.confirm("Sertifikatni o'chirishni tasdiqlaysizmi?")) return;
+    setCertLoading(true);
+    try {
+      const res = await deleteCertification(id);
+      if (res?.success === false) throw new Error(res.message);
+      setCertificates(prev => prev.filter(c => c.id !== id));
+      showMessage("success", "Sertifikat o'chirildi!");
+    } catch (err) {
+      showMessage("error", err.message || "O'chirishda xato");
+    } finally {
+      setCertLoading(false);
+    }
   };
 
   // Membership functions
@@ -1357,56 +1427,107 @@ const MyProfile = () => {
                   </div>
 
                   <div className="freelancer-section soft-fade-in stagger-6">
-
                     <div className="freelancer-section-header">
                       <div>
                         <h3 className="freelancer-section-title">
-                          <Award size={18} />{t("profile.certifications", "Certifications")}
+                          <Award size={18} />{t("profile.certifications")}
                         </h3>
-                        <p className="freelancer-section-subtitle">{t("profile.certificationsDesc", "Professional credentials")}</p>
+                        <p className="freelancer-section-subtitle">{t("profile.certificationsDesc")}</p>
                       </div>
-                      {editingSection === 'certificates' ? (
-                        <div className="inline-edit-actions">
-                          <button className="btn-cancel-inline" onClick={handleSectionCancel}>{t("profile.cancel", "Cancel")}</button>
-                          <button className="btn-save-inline" onClick={() => handleSectionSave('contact')}> {/* Reuse contact save for simplicity if it updates profiles */}
-                            {isLoading ? <RefreshCw size={14} className="spinning" /> : <Save size={14} />}
-                            {t("profile.save", "Save")}
-                          </button>
-                        </div>
-                      ) : (
-                        <button className="edit-pencil-btn visible" onClick={() => handleSectionEdit('certificates')}>
-                          <Edit size={14} />
-                        </button>
-                      )}
+                      <button className="upw-cert-add-btn" onClick={openAddCert} disabled={certLoading}>
+                        <Plus size={15} /> {t("profile.addCertification")}
+                      </button>
                     </div>
-                    
-                    {editingSection === 'certificates' && (
-                      <div className="skills-edit-top">
-                        <button className="btn-secondary" onClick={addCertificate} disabled={isLoading}>
-                          <Plus size={16} />Add Certificate
+
+                    {certLoading && certificates.length === 0 ? (
+                      <div className="upw-cert-loading">
+                        <RefreshCw size={20} className="spinning" />
+                        <span>{t("profile.certLoading")}</span>
+                      </div>
+                    ) : certificates.length === 0 ? (
+                      <div className="upw-cert-empty">
+                        <div className="upw-cert-empty-icon">
+                          <Award size={32} />
+                        </div>
+                        <div className="upw-cert-empty-text">
+                          <p className="upw-cert-empty-title">{t("profile.noCertificates")}</p>
+                          <p className="upw-cert-empty-sub">{t("profile.noCertificatesDesc")}</p>
+                        </div>
+                        <button className="upw-cert-empty-btn" onClick={openAddCert}>
+                          <Plus size={14} /> {t("profile.addCertification")}
                         </button>
+                      </div>
+                    ) : (
+                      <div className="upw-cert-list">
+                        {certificates.map((cert) => (
+                          <div key={cert.id} className="upw-cert-card">
+                            <div className="upw-cert-accent" />
+                            <div className="upw-cert-card-icon">
+                              <Award size={22} />
+                            </div>
+                            <div className="upw-cert-card-body">
+                              <div className="upw-cert-card-top">
+                                <div className="upw-cert-card-titles">
+                                  <h4 className="upw-cert-title">{cert.title}</h4>
+                                  {cert.issuer && (
+                                    <p className="upw-cert-issuer">{cert.issuer}</p>
+                                  )}
+                                </div>
+                                <div className="upw-cert-card-actions">
+                                  <button
+                                    className="upw-cert-btn-icon upw-cert-btn-edit"
+                                    onClick={() => openEditCert(cert)}
+                                    disabled={certLoading}
+                                    title={t("profile.editCertification")}
+                                  >
+                                    <Edit size={14} />
+                                  </button>
+                                  <button
+                                    className="upw-cert-btn-icon upw-cert-btn-delete"
+                                    onClick={() => handleDeleteCert(cert.id)}
+                                    disabled={certLoading}
+                                    title={t("profile.certCancel")}
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div className="upw-cert-card-meta">
+                                {(cert.issue_month || cert.issue_year) && (
+                                  <span className="upw-cert-meta-tag">
+                                    <Calendar size={12} />
+                                    {cert.issue_month
+                                      ? `${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][cert.issue_month - 1]} ${cert.issue_year || ""}`
+                                      : cert.issue_year}{" "}{t("profile.certIssued")}
+                                  </span>
+                                )}
+                                {cert.credential_id && (
+                                  <span className="upw-cert-meta-tag">
+                                    <Shield size={12} />
+                                    ID: {cert.credential_id}
+                                  </span>
+                                )}
+                              </div>
+
+                              {cert.credential_url && (
+                                <a
+                                  href={cert.credential_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="upw-cert-verify-link"
+                                >
+                                  <ExternalLink size={13} />
+                                  {t("profile.showCredential")}
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
-
-                    <div className="certificates-list">
-                      {certificates.map(cert => (
-                        <div key={cert.id} className="certificate-item">
-                          <div className="certificate-icon">
-                            <Award size={20} />
-                          </div>
-                          <div className="certificate-info">
-                            <h4>{cert.name}</h4>
-                            <p>{cert.issuer} · {cert.year}</p>
-                          </div>
-                          {editingSection === 'certificates' && (
-                            <button className="skill-remove-btn" onClick={() => removeCertificate(cert.id)} disabled={isLoading}>
-                              <Trash2 size={14} />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
                   </div>
+
 
 
                   {/* CONTACT DETAILS */}
@@ -2326,7 +2447,153 @@ const MyProfile = () => {
           </div>
         </div>
       )}
-      {/* SKILLS MODAL */}
+      {/* ===== CERTIFICATION MODAL (Upwork Style) ===== */}
+      {showCertModal && (
+        <div className="modal-overlay" onClick={() => !certLoading && setShowCertModal(false)}>
+          <div className="upw-cert-modal" onClick={(e) => e.stopPropagation()}>
+
+            {/* Header */}
+            <div className="upw-cert-modal-header">
+              <div className="upw-cert-modal-header-left">
+                <div className="upw-cert-modal-icon">
+                  <Award size={20} />
+                </div>
+                <div>
+                  <h2>{editingCert ? t("profile.editCertification") : t("profile.addCertificationTitle")}</h2>
+                  <p>{t("profile.certSubtitle")}</p>
+                </div>
+              </div>
+              <button className="upw-cert-modal-close" onClick={() => setShowCertModal(false)} disabled={certLoading}>
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="upw-cert-modal-body">
+
+              {/* Certification name */}
+              <div className="upw-cert-field">
+                <label>
+                  {t("profile.certNameLabel")} <span className="upw-cert-required">{t("profile.certRequired")}</span>
+                </label>
+                <input
+                  type="text"
+                  className="upw-cert-input"
+                  placeholder={t("profile.certNamePlaceholder")}
+                  value={certForm.title}
+                  onChange={(e) => setCertForm(p => ({ ...p, title: e.target.value }))}
+                  disabled={certLoading}
+                  autoFocus
+                />
+              </div>
+
+              {/* Issuing organization */}
+              <div className="upw-cert-field">
+                <label>{t("profile.certIssuerLabel")}</label>
+                <input
+                  type="text"
+                  className="upw-cert-input"
+                  placeholder={t("profile.certIssuerPlaceholder")}
+                  value={certForm.issuer}
+                  onChange={(e) => setCertForm(p => ({ ...p, issuer: e.target.value }))}
+                  disabled={certLoading}
+                />
+              </div>
+
+              {/* Issue date */}
+              <div className="upw-cert-field">
+                <label>{t("profile.certIssueDateLabel")} <span className="upw-cert-optional">{t("profile.certOptional")}</span></label>
+                <div className="upw-cert-date-row">
+                  <select
+                    className="upw-cert-input upw-cert-select"
+                    value={certForm.issue_month}
+                    onChange={(e) => setCertForm(p => ({ ...p, issue_month: e.target.value }))}
+                    disabled={certLoading}
+                  >
+                    <option value="">{t("profile.certMonth")}</option>
+                    {["January","February","March","April","May","June",
+                      "July","August","September","October","November","December"].map((m, i) => (
+                      <option key={i + 1} value={i + 1}>{m}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    className="upw-cert-input upw-cert-year"
+                    placeholder={t("profile.certYear")}
+                    min="1990"
+                    max={new Date().getFullYear()}
+                    value={certForm.issue_year}
+                    onChange={(e) => setCertForm(p => ({ ...p, issue_year: e.target.value }))}
+                    disabled={certLoading}
+                  />
+                </div>
+              </div>
+
+              {/* Credential ID */}
+              <div className="upw-cert-field">
+                <label>{t("profile.certIdLabel")} <span className="upw-cert-optional">{t("profile.certOptional")}</span></label>
+                <input
+                  type="text"
+                  className="upw-cert-input"
+                  placeholder={t("profile.certIdPlaceholder")}
+                  value={certForm.credential_id}
+                  onChange={(e) => setCertForm(p => ({ ...p, credential_id: e.target.value }))}
+                  disabled={certLoading}
+                />
+              </div>
+
+              {/* Credential URL */}
+              <div className="upw-cert-field">
+                <label>{t("profile.certUrlLabel")} <span className="upw-cert-optional">{t("profile.certOptional")}</span></label>
+                <div className="upw-cert-url-wrapper">
+                  <Globe size={15} className="upw-cert-url-icon" />
+                  <input
+                    type="url"
+                    className="upw-cert-input upw-cert-input-url"
+                    placeholder={t("profile.certUrlPlaceholder")}
+                    value={certForm.credential_url}
+                    onChange={(e) => setCertForm(p => ({ ...p, credential_url: e.target.value }))}
+                    disabled={certLoading}
+                  />
+                </div>
+                <p className="upw-cert-hint">
+                  <CheckCircle size={12} /> {t("profile.certUrlHint")}
+                </p>
+              </div>
+
+              {/* Info banner */}
+              <div className="upw-cert-info-banner">
+                <Info size={14} />
+                <span>
+                  {t("profile.certPdfHint")} <strong>{t("profile.certPdfHint2")}</strong> {t("profile.certPdfHint3")}
+                </span>
+              </div>
+
+            </div>
+
+            {/* Footer */}
+            <div className="upw-cert-modal-footer">
+              <button
+                className="upw-cert-modal-cancel"
+                onClick={() => setShowCertModal(false)}
+                disabled={certLoading}
+              >
+                {t("profile.certCancel")}
+              </button>
+              <button
+                className="upw-cert-modal-save"
+                onClick={handleSaveCert}
+                disabled={certLoading || !certForm.title.trim()}
+              >
+                {certLoading && <RefreshCw size={15} className="spinning" />}
+                {editingCert ? t("profile.certSaveChanges") : t("profile.addCertification")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
       {showSkillsModal && (
         <div className="modal-overlay" onClick={() => setShowSkillsModal(false)}>
           <div className="modal-content skills-edit-modal" onClick={(e) => e.stopPropagation()}>

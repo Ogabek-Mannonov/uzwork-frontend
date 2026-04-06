@@ -1889,76 +1889,716 @@ body.dark-mode {
   color: var(--dark-text-tertiary);
 }
 
-/* ===== CERTIFICATES ===== */
-.certificates-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 16px;
+/* ===== UPWORK-STYLE CERTIFICATES ===== */
+
+/* Add button */
+.upw-cert-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: transparent;
+  border: 1.5px solid var(--blue);
+  color: var(--blue);
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.certificate-item {
+.upw-cert-add-btn:hover:not(:disabled) {
+  background: var(--blue);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+}
+
+.upw-cert-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading state */
+.upw-cert-loading {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 20px;
-  background: var(--light-card);
-  border: 1px solid var(--light-border);
-  border-radius: var(--radius-lg);
-  transition: var(--transition);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  gap: 10px;
+  padding: 24px 0;
+  color: var(--light-text-tertiary);
+  font-size: 14px;
 }
 
-.dark .certificate-item {
-  background: var(--dark-card-alt);
+.dark .upw-cert-loading {
+  color: var(--dark-text-tertiary);
+}
+
+/* Empty state */
+.upw-cert-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 24px;
+  text-align: center;
+  border: 2px dashed var(--light-border);
+  border-radius: var(--radius-xl);
+  background: rgba(59, 130, 246, 0.02);
+  transition: all 0.3s ease;
+}
+
+.dark .upw-cert-empty {
+  border-color: var(--dark-border);
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.upw-cert-empty:hover {
+  border-color: var(--blue);
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.upw-cert-empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+
+.upw-cert-empty-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.upw-cert-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--light-text);
+  margin: 0;
+}
+
+.dark .upw-cert-empty-title {
+  color: var(--dark-text);
+}
+
+.upw-cert-empty-sub {
+  font-size: 13px;
+  color: var(--light-text-tertiary);
+  margin: 0;
+}
+
+.dark .upw-cert-empty-sub {
+  color: var(--dark-text-tertiary);
+}
+
+.upw-cert-empty-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 20px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.upw-cert-empty-btn:hover {
+  background: var(--blue-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+}
+
+/* Certificate list */
+.upw-cert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Certificate card */
+.upw-cert-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 20px 20px 0;
+  border-bottom: 1px solid var(--light-border);
+  position: relative;
+  transition: all 0.2s ease;
+  border-radius: 0;
+}
+
+.dark .upw-cert-card {
   border-color: var(--dark-border);
 }
 
-.certificate-item:hover {
-  transform: translateX(6px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.1);
-  border-color: var(--blue);
+.upw-cert-card:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
-.certificate-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: rgba(59, 130, 246, 0.1);
+.upw-cert-card:hover {
+  background: rgba(59, 130, 246, 0.025);
+  border-radius: var(--radius-lg);
+  padding-left: 12px;
+  margin-left: -12px;
+  margin-right: -4px;
+  padding-right: 12px;
+}
+
+.dark .upw-cert-card:hover {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+/* Left accent bar */
+.upw-cert-accent {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: var(--blue);
+  border-radius: 2px;
+}
+
+/* Icon */
+.upw-cert-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(99, 102, 241, 0.12));
   color: var(--blue);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  transition: all 0.2s ease;
 }
 
-.dark .certificate-icon {
-  background: rgba(59, 130, 246, 0.15);
+.dark .upw-cert-card-icon {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(99, 102, 241, 0.18));
+  border-color: rgba(59, 130, 246, 0.25);
 }
 
-.certificate-info {
+.upw-cert-card:hover .upw-cert-card-icon {
+  background: var(--blue);
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Body */
+.upw-cert-card-body {
   flex: 1;
+  min-width: 0;
 }
 
-.certificate-info h4 {
+.upw-cert-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.upw-cert-card-titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.upw-cert-title {
   font-size: 16px;
   font-weight: 600;
   color: var(--light-text);
-  margin-bottom: 4px;
+  margin: 0 0 3px;
+  line-height: 1.3;
 }
 
-.dark .certificate-info h4 {
+.dark .upw-cert-title {
   color: var(--dark-text);
 }
 
-.certificate-info p {
+.upw-cert-issuer {
   font-size: 14px;
+  color: var(--blue);
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Action buttons */
+.upw-cert-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.upw-cert-card:hover .upw-cert-card-actions {
+  opacity: 1;
+}
+
+.upw-cert-btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upw-cert-btn-edit {
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--blue);
+}
+
+.upw-cert-btn-edit:hover:not(:disabled) {
+  background: var(--blue);
+  color: white;
+}
+
+.upw-cert-btn-delete {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+}
+
+.upw-cert-btn-delete:hover:not(:disabled) {
+  background: #ef4444;
+  color: white;
+}
+
+.upw-cert-btn-icon:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Meta tags */
+.upw-cert-card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.upw-cert-meta-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.12);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--light-text-secondary, #64748b);
+  font-weight: 500;
+}
+
+.dark .upw-cert-meta-tag {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+  color: var(--dark-text-secondary, #94a3b8);
+}
+
+/* Verify link */
+.upw-cert-verify-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+  padding: 2px 0;
+}
+
+.upw-cert-verify-link:hover {
+  border-color: var(--blue);
+  opacity: 0.85;
+}
+
+/* ===== CERTIFICATION MODAL ===== */
+.upw-cert-modal {
+  background: var(--light-card);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 560px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  animation: modalSlideUp 0.25s ease;
+  overflow: hidden;
+}
+
+.dark .upw-cert-modal {
+  background: var(--dark-card);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Modal header */
+.upw-cert-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid var(--light-border);
+  flex-shrink: 0;
+}
+
+.dark .upw-cert-modal-header {
+  border-color: var(--dark-border);
+}
+
+.upw-cert-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.upw-cert-modal-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(99, 102, 241, 0.15));
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.dark .upw-cert-modal-icon {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(99, 102, 241, 0.2));
+}
+
+.upw-cert-modal-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--light-text);
+  margin: 0 0 2px;
+  line-height: 1.2;
+}
+
+.dark .upw-cert-modal-header h2 {
+  color: var(--dark-text);
+}
+
+.upw-cert-modal-header p {
+  font-size: 13px;
+  color: var(--light-text-tertiary);
+  margin: 0;
+}
+
+.dark .upw-cert-modal-header p {
+  color: var(--dark-text-tertiary);
+}
+
+.upw-cert-modal-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--light-text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.dark .upw-cert-modal-close {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--dark-text-tertiary);
+}
+
+.upw-cert-modal-close:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* Modal body */
+.upw-cert-modal-body {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+/* Fields */
+.upw-cert-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.upw-cert-field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--light-text);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dark .upw-cert-field label {
+  color: var(--dark-text);
+}
+
+.upw-cert-required {
+  color: #ef4444;
+  font-size: 13px;
+}
+
+.upw-cert-optional {
+  font-size: 12px;
+  font-weight: 400;
   color: var(--light-text-tertiary);
 }
 
-.dark .certificate-info p {
+.dark .upw-cert-optional {
   color: var(--dark-text-tertiary);
 }
+
+/* Input */
+.upw-cert-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--light-border);
+  border-radius: var(--radius-md);
+  background: var(--light-surface);
+  color: var(--light-text);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.dark .upw-cert-input {
+  border-color: var(--dark-border);
+  background: var(--dark-surface);
+  color: var(--dark-text);
+}
+
+.upw-cert-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  background: #fff;
+}
+
+.dark .upw-cert-input:focus {
+  background: var(--dark-card);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.upw-cert-input::placeholder {
+  color: var(--light-text-tertiary);
+  font-size: 13px;
+}
+
+.dark .upw-cert-input::placeholder {
+  color: var(--dark-text-tertiary);
+}
+
+.upw-cert-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Date row */
+.upw-cert-date-row {
+  display: grid;
+  grid-template-columns: 1fr 130px;
+  gap: 10px;
+}
+
+.upw-cert-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%2394a3b8'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+.upw-cert-year {
+  min-width: 0;
+}
+
+/* URL field */
+.upw-cert-url-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.upw-cert-url-icon {
+  position: absolute;
+  left: 13px;
+  color: var(--light-text-tertiary);
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.dark .upw-cert-url-icon {
+  color: var(--dark-text-tertiary);
+}
+
+.upw-cert-input-url {
+  padding-left: 36px;
+}
+
+/* Hint */
+.upw-cert-hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--light-text-tertiary);
+  margin: 0;
+}
+
+.dark .upw-cert-hint {
+  color: var(--dark-text-tertiary);
+}
+
+.upw-cert-hint svg {
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+/* Info banner */
+.upw-cert-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--light-text-secondary, #475569);
+  line-height: 1.5;
+}
+
+.dark .upw-cert-info-banner {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.25);
+  color: var(--dark-text-secondary, #94a3b8);
+}
+
+.upw-cert-info-banner svg {
+  color: var(--blue);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.upw-cert-info-banner strong {
+  color: var(--blue);
+}
+
+/* Modal footer */
+.upw-cert-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 28px 24px;
+  border-top: 1px solid var(--light-border);
+  flex-shrink: 0;
+}
+
+.dark .upw-cert-modal-footer {
+  border-color: var(--dark-border);
+}
+
+.upw-cert-modal-cancel {
+  padding: 10px 22px;
+  background: transparent;
+  border: 1.5px solid var(--light-border);
+  color: var(--light-text);
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dark .upw-cert-modal-cancel {
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+}
+
+.upw-cert-modal-cancel:hover:not(:disabled) {
+  background: var(--light-hover);
+  border-color: var(--light-text);
+}
+
+.dark .upw-cert-modal-cancel:hover:not(:disabled) {
+  background: var(--dark-hover);
+}
+
+.upw-cert-modal-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.upw-cert-modal-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upw-cert-modal-save:hover:not(:disabled) {
+  background: var(--blue-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.upw-cert-modal-save:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 
 /* ===== QUICK LINK CARD ===== */
 .quick-link-card {
