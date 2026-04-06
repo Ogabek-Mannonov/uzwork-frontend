@@ -115,6 +115,10 @@ const MyProfile = () => {
   });
   const [newSkillInput, setNewSkillInput] = useState("");
   
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [editingLangIdx, setEditingLangIdx] = useState(null);
+  const [langForm, setLangForm] = useState({ language: "", proficiency: "Conversational" });
+  
   // Password strength
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordValidations, setPasswordValidations] = useState({
@@ -183,7 +187,8 @@ const MyProfile = () => {
             profilePicture: p.avatar_url || u.avatar_url || "",
             hourlyRate: p.hourly_rate || 0,
             cv_url: p.cv_url || "",
-            coverPhoto: p.cover_url || "", // Added cover_url
+            coverPhoto: p.cover_url || "",
+            languages: p.languages || []
           }));
 
 
@@ -235,7 +240,7 @@ const MyProfile = () => {
     phone: "",
     location: "",
     timezone: "GMT+5",
-    language: "English (US)",
+    languages: [],
     accountType: "Freelancer",
     membership: "Pro",
     membershipStatus: "Active",
@@ -556,6 +561,58 @@ const MyProfile = () => {
       ...prev,
       images: prev.images.filter((_, i) => i !== indexToRemove)
     }));
+  };
+
+  const openAddLanguage = () => {
+    setEditingLangIdx(null);
+    setLangForm({ language: "", proficiency: "Conversational" });
+    setShowLanguageModal(true);
+  };
+
+  const openEditLanguage = (langObj, idx) => {
+    setEditingLangIdx(idx);
+    setLangForm({ language: langObj.language, proficiency: langObj.proficiency });
+    setShowLanguageModal(true);
+  };
+
+  const handleDeleteLanguage = async (idx) => {
+    setIsLoading(true);
+    try {
+      const newLanguages = userData.languages.filter((_, i) => i !== idx);
+      await updateMyProfile({ languages: newLanguages });
+      setUserData(prev => ({ ...prev, languages: newLanguages }));
+      showMessage("success", t("profile.skillsUpdated", "Language deleted successfully"));
+    } catch (error) {
+      showMessage("error", "Failed to delete language");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveLanguage = async () => {
+    if (!langForm.language.trim() || !langForm.proficiency) {
+      showMessage("error", "Language and proficiency are required");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const newLanguages = [...userData.languages];
+      if (editingLangIdx !== null) {
+        newLanguages[editingLangIdx] = langForm;
+      } else {
+        newLanguages.push(langForm);
+      }
+      
+      await updateMyProfile({ languages: newLanguages });
+      setUserData(prev => ({ ...prev, languages: newLanguages }));
+      setShowLanguageModal(false);
+      showMessage("success", t("profile.skillsUpdated", "Languages updated successfully"));
+    } catch (error) {
+      showMessage("error", "Failed to save language");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const openAddPortfolio = () => {
@@ -1118,7 +1175,7 @@ const MyProfile = () => {
         {/* SIDEBAR */}
         <aside className={`settings-sidebar ${showMobileMenu ? 'open' : ''}`}>
           <div className="sidebar-header">
-            <h2>Settings</h2>
+            <h2>{t("profile.settings", "Settings")}</h2>
             <button className="close-sidebar" onClick={() => setShowMobileMenu(false)}>
               <X size={18} />
             </button>
@@ -1235,14 +1292,14 @@ const MyProfile = () => {
                             value={editFormData.fullName} 
                             onChange={(e) => handleEditInputChange('fullName', e.target.value)} 
                             className="inline-edit-input name-edit-input" 
-                            placeholder="Full Name"
+                            placeholder={t("profile.fullNamePlaceholder", "Full Name")}
                           />
                           <input 
                             type="text" 
                             value={editFormData.title} 
                             onChange={(e) => handleEditInputChange('title', e.target.value)} 
                             className="inline-edit-input" 
-                            placeholder="Professional title" 
+                            placeholder={t("profile.titlePlaceholder", "Professional title")} 
                           />
                           <div className="inline-edit-actions">
                             <button className="btn-cancel-inline" onClick={handleSectionCancel}>{t("profile.cancel", "Cancel")}</button>
@@ -1256,7 +1313,7 @@ const MyProfile = () => {
                         <div className="section-edit-trigger" onClick={() => handleSectionEdit('name', { fullName: userData.fullName, title: userData.title })}>
                           <div>
                             <h2 className="profile-fullname">{userData.fullName}</h2>
-                            <p className="profile-title">{userData.title || "Professional title"}</p>
+                            <p className="profile-title">{userData.title || t("profile.titlePlaceholder", "Professional title")}</p>
                             <p className="profile-username">{userData.username}</p>
                           </div>
                           <button className="edit-pencil-btn">
@@ -1287,7 +1344,7 @@ const MyProfile = () => {
                           value={editFormData.bio}
                           onChange={(e) => handleEditInputChange('bio', e.target.value)}
                           rows={6}
-                          placeholder="Write about your professional experience, skills, and expertise..."
+                          placeholder={t("profile.bioPlaceholder", "Write about your professional experience, skills, and expertise...")}
                           disabled={isLoading}
                         />
                         <div className="inline-edit-actions">
@@ -1398,6 +1455,56 @@ const MyProfile = () => {
                         ))
                       ) : (
                         <p className="no-data-text">{t("profile.noSkills", "No skills added yet.")}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* LANGUAGES SECTION */}
+                  <div className="freelancer-section soft-fade-in stagger-4-5">
+                    <div className="freelancer-section-header">
+                      <div>
+                        <h3 className="freelancer-section-title">
+                          <Globe size={18} />{t("profile.languages", "Languages")}
+                        </h3>
+                        <p className="freelancer-section-subtitle">{t("profile.languagesDesc", "Select languages you can speak and write")}</p>
+                      </div>
+                      <button className="upw-cert-add-btn" onClick={openAddLanguage}>
+                        <Plus size={14} />
+                        {t("profile.addLanguage", "Add Language")}
+                      </button>
+                    </div>
+
+                    <div className="portfolio-grid">
+                      {userData.languages && userData.languages.length > 0 ? (
+                        userData.languages.map((lang, idx) => (
+                          <div key={idx} className="portfolio-card" style={{ padding: '20px', minHeight: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <h4 style={{ margin: '0 0 5px 0', fontSize: '16px', color: isDark ? '#e0e0e0' : '#1f2937' }}>{lang.language}</h4>
+                              <span style={{ color: '#6b7280', fontSize: '14px' }}>
+                                {lang.proficiency === 'Basic' ? t("profile.profBasic", "Basic") : 
+                                 lang.proficiency === 'Conversational' ? t("profile.profConversational", "Conversational") : 
+                                 lang.proficiency === 'Fluent' ? t("profile.profFluent", "Fluent") : 
+                                 lang.proficiency === 'Native/Bilingual' ? t("profile.profNativeBilingual", "Native/Bilingual") : lang.proficiency}
+                              </span>
+                            </div>
+                            <div className="cert-actions" style={{ position: 'relative', top: 0, right: 0, opacity: 1, background: 'transparent', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                              <button className="upw-cert-btn-icon upw-cert-btn-edit" onClick={() => openEditLanguage(lang, idx)} title={t("profile.editLanguage", "Edit Language")}>
+                                <Edit size={14} />
+                              </button>
+                              <button className="upw-cert-btn-icon upw-cert-btn-delete" onClick={() => handleDeleteLanguage(idx)} title={t("profile.deleteLanguage", "Delete")}>
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="empty-state-container" style={{ gridColumn: '1 / -1' }}>
+                          <Globe size={40} className="empty-state-icon" />
+                          <p className="empty-state-text">{t("profile.noLanguagesAdded", "No languages added yet")}</p>
+                          <button className="btn-outline" onClick={openAddLanguage}>
+                            <Plus size={14} />{t("profile.addLanguage", "Add Language")}
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -1537,7 +1644,7 @@ const MyProfile = () => {
                         <Mail size={18} />{t("profile.contactDetails", "Contact Details")}
                       </h3>
                       {editingSection !== 'contact' && (
-                        <button className="edit-pencil-btn visible" onClick={() => handleSectionEdit('contact', { email: userData.email, phone: userData.phone, location: userData.location, language: userData.language })}>
+                        <button className="edit-pencil-btn visible" onClick={() => handleSectionEdit('contact', { email: userData.email, phone: userData.phone, location: userData.location })}>
                           <Edit size={14} />
                         </button>
                       )}
@@ -1557,10 +1664,6 @@ const MyProfile = () => {
                           <div className="form-group">
                             <label><MapPin size={14} /> {t("profile.location", "Location")}</label>
                             <input type="text" value={editFormData.location} onChange={(e) => handleEditInputChange('location', e.target.value)} className="inline-edit-input" />
-                          </div>
-                          <div className="form-group">
-                            <label><Globe size={14} /> Language </label>
-                            <input type="text" value={editFormData.language} onChange={(e) => handleEditInputChange('language', e.target.value)} className="inline-edit-input" />
                           </div>
                         </div>
                         <div className="inline-edit-actions">
@@ -1597,13 +1700,6 @@ const MyProfile = () => {
                             <span className="detail-value">{userData.location}</span>
                           </div>
                         </div>
-                        <div className="detail-item">
-                          <span className="detail-icon"><Globe size={16} /></span>
-                          <div className="detail-content">
-                            <span className="detail-label">Language</span>
-                            <span className="detail-value">{userData.language}</span>
-                          </div>
-                        </div>
                       </div>
                     )}
                   </div>
@@ -1613,15 +1709,14 @@ const MyProfile = () => {
               </div>
             </div>
           )}
-
           {/* CV UPLOAD SECTION */}
           {activeSection === "cv-upload" && (
             <div className="content-section">
               <div className="section-header">
                 <div className="header-left">
-                  <h1 className="section-title">Documents & Portfolio</h1>
+                  <h1 className="section-title">{t("profile.documentsPortfolio", "Documents & Portfolio")}</h1>
                   <span className="section-badge">
-                    <FileText size={14} />Professional Materials
+                    <FileText size={14} />{t("profile.professionalMaterials", "Professional Materials")}
                   </span>
                 </div>
               </div>
@@ -1632,21 +1727,21 @@ const MyProfile = () => {
                   <div className="cv-section-title-bar">
                     <div>
                       <h2 className="cv-section-main-title">
-                        <Briefcase size={20} />Portfolio Projects
+                        <Briefcase size={20} />{t("profile.portfolioProjects", "Portfolio Projects")}
                       </h2>
-                      <p className="cv-section-desc">Showcase your best work with project images and descriptions</p>
+                      <p className="cv-section-desc">{t("profile.portfolioDesc2", "Showcase your best work with project images and descriptions")}</p>
 
                     </div>
                     <button className="btn-primary" onClick={openAddPortfolio} disabled={isLoading}>
-                      <Plus size={16} />Add Project
+                      <Plus size={16} />{t("profile.addProject", "Add Project")}
                     </button>
                   </div>
 
                   {portfolio.length === 0 ? (
                     <div className="empty-portfolio">
                       <Briefcase size={48} />
-                      <h4>No portfolio items yet</h4>
-                      <p>Click "Add Project" to showcase your work</p>
+                      <h4>{t("profile.noPortfolioItems", "No portfolio items yet")}</h4>
+                      <p>{t("profile.noPortfolioHint", "Click \"Add Project\" to showcase your work")}</p>
                     </div>
                   ) : (
                     <div className="portfolio-upload-grid">
@@ -1682,7 +1777,7 @@ const MyProfile = () => {
                 </div>
 
                 <div className="cv-divider">
-                  <span>Resume / CV</span>
+                  <span>{t("profile.resumeCV", "Resume / CV")}</span>
                 </div>
 
                 {/* CV UPLOAD */}
@@ -1690,18 +1785,18 @@ const MyProfile = () => {
                   <div className="cv-section-title-bar">
                     <div>
                       <h2 className="cv-section-main-title">
-                        <FileText size={20} />{userData.cv_url ? "Update Your Resume" : "Upload Your Resume"}
+                        <FileText size={20} />{userData.cv_url ? t("profile.updateResume", "Update Your Resume") : t("profile.uploadResume", "Upload Your Resume")}
                       </h2>
-                      <p className="cv-section-desc">Share your professional CV with potential clients</p>
+                      <p className="cv-section-desc">{t("profile.shareCV", "Share your professional CV with potential clients")}</p>
                     </div>
                   </div>
 
                   {!userData.cv_url ? (
                     <div className="cv-upload-zone" onClick={() => document.getElementById('cv-file-input').click()}>
                       <Upload size={48} />
-                      <h3>Upload Your Resume</h3>
-                      <p>Drag and drop your CV here, or click to browse</p>
-                      <p className="cv-upload-hint">Supported formats: PDF, DOCX (Max 5MB)</p>
+                      <h3>{t("profile.uploadResumeHere", "Upload Your Resume")}</h3>
+                      <p>{t("profile.dragDropCV", "Drag and drop your CV here, or click to browse")}</p>
+                      <p className="cv-upload-hint">{t("profile.cvFormats", "Supported formats: PDF, DOCX (Max 5MB)")}</p>
                       <input 
                         type="file" 
                         id="cv-file-input" 
@@ -1710,15 +1805,15 @@ const MyProfile = () => {
                         onChange={handleCvUpload}
                       />
                       <button className="btn-primary" disabled={isLoading}>
-                        <Upload size={16} />Browse Files
+                        <Upload size={16} />{t("profile.browseFiles", "Browse Files")}
                       </button>
                     </div>
                   ) : (
                     <div className="cv-current-file">
                       <div className="cv-file-header">
-                        <h3>Current Resume</h3>
+                        <h3>{t("profile.currentResume", "Current Resume")}</h3>
                         <button className="btn-outline btn-small" onClick={() => document.getElementById('cv-file-input').click()} disabled={isLoading}>
-                          <RefreshCw size={14} /> Replace
+                          <RefreshCw size={14} /> {t("profile.replace", "Replace")}
                         </button>
                         <input 
                           type="file" 
@@ -1734,10 +1829,10 @@ const MyProfile = () => {
                         </div>
                         <div className="cv-file-info">
                           <h4>{userData.cv_url.split('/').pop() || "Your_Resume.pdf"}</h4>
-                          <p>Ready to share with clients</p>
+                          <p>{t("profile.readyToShare", "Ready to share with clients")}</p>
                           <div className="cv-file-meta">
                             <span className="cv-file-status cv-file-verified">
-                              <CheckCircle size={14} />Professional
+                              <CheckCircle size={14} />{t("profile.professional", "Professional")}
                             </span>
                           </div>
                         </div>
@@ -1749,10 +1844,10 @@ const MyProfile = () => {
                             className="btn-secondary"
                             style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}
                           >
-                            <Eye size={14} />View
+                            <Eye size={14} />{t("profile.viewCV", "View")}
                           </a>
                           <button className="btn-outline" onClick={handleDeleteCv} disabled={isLoading}>
-                            <Trash2 size={14} />Delete
+                            <Trash2 size={14} />{t("profile.deleteCV", "Delete")}
                           </button>
                         </div>
                       </div>
@@ -1764,14 +1859,14 @@ const MyProfile = () => {
                 <div className="cv-tips-card">
                   <div className="cv-tips-header">
                     <Info size={20} />
-                    <h4>Resume Tips</h4>
+                    <h4>{t("profile.resumeTips", "Resume Tips")}</h4>
                   </div>
                   <ul className="cv-tips-list">
-                    <li>Keep your resume concise - 1-2 pages maximum</li>
-                    <li>Highlight relevant skills and achievements</li>
-                    <li>Use keywords from job descriptions</li>
-                    <li>Update regularly with new projects and skills</li>
-                    <li>Proofread carefully for errors</li>
+                    <li>{t("profile.cvTip1", "Keep your resume concise - 1-2 pages maximum")}</li>
+                    <li>{t("profile.cvTip2", "Highlight relevant skills and achievements")}</li>
+                    <li>{t("profile.cvTip3", "Use keywords from job descriptions")}</li>
+                    <li>{t("profile.cvTip4", "Update regularly with new projects and skills")}</li>
+                    <li>{t("profile.cvTip5", "Proofread carefully for errors")}</li>
                   </ul>
                 </div>
               </div>
@@ -2707,6 +2802,89 @@ const MyProfile = () => {
                       setIsLoading(false);
                     }
                   }}
+                  disabled={isLoading}
+                >
+                  {isLoading ? <RefreshCw size={16} className="spinning" /> : t("profile.save", "Save")}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {showLanguageModal && (
+        <div className="modal-overlay" onClick={() => setShowLanguageModal(false)}>
+          <div className="modal-content skills-edit-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{editingLangIdx !== null ? t("profile.editLanguage", "Edit Language") : t("profile.addLanguage", "Add Language")}</h2>
+              <button 
+                className="modal-close" 
+                onClick={() => setShowLanguageModal(false)}
+                disabled={isLoading}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: isDark ? '#e0e0e0' : '#4b5563', fontSize: '14px', fontWeight: '500' }}>
+                  {t("profile.language", "Language")}
+                </label>
+                <select 
+                  className="inline-edit-input"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: `1px solid ${isDark ? '#4b5563' : '#d1d5db'}`, background: isDark ? '#374151' : 'white', color: isDark ? '#f9fafb' : '#1f2937' }}
+                  value={langForm.language}
+                  onChange={(e) => setLangForm(p => ({ ...p, language: e.target.value }))}
+                >
+                  <option value="">{t("profile.chooseLanguage", "Choose Language")}</option>
+                  <option value="English">English</option>
+                  <option value="Uzbek">Uzbek</option>
+                  <option value="Russian">Russian</option>
+                  <option value="Turkish">Turkish</option>
+                  <option value="Kazakh">Kazakh</option>
+                  <option value="Tajik">Tajik</option>
+                  <option value="German">German</option>
+                  <option value="French">French</option>
+                  <option value="Spanish">Spanish</option>
+                  <option value="Arabic">Arabic</option>
+                  <option value="Chinese">Chinese</option>
+                  <option value="Korean">Korean</option>
+                  <option value="Japanese">Japanese</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label style={{ display: 'block', marginBottom: '8px', color: isDark ? '#e0e0e0' : '#4b5563', fontSize: '14px', fontWeight: '500' }}>
+                  {t("profile.languageLevel", "Proficiency Level")}
+                </label>
+                <select 
+                  className="inline-edit-input"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: `1px solid ${isDark ? '#4b5563' : '#d1d5db'}`, background: isDark ? '#374151' : 'white', color: isDark ? '#f9fafb' : '#1f2937' }}
+                  value={langForm.proficiency}
+                  onChange={(e) => setLangForm(p => ({ ...p, proficiency: e.target.value }))}
+                >
+                  <option value="Basic">{t("profile.profBasic", "Basic")}</option>
+                  <option value="Conversational">{t("profile.profConversational", "Conversational")}</option>
+                  <option value="Fluent">{t("profile.profFluent", "Fluent")}</option>
+                  <option value="Native/Bilingual">{t("profile.profNativeBilingual", "Native/Bilingual")}</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="modal-footer" style={{ marginTop: '20px' }}>
+              <div className="modal-footer-btns" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button 
+                  className="btn-cancel-flat" 
+                  onClick={() => setShowLanguageModal(false)}
+                  disabled={isLoading}
+                >
+                  {t("profile.cancel", "Cancel")}
+                </button>
+                <button 
+                  className="btn-save-premium" 
+                  onClick={handleSaveLanguage}
                   disabled={isLoading}
                 >
                   {isLoading ? <RefreshCw size={16} className="spinning" /> : t("profile.save", "Save")}

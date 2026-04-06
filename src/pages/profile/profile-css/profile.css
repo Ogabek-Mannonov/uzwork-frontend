@@ -929,6 +929,8 @@ body.dark-mode {
   font-size: 28px;
   font-weight: 700;
   color: var(--light-text);
+  margin: 0;
+  line-height: 1;
 }
 
 .dark .section-title {
@@ -1382,7 +1384,7 @@ body.dark-mode {
 
 .profile-avatar-section {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 24px;
   margin-bottom: 24px;
   position: relative;
@@ -1394,6 +1396,7 @@ body.dark-mode {
   position: relative;
   flex-shrink: 0;
   z-index: 15;
+  margin-top: -60px;
 }
 
 .profile-avatar {
@@ -1474,13 +1477,30 @@ body.dark-mode {
 }
 
 .avatar-status.online {
-  background: var(--success);
+  background: var(--blue);
 }
 
 .profile-name-section {
   flex: 1;
   padding-bottom: 8px;
   min-width: 250px;
+  margin-top: 20px;
+  margin-left: 24px;
+}
+
+.profile-name-section .inline-edit-container {
+  padding: 16px;
+  background: var(--light-card);
+  border: 1px solid var(--light-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  z-index: 20;
+}
+
+.dark .profile-name-section .inline-edit-container {
+  background: var(--dark-card-alt);
+  border-color: var(--dark-border);
 }
 
 .profile-fullname {
@@ -1527,6 +1547,7 @@ body.dark-mode {
   flex-shrink: 0;
   padding-bottom: 8px;
   margin-left: auto;
+  margin-top: 20px;
 }
 
 .profile-badge-item {
@@ -1554,14 +1575,14 @@ body.dark-mode {
 }
 
 .profile-badge-verified {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2));
-  color: var(--success);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(14, 165, 233, 0.2));
+  color: #0ea5e9;
+  border: 1px solid rgba(14, 165, 233, 0.3);
 }
 
 .dark .profile-badge-verified {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.3));
-  border-color: rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0.3));
+  border-color: rgba(14, 165, 233, 0.4);
 }
 
 /* ===== BIO SECTION ===== */
@@ -5222,7 +5243,7 @@ input:disabled + .toggle-slider {
 }
 
 .btn-save-premium {
-  background: var(--success);
+  background: var(--blue);
   color: white;
   border: none;
   padding: 10px 28px;
@@ -5234,13 +5255,13 @@ input:disabled + .toggle-slider {
   display: flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
 .btn-save-premium:hover {
-  background: #059669;
+  background: var(--blue-dark);
   transform: translateY(-1px);
-  box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 6px 15px rgba(59, 130, 246, 0.3);
 }
 
 .btn-save-premium:active {
@@ -5363,7 +5384,7 @@ input:disabled + .toggle-slider {
 .btn-cancel-flat {
   background: transparent !important;
   border: none !important;
-  color: #14a800 !important; /* Specialized green color for Upwork-like experience */
+  color: var(--light-text-secondary) !important;
   font-weight: 600 !important;
   font-size: 15px !important;
   padding: 8px 16px !important;
@@ -5376,15 +5397,19 @@ input:disabled + .toggle-slider {
 }
 
 .btn-save-premium {
-  background: #14a800 !important; /* Proper success green */
-  border-radius: var(--radius-full) !important;
-  padding: 12px 32px !important;
-  font-size: 15px !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  background: var(--blue) !important;
+  color: white !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15) !important;
 }
 
 .btn-save-premium:hover {
-  background: #108a00 !important;
-  box-shadow: 0 4px 12px rgba(20, 168, 0, 0.3) !important;
+  background: var(--blue-dark) !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25) !important;
+  transform: translateY(-1px);
 }
 
 /* ===== DOCUMENTS & CV SECTION ===== */

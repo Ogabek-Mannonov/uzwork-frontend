@@ -9,7 +9,7 @@ import { getUserProfile } from "../../api/common";
 import {
   FiArrowLeft, FiMapPin, FiDollarSign, FiStar,
   FiBriefcase, FiAward, FiFileText, FiExternalLink,
-  FiShield, FiCalendar,
+  FiShield, FiCalendar, FiGlobe
 } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 
@@ -56,9 +56,14 @@ export default function PublicProfile() {
             hourly_rate: p.hourly_rate || 0,
             job_success_score: p.job_success_score || 0,
             total_earned: p.total_earned || 0,
+            jobs_completed: p.completed_jobs || 0,
+            active_projects: p.active_projects || 0,
             skills: Array.isArray(p.skills) ? p.skills : (p.skills ? [p.skills] : []),
+            languages: p.languages || [],
             cv_url: p.cv_url || "",
             cover_url: p.cover_url || "",
+            phone: u.phone || "",
+            availability_status: p.availability_status || "Available now",
           });
         } else {
           setProfile(null);
@@ -151,8 +156,16 @@ export default function PublicProfile() {
                 </svg>
               </span>
             </div>
-
+            {profile.username && <p className="public-username" style={{ color: 'var(--text-muted)', marginBottom: '8px', fontSize: '14px' }}>@{profile.username}</p>}
             {profile.title && <p className="public-title">{profile.title}</p>}
+
+            <div className="profile-badges-row" style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+              <span className="profile-badge-item profile-badge-membership" style={{ 
+                display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: '600', padding: '4px 10px', borderRadius: '12px', background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' 
+              }}>
+                <FiAward size={14} /> Professional
+              </span>
+            </div>
 
             {/* Stats Dashboard */}
             <div className="stats-dashboard">
@@ -180,6 +193,22 @@ export default function PublicProfile() {
                 </div>
               </div>
 
+              <div className="stat-card">
+                <FiBriefcase className="stat-icon" />
+                <div className="stat-info">
+                  <span className="stat-value">{profile.jobs_completed || 0}</span>
+                  <span className="stat-label">{t("profile.jobsCompleted", "Jobs Completed")}</span>
+                </div>
+              </div>
+
+              <div className="stat-card">
+                <FiBriefcase className="stat-icon" />
+                <div className="stat-info">
+                  <span className="stat-value">{profile.active_projects || 0}</span>
+                  <span className="stat-label">{t("profile.activeProjects", "Active Projects")}</span>
+                </div>
+              </div>
+
               {profile.location && (
                 <div className="stat-card">
                   <FiMapPin className="stat-icon" />
@@ -189,6 +218,13 @@ export default function PublicProfile() {
                   </div>
                 </div>
               )}
+            </div>
+
+            <div className="availability-row" style={{ marginTop: '16px', display: 'flex', gap: '16px', color: 'var(--text-muted)', fontSize: '14px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }}></div>
+                 {profile.availability_status}
+              </span>
             </div>
 
             {profile.cv_url && (
@@ -282,6 +318,28 @@ export default function PublicProfile() {
           </div>
 
           <aside className="profile-sidebar">
+            {/* Languages */}
+            {profile.languages?.length > 0 && (
+              <div className="public-skills-section soft-fade-in stagger-5" style={{ marginBottom: '24px' }}>
+                <h3 className="section-title">
+                  <FiGlobe style={{ marginRight: '8px' }} />
+                  {t("publicProfile.languages", "Languages")}
+                </h3>
+                <div className="public-languages-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {profile.languages.map((lang, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: '500', color: 'var(--text-color)' }}>{lang.language}</span>
+                      <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                        {lang.proficiency === 'Basic' ? t("profile.profBasic", "Basic") : 
+                         lang.proficiency === 'Conversational' ? t("profile.profConversational", "Conversational") : 
+                         lang.proficiency === 'Fluent' ? t("profile.profFluent", "Fluent") : 
+                         lang.proficiency === 'Native/Bilingual' ? t("profile.profNativeBilingual", "Native/Bilingual") : lang.proficiency}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {/* Skills */}
             {profile.skills?.length > 0 && (
               <div className="public-skills-section soft-fade-in stagger-5">
@@ -293,6 +351,24 @@ export default function PublicProfile() {
                 </div>
               </div>
             )}
+            {/* Contact Info Sidebar */}
+            <div className="public-skills-section soft-fade-in stagger-5" style={{ marginBottom: '24px' }}>
+               <h3 className="section-title">{t("profile.contactDetails", "Contact Details")}</h3>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px', color: 'var(--text)' }}>
+                 {profile.email && (
+                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                     <span style={{ color: 'var(--text-muted)' }}>{t("profile.email", "Email")}</span>
+                     <span style={{ fontWeight: '500' }}>{profile.email}</span>
+                   </div>
+                 )}
+                 {profile.phone && (
+                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                     <span style={{ color: 'var(--text-muted)' }}>{t("profile.phone", "Phone")}</span>
+                     <span style={{ fontWeight: '500' }}>{profile.phone}</span>
+                   </div>
+                 )}
+               </div>
+            </div>
           </aside>
         </div>
       </div>
