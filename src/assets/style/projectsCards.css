@@ -13,7 +13,7 @@
   margin: 0;
   font-size: 18px;
   font-weight: 800;
-  color: #101828;
+  color: var(--text);
 }
 
 .projects-grid {
@@ -55,9 +55,9 @@
   align-items: center;
   gap: 10px;
 
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--surface);
   padding: 6px;
 }
 
@@ -67,7 +67,7 @@
   padding: 10px 14px;
   border-radius: 8px;
   cursor: pointer;
-  color: #667085;
+  color: var(--muted);
   font-weight: 600;
 }
 
@@ -81,8 +81,8 @@
   align-items: center;
   gap: 8px;
   padding: 0 6px;
-  border-left: 1px solid #e5e7eb;
-  border-right: 1px solid #e5e7eb;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
 }
 
 .pg-page {
@@ -93,17 +93,17 @@
   background: transparent;
   cursor: pointer;
   font-weight: 700;
-  color: #2563eb;
+  color: var(--brand);
 }
 
 .pg-page.is-active {
-  border-color: #2563eb;
-  background: #eff6ff;
+  border-color: var(--brand);
+  background: var(--brand-light);
 }
 
 .pg-dots {
   width: 42px;
   text-align: center;
-  color: #98a2b3;
+  color: var(--muted);
   font-weight: 700;
 }

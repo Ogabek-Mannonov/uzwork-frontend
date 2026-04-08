@@ -26,13 +26,13 @@
   width: 100%;
   max-width: 950px;
   height: 100%;
-  background: #ffffff;
+  background: var(--surface);
   z-index: 1001;
   transform: translateX(100%);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
-  box-shadow: -10px 0 50px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
 }
 
@@ -42,7 +42,7 @@
 
 .jd-header {
   padding: 16px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -59,14 +59,14 @@
 }
 
 .jd-back-btn:hover {
-  background: #eff6ff;
+  background: var(--btn-ghost);
 }
 
 .jd-external-link {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #2563eb;
+  color: var(--brand);
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
@@ -87,13 +87,13 @@
 .jd-main-info {
   flex: 1;
   padding: 32px 40px;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid var(--border);
 }
 
 .jd-title {
   font-size: 28px;
   font-weight: 800;
-  color: #1e293b;
+  color: var(--text);
   margin-bottom: 12px;
   line-height: 1.25;
 }
@@ -104,12 +104,12 @@
   gap: 16px;
   flex-wrap: wrap;
   font-size: 14px;
-  color: #64748b;
+  color: var(--muted);
   margin-bottom: 24px;
 }
 
 .jd-category {
-    color: #2563eb;
+    color: var(--brand);
     font-weight: 600;
     text-decoration: underline;
 }
@@ -122,14 +122,14 @@
 
 .jd-divider {
   border: 0;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border);
   margin: 32px 0;
 }
 
 .jd-description {
   font-size: 16px;
   line-height: 1.6;
-  color: #475569;
+  color: var(--text-2);
   white-space: pre-line;
 }
 
@@ -144,7 +144,7 @@
   display: flex;
   gap: 12px;
   align-items: flex-start;
-  color: #1e293b;
+  color: var(--text);
 }
 
 .jd-detail-item div {
@@ -159,13 +159,13 @@
 
 .jd-detail-item span {
     font-size: 13px;
-    color: #64748b;
+    color: var(--muted);
 }
 
 .jd-skills-section h3 {
   font-size: 16px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text);
   margin-bottom: 16px;
 }
 
@@ -176,12 +176,12 @@
 }
 
 .jd-tag {
-  background: #f3f4f6;
+  background: var(--chip-bg);
   border-radius: 999px;
   padding: 6px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: #1e293b;
+  color: var(--text);
 }
 
 .jd-proposals-stat strong {
@@ -192,12 +192,12 @@
 
 .jd-stat-line {
     font-size: 14px;
-    color: #64748b;
+    color: var(--muted);
     margin-bottom: 6px;
 }
 
 .jd-stat-line span {
-    color: #1e293b;
+    color: var(--text);
     font-weight: 600;
 }
 
@@ -205,7 +205,7 @@
 .jd-sidebar {
   width: 320px;
   padding: 32px 24px;
-  background: #fafafa;
+  background: var(--surface-2);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -230,9 +230,9 @@
 }
 
 .jd-btn-save {
-  background: #ffffff;
-  color: #2563eb;
-  border: 1px solid #2563eb;
+  background: var(--surface);
+  color: var(--brand);
+  border: 1px solid var(--brand);
   font-size: 16px;
   font-weight: 700;
   padding: 12px;
@@ -242,7 +242,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.2s;
+  transition: var(--transition);
 }
 
 .jd-btn-save:hover {
@@ -258,7 +258,7 @@
     border: none;
     cursor: pointer;
     font-size: 14px;
-    color: #64748b;
+    color: var(--muted);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -268,7 +268,7 @@
 
 .jd-client-info {
     margin-top: 32px;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--border);
     padding-top: 24px;
 }
 
@@ -295,7 +295,7 @@
     align-items: center;
     gap: 4px;
     font-size: 13px;
-    color: #64748b;
+    color: var(--muted);
 }
 
 .jd-client-meta {
@@ -315,12 +315,12 @@
 
 .jd-meta-item span {
     font-size: 13px;
-    color: #64748b;
+    color: var(--muted);
 }
 
 .jd-member-since {
     font-size: 12px;
-    color: #94a3b8;
+    color: var(--muted);
     margin-top: 24px;
 }
 
