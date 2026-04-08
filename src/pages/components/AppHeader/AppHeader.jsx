@@ -1,9 +1,10 @@
 // src/pages/components/AppHeader/AppHeader.jsx
 import React, { useEffect, useRef, useState, useMemo } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Sun, Moon, Menu, X, ChevronDown, Globe,
   Bell, HelpCircle, Settings, User, Search, Check,
+  FileText, CreditCard, Shield, Award, AlertTriangle, LogOut
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useThemeContext } from "../Theme/ThemeContext";
@@ -291,10 +292,16 @@ function AuthHeader({ i18n, changeLanguage }) {
   const { isDark, toggle } = useThemeContext();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [jobsOpen, setJobsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const jobsRef = useRef(null);
+  const profileRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const h = (e) => { if (jobsRef.current && !jobsRef.current.contains(e.target)) setJobsOpen(false); };
+    const h = (e) => { 
+      if (jobsRef.current && !jobsRef.current.contains(e.target)) setJobsOpen(false); 
+      if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false); 
+    };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, []);
@@ -310,6 +317,21 @@ function AuthHeader({ i18n, changeLanguage }) {
     { to: "/proposals", label: t("navbar.proposals") },
     { to: "/messages",  label: t("navbar.messages") },
   ], [t]);
+
+  const handleProfileNav = (section) => {
+    setProfileOpen(false);
+    navigate(`/profile?section=${section}`);
+  };
+
+  const handleLogout = () => {
+    setProfileOpen(false);
+    import("../../../api/auth").then(({ logout }) => {
+      logout().then(() => {
+        window.dispatchEvent(new Event("authChange"));
+        navigate("/login");
+      });
+    });
+  };
 
   return (
     <>
@@ -356,7 +378,63 @@ function AuthHeader({ i18n, changeLanguage }) {
             <button className="icon-btn icon-btn--notif" title="Notifications">
               <Bell size={16} /><span className="notif-dot" />
             </button>
-            <button className="avatar" title="Profile"><User size={16} /></button>
+            <div className="profile-menu-container" ref={profileRef} style={{ position: "relative" }}>
+              <button 
+                className={`avatar ${profileOpen ? 'active' : ''}`} 
+                title="Profile" 
+                onClick={() => setProfileOpen(!profileOpen)}
+              >
+                <User size={16} />
+              </button>
+              {profileOpen && (
+                <div className="profile-dropdown-menu" style={{
+                  position: "absolute", top: "calc(100% + 10px)", right: 0,
+                  background: "var(--surface, #fff)", border: "1px solid var(--border, #e2e8f0)",
+                  borderRadius: "12px", width: "240px", zIndex: 1000,
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.1)", padding: "8px"
+                }}>
+                  <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border, #e2e8f0)", marginBottom: "8px" }}>
+                    <span style={{ fontWeight: 600, fontSize: "14px", display: "block", color: "var(--text)" }}>Sozlamalar</span>
+                  </div>
+                  {[
+                    { id: "my-info", label: "Mening ma'lumotlarim", icon: <User size={14} /> },
+                    { id: "cv-upload", label: "CV Yuklash", icon: <FileText size={14} /> },
+                    { id: "billing", label: "To'lovlar", icon: <CreditCard size={14} /> },
+                    { id: "password", label: "Parol va Xavfsizlik", icon: <Shield size={14} /> },
+                    { id: "membership", label: "A'zolik", icon: <Award size={14} /> },
+                    { id: "notifications", label: "Xabarnoma sozlamalari", icon: <Bell size={14} /> },
+                    { id: "appeals", label: "Shikoyatlar markazi", icon: <AlertTriangle size={14} /> }
+                  ].map(item => (
+                    <button key={item.id} onClick={() => handleProfileNav(item.id)} style={{
+                      display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "10px 12px",
+                      background: "none", border: "none", borderRadius: "6px", cursor: "pointer",
+                      fontSize: "14px", color: "var(--text, #1e293b)", textDecoration: "none", transition: "0.2s"
+                    }} onMouseOver={e => e.currentTarget.style.background = "var(--bg, #f1f5f9)"}
+                       onMouseOut={e => e.currentTarget.style.background = "none"}>
+                      <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary, #64748b)' }}>{item.icon}</span>
+                      {item.label}
+                    </button>
+                  ))}
+                  <div style={{ margin: "8px 0", borderTop: "1px solid var(--border, #e2e8f0)" }}></div>
+                  <button onClick={() => handleProfileNav("help")} style={{
+                    display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "10px 12px",
+                    background: "none", border: "none", borderRadius: "6px", cursor: "pointer",
+                    fontSize: "14px", color: "var(--text, #1e293b)", transition: "0.2s"
+                  }} onMouseOver={e => e.currentTarget.style.background = "var(--bg, #f1f5f9)"} onMouseOut={e => e.currentTarget.style.background = "none"}>
+                    <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary, #64748b)' }}><HelpCircle size={14} /></span>
+                    Yordam va qo'llab quvvatlash
+                  </button>
+                  <button onClick={handleLogout} style={{
+                    display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "10px 12px",
+                    background: "none", border: "none", borderRadius: "6px", cursor: "pointer",
+                    fontSize: "14px", color: "#ef4444", transition: "0.2s"
+                  }} onMouseOver={e => e.currentTarget.style.background = "var(--bg, #f1f5f9)"} onMouseOut={e => e.currentTarget.style.background = "none"}>
+                    <span style={{ display: 'flex', alignItems: 'center', color: '#ef4444' }}><LogOut size={14} /></span>
+                    Chiqish
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>

@@ -120,10 +120,10 @@ const Login = () => {
 
       // ✅ Role bo‘yicha yo‘naltirish
       // Siz hozir hammani /profile ga yuboryapsiz, lekin freelancer bo'lsa /jobs ga ham bo'lishi mumkin
-      if (role === "freelancer") navigate("/profile", { replace: true });
+      if (role === "freelancer") navigate("/find-work", { replace: true });
       else if (role === "client") navigate("/profile/client", { replace: true });
       else if (role === "admin") navigate("/home", { replace: true });
-      else navigate("/profile", { replace: true });
+      else navigate("/find-work", { replace: true });
     } catch (err) {
       setError(err?.message || t("auth.serverError", "Server bilan ulanishda xato"));
     } finally {
@@ -157,10 +157,10 @@ const Login = () => {
         return;
       }
 
-      if (role === "freelancer") navigate("/profile", { replace: true });
+      if (role === "freelancer") navigate("/find-work", { replace: true });
       else if (role === "client") navigate("/profile/client", { replace: true });
       else if (role === "admin") navigate("/home", { replace: true });
-      else navigate("/profile", { replace: true });
+      else navigate("/find-work", { replace: true });
 
     } catch (e) {
       setError(t("auth.googleUnexpectedError", "Google bilan ulanishda kutilmagan xatolik."));

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import {
   User,
@@ -79,8 +79,9 @@ const MyProfile = () => {
   const { t } = useTranslation();
   const { isDark } = useThemeContext();
 
-  // const [darkMode, setDarkMode] = useState(false);
-  const [activeSection, setActiveSection] = useState("my-info");
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const activeSection = searchParams.get('section') || 'my-info';
   // const [activeHeaderTab, setActiveHeaderTab] = useState("find");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [editingSection, setEditingSection] = useState(null); // 'name', 'bio', 'rate', 'skills', 'contact'
@@ -450,7 +451,7 @@ const MyProfile = () => {
   // };
 
   const handleSectionChange = (id, label) => {
-    setActiveSection(id);
+    navigate(`/profile?section=${id}`);
     setShowMobileMenu(false);
     showMessage("info", `Opening ${label}...`);
   };
@@ -1172,49 +1173,10 @@ const MyProfile = () => {
       {/* MAIN CONTENT */}
       <div className="settings-main">
         
-        {/* SIDEBAR */}
-        <aside className={`settings-sidebar ${showMobileMenu ? 'open' : ''}`}>
-          <div className="sidebar-header">
-            <h2>{t("profile.settings", "Settings")}</h2>
-            <button className="close-sidebar" onClick={() => setShowMobileMenu(false)}>
-              <X size={18} />
-            </button>
-          </div>
-          
-          <nav className="sidebar-nav">
-            {navSections.map((section, idx) => (
-              <div key={idx} className="nav-section">
-                <h3 className="section-title">{section.title}</h3>
-                <ul className="nav-list">
-                  {section.items.map(item => (
-                    <li key={item.id}>
-                      <button 
-                        className={`nav-link ${activeSection === item.id ? 'active' : ''}`} 
-                        onClick={() => handleSectionChange(item.id, item.label)}
-                      >
-                        <span className="nav-icon">{item.icon}</span>
-                        <span className="nav-label">{item.label}</span>
-                        {item.badge && <span className="nav-badge">{item.badge}</span>}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </nav>
-          
-          <div className="sidebar-footer">
-            <button className="sidebar-footer-btn" onClick={() => handleUserMenuClick("Help & Support")}>
-              <HelpCircle size={16} /> {t("profile.helpSupport", "Help & Support")}
-            </button>
-            <button className="sidebar-footer-btn" onClick={() => handleUserMenuClick("Sign Out")}>
-              <LogOut size={16} /> {t("profile.signOut", "Sign Out")}
-            </button>
-          </div>
-        </aside>
+        {/* SIDEBAR DELETED */}
 
         {/* CONTENT AREA */}
-        <main className="settings-content">
+        <main className="settings-content" style={{ width: "100%", maxWidth: "1440px", margin: "0 auto", padding: "24px 24px" }}>
           
           {message.text && (
             <div className={`message-banner ${message.type}`}>
@@ -1231,27 +1193,26 @@ const MyProfile = () => {
           {/* MY INFO SECTION */}
           {activeSection === "my-info" && (
             <div className="content-section">
-              <div className="section-header">
-                <div className="header-left">
-                  <h1 className="section-title">{t("profile.myInfo", "My Info")}</h1>
-                  <span className="section-badge">
-                    <User size={14} />{t("profile.professionalProfile", "Professional Profile")}
-                  </span>
-                </div>
+              <div className="section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                <h1 className="section-title" style={{ margin: 0, textTransform: 'uppercase', fontSize: '24px', lineHeight: '1', display: 'flex', alignItems: 'center' }}>
+                  {t("profile.myInfo", "My Info")}
+                </h1>
                 <a 
                   href={`/profile/${userData.id}`}
                   className="view-profile-btn"
                   target="_blank"
                   rel="noopener noreferrer"
+                  style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '20px', height: 'fit-content' }}
                 >
-
                   <Eye size={16} />{t("profile.viewPublicProfile", "View Public Profile")}
                 </a>
-
               </div>
               
               <div className="profile-card soft-fade-in stagger-1">
-                <div className="profile-cover">
+                <div className="profile-cover" style={{ position: 'relative' }}>
+                  <span className="section-badge" style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 10, background: 'var(--surface, rgba(255,255,255,0.9))', color: 'var(--blue, #3b82f6)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '600', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+                    <User size={14} />{t("profile.professionalProfile", "Professional Profile")}
+                  </span>
                   <img src={userData.coverPhoto} alt="Cover" className="cover-image" />
                   <button className="change-cover-btn" onClick={() => document.getElementById('cover-upload-input').click()} disabled={isLoading}>
                     <Camera size={15} /> {t("profile.edit", "Edit")}
