@@ -10,7 +10,8 @@ export default function Projects({
   minBudget = null,
   maxBudget = null,
   sortBy = "created_at",
-  sortOrder = "DESC"
+  sortOrder = "DESC",
+  onProjectClick // Added this
 }) {
   const [jobs, setJobs] = useState([]);
   const [likedIds, setLikedIds] = useState(() => new Set());
@@ -199,21 +200,38 @@ export default function Projects({
         </div>
       ) : (
         <div className="projects-grid">
-          {mappedJobs.map((item) => (
-            <ProjectCard
-              key={item.id}
-              img={item.img}
-              title={item.title}
-              description={item.description}
-              tags={item.tags}
-              price={item.price}
-              meta={`${item.type} · ${item.experience}`}
-              posted={item.posted}
-              liked={likedIds.has(item.id)}
-              onToggleLike={() => toggleLike(item.id)}
-              onReadMore={() => window.location.href = `/jobs/${item.id}`}
-            />
-          ))}
+          {jobs.map((job) => {
+            // Determine price representation for the card
+            let priceText = "Kelishiladi";
+            if (job.job_type === "fixed" && job.budget_max) {
+              priceText = `${Number(job.budget_max).toLocaleString()} ${job.currency || 'UZS'}`;
+            } else if (job.job_type === "hourly" && job.budget_min) {
+              priceText = `${Number(job.budget_min)}–${Number(job.budget_max)} ${job.currency || 'UZS'}/soat`;
+            }
+
+            let tagsList = [];
+            try {
+              if (typeof job.required_skills === 'string') tagsList = JSON.parse(job.required_skills);
+              else if (Array.isArray(job.required_skills)) tagsList = job.required_skills;
+            } catch (e) {}
+
+            return (
+              <ProjectCard
+                key={job.id}
+                img={job.cover_image_url}
+                title={job.title}
+                description={job.description}
+                tags={tagsList}
+                price={priceText}
+                meta={`${job.job_type === 'hourly' ? "Soatbay" : "Belgilangan"} · O'rta daraja`}
+                posted={job.created_at ? new Date(job.created_at).toLocaleDateString("uz-UZ") : "Yaqinda"}
+                liked={likedIds.has(job.id)}
+                proposalsCount={job.proposals_count}
+                onToggleLike={() => toggleLike(job.id)}
+                onReadMore={() => onProjectClick && onProjectClick(job)}
+              />
+            );
+          })}
         </div>
       )}
 

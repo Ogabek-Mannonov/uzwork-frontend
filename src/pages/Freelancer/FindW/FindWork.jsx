@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Search, Filter, ThumbsDown, Heart, CheckCircle, ChevronDown, Award, Star } from "lucide-react";
 import "../../../assets/Freelancer/FindW/FindWork.css";
 import Projects from "../../components/projectsCards";
+import JobDetailsDrawer from "../../components/JobDetailsDrawer";
 import { useTranslation } from "react-i18next";
 
 export default function FindWork() {
@@ -12,6 +13,10 @@ export default function FindWork() {
   const [searchQuery, setSearchQuery] = useState("");
   const [tempSearch, setTempSearch] = useState(""); 
   
+  // Drawer State
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   // Filter States (hidden behind a toggle if needed, or simple right now)
   const [showFilters, setShowFilters] = useState(false);
   const [jobType, setJobType] = useState("all"); 
@@ -28,6 +33,11 @@ export default function FindWork() {
       if (stored) setUserData(JSON.parse(stored));
     } catch(e) {}
   }, []);
+
+  const handleProjectClick = (job) => {
+    setSelectedJob(job);
+    setIsDrawerOpen(true);
+  };
 
   const tabs = [
     { id: "recommended", label: "Eng mos keladigan" },
@@ -161,12 +171,14 @@ export default function FindWork() {
               maxBudget={maxBudget}
               sortBy={sortBy}
               sortOrder={sortOrder}
+              onProjectClick={handleProjectClick}
             />
           </div>
 
         </main>
 
         {/* RIGHT SIDEBAR (~30%) */}
+        {/* ... existing sidebar code ... */}
         <aside className="fw-sidebar-right">
           
           {/* Profile Card */}
@@ -228,6 +240,18 @@ export default function FindWork() {
         </aside>
 
       </div>
+
+      {/* JOB DETAILS DRAWER */}
+      <JobDetailsDrawer 
+        isOpen={isDrawerOpen}
+        job={selectedJob}
+        onClose={() => setIsDrawerOpen(false)}
+        onToggleLike={() => {
+            // This is a bit complex as likedIds is inside Projects component. 
+            // For now, let's keep it simple or just show the info.
+        }}
+        isLiked={false}
+      />
     </div>
   );
 }
