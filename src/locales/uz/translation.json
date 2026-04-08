@@ -432,5 +432,87 @@
     "otpLabel": "Tasdiqlash kodi (OTP)",
     "verifying": "Tasdiqlanmoqda...",
     "verify": "Tasdiqlash"
+  },
+  "findWork": {
+    "layout": {
+      "bannerSub": "To'g'ridan-to'g'ri shartnomalar",
+      "bannerTitle": "Yangi mijozlarni UzWork ga olib keling va 5% lik past xizmat haqi orqali daromadingizni oshiring.",
+      "bannerBtn": "Shartnoma yaratish",
+      "searchPlaceholder": "Ishlarni qidirish...",
+      "mainTitle": "Siz uchun mos ishlar",
+      "tabs": {
+        "recommended": "Eng mos keladigan",
+        "recent": "Eng yangi",
+        "saved": "Saqlangan ishlar"
+      },
+      "filterToggle": "Filtrlar",
+      "tabsSubtitle": "Sizning qobiliyatingizga mos keladigan loyihalar. Mijozning yollash tarixi asosida tartiblangan.",
+      "filters": {
+        "jobType": "Ish turi",
+        "all": "Barchasi",
+        "fixed": "Belgilangan pul (Fixed)",
+        "hourly": "Soatbay (Hourly)",
+        "budget": "Byudjet",
+        "anyAmount": "Istalgan summa",
+        "upTo100": "$100 gacha",
+        "sort": "Tartiblash",
+        "newestFirst": "Eng yangi birinchi",
+        "highestBudget": "Katta byudjetli",
+        "lowestBudget": "Kichik byudjetli"
+      },
+      "sidebar": {
+        "completeProfile": "Profilingizni to'ldiring",
+        "idVerification": "Shaxsni tasdiqlash",
+        "idVerificationDesc": "Qidiruv natijalarida profilingiz ko'rinishini oshiring va IDV nishoni bilan ko'proq ishlarga ega bo'ling.",
+        "enrollNow": "Ro'yxatdan o'tish",
+        "promoteAds": "Reklama orqali targ'ib qilish",
+        "availabilityBadge": "Mavjudlik nishoni",
+        "off": "O'chirilgan",
+        "boostProfile": "Profilingizni ko'tarish",
+        "statsAnalytics": "Statistika va tahlillar"
+      }
+    },
+    "drawer": {
+      "openNewWindow": "Ishni yangi oynada ochish",
+      "posted": "Joylandi: {{date}}",
+      "worldwide": "Butun dunyo",
+      "projectType": "Loyiha turi",
+      "experienceLevel": "Tajriba darajasi",
+      "budget": "Byudjet",
+      "skillsExpertise": "Ko'nikmalar va Tajriba",
+      "activityOnJob": "Ushbu ishda faollik",
+      "stats": {
+        "proposals": "Takliflar",
+        "interviewing": "Suhbatdagilar",
+        "invitesSent": "Taklif yuborildi"
+      },
+      "applyNow": "Hozir murojaat qilish",
+      "saveJob": "Saqlash",
+      "saved": "Saqlandi",
+      "flagInappropriate": "Nomaqbul deb belgilash",
+      "aboutClient": "Mijoz haqida",
+      "paymentVerified": "To'lov usuli tasdiqlangan",
+      "reviews": "ta sharhdan {{rating}}",
+      "memberSince": "A'zo bo'lgan sana: {{date}}",
+      "recently": "Yaqinda",
+      "jobsPosted": "ish joylangan",
+      "hireRate": "yollash darajasi",
+      "totalSpent": "umumiy sarf",
+      "hires": "yollash"
+    },
+    "projectCard": {
+      "paymentVerified": "To'lov tasdiqlangan",
+      "fixed": "Belgilangan",
+      "hourly": "Soatbay",
+      "intermediate": "O'rta daraja",
+      "recently": "Yaqinda",
+      "proposalsCount": "Takliflar: {{count}}"
+    },
+    "projectsList": {
+      "noProjects": "Loyihalar topilmadi. Boshqa kalit so'z yoki tabni sinab ko'ring.",
+      "loading": "Ma'lumotlar yuklanmoqda...",
+      "prev": "Oldingi",
+      "next": "Keyingi"
+    }
   }
 }

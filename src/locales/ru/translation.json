@@ -432,5 +432,87 @@
     "otpLabel": "Код подтверждения (OTP)",
     "verifying": "Подтверждение...",
     "verify": "Подтвердить"
+  },
+  "findWork": {
+    "layout": {
+      "bannerSub": "Прямые контракты",
+      "bannerTitle": "Приведите новых клиентов в UzWork и увеличьте свой доход за счет низкой комиссии 5%.",
+      "bannerBtn": "Создать контракт",
+      "searchPlaceholder": "Поиск работы...",
+      "mainTitle": "Подходящие вакансии",
+      "tabs": {
+        "recommended": "Рекомендованные",
+        "recent": "Самые свежие",
+        "saved": "Сохранённые"
+      },
+      "filterToggle": "Фильтры",
+      "tabsSubtitle": "Проекты, соответствующие вашим навыкам. Отсортированы по истории найма клиента.",
+      "filters": {
+        "jobType": "Тип работы",
+        "all": "Все",
+        "fixed": "Фикс. цена (Fixed)",
+        "hourly": "Почасовая (Hourly)",
+        "budget": "Бюджет",
+        "anyAmount": "Любая сумма",
+        "upTo100": "До $100",
+        "sort": "Сортировка",
+        "newestFirst": "Сначала новые",
+        "highestBudget": "Высокий бюджет",
+        "lowestBudget": "Низкий бюджет"
+      },
+      "sidebar": {
+        "completeProfile": "Заполните профиль",
+        "idVerification": "Подтверждение личности",
+        "idVerificationDesc": "Повысьте видимость профиля в результатах поиска и получите больше заказов со значком IDV.",
+        "enrollNow": "Записаться",
+        "promoteAds": "Продвижение через рекламу",
+        "availabilityBadge": "Значок доступности",
+        "off": "Выкл",
+        "boostProfile": "Поднять профиль",
+        "statsAnalytics": "Статистика и аналитика"
+      }
+    },
+    "drawer": {
+      "openNewWindow": "Открыть в новом окне",
+      "posted": "Опубликовано: {{date}}",
+      "worldwide": "Весь мир",
+      "projectType": "Тип проекта",
+      "experienceLevel": "Уровень опыта",
+      "budget": "Бюджет",
+      "skillsExpertise": "Навыки и экспертиза",
+      "activityOnJob": "Активность по вакансии",
+      "stats": {
+        "proposals": "Предложения",
+        "interviewing": "Собеседуются",
+        "invitesSent": "Отправлено приглашений"
+      },
+      "applyNow": "Подать заявку",
+      "saveJob": "Сохранить",
+      "saved": "Сохранено",
+      "flagInappropriate": "Пожаловаться",
+      "aboutClient": "О клиенте",
+      "paymentVerified": "Способ оплаты подтверждён",
+      "reviews": "из {{rating}} отзывов",
+      "memberSince": "С нами с: {{date}}",
+      "recently": "Недавно",
+      "jobsPosted": "вакансий опубликовано",
+      "hireRate": "уровень найма",
+      "totalSpent": "всего потрачено",
+      "hires": "наймов"
+    },
+    "projectCard": {
+      "paymentVerified": "Оплата подтверждена",
+      "fixed": "Фикс. цена",
+      "hourly": "Почасовая",
+      "intermediate": "Средний уровень",
+      "recently": "Недавно",
+      "proposalsCount": "Предложений: {{count}}"
+    },
+    "projectsList": {
+      "noProjects": "Проекты не найдены. Попробуйте другое ключевое слово или вкладку.",
+      "loading": "Загрузка данных...",
+      "prev": "Назад",
+      "next": "Вперед"
+    }
   }
 }

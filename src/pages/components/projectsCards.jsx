@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import ProjectCard from "../components/projectCard";
 import { getJobs, getRecommendedJobs, getSavedJobs, saveJob } from "../../api/jobs";
 import "../../assets/style/projectsCards.css";
@@ -13,6 +14,7 @@ export default function Projects({
   sortOrder = "DESC",
   onProjectClick // Added this
 }) {
+  const { t } = useTranslation();
   const [jobs, setJobs] = useState([]);
   const [likedIds, setLikedIds] = useState(() => new Set());
   const [loading, setLoading] = useState(true);
@@ -139,9 +141,9 @@ export default function Projects({
   if (loading && page === 1) {
     return (
       <div className="projects-wrap">
-        <div style={{ textAlign: "center", padding: 40, color: "#888", fontSize: "1.1rem" }}>
+        <div style={{ textAlign: "center", padding: 40, color: "var(--muted)", fontSize: "1.1rem" }}>
           <div className="spinner"></div> 
-          Ma'lumotlar yuklanmoqda...
+          {t("findWork.projectsList.loading")}
         </div>
       </div>
     );
@@ -150,7 +152,7 @@ export default function Projects({
   if (error) {
     return (
       <div className="projects-wrap">
-        <div style={{ textAlign: "center", padding: 40, color: "#dc2626", background: "#fef2f2", borderRadius: "12px" }}>
+        <div style={{ textAlign: "center", padding: 40, color: "#dc2626", background: "var(--surface-2)", borderRadius: "12px" }}>
           {error}
         </div>
       </div>
@@ -160,7 +162,7 @@ export default function Projects({
   // Backend'dan kelgan ma'lumotni ProjectCard formatiga moslashtirish
   const mappedJobs = jobs.map((job) => {
     // Determine price representation
-    let priceText = "Kelishiladi";
+    let priceText = t("findWork.projectCard.recently");
     if (job.job_type === "fixed" && job.budget_max) {
       priceText = `${Number(job.budget_max).toLocaleString()} ${job.currency || 'UZS'}`;
     } else if (job.job_type === "hourly" && job.budget_min) {
@@ -186,23 +188,23 @@ export default function Projects({
       description: job.description,
       tags: tagsList,
       price: priceText,
-      type: job.job_type === 'hourly' ? "Soatbay" : "Belgilangan",
-      experience: "O'rta daraja", // experience_level is not in DB yet
-      posted: job.created_at ? new Date(job.created_at).toLocaleDateString("uz-UZ") : "Yaqinda joylandi",
+      type: job.job_type === 'hourly' ? t("findWork.projectCard.hourly") : t("findWork.projectCard.fixed"),
+      experience: t("findWork.projectCard.intermediate"), // experience_level is not in DB yet
+      posted: job.created_at ? new Date(job.created_at).toLocaleDateString() : t("findWork.projectCard.recently"),
     };
   });
 
   return (
     <div className="projects-wrap">
       {mappedJobs.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 60, color: "#6b7280", background: "#f9fafb", borderRadius: "16px", border: "1px dashed #d1d5db" }}>
-          Loyihalar topilmadi. Boshqa kalit so'z yoki tabni sinab ko'ring.
+        <div style={{ textAlign: "center", padding: 60, color: "var(--muted)", background: "var(--surface-2)", borderRadius: "16px", border: "1px dashed var(--border)" }}>
+          {t("findWork.projectsList.noProjects")}
         </div>
       ) : (
         <div className="projects-grid">
           {jobs.map((job) => {
             // Determine price representation for the card
-            let priceText = "Kelishiladi";
+            let priceText = t("findWork.projectCard.recently");
             if (job.job_type === "fixed" && job.budget_max) {
               priceText = `${Number(job.budget_max).toLocaleString()} ${job.currency || 'UZS'}`;
             } else if (job.job_type === "hourly" && job.budget_min) {
@@ -223,8 +225,8 @@ export default function Projects({
                 description={job.description}
                 tags={tagsList}
                 price={priceText}
-                meta={`${job.job_type === 'hourly' ? "Soatbay" : "Belgilangan"} · O'rta daraja`}
-                posted={job.created_at ? new Date(job.created_at).toLocaleDateString("uz-UZ") : "Yaqinda"}
+                meta={`${job.job_type === 'hourly' ? t("findWork.projectCard.hourly") : t("findWork.projectCard.fixed")} · ${t("findWork.projectCard.intermediate")}`}
+                posted={job.created_at ? new Date(job.created_at).toLocaleDateString() : t("findWork.projectCard.recently")}
                 liked={likedIds.has(job.id)}
                 proposalsCount={job.proposals_count}
                 onToggleLike={() => toggleLike(job.id)}
@@ -238,7 +240,7 @@ export default function Projects({
       {totalPages > 1 && (
         <div className="pg-wrap" style={{ marginTop: "2rem" }}>
           <button className="pg-nav" onClick={goPrev} disabled={page === 1} type="button">
-            ‹ Oldingi
+            ‹ {t("findWork.projectsList.prev")}
           </button>
           <div className="pg-pages">
             {pageItems.map((p) => {
@@ -256,7 +258,7 @@ export default function Projects({
             })}
           </div>
           <button className="pg-nav" onClick={goNext} disabled={page === totalPages} type="button">
-            Keyingi ›
+            {t("findWork.projectsList.next")} ›
           </button>
         </div>
       )}

@@ -1,4 +1,5 @@
-import { ThumbsDown, Heart, Maximize2 } from "lucide-react";
+import { Heart, CheckCircle, ThumbsDown, MessageSquare } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import "../../assets/style/projectCard.css";
 import "../../assets/style/theme.css"
 
@@ -15,9 +16,12 @@ export default function ProjectCard({
   proposalsCount = "0",
   onReadMore,
   onToggleLike,
-  onDislike, // Added as a prop
+  onToggleDislike,
   liked = false,
+  disliked = false,
 }) {
+  const { t } = useTranslation();
+
   return (
     <article className="pc-card" onClick={onReadMore}>
       <div className="pc-top">
@@ -25,12 +29,12 @@ export default function ProjectCard({
 
         <div className="pc-actions">
           <button 
-            className="pc-iconBtn pc-dislike" 
+            className={`pc-iconBtn pc-dislike ${disliked ? "is-disliked" : ""}`} 
             type="button" 
             aria-label="Dislike" 
             onClick={(e) => {
               e.stopPropagation();
-              onDislike && onDislike();
+              onToggleDislike && onToggleDislike();
             }}
           >
             <ThumbsDown size={20} />
@@ -68,9 +72,8 @@ export default function ProjectCard({
       <div className="pc-bottom">
         <div className="pc-bottomLeft">
           {paymentVerified && (
-            <span className="pc-badge">
-              <span className="pc-badgeDot">✔</span>
-              To'lov tasdiqlangan
+            <span className="pc-payment-verified">
+              <CheckCircle size={14} fill="#2563eb" color="#fff" /> {t("findWork.projectCard.paymentVerified")}
             </span>
           )}
 
@@ -82,7 +85,9 @@ export default function ProjectCard({
         </div>
       </div>
 
-      <div className="pc-footnote">Takliflar: {proposalsCount}</div>
+      <div className="pc-footnote">
+        {t("findWork.projectCard.proposalsCount", { count: proposalsCount || 0 })}
+      </div>
     </article>
   );
 }

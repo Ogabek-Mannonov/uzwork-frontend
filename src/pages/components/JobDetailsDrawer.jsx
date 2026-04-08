@@ -1,63 +1,58 @@
 import React, { useEffect, useState } from "react";
-import { X, ArrowLeft, ExternalLink, Heart, Flag, Share2, MapPin, Calendar, Clock, DollarSign, Award, CheckCircle2, Star } from "lucide-react";
+import { X, ArrowLeft, ExternalLink, Heart, Flag, MapPin, Clock, DollarSign, Award, CheckCircle2, Star } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import "../../assets/style/JobDetailsDrawer.css";
 
 export default function JobDetailsDrawer({ job, isOpen, onClose, onToggleLike, isLiked }) {
+  const { t } = useTranslation();
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      // Small delay to ensure overlay starts first for better feel
       const timer = setTimeout(() => setIsAnimating(true), 10);
       return () => clearTimeout(timer);
     } else {
       const timer = setTimeout(() => {
         setIsAnimating(false);
         document.body.style.overflow = "unset";
-      }, 400); // Now matches the 0.4s CSS transition
+      }, 400);
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
   if (!isOpen && !isAnimating) return null;
+  if (!job) return null;
 
-  // Formatting skills
   let skills = [];
   try {
     if (typeof job?.required_skills === 'string') skills = JSON.parse(job.required_skills);
     else if (Array.isArray(job?.required_skills)) skills = job.required_skills;
   } catch (e) {}
 
-  const budgetText = job?.job_type === "fixed" 
-    ? `${Number(job?.budget_max).toLocaleString()} ${job?.currency || 'UZS'}`
-    : `${Number(job?.budget_min)}–${Number(job?.budget_max)} ${job?.currency || 'UZS'}/soat`;
-
   return (
     <div className={`jd-overlay ${isOpen ? "is-open" : ""}`} onClick={onClose}>
       <div className={`jd-drawer ${isOpen ? "is-open" : ""}`} onClick={(e) => e.stopPropagation()}>
         
-        {/* Header Navigation */}
         <div className="jd-header">
           <button className="jd-back-btn" onClick={onClose}>
             <ArrowLeft size={24} />
           </button>
           <div className="jd-header-actions">
-            <a href={`/jobs/${job?.id}`} target="_blank" rel="noreferrer" className="jd-external-link">
-              <ExternalLink size={18} /> Open job in a new window
+            <a href={`/job/${job.id}`} className="jd-external-link">
+              <ExternalLink size={18} /> {t("findWork.drawer.openNewWindow")}
             </a>
           </div>
         </div>
 
         <div className="jd-content">
-          {/* Main Info Column */}
           <div className="jd-main-info">
             <h1 className="jd-title">{job?.title}</h1>
             
             <div className="jd-meta-row">
-              <span className="jd-category">Design & Creative</span> 
-              <span className="jd-posted">Posted {job?.created_at ? new Date(job.created_at).toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' }) : "Recently"}</span>
-              <span className="jd-location"><MapPin size={14} /> Worldwide</span>
+              <span className="jd-category">{t("info.categories.design")}</span> 
+              <span className="jd-posted">{t("findWork.drawer.posted", { date: job?.created_at ? new Date(job.created_at).toLocaleDateString() : t("findWork.drawer.recently") })}</span>
+              <span className="jd-location"><MapPin size={14} /> {t("findWork.drawer.worldwide")}</span>
             </div>
 
             <hr className="jd-divider" />
@@ -72,8 +67,8 @@ export default function JobDetailsDrawer({ job, isOpen, onClose, onToggleLike, i
               <div className="jd-detail-item">
                 <Clock size={20} />
                 <div>
-                  <strong>{job?.job_type === 'hourly' ? 'Hourly' : 'Fixed-price'}</strong>
-                  <span>Project Type</span>
+                  <span>{t("findWork.drawer.projectType")}</span>
+                  <strong>{job.job_type === "fixed" ? t("findWork.projectCard.fixed") : t("findWork.projectCard.hourly")}</strong>
                 </div>
               </div>
               <div className="jd-detail-item">
@@ -86,8 +81,8 @@ export default function JobDetailsDrawer({ job, isOpen, onClose, onToggleLike, i
               <div className="jd-detail-item">
                 <DollarSign size={20} />
                 <div>
-                  <strong>{budgetText}</strong>
-                  <span>Budget</span>
+                  <span>{t("findWork.drawer.budget")}</span>
+                  <strong>{job.budget_max ? `${Number(job.budget_max).toLocaleString()} ${job.currency || 'UZS'}` : t("findWork.projectCard.recently")}</strong>
                 </div>
               </div>
             </div>
@@ -95,7 +90,7 @@ export default function JobDetailsDrawer({ job, isOpen, onClose, onToggleLike, i
             <hr className="jd-divider" />
 
             <div className="jd-skills-section">
-              <h3>Skills and Expertise</h3>
+              <h3>{t("findWork.drawer.skillsExpertise")}</h3>
               <div className="jd-tags">
                 {skills.map((skill, index) => (
                   <span key={index} className="jd-tag">{skill}</span>
@@ -105,38 +100,34 @@ export default function JobDetailsDrawer({ job, isOpen, onClose, onToggleLike, i
 
             <hr className="jd-divider" />
             
-            <div className="jd-proposals-stat">
-                <strong>Activity on this job</strong>
-                <div className="jd-stat-line">Proposals: <span>{job?.proposals_count || 0}</span></div>
-                <div className="jd-stat-line">Interviewing: <span>0</span></div>
-                <div className="jd-stat-line">Invites sent: <span>0</span></div>
+            <div className="jd-activity-section">
+                <h3>{t("findWork.drawer.activityOnJob")}</h3>
+                <div className="jd-proposals-stat">
+                  {t("findWork.drawer.stats.proposals")}: <strong>{job.proposals_count || 0}</strong>
+                </div>
+                <div className="jd-stat-line">{t("findWork.drawer.stats.interviewing")}: <span>0</span></div>
+                <div className="jd-stat-line">{t("findWork.drawer.stats.invitesSent")}: <span>0</span></div>
             </div>
           </div>
 
-          {/* Right Sidebar Actions */}
           <div className="jd-sidebar">
-            <button className="jd-btn-apply">Apply Now</button>
+            <button className="jd-btn-apply">{t("findWork.drawer.applyNow")}</button>
             <button className={`jd-btn-save ${isLiked ? "active" : ""}`} onClick={onToggleLike}>
               <Heart size={18} fill={isLiked ? "currentColor" : "none"} /> 
-              {isLiked ? "Saved" : "Save Job"}
+              {isLiked ? t("findWork.drawer.saved") : t("findWork.drawer.saveJob")}
             </button>
             
-            <button className="jd-btn-flag"><Flag size={14} /> Flag as inappropriate</button>
+            <button className="jd-btn-flag"><Flag size={14} /> {t("findWork.drawer.flagInappropriate")}</button>
 
             <div className="jd-client-info">
-              <h3>About the client</h3>
-              <div className="jd-client-stat">
-                <CheckCircle2 size={16} color="#2563eb" /> 
-                <strong>Payment method verified</strong>
+              <h3>{t("findWork.drawer.aboutClient")}</h3>
+              <div className="jd-stat-line" style={{ marginTop: "12px", color: "var(--brand)" }}>
+                <CheckCircle2 size={16} /> 
+                <strong>{t("findWork.drawer.paymentVerified")}</strong>
               </div>
               <div className="jd-client-rating">
                 <div className="jd-stars">
-                  <Star size={14} fill="#f59e0b" color="#f59e0b" />
-                  <Star size={14} fill="#f59e0b" color="#f59e0b" />
-                  <Star size={14} fill="#f59e0b" color="#f59e0b" />
-                  <Star size={14} fill="#f59e0b" color="#f59e0b" />
-                  <Star size={14} fill="#f59e0b" color="#f59e0b" />
-                  <span>4.95 of 50 reviews</span>
+                  ★★★★★ <span>4.95 {t("findWork.drawer.reviews", { count: 50, rating: "" })}</span>
                 </div>
               </div>
               
@@ -146,16 +137,16 @@ export default function JobDetailsDrawer({ job, isOpen, onClose, onToggleLike, i
                     <span>Tashkent 10:45 PM</span>
                 </div>
                 <div className="jd-meta-item">
-                    <strong>12 jobs posted</strong>
-                    <span>80% hire rate, 1 open job</span>
+                    <strong>12 {t("findWork.drawer.jobsPosted")}</strong>
+                    <span>80% {t("findWork.drawer.hireRate")}, 1 open job</span>
                 </div>
                 <div className="jd-meta-item">
-                    <strong>$5K+ total spent</strong>
-                    <span>11 hires, 0 active</span>
+                    <strong>$5K+ {t("findWork.drawer.totalSpent")}</strong>
+                    <span>11 {t("findWork.drawer.hires")}, 0 active</span>
                 </div>
               </div>
               
-              <p className="jd-member-since">Member since Jan 15, 2023</p>
+              <p className="jd-member-since">{t("findWork.drawer.memberSince", { date: "Jan 15, 2023" })}</p>
             </div>
           </div>
         </div>

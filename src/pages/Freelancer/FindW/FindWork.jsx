@@ -40,9 +40,9 @@ export default function FindWork() {
   };
 
   const tabs = [
-    { id: "recommended", label: "Eng mos keladigan" },
-    { id: "recent", label: "Eng yangi" },
-    { id: "saved", label: "Saqlangan ishlar" },
+    { id: "recommended", label: t("findWork.layout.tabs.recommended") },
+    { id: "recent", label: t("findWork.layout.tabs.recent") },
+    { id: "saved", label: t("findWork.layout.tabs.saved") },
   ];
 
   const handleSearchSubmit = (e) => {
@@ -71,9 +71,9 @@ export default function FindWork() {
           {/* BANNER */}
           <div className="fw-banner">
             <div className="fw-banner-content">
-              <h3>To'g'ridan-to'g'ri shartnomalar</h3>
-              <h2>Yangi mijozlarni UzWork ga olib keling va 5% lik past xizmat haqi orqali daromadingizni oshiring.</h2>
-              <button className="fw-banner-btn">Shartnoma yaratish</button>
+              <h3>{t("findWork.layout.bannerSub")}</h3>
+              <h2>{t("findWork.layout.bannerTitle")}</h2>
+              <button className="fw-banner-btn">{t("findWork.layout.bannerBtn")}</button>
             </div>
             <div className="fw-banner-graphics">
               {/* Abstract document / graphics representation */}
@@ -86,7 +86,7 @@ export default function FindWork() {
             <Search className="fw-search-icon-inside" size={20} />
             <input 
               type="text" 
-              placeholder="Ishlarni qidirish..." 
+              placeholder={t("findWork.layout.searchPlaceholder")} 
               value={tempSearch}
               onChange={(e) => setTempSearch(e.target.value)}
               className="fw-search-input-main"
@@ -95,7 +95,7 @@ export default function FindWork() {
 
           {/* TITLE & TABS ROW */}
           <div className="fw-feed-header">
-            <h1 className="fw-main-title">Siz uchun mos ishlar</h1>
+            <h1 className="fw-main-title">{t("findWork.layout.mainTitle")}</h1>
             
             <div className="fw-tabs-and-filters">
               <div className="fw-tabs-row">
@@ -114,13 +114,12 @@ export default function FindWork() {
                 className={`fw-filter-toggle ${showFilters ? "active" : ""}`}
                 onClick={() => setShowFilters(!showFilters)}
               >
-                <Filter size={18} /> Filtrlar
+                <Filter size={18} /> {t("findWork.layout.filterToggle")}
               </button>
             </div>
 
             <p className="fw-tabs-subtitle">
-              Sizning qobiliyatingizga mos keladigan loyihalar. 
-              Mijozning yollash tarixi asosida tartiblangan.
+              {t("findWork.layout.tabsSubtitle")}
             </p>
           </div>
 
@@ -128,34 +127,34 @@ export default function FindWork() {
           {showFilters && (
             <div className="fw-expandable-filters">
               <div className="fw-filter-box">
-                <span className="fw-filter-label">Ish turi:</span>
+                <span className="fw-filter-label">{t("findWork.layout.filters.jobType")}:</span>
                 <select value={jobType} onChange={(e) => setJobType(e.target.value)}>
-                  <option value="all">Barchasi</option>
-                  <option value="fixed">Belgilangan pul (Fixed)</option>
-                  <option value="hourly">Soatbay (Hourly)</option>
+                  <option value="all">{t("findWork.layout.filters.all")}</option>
+                  <option value="fixed">{t("findWork.layout.filters.fixed")}</option>
+                  <option value="hourly">{t("findWork.layout.filters.hourly")}</option>
                 </select>
               </div>
 
               <div className="fw-filter-box">
-                <span className="fw-filter-label">Byudjet:</span>
+                <span className="fw-filter-label">{t("findWork.layout.filters.budget")}:</span>
                 <select value={budgetRange} onChange={(e) => setBudgetRange(e.target.value)}>
-                  <option value="all">Istalgan summa</option>
-                  <option value="0-100">$100 gacha</option>
+                  <option value="all">{t("findWork.layout.filters.anyAmount")}</option>
+                  <option value="0-100">{t("findWork.layout.filters.upTo100")}</option>
                   <option value="100-500">$100 - $500</option>
                   <option value="500-1000">$500 - $1K</option>
-                  <option value="1000+">$1K dan yuqori</option>
+                  <option value="1000+">$1K +</option>
                 </select>
               </div>
 
               <div className="fw-filter-box">
-                <span className="fw-filter-label">Tartiblash:</span>
+                <span className="fw-filter-label">{t("findWork.layout.filters.sort")}:</span>
                 <select value={`${sortBy}|${sortOrder}`} onChange={(e) => {
                   const [sb, so] = e.target.value.split('|'); 
                   setSortBy(sb); setSortOrder(so);
                 }}>
-                  <option value="created_at|DESC">Eng yangi birinchi</option>
-                  <option value="budget_min|DESC">Katta byudjetli</option>
-                  <option value="budget_min|ASC">Kichik byudjetli</option>
+                  <option value="created_at|DESC">{t("findWork.layout.filters.newestFirst")}</option>
+                  <option value="budget_min|DESC">{t("findWork.layout.filters.highestBudget")}</option>
+                  <option value="budget_min|ASC">{t("findWork.layout.filters.lowestBudget")}</option>
                 </select>
               </div>
             </div>
@@ -193,7 +192,7 @@ export default function FindWork() {
             
             <div className="fw-profile-progress">
               <div className="fw-progress-text">
-                <a href="/profile">Profilingizni to'ldiring</a>
+                <a href="/profile">{t("findWork.layout.sidebar.completeProfile")}</a>
                 <span className="fw-progress-pct">70%</span>
               </div>
               <div className="fw-progress-bar-bg">
@@ -204,37 +203,37 @@ export default function FindWork() {
 
           {/* Identity Verification */}
           <div className="fw-card fw-id-card">
-            <h3 className="fw-card-title"><Award size={20} /> Shaxsni tasdiqlash</h3>
+            <h3 className="fw-card-title"><Award size={20} /> {t("findWork.layout.sidebar.idVerification")}</h3>
             <p className="fw-card-desc">
-              Qidiruv natijalarida profilingiz ko'rinishini oshiring va IDV nishoni bilan ko'proq ishlarga ega bo'ling.
+              {t("findWork.layout.sidebar.idVerificationDesc")}
             </p>
-            <a href="#" className="fw-card-link">Ro'yxatdan o'tish</a>
+            <a href="#" className="fw-card-link">{t("findWork.layout.sidebar.enrollNow")}</a>
           </div>
 
           {/* Promote with ads */}
           <div className="fw-card fw-ads-card">
             <div className="fw-card-header-flex">
-              <h3 className="fw-card-title">Reklama orqali targ'ib qilish</h3>
+              <h3 className="fw-card-title">{t("findWork.layout.sidebar.promoteAds")}</h3>
               <ChevronDown size={20} color="#6b7280" />
             </div>
 
             <div className="fw-ad-item">
               <div className="fw-ad-text">
-                <span>Mavjudlik nishoni (Available badge)</span>
-                <small>O'chirilgan</small>
+                <span>{t("findWork.layout.sidebar.availabilityBadge")}</span>
+                <small>{t("findWork.layout.sidebar.off")}</small>
               </div>
               <button className="fw-icon-btn"><Star size={18} /></button>
             </div>
 
             <div className="fw-ad-item">
               <div className="fw-ad-text">
-                <span>Profilingizni ko'tarish</span>
-                <small>O'chirilgan</small>
+                <span>{t("findWork.layout.sidebar.boostProfile")}</span>
+                <small>{t("findWork.layout.sidebar.off")}</small>
               </div>
               <button className="fw-icon-btn"><Star size={18} /></button>
             </div>
 
-            <a href="#" className="fw-card-link mt-8">Statistika va tahlillar</a>
+            <a href="#" className="fw-card-link mt-8">{t("findWork.layout.sidebar.statsAnalytics")}</a>
           </div>
 
         </aside>

@@ -432,5 +432,87 @@
     "otpLabel": "Verification code (OTP)",
     "verifying": "Verifying...",
     "verify": "Verify"
+  },
+  "findWork": {
+    "layout": {
+      "bannerSub": "Direct Contracts",
+      "bannerTitle": "Bring new clients to UzWork and increase your earnings with a low 5% service fee.",
+      "bannerBtn": "Create Contract",
+      "searchPlaceholder": "Search for jobs...",
+      "mainTitle": "Jobs you might like",
+      "tabs": {
+        "recommended": "Recommended",
+        "recent": "Most Recent",
+        "saved": "Saved Jobs"
+      },
+      "filterToggle": "Filters",
+      "tabsSubtitle": "Projects that match your skills. Sorted based on client's hire history.",
+      "filters": {
+        "jobType": "Job Type",
+        "all": "All",
+        "fixed": "Fixed-price",
+        "hourly": "Hourly",
+        "budget": "Budget",
+        "anyAmount": "Any amount",
+        "upTo100": "Up to $100",
+        "sort": "Sort by",
+        "newestFirst": "Newest first",
+        "highestBudget": "Highest budget",
+        "lowestBudget": "Lowest budget"
+      },
+      "sidebar": {
+        "completeProfile": "Complete your profile",
+        "idVerification": "Identity Verification",
+        "idVerificationDesc": "Boost your profile visibility in search results and win more work with an IDV badge.",
+        "enrollNow": "Enroll Now",
+        "promoteAds": "Promote with ads",
+        "availabilityBadge": "Availability badge",
+        "off": "Off",
+        "boostProfile": "Boost your profile",
+        "statsAnalytics": "Stats & Analytics"
+      }
+    },
+    "drawer": {
+      "openNewWindow": "Open job in a new window",
+      "posted": "Posted on: {{date}}",
+      "worldwide": "Worldwide",
+      "projectType": "Project Type",
+      "experienceLevel": "Experience Level",
+      "budget": "Budget",
+      "skillsExpertise": "Skills and Expertise",
+      "activityOnJob": "Activity on this job",
+      "stats": {
+        "proposals": "Proposals",
+        "interviewing": "Interviewing",
+        "invitesSent": "Invites sent"
+      },
+      "applyNow": "Apply Now",
+      "saveJob": "Save",
+      "saved": "Saved",
+      "flagInappropriate": "Flag as inappropriate",
+      "aboutClient": "About the client",
+      "paymentVerified": "Payment method verified",
+      "reviews": "of {{rating}} reviews",
+      "memberSince": "Member since: {{date}}",
+      "recently": "Recently",
+      "jobsPosted": "jobs posted",
+      "hireRate": "hire rate",
+      "totalSpent": "total spent",
+      "hires": "hires"
+    },
+    "projectCard": {
+      "paymentVerified": "Payment verified",
+      "fixed": "Fixed-price",
+      "hourly": "Hourly",
+      "intermediate": "Intermediate",
+      "recently": "Recently",
+      "proposalsCount": "Proposals: {{count}}"
+    },
+    "projectsList": {
+      "noProjects": "No projects found. Try a different keyword or tab.",
+      "loading": "Loading data...",
+      "prev": "Prev",
+      "next": "Next"
+    }
   }
 }
