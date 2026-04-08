@@ -1,3 +1,4 @@
+import { ThumbsDown, Heart, Maximize2 } from "lucide-react";
 import "../../assets/style/projectCard.css";
 import "../../assets/style/theme.css"
 
@@ -14,25 +15,37 @@ export default function ProjectCard({
   proposalsCount = "0",
   onReadMore,
   onToggleLike,
+  onDislike, // Added as a prop
   liked = false,
 }) {
   return (
-    <article className="pc-card">
+    <article className="pc-card" onClick={onReadMore}>
       <div className="pc-top">
         <span className="pc-posted">{posted}</span>
 
         <div className="pc-actions">
-          <button className="pc-iconBtn" type="button" aria-label="Action">
-            ⛶
+          <button 
+            className="pc-iconBtn pc-dislike" 
+            type="button" 
+            aria-label="Dislike" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onDislike && onDislike();
+            }}
+          >
+            <ThumbsDown size={20} />
           </button>
 
           <button
             className={`pc-iconBtn pc-heart ${liked ? "is-liked" : ""}`}
-            onClick={onToggleLike}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleLike();
+            }}
             aria-label="Like"
             type="button"
           >
-            ♥
+            <Heart size={20} fill={liked ? "currentColor" : "none"} />
           </button>
         </div>
       </div>
@@ -67,10 +80,6 @@ export default function ProjectCard({
 
           <span className="pc-loc">{location}</span>
         </div>
-
-        <button className="pc-btn" onClick={onReadMore} type="button">
-          Batafsil
-        </button>
       </div>
 
       <div className="pc-footnote">Takliflar: {proposalsCount}</div>

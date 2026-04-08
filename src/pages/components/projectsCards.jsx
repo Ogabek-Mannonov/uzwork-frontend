@@ -3,7 +3,15 @@ import ProjectCard from "../components/projectCard";
 import { getJobs, getRecommendedJobs, getSavedJobs, saveJob } from "../../api/jobs";
 import "../../assets/style/projectsCards.css";
 
-export default function Projects({ activeTab = "recommended", searchQuery = "" }) {
+export default function Projects({ 
+  activeTab = "recommended", 
+  searchQuery = "",
+  jobType = null,
+  minBudget = null,
+  maxBudget = null,
+  sortBy = "created_at",
+  sortOrder = "DESC"
+}) {
   const [jobs, setJobs] = useState([]);
   const [likedIds, setLikedIds] = useState(() => new Set());
   const [loading, setLoading] = useState(true);
@@ -13,10 +21,10 @@ export default function Projects({ activeTab = "recommended", searchQuery = "" }
 
   const PAGE_SIZE = 20;
 
-  // Reset page on tab or search change
+  // Reset page when any filter config changes
   useEffect(() => {
     setPage(1);
-  }, [activeTab, searchQuery]);
+  }, [activeTab, searchQuery, jobType, minBudget, maxBudget, sortBy, sortOrder]);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -25,11 +33,21 @@ export default function Projects({ activeTab = "recommended", searchQuery = "" }
       
       let res;
       try {
-        const params = { page, limit: PAGE_SIZE, search: searchQuery };
+        const params = { 
+          page, 
+          limit: PAGE_SIZE, 
+          search: searchQuery || undefined,
+          job_type: jobType || undefined,
+          min_budget: minBudget !== null ? minBudget : undefined,
+          max_budget: maxBudget !== null ? maxBudget : undefined,
+          sort_by: sortBy,
+          order: sortOrder
+        };
         
         if (activeTab === "recommended") {
           res = await getRecommendedJobs(params);
         } else if (activeTab === "saved") {
+          // If the backend 501s, we should mock it or catch it, but we'll try the API first
           res = await getSavedJobs(params);
         } else {
           res = await getJobs(params);
@@ -38,13 +56,14 @@ export default function Projects({ activeTab = "recommended", searchQuery = "" }
         if (res?.success === false) {
           setError(res?.message || "Ma'lumotlarni yuklashda xato");
         } else {
-          const data = res?.data || res?.projects || res || [];
+          // res.data.projects is the new structure from /api/projects
+          const data = res?.data?.projects || res?.data || res?.projects || res || [];
           const jobsList = Array.isArray(data) ? data : [];
           setJobs(jobsList);
           
-          if (res?.total) setTotalPages(Math.ceil(res.total / PAGE_SIZE));
-          if (res?.pages) setTotalPages(res.pages);
-          if (res?.pagination?.total_pages) setTotalPages(res.pagination.total_pages);
+          let totalItems = res?.data?.pagination?.total || res?.total || 0;
+          let calculatedPages = res?.data?.pagination?.totalPages || res?.pages || Math.ceil(totalItems / PAGE_SIZE) || 1;
+          setTotalPages(calculatedPages);
           
           // Initialize liked state appropriately
           const currentLikes = new Set(likedIds);
@@ -54,6 +73,13 @@ export default function Projects({ activeTab = "recommended", searchQuery = "" }
                 currentLikes.add(job.id);
              }
           });
+          
+          // Agar bazada saved jobs qo'shilmagan bo'lsa local storage dan tortib koramiz (mock)
+          if(activeTab === "saved" && res?.success === false && res?.message?.includes("501")) {
+            // backend doesn't support it yet
+            // let's do nothing for now, it shows the error
+          }
+
           setLikedIds(currentLikes);
         }
       } catch (err) {
@@ -131,21 +157,39 @@ export default function Projects({ activeTab = "recommended", searchQuery = "" }
   }
 
   // Backend'dan kelgan ma'lumotni ProjectCard formatiga moslashtirish
-  const mappedJobs = jobs.map((job) => ({
-    id: job.id,
-    img: job.cover_image_url || null,
-    title: job.title,
-    description: job.description,
-    tags: job.skills || [],
-    price: job.budget_amount
-      ? `${job.budget_amount.toLocaleString()} UZS` // Statically mapping it to UZS since it's an Uzbek platform
-      : job.hourly_rate_min
-      ? `${job.hourly_rate_min}–${job.hourly_rate_max} UZS/soat`
-      : "Kelishiladi",
-    type: job.type || "Fixed",
-    experience: job.experience_level || "Intermediate",
-    posted: job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "Yaqinda joylandi",
-  }));
+  const mappedJobs = jobs.map((job) => {
+    // Determine price representation
+    let priceText = "Kelishiladi";
+    if (job.job_type === "fixed" && job.budget_max) {
+      priceText = `${Number(job.budget_max).toLocaleString()} ${job.currency || 'UZS'}`;
+    } else if (job.job_type === "hourly" && job.budget_min) {
+      priceText = `${Number(job.budget_min)}–${Number(job.budget_max)} ${job.currency || 'UZS'}/soat`;
+    }
+
+    // Determine tags
+    let tagsList = [];
+    try {
+      if (typeof job.required_skills === 'string') {
+        tagsList = JSON.parse(job.required_skills);
+      } else if (Array.isArray(job.required_skills)) {
+        tagsList = job.required_skills;
+      }
+    } catch (e) {
+      tagsList = [];
+    }
+
+    return {
+      id: job.id,
+      img: job.cover_image_url || null,
+      title: job.title,
+      description: job.description,
+      tags: tagsList,
+      price: priceText,
+      type: job.job_type === 'hourly' ? "Soatbay" : "Belgilangan",
+      experience: "O'rta daraja", // experience_level is not in DB yet
+      posted: job.created_at ? new Date(job.created_at).toLocaleDateString("uz-UZ") : "Yaqinda joylandi",
+    };
+  });
 
   return (
     <div className="projects-wrap">

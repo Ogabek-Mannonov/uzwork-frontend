@@ -34,9 +34,9 @@ export const getMyJobs = async () => {
 };
 
 /** Tavsiya etilgan ishlar (freelancer uchun) */
-export const getRecommendedJobs = async () => {
+export const getRecommendedJobs = async (params = {}) => {
   try {
-    const res = await api.get("/projects/recommended");
+    const res = await api.get("/projects/recommended", { params });
     return res?.data;
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err?.message };
@@ -44,9 +44,9 @@ export const getRecommendedJobs = async () => {
 };
 
 /** Saqlangan ishlar */
-export const getSavedJobs = async () => {
+export const getSavedJobs = async (params = {}) => {
   try {
-    const res = await api.get("/projects/saved");
+    const res = await api.get("/projects/saved", { params });
     return res?.data;
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err?.message };
