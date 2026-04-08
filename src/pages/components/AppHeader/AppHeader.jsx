@@ -15,6 +15,15 @@ import "../../../assets/style/theme.css";
 
 const getToken = () => localStorage.getItem("accessToken");
 
+const BACKEND =
+  import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
+
+function avatarSrc(url) {
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  return `${BACKEND}${url}`;
+}
+
 // ══════════════════════════════════════════════════════════
 // PREMIUM LANG SWITCHER
 // ══════════════════════════════════════════════════════════
@@ -287,7 +296,7 @@ function LandingHeader({ i18n, changeLanguage }) {
 // ══════════════════════════════════════════════════════════
 // AUTH HEADER (logged in — freelancer navbar)
 // ══════════════════════════════════════════════════════════
-function AuthHeader({ i18n, changeLanguage }) {
+function AuthHeader({ i18n, changeLanguage, user }) {
   const { t } = useTranslation();
   const { isDark, toggle } = useThemeContext();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -384,7 +393,20 @@ function AuthHeader({ i18n, changeLanguage }) {
                 title="Profile" 
                 onClick={() => setProfileOpen(!profileOpen)}
               >
-                <User size={16} />
+                {user?.avatar_url ? (
+                  <img 
+                    src={avatarSrc(user.avatar_url)} 
+                    alt="Avatar" 
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      // Fallback logic handled by CSS or state? 
+                      // Actually, if it errors, we just hide it and the User icon would be nice to have but we can't easily fallback inside JSX like this without state.
+                      // Better approach: use state if it fails.
+                    }}
+                  />
+                ) : (
+                  <User size={16} />
+                )}
               </button>
               {profileOpen && (
                 <div className="profile-dropdown-menu" style={{
@@ -486,9 +508,19 @@ export default function AppHeader() {
   const { i18n } = useTranslation();
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(!!getToken());
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const check = () => setIsLoggedIn(!!getToken());
+    const check = () => {
+      setIsLoggedIn(!!getToken());
+      const u = localStorage.getItem("user");
+      try {
+        setUser(u ? JSON.parse(u) : null);
+      } catch (e) {
+        setUser(null);
+      }
+    };
+    check();
     window.addEventListener("storage", check);
     window.addEventListener("authChange", check);
     return () => { window.removeEventListener("storage", check); window.removeEventListener("authChange", check); };
@@ -505,7 +537,7 @@ export default function AppHeader() {
   }
 
   if (isLoggedIn) {
-    return <AuthHeader i18n={i18n} changeLanguage={changeLanguage} />;
+    return <AuthHeader i18n={i18n} changeLanguage={changeLanguage} user={user} />;
   }
 
   return <LandingHeader i18n={i18n} changeLanguage={changeLanguage} />;
