@@ -155,30 +155,36 @@ export default function ForgotPassword() {
   return (
     <div className="uzfp-container">
       <div className="uzfp-card">
-        <button type="button" className="uzfp-backBtn" onClick={goBack} aria-label="Orqaga">
+        <button type="button" className="uzfp-backBtn" onClick={goBack} aria-label={t("common.back", "Orqaga")}>
           <IoMdArrowRoundBack />
         </button>
 
         {step !== "done" && (
-          <h1 className="uzfp-title">{step === "request" ? "Parolni tiklash" : "Yangi parol o‘rnatish"}</h1>
+          <div className="soft-fade-in">
+            <h1 className="uzfp-title">
+              {step === "request" ? t("auth.resetPassword", "Parolni tiklash") : t("auth.setNewPassword", "Yangi parol")}
+            </h1>
+            <p className="uzfp-sub">
+              {step === "request" 
+                ? t("auth.resetSubtitle", "Email yoki telefon raqamingizni kiriting — tasdiqlash kodi yuboramiz.")
+                : t("auth.setCodeSubtitle", "Iltimos, yuborilgan kodni va yangi parolni kiriting.")
+              }
+            </p>
+          </div>
         )}
 
         {error && <div className="uzfp-alert">{error}</div>}
 
         {/* STEP 1: REQUEST CODE */}
         {step === "request" && (
-          <>
-            <p className="uzfp-sub">
-              Email yoki telefon raqamingizni kiriting — tasdiqlash kodi yuboramiz.
-            </p>
-
+          <div className="soft-fade-in">
             <form onSubmit={handleSendCode}>
               <div className="uzfp-inputGroup">
                 <FaUser className="uzfp-icon" />
                 <input
                   className="uzfp-input"
                   type="text"
-                  placeholder="Email yoki telefon raqam"
+                  placeholder={t("auth.emailOrPhone", "Email yoki telefon raqam")}
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   autoFocus
@@ -186,24 +192,24 @@ export default function ForgotPassword() {
               </div>
 
               <button className="uzfp-btn uzfp-primary" disabled={loading}>
-                {loading ? "Yuborilmoqda..." : "Kod yuborish"}
+                {loading ? t("auth.sending", "Yuborilmoqda...") : t("auth.sendCode", "Kod yuborish")}
               </button>
 
               <div className="uzfp-footer">
-                <span>Esingizga tushdimi?</span>{" "}
+                <span>{t("auth.remembered", "Esingizga tushdimi?")}</span>
                 <button type="button" className="uzfp-linkBtn" onClick={backToLogin}>
-                  Login
+                  {t("auth.loginBtn", "Kirish")}
                 </button>
               </div>
             </form>
-          </>
+          </div>
         )}
 
         {/* STEP 2: RESET */}
         {step === "reset" && (
-          <>
+          <div className="soft-fade-in">
             <div className="uzfp-pill">
-              Kod yuborildi: <b>{maskedIdentifier}</b>
+              {t("auth.codeSentTo", "Kod yuborildi:")} <b>{maskedIdentifier}</b>
             </div>
 
             <form onSubmit={handleResetPassword}>
@@ -212,19 +218,19 @@ export default function ForgotPassword() {
                 <input
                   className="uzfp-input uzfp-codeInput"
                   type="text"
-                  placeholder="Tasdiqlash kodi"
+                  placeholder="000000"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   inputMode="numeric"
                 />
               </div>
 
-              <div className="uzfp-inputGroup uzfp-passGroup">
+              <div className="uzfp-inputGroup">
                 <FaLock className="uzfp-icon" />
                 <input
                   className="uzfp-input"
                   type={showNew ? "text" : "password"}
-                  placeholder="Yangi parol (kamida 8 ta belgi)"
+                  placeholder={t("auth.newPassword", "Yangi parol")}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                 />
@@ -232,18 +238,17 @@ export default function ForgotPassword() {
                   type="button"
                   className="uzfp-eyeBtn"
                   onClick={() => setShowNew((p) => !p)}
-                  aria-label="Show password"
                 >
                   {showNew ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
 
-              <div className="uzfp-inputGroup uzfp-passGroup">
+              <div className="uzfp-inputGroup">
                 <FaLock className="uzfp-icon" />
                 <input
                   className="uzfp-input"
                   type={showConfirm ? "text" : "password"}
-                  placeholder="Parolni tasdiqlang"
+                  placeholder={t("auth.confirmPassword", "Parolni tasdiqlang")}
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                 />
@@ -251,14 +256,13 @@ export default function ForgotPassword() {
                   type="button"
                   className="uzfp-eyeBtn"
                   onClick={() => setShowConfirm((p) => !p)}
-                  aria-label="Show confirm password"
                 >
                   {showConfirm ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
 
               <button className="uzfp-btn uzfp-primary" disabled={loading}>
-                {loading ? "Yangilanmoqda..." : "Parolni yangilash"}
+                {loading ? t("auth.updating", "Yangilanmoqda...") : t("auth.updateBtn", "Yangilash")}
               </button>
 
               <button
@@ -267,24 +271,26 @@ export default function ForgotPassword() {
                 onClick={handleResend}
                 disabled={loading}
               >
-                {loading ? "Yuborilmoqda..." : "Kodni qayta yuborish"}
+                {t("auth.resendCode", "Kodni qayta yuborish")}
               </button>
             </form>
-          </>
+          </div>
         )}
 
         {/* STEP 3: DONE */}
         {step === "done" && (
-          <div className="uzfp-success">
+          <div className="uzfp-success soft-fade-in">
             <div className="uzfp-successIcon">
               <FaCheckCircle />
             </div>
 
-            <h2 className="uzfp-successTitle">Parol muvaffaqiyatli yangilandi!</h2>
-            <p className="uzfp-successText">Endi yangi parol bilan tizimga kirishingiz mumkin.</p>
+            <h2 className="uzfp-successTitle">{t("auth.successTitle", "Muvaffaqiyatli!")}</h2>
+            <p className="uzfp-successText">
+              {t("auth.successDesc", "Parolingiz muvaffaqiyatli yangilandi. Endi yangi parol bilan kirishingiz mumkin.")}
+            </p>
 
             <button className="uzfp-btn uzfp-primary" onClick={backToLogin}>
-              Login ga o‘tish
+              {t("auth.goToLogin", "Kirish sahifasiga o'tish")}
             </button>
           </div>
         )}

@@ -99,15 +99,24 @@ function Signup() {
       if (role) localStorage.setItem("user", JSON.stringify({ role }));
     }
 
-    let role = null;
-    try {
-      const raw = localStorage.getItem("user");
-      role = raw ? (JSON.parse(raw)?.role || "").toLowerCase() : null;
-    } catch {
-      role = null;
+    let role =
+      res?.data?.user?.role ||
+      res?.user?.role ||
+      res?.data?.role ||
+      res?.role ||
+      res?.data?.userRole ||
+      res?.userRole;
+
+    if (!role) {
+      try {
+        const raw = localStorage.getItem("user");
+        role = raw ? JSON.parse(raw)?.role : null;
+      } catch {
+        role = null;
+      }
     }
 
-    return { token, role };
+    return { token, role: role ? role.toLowerCase() : null };
   };
 
   const handleSubmit = async (e) => {
@@ -164,7 +173,11 @@ function Signup() {
         setStep(3); // OTP step
       } else {
         persistAuth(res);
-        setShowSuccess(true);
+        if (formData.role === "freelancer") {
+          navigate("/onboarding", { replace: true });
+        } else {
+          setShowSuccess(true);
+        }
       }
     } catch (err) {
       setServerError(err?.message || t("auth.serverError", "Server bilan ulanishda xato"));
@@ -188,7 +201,15 @@ function Signup() {
         setServerError(res?.message || t("auth.verifyError", "Kodni tasdiqlashda xatolik."));
         return;
       }
-      setShowSuccess(true);
+      
+      const { role } = persistAuth(res);
+      const finalRole = role || formData.role;
+      
+      if (finalRole === "freelancer") {
+        navigate("/onboarding", { replace: true });
+      } else {
+        setShowSuccess(true);
+      }
     } catch (err) {
       setServerError(err?.message || t("auth.verifyFail", "Tasdiqlashda xatolik."));
     } finally {
@@ -196,12 +217,13 @@ function Signup() {
     }
   };
 
-  const handleGoLogin = () => {
-    // Siz xohlaganingiz: signupdan keyin login pagega o'tish
-    // Agar signup token qaytarib qo'ysa ham login flow bo'lsin desangiz tokenni o'chiramiz:
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    navigate("/login", { replace: true });
+  const handleGoNext = () => {
+    // formData.role is always reliable — user selected it themselves
+    if (formData.role === "freelancer") {
+      navigate("/onboarding", { replace: true });
+    } else {
+      navigate("/login", { replace: true });
+    }
   };
 
   return (
@@ -209,82 +231,85 @@ function Signup() {
       <div className="signup-card">
         {/* ✅ SUCCESS CARD */}
         {showSuccess ? (
-          <div className="success-card">
+          <div className="success-card soft-fade-in">
             <div className="success-icon-wrapper">
               <FaCheckCircle className="success-icon" />
             </div>
 
-            <h2 className="success-title">{t("auth.signupSuccessTitle", "Muvaffaqiyatli ro‘yxatdan o‘tdingiz!")}</h2>
+            <h2 className="title-signup">{t("auth.signupSuccessTitle", "Muvaffaqiyatli ro‘yxatdan o‘tdingiz!")}</h2>
 
-            <p className="success-text">
-              {t("auth.signupSuccessDesc", "Hisobingiz muvaffaqiyatli yaratildi. Endi login qilib tizimga kirishingiz mumkin.")}
+            <p className="subtitle-signup">
+              {formData.role === "freelancer" 
+                ? t("auth.signupSuccessDesc_freelancer", "Hisobingiz muvaffaqiyatli yaratildi. Karyerangizni boshlash uchun profilingizni sozlang.")
+                : t("auth.signupSuccessDesc", "Hisobingiz muvaffaqiyatli yaratildi. Tizimga kirib ishingizni boshlashingiz mumkin.")
+              }
             </p>
 
-            <button className="success-btn" onClick={handleGoLogin}>
+            <button className="create-account-btn" onClick={handleGoNext}>
               {t("auth.continue", "Davom etish")}
             </button>
           </div>
         ) : (
           <>
+            {step > 1 && (
+              <button type="button" className="back-btn" onClick={handleBack}>
+                <IoMdArrowRoundBack size={20} />
+              </button>
+            )}
+
             <h2 className="title-signup">{t("auth.signUp", "Ro'yxatdan o'tish")}</h2>
+            <p className="subtitle-signup">
+              {step === 1 
+                ? t("auth.selectRoleDesc", "Platformada qaysi maqsadda foydalanmoqchisiz?")
+                : t("auth.fillDetailsDesc", "Hisobingizni yaratish uchun quyidagi ma'lumotlarni to'ldiring.")
+              }
+            </p>
 
             {serverError && (
               <div
                 style={{
-                  background: "#ffeded",
-                  border: "1px solid #ffb3b3",
-                  color: "#b10000",
-                  padding: "10px 12px",
-                  borderRadius: 10,
-                  marginBottom: 14,
+                  background: "rgba(220, 38, 38, 0.1)",
+                  border: "1px solid rgba(220, 38, 38, 0.2)",
+                  color: "#dc2626",
+                  padding: "12px 16px",
+                  borderRadius: "var(--radius-md)",
+                  marginBottom: 20,
                   fontSize: 14,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10
                 }}
               >
+                <FaCheckCircle style={{ transform: 'rotate(45deg)' }} />
                 {serverError}
               </div>
             )}
 
             {/* STEP 1: ROLE */}
             {step === 1 && (
-              <>
+              <div className="soft-fade-in">
                 <div className="role-boxes">
-                  <label
-                    className={`role-box ${formData.role === "client" ? "selected" : ""
-                      }`}
+                  <div
+                    className={`role-box ${formData.role === "client" ? "selected" : ""}`}
+                    onClick={() => handleRoleChange({ target: { value: "client" } })}
                   >
-                    <input
-                      type="radio"
-                      name="role"
-                      value="client"
-                      checked={formData.role === "client"}
-                      onChange={handleRoleChange}
-                      className="radio-input"
-                    />
-                    <div className="role-content">
-                      <FaBriefcase size={60} className="role-icon" />
-                      <h3>{t("auth.iAmClient", "Men ish beruvchiman")}</h3>
-                      <p>{t("auth.clientDesc", "Loyiha joylashtirib, freelancer yollamoqchiman")}</p>
+                    <div className="role-icon-box">
+                      <FaBriefcase size={24} />
                     </div>
-                  </label>
+                    <h3>{t("auth.iAmClient", "Men ish beruvchiman")}</h3>
+                    <p>{t("auth.clientDesc", "Loyiha joylashtirib, mutaxassis yollamoqchiman")}</p>
+                  </div>
 
-                  <label
-                    className={`role-box ${formData.role === "freelancer" ? "selected" : ""
-                      }`}
+                  <div
+                    className={`role-box ${formData.role === "freelancer" ? "selected" : ""}`}
+                    onClick={() => handleRoleChange({ target: { value: "freelancer" } })}
                   >
-                    <input
-                      type="radio"
-                      name="role"
-                      value="freelancer"
-                      checked={formData.role === "freelancer"}
-                      onChange={handleRoleChange}
-                      className="radio-input"
-                    />
-                    <div className="role-content">
-                      <FaUser size={60} className="role-icon" />
-                      <h3>{t("auth.iAmFreelancer", "Men freelancer man")}</h3>
-                      <p>{t("auth.freelancerDesc", "Ish topib, daromad qilmoqchiman")}</p>
+                    <div className="role-icon-box">
+                      <FaUser size={24} />
                     </div>
-                  </label>
+                    <h3>{t("auth.iAmFreelancer", "Men freelancerman")}</h3>
+                    <p>{t("auth.freelancerDesc", "Ish topib, daromad qilmoqchiman")}</p>
+                  </div>
                 </div>
 
                 <button
@@ -295,151 +320,130 @@ function Signup() {
                 >
                   {t("auth.continue", "Davom etish")}
                 </button>
+                
                 <div className="link-box">
-                  <Link to="/login" className="text-center-signup">
-                    {t("auth.loginExisting", "Mavjud hisobga kiring")}
-                  </Link>
+                  <span className="text-center-signup">
+                    {t("auth.alreadyHaveAcc", "Hisobingiz bormi?")}{" "}
+                    <Link to="/login" className="login-link">
+                      {t("auth.login", "Kirish")}
+                    </Link>
+                  </span>
                 </div>
-              </>
+              </div>
             )}
 
             {/* STEP 2: FORM */}
             {step === 2 && (
-              <>
-                <button type="button" className="back-btn" onClick={handleBack}>
-                  <IoMdArrowRoundBack />
-                </button>
+              <form onSubmit={handleSubmit} className="upwork-signup-form soft-fade-in">
+                <div className="input-row">
+                  <div className="input-group">
+                    <label>{t("auth.firstName", "Ismingiz")}</label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      placeholder="Ali"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
 
-                <div className="selected-role-header">
-                  <h3 className="selected-role-title">
-                    {formData.role === "client"
-                      ? t("auth.asClient", "Ish beruvchi sifatida")
-                      : t("auth.asFreelancer", "Freelancer sifatida")}{" "}
-                    {t("auth.signupAsTitle", "ro'yxatdan o'tish")}
-                  </h3>
+                  <div className="input-group">
+                    <label>{t("auth.lastName", "Familiyangiz")}</label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      placeholder="Valiyev"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="upwork-signup-form">
-                  <div className="input-row">
-                    <div className="input-group">
-                      <label>{t("auth.firstName", "Ismingiz")}</label>
-                      <input
-                        type="text"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
+                <div className="input-group">
+                  <label>{t("auth.username", "Username")}</label>
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="alidev_uz"
+                    value={formData.username}
+                    onChange={handleChange}
+                  />
+                  <small>{t("auth.optionalUsername", "Ixtiyoriy. Bo‘sh bo'lsa avtomatik yaratiladi.")}</small>
+                </div>
 
-                    <div className="input-group">
-                      <label>{t("auth.lastName", "Familiyangiz")}</label>
-                      <input
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                  </div>
+                <div className="input-group">
+                  <label>{t("auth.emailOrPhone", "Email yoki Telefon")}</label>
+                  <input
+                    type="text"
+                    name="identifier"
+                    placeholder="example@gmail.com"
+                    value={formData.identifier}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
 
-                  {/* USERNAME */}
-                  <div className="input-group full-width">
-                    <label>{t("auth.username", "Username")}</label>
-                    <input
-                      type="text"
-                      name="username"
-                      placeholder="ogabek_dev"
-                      value={formData.username}
-                      onChange={handleChange}
-                    />
-                    <small style={{ opacity: 0.7 }}>
-                      {t("auth.optionalUsername", "Ixtiyoriy. Bo‘sh qoldirsangiz avtomatik yaratiladi.")}
-                    </small>
-                  </div>
+                <div className="input-group">
+                  <label>{t("auth.passwordLabel", "Parol")}</label>
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
 
-                  <div className="input-group full-width">
-                    <label>{t("auth.emailOrPhone", "Email yoki Telefon raqam")}</label>
-                    <input
-                      type="text"
-                      name="identifier"
-                      placeholder="example@gmail.com yoki +998901234567"
-                      value={formData.identifier}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
+                <div className="upwork-checkbox-group">
+                  <input
+                    type="checkbox"
+                    name="agreeTerms"
+                    checked={formData.agreeTerms}
+                    onChange={handleChange}
+                    id="agreeTerms"
+                    required
+                  />
+                  <label htmlFor="agreeTerms">
+                    {t("auth.agreePrefix", "Ha, men ")}
+                    <a href="#" className="terms-link">{t("auth.terms", "UzWork shartlari")}</a>
+                    {" va "}
+                    <a href="#" className="terms-link">{t("auth.privacyPolicy", "Siyosati")}</a>
+                    {" bilan roziman."}
+                  </label>
+                </div>
 
-                  <div className="input-group full-width">
-                    <label>{t("auth.passwordLabel", "Parol")}</label>
-                    <input
-                      type="password"
-                      name="password"
-                      placeholder={t("auth.min8char", "Kamida 8 ta belgi")}
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="upwork-checkbox-group">
-                    <input
-                      type="checkbox"
-                      name="agreeTerms"
-                      checked={formData.agreeTerms}
-                      onChange={handleChange}
-                      id="agreeTerms"
-                      required
-                    />
-                    <label htmlFor="agreeTerms">
-                      {t("auth.agreePrefix", "Ha, men ")}
-                      <a href="#" className="terms-link">
-                        {t("auth.terms", "UzWork shartlari")}
-                      </a>{" "}
-                      ,{" "}
-                      <a href="#" className="terms-link">
-                        {t("auth.userAgreement", "Foydalanuvchi kelishuvi")}
-                      </a>{" "}
-                      {t("auth.and", "va")}{" "}
-                      <a href="#" className="terms-link">
-                        {t("auth.privacyPolicy", "Maxfiylik siyosati")}
-                      </a>{" "}
-                      {t("auth.agreeSuffix", "bilan tanishib chiqdim va roziman.")}
-                    </label>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="create-account-btn"
-                    disabled={submitting}
-                  >
-                    {submitting ? t("auth.creatingAcc", "Yaratilmoqda...") : t("auth.createAcc", "Hisobni yaratish")}
-                  </button>
-                </form>
-              </>
+                <button
+                  type="submit"
+                  className="create-account-btn"
+                  disabled={submitting}
+                >
+                  {submitting ? t("auth.creatingAcc", "Yaratilmoqda...") : t("auth.createAcc", "Hisobni yaratish")}
+                </button>
+              </form>
             )}
 
             {/* STEP 3: OTP VERIFICATION */}
             {step === 3 && (
-              <>
-                <div className="selected-role-header">
-                  <h3 className="selected-role-title">
-                    {t("auth.otpSentTitle", "Tasdiqlash kodi yuborildi")}
-                  </h3>
-                  <p>{t("auth.otpSentDesc", "Siz ko'rsatgan manzilga 6-xonali kod yuborilgan. Iltimos tekshiring.")}</p>
+              <div className="soft-fade-in">
+                <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                  <p style={{ color: 'var(--muted)', fontSize: 14 }}>
+                    {t("auth.otpSentDesc", "Siz ko'rsatgan manzilga 6-xonali kod yuborild.")}
+                  </p>
                 </div>
 
                 <form onSubmit={handleVerifyOtp} className="upwork-signup-form">
-                  <div className="input-group full-width">
-                    <label>{t("auth.otpLabel", "Tasdiqlash kodi (OTP)")}</label>
+                  <div className="input-group">
+                    <label>{t("auth.otpLabel", "Tasdiqlash kodi")}</label>
                     <input
                       type="text"
-                      placeholder="123456"
+                      placeholder="000 000"
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value)}
                       required
-                      style={{ letterSpacing: '2px', textAlign: 'center', fontSize: '1.2rem', padding: '15px' }}
+                      style={{ letterSpacing: '8px', textAlign: 'center', fontSize: '20px', fontWeight: 700 }}
                     />
                   </div>
 
@@ -447,12 +451,11 @@ function Signup() {
                     type="submit"
                     className="create-account-btn"
                     disabled={submitting}
-                    style={{ marginTop: '20px' }}
                   >
                     {submitting ? t("auth.verifying", "Tasdiqlanmoqda...") : t("auth.verify", "Tasdiqlash")}
                   </button>
                 </form>
-              </>
+              </div>
             )}
           </>
         )}

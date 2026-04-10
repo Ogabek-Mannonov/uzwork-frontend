@@ -149,11 +149,20 @@ const MyProfile = () => {
   const [skillSearch, setSkillSearch] = useState("");
   const [skillSuggestions, setSkillSuggestions] = useState([]);
   const [activeSuggestion, setActiveSuggestion] = useState(0);
+  const [categories, setCategories] = useState([]);
 
 
   const showMessage = (type, text) => {
     setMessage({ type, text });
   };
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      const res = await getCategories();
+      if (res?.success) setCategories(res.data);
+    };
+    fetchCats();
+  }, []);
 
   useEffect(() => {
     if (message.text) {
@@ -189,7 +198,9 @@ const MyProfile = () => {
             hourlyRate: p.hourly_rate || 0,
             cv_url: p.cv_url || "",
             coverPhoto: p.cover_url || "",
-            languages: p.languages || []
+            languages: p.languages || [],
+            category_id: p.category_id || null,
+            categoryName: p.category_name || ""
           }));
 
 
@@ -915,7 +926,8 @@ const MyProfile = () => {
           payload = {
             first_name: editFormData.fullName.split(' ')[0] || "",
             last_name: editFormData.fullName.split(' ').slice(1).join(' ') || "",
-            title: editFormData.title
+            title: editFormData.title,
+            category_id: editFormData.category_id
           };
           break;
         case 'bio':
@@ -1262,6 +1274,17 @@ const MyProfile = () => {
                             className="inline-edit-input" 
                             placeholder={t("profile.titlePlaceholder", "Professional title")} 
                           />
+                          <select 
+                            value={editFormData.category_id || ""} 
+                            onChange={(e) => handleEditInputChange('category_id', e.target.value)}
+                            className="inline-edit-input"
+                            style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '12px' }}
+                          >
+                            <option value="">{t("profile.selectCategory", "Sohangizni tanlang")}</option>
+                            {categories.map(cat => (
+                              <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                          </select>
                           <div className="inline-edit-actions">
                             <button className="btn-cancel-inline" onClick={handleSectionCancel}>{t("profile.cancel", "Cancel")}</button>
                             <button className="btn-save-inline" onClick={() => handleSectionSave('name')}>
@@ -1271,10 +1294,15 @@ const MyProfile = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="section-edit-trigger" onClick={() => handleSectionEdit('name', { fullName: userData.fullName, title: userData.title })}>
+                        <div className="section-edit-trigger" onClick={() => handleSectionEdit('name', { fullName: userData.fullName, title: userData.title, category_id: userData.category_id })}>
                           <div>
                             <h2 className="profile-fullname">{userData.fullName}</h2>
                             <p className="profile-title">{userData.title || t("profile.titlePlaceholder", "Professional title")}</p>
+                            {userData.categoryName && (
+                              <span style={{ fontSize: '12px', background: 'var(--brand-light)', color: 'var(--brand)', padding: '2px 8px', borderRadius: '4px', fontWeight: '600', marginBottom: '8px', display: 'inline-block' }}>
+                                {userData.categoryName}
+                              </span>
+                            )}
                             <p className="profile-username">{userData.username}</p>
                           </div>
                           <button className="edit-pencil-btn">

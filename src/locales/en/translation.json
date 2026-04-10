@@ -301,7 +301,10 @@
     "cvTip2": "Highlight relevant skills and achievements",
     "cvTip3": "Use keywords from job descriptions",
     "cvTip4": "Update regularly with new projects and skills",
-    "cvTip5": "Proofread carefully for errors"
+    "cvTip5": "Proofread carefully for errors",
+    "selectCategory": "Select your category",
+    "addSkillPlaceholder": "Enter skill and press Enter",
+    "bioPlaceholder": "Write about your professional experience, skills, and expertise..."
   },
   "publicProfile": {
     "aboutMe": "About Me",
@@ -431,7 +434,24 @@
     "otpSentDesc": "A 6-digit code has been sent to your contact. Please check.",
     "otpLabel": "Verification code (OTP)",
     "verifying": "Verifying...",
-    "verify": "Verify"
+    "verify": "Verify",
+    "resetPassword": "Reset Password",
+    "setNewPassword": "Set New Password",
+    "resetSubtitle": "Enter your email or phone number — we'll send a verification code.",
+    "setCodeSubtitle": "Please enter the code and your new password.",
+    "remembered": "Remembered it?",
+    "codeSentTo": "Code sent to:",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "updating": "Updating...",
+    "updateBtn": "Update",
+    "resendCode": "Resend Code",
+    "successTitle": "Success!",
+    "successDesc": "Your password has been reset successfully. You can now log in.",
+    "goToLogin": "Go to login",
+    "signupTitle_freelancer": "Sign up as a Freelancer",
+    "signupDesc_freelancer": "Take your career to the next level",
+    "signupSuccessDesc_freelancer": "Your account has been successfully created. Set up your profile to start your career."
   },
   "findWork": {
     "layout": {
@@ -514,5 +534,30 @@
       "prev": "Prev",
       "next": "Next"
     }
+  },
+  "onboarding": {
+    "step": "Step",
+    "welcomeTitle": "Welcome! You're almost there.",
+    "welcomeDesc": "What is your specialty? Choose your main direction so we can find matching jobs for you.",
+    "noCategories": "Categories not found.",
+    "professionalInfo": "Professional title and info",
+    "titleDesc": "How do you want clients to see you? e.g. Senior React Developer or Pro Graphic Designer.",
+    "bioTitle": "Write your bio",
+    "bioDesc": "Tell us about your experience, achievements, and how you can help clients.",
+    "skillsTitle": "Add your skills",
+    "skillsDesc": "List technologies or skills you're great at (at least 3).",
+    "rateTitle": "Your hourly rate",
+    "rateDesc": "How much do you charge per hour? You can change this anytime in your profile.",
+    "ready": "Are you ready?",
+    "readyDesc": "You're ready to join the UzWork community. Click the button below to confirm.",
+    "finish": "Finish"
+  },
+  "common": {
+    "next": "Next",
+    "back": "Back",
+    "logout": "Logout",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "saving": "Saving..."
   }
 }

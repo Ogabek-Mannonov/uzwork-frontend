@@ -50,6 +50,7 @@ import PostJob from "./pages/Client/PostJob.jsx";
 
 // =================== Freelancer Pages =====================
 import FindWork from "./pages/Freelancer/FindW/FindWork.jsx";
+import Onboarding from "./pages/Freelancer/Onboarding.jsx";
 
 function App() {
   return (
@@ -65,6 +66,11 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+        </Route>
+
+        {/* Standalone Protected Routes (Onboarding, etc.) */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/onboarding" element={<Onboarding />} />
         </Route>
 
         {/* Main app layout */}

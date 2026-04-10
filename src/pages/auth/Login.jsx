@@ -183,24 +183,30 @@ const handleBack = (e) => {
 };
 
 return (
-  <div className="login-container">
-    <div className="login-card">
-      <h1 className="title-login">
-        {step === "email" ? t("auth.loginToUzwork", "Uzworkga kirish") : t("auth.welcome", "Xush kelibsiz")}
-      </h1>
+    <div className="login-container">
+      <div className="login-card">
+        <h1 className="title-login">
+          {step === "email" ? t("auth.loginToUzwork", "UzWork'ka kirish") : t("auth.welcome", "Xush kelibsiz")}
+        </h1>
+        <p className="subtitle-login">
+          {step === "email" 
+            ? t("auth.loginSubtitle", "Platformaga kirish uchun ma'lumotlaringizni kiriting")
+            : t("auth.passwordSubtitle", "Davom etish uchun parolingizni kiriting")
+          }
+        </p>
 
-      {error && <div className="alert-error">{error}</div>}
+        {error && <div className="alert-error">{error}</div>}
 
       {/* 1-bosqich: Email/phone */}
       {step === "email" && (
-        <>
+        <div className="soft-fade-in">
           <form onSubmit={handleEmailSubmit}>
             <div className="input-group">
-              <FaUser className="input-icon" />
+              <label>{t("auth.emailOrPhone", "Email yoki Telefon")}</label>
               <input
                 type="text"
                 className="login-input"
-                placeholder={t("auth.emailOrPhonePlaceholder", "Email yoki telefon raqam")}
+                placeholder="example@gmail.com"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 autoFocus
@@ -214,52 +220,54 @@ return (
 
           <div className="login-or">{t("auth.or", "yoki")}</div>
 
-          <button
-            className="google-btn"
-            onClick={() => gLogin()}
-            disabled={loading}
-            type="button"
-          >
-            <img
-              src="https://www.google.com/favicon.ico"
-              alt="Google"
-              width={20}
-              height={20}
-            />
-            {t("auth.loginWithGoogle", "Google orqali kirish")}
-          </button>
+          <div className="social-btns">
+            <button
+              className="google-btn"
+              onClick={() => gLogin()}
+              disabled={loading}
+              type="button"
+            >
+              <img
+                src="https://www.google.com/favicon.ico"
+                alt="Google"
+                width={18}
+                height={18}
+              />
+              {t("auth.loginWithGoogle", "Google orqali kirish")}
+            </button>
 
-          <button
-            className="apple-btn"
-            onClick={handlePhoneClick}
-            disabled={loading}
-            type="button"
-          >
-            <FaPhoneAlt size={20} />
-            {t("auth.loginWithPhone", "Telefon orqali kirish")}
-          </button>
+            <button
+              className="apple-btn"
+              onClick={handlePhoneClick}
+              disabled={loading}
+              type="button"
+            >
+              <FaPhoneAlt size={16} />
+              {t("auth.loginWithPhone", "Telefon orqali kirish")}
+            </button>
+          </div>
 
           <div className="text-center">
-            <p>{t("auth.noAccount", "Hisobingiz yo‘qmi?")}</p>
+            <span>{t("auth.noAccount", "Hisobingiz yo‘qmi?")}</span>
             <a href="/signup" className="signup-btn-link">
               {t("auth.signUp", "Ro‘yxatdan o‘tish")}
             </a>
           </div>
-        </>
+        </div>
       )}
 
       {/* 2-bosqich: Parol */}
       {step === "password" && (
-        <>
-          <div className="email-preview">{identifier}</div>
+        <div className="soft-fade-in">
+          <span className="email-preview">{identifier}</span>
 
           <form onSubmit={handleLogin}>
-            <div className="input-group password-group">
-              <FaLock className="input-icon" />
+            <div className="input-group">
+              <label>{t("auth.passwordLabel", "Parol")}</label>
               <input
                 type={showPassword ? "text" : "password"}
                 className="login-input"
-                placeholder={t("auth.password", "Parol")}
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoFocus
@@ -290,19 +298,19 @@ return (
 
             <button
               type="submit"
-              className="cont-btn login-btn"
+              className="cont-btn"
               disabled={loading}
             >
               {loading ? t("auth.loading", "Yuklanmoqda...") : t("auth.loginBtn", "Kirish")}
             </button>
           </form>
 
-          <div className="text-center not-you">
+          <div className="not-you">
             <a href="#" onClick={handleBack} className="not-you-link">
               {t("auth.notYou", "Bu siz emassizmi?")}
             </a>
           </div>
-        </>
+        </div>
       )}
     </div>
 

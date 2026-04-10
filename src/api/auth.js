@@ -64,7 +64,12 @@ export const signup = async (payload) => {
 export const verifySignup = async (payload) => {
   try {
     const res = await api.post("/auth/verify-signup", payload);
-    return unwrap(res);
+    const body = unwrap(res);
+
+    const data = body?.data;
+    if (data?.accessToken || data?.user) saveAuth(data);
+
+    return body;
   } catch (err) {
     const msg = err?.response?.data?.message || err?.message || "Verify signup failed";
     return { success: false, message: msg };

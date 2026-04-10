@@ -301,7 +301,10 @@
     "cvTip2": "Tegishli ko'nikmalar va yutuqlarni ajratib ko'rsating",
     "cvTip3": "Ish tavsiflardagi kalit so'zlardan foydalaning",
     "cvTip4": "Yangi loyihalar va ko'nikmalar bilan muntazam yangilang",
-    "cvTip5": "Xatolar uchun diqqat bilan tekshiring"
+    "cvTip5": "Xatolar uchun diqqat bilan tekshiring",
+    "selectCategory": "Sohangizni tanlang",
+    "addSkillPlaceholder": "Ko'nikma kiriting va Enter bosing",
+    "bioPlaceholder": "Professional tajriba, ko'nikmalar va mutaxassisligingiz haqida yozing..."
   },
   "publicProfile": {
     "aboutMe": "O'zim haqimda",
@@ -431,7 +434,24 @@
     "otpSentDesc": "Siz ko'rsatgan manzilga 6-xonali kod yuborilgan. Iltimos tekshiring.",
     "otpLabel": "Tasdiqlash kodi (OTP)",
     "verifying": "Tasdiqlanmoqda...",
-    "verify": "Tasdiqlash"
+    "verify": "Tasdiqlash",
+    "resetPassword": "Parolni tiklash",
+    "setNewPassword": "Yangi parol o'rnatish",
+    "resetSubtitle": "Email yoki telefon raqamingizni kiriting — tasdiqlash kodi yuboramiz.",
+    "setCodeSubtitle": "Iltimos, yuborilgan kodni va yangi parolni kiriting.",
+    "remembered": "Esingizga tushdimi?",
+    "codeSentTo": "Kod yuborildi:",
+    "newPassword": "Yangi parol",
+    "confirmPassword": "Parolni tasdiqlang",
+    "updating": "Yangilanmoqda...",
+    "updateBtn": "Yangilash",
+    "resendCode": "Kodni qayta yuborish",
+    "successTitle": "Muvaffaqiyatli!",
+    "successDesc": "Parolingiz muvaffaqiyatli yangilandi. Endi yangi parol bilan kirishingiz mumkin.",
+    "goToLogin": "Kirish sahifasiga o'tish",
+    "signupTitle_freelancer": "Freelancer sifatida ro'yxatdan o'tish",
+    "signupDesc_freelancer": "Karyerangizni yangi bosqichga olib chiqing",
+    "signupSuccessDesc_freelancer": "Hisobingiz muvaffaqiyatli yaratildi. Karyerangizni boshlash uchun profilingizni sozlang."
   },
   "findWork": {
     "layout": {
@@ -514,5 +534,30 @@
       "prev": "Oldingi",
       "next": "Keyingi"
     }
+  },
+  "onboarding": {
+    "step": "Bosqich",
+    "welcomeTitle": "Xush kelibsiz! Platformaga kirish uchun oz qoldi.",
+    "welcomeDesc": "Sizning sohangiz nima? Biz sizga mos ishlarni topishimiz uchun asosiy yo'nalishingizni tanlang.",
+    "noCategories": "Kategoriyalar topilmadi.",
+    "professionalInfo": "Professional sarlavha va ma'lumot",
+    "titleDesc": "Sizni mijozlar qanday ko'rishini istaysiz? Masalan: Senior React Developer yoki Pro Graphic Designer.",
+    "bioTitle": "O'zingiz haqida yozing",
+    "bioDesc": "Tajribangiz, yutuqlaringiz va mijozlarga qanday yordam bera olishingiz haqida qisqacha ma'lumot bering.",
+    "skillsTitle": "Ko'nikmalaringizni qo'shing",
+    "skillsDesc": "Siz yaxshi biladigan texnologiyalar yoki ko'nikmalarni yozing (kamida 3 ta).",
+    "rateTitle": "Soatlik ish haqingiz",
+    "rateDesc": "Sizning bir soatlik xizmatingiz necha pul turadi? Buni istalgan vaqtda keyinroq o'zgartirishingiz mumkin.",
+    "ready": "Tayyormisiz?",
+    "readyDesc": "Siz UzWork hamjamiyatiga qo'shilishga tayyorsiz. Ma'lumotlarni tasdiqlash uchun pastdagi tugmani bosing.",
+    "finish": "Tugallash"
+  },
+  "common": {
+    "next": "Keyingisi",
+    "back": "Orqaga",
+    "logout": "Chiqish",
+    "loading": "Yuklanmoqda...",
+    "retry": "Qayta urinish",
+    "saving": "Saqlanmoqda..."
   }
 }
