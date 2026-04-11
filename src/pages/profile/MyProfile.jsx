@@ -67,7 +67,7 @@ import { getMyProfile, updateMyProfile, uploadFile, uploadImage } from "../../ap
 
 
 import { logout } from "../../api/auth";
-import { getMyPortfolio, createPortfolioItem, updatePortfolioItem, deletePortfolioItem, getMyCertifications, createCertification, updateCertification, deleteCertification } from "../../api/freelancer";
+import { getMyPortfolio, createPortfolioItem, updatePortfolioItem, deletePortfolioItem, addPortfolioMedia, deletePortfolioMedia, getMyCertifications, createCertification, updateCertification, deleteCertification } from "../../api/freelancer";
 import { PROFESSIONAL_SKILLS } from "../../utils/skills";
 
 
@@ -134,7 +134,8 @@ const MyProfile = () => {
     title: "",
     description: "",
     url: "",
-    images: [],
+    media: [], // { id, url, type } - existing from server
+    files: [], // [File, File] - new ones to upload
     skills: []
   });
   const [newSkillInput, setNewSkillInput] = useState("");
@@ -573,29 +574,39 @@ const MyProfile = () => {
     }));
   };
 
-  const handleImageUpload = (e) => {
+  const handlePortfolioFileSelect = (e) => {
     const files = Array.from(e.target.files);
-    if (portfolioForm.images.length + files.length <= 5) {
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setPortfolioForm(prev => ({
-            ...prev,
-            images: [...prev.images, reader.result]
-          }));
-        };
-        reader.readAsDataURL(file);
-      });
+    if ((portfolioForm.media.length + portfolioForm.files.length + files.length) <= 10) {
+      setPortfolioForm(prev => ({
+        ...prev,
+        files: [...prev.files, ...files]
+      }));
     } else {
-      showMessage("error", "Maximum 5 images allowed");
+      showMessage("error", t("profile.maxFilesError", "Maksimal 10 ta fayl ruxsat etilgan"));
     }
   };
 
-  const handleRemoveImage = (indexToRemove) => {
+  const handleRemovePortfolioFile = (indexToRemove) => {
     setPortfolioForm(prev => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== indexToRemove)
+      files: prev.files.filter((_, i) => i !== indexToRemove)
     }));
+  };
+
+  const handleRemoveExistingMedia = async (mediaId) => {
+    if (!editingPortfolio) return;
+    try {
+      const res = await deletePortfolioMedia(editingPortfolio.id, mediaId);
+      if (res?.success) {
+        setPortfolioForm(prev => ({
+          ...prev,
+          media: prev.media.filter(m => m.id !== mediaId)
+        }));
+        showMessage("success", t("profile.mediaDeleted", "Media o'chirildi"));
+      }
+    } catch (err) {
+      showMessage("error", t("profile.mediaDeleteError", "Media o'chirishda xatolik"));
+    }
   };
 
   const openAddLanguage = () => {
@@ -662,7 +673,8 @@ const MyProfile = () => {
       title: "",
       description: "",
       url: "",
-      images: [],
+      media: [],
+      files: [],
       skills: []
     });
     setShowPortfolioModal(true);
@@ -674,52 +686,67 @@ const MyProfile = () => {
       title: item.title,
       description: item.description,
       url: item.url,
-      images: [...item.images],
-      skills: [...item.skills]
+      media: item.media || [],
+      files: [],
+      skills: item.skills || []
     });
     setShowPortfolioModal(true);
   };
 
   const handleSavePortfolio = async () => {
-    if (!portfolioForm.title.trim() || !portfolioForm.url.trim()) {
-      showMessage("error", "Title and URL are required");
+    if (!portfolioForm.title.trim()) {
+      showMessage("error", t("profile.titleRequired", "Sarlavha majburiy"));
       return;
     }
 
     setIsLoading(true);
-    const payload = {
-      title: portfolioForm.title,
-      description: portfolioForm.description,
-      project_url: portfolioForm.url,
-      image_url: portfolioForm.images[0] || ""
-    };
-
     try {
-      if (editingPortfolio) {
-        const res = await updatePortfolioItem(editingPortfolio.id, payload);
-        if (res?.success === false) throw new Error(res.message);
+      const payload = {
+        title: portfolioForm.title,
+        description: portfolioForm.description,
+        project_url: portfolioForm.url,
+        skills: portfolioForm.skills,
+        is_featured: false
+      };
 
-        setPortfolio(prev => prev.map(item =>
-          item.id === editingPortfolio.id
-            ? { ...item, ...portfolioForm }
-            : item
-        ));
-        showMessage("success", "Portfolio updated successfully");
+      let itemId = editingPortfolio?.id;
+      
+      if (editingPortfolio) {
+        await updatePortfolioItem(itemId, payload);
       } else {
         const res = await createPortfolioItem(payload);
-        if (res?.success === false) throw new Error(res.message);
-
-        const newItem = {
-          id: res?.data?.id || Date.now(),
-          ...portfolioForm,
-          created_at: new Date().toISOString().split('T')[0]
-        };
-        setPortfolio(prev => [...prev, newItem]);
-        showMessage("success", "Portfolio added successfully");
+        if (!res?.success) throw new Error(res.message);
+        itemId = res.data.item.id;
       }
+
+      // Upload new files
+      if (portfolioForm.files.length > 0) {
+        for (const file of portfolioForm.files) {
+          const formData = new FormData();
+          formData.append("media", file);
+          await addPortfolioMedia(itemId, formData);
+        }
+      }
+
+      // Refresh data
+      const portRes = await getMyPortfolio();
+      if (portRes?.success) {
+        setPortfolio(portRes.data.items.map(p => ({
+          id: p.id,
+          title: p.title,
+          description: p.description,
+          url: p.project_url,
+          media: p.media || [],
+          skills: p.skills || [],
+          created_at: p.created_at
+        })));
+      }
+
       setShowPortfolioModal(false);
+      showMessage("success", t("profile.portfolioSaved", "Portfolio muvaffaqiyatli saqlandi"));
     } catch (err) {
-      showMessage("error", err.message || "Failed to save portfolio");
+      console.error("Save portfolio error:", err);
+      showMessage("error", err.message || "Xatolik yuz berdi");
     } finally {
       setIsLoading(false);
     }
@@ -1760,58 +1787,85 @@ const MyProfile = () => {
 
               <div className="cv-section-card">
                 {/* PORTFOLIO */}
-                <div className="cv-upload-area">
-                  <div className="cv-section-title-bar">
-                    <div>
-                      <h2 className="cv-section-main-title">
-                        <Briefcase size={20} />{t("profile.portfolioProjects", "Portfolio Projects")}
-                      </h2>
-                      <p className="cv-section-desc">{t("profile.portfolioDesc2", "Showcase your best work with project images and descriptions")}</p>
-
-                    </div>
-                    <button className="btn-primary" onClick={openAddPortfolio} disabled={isLoading}>
-                      <Plus size={16} />{t("profile.addProject", "Add Project")}
-                    </button>
-                  </div>
-
-                  {portfolio.length === 0 ? (
-                    <div className="empty-portfolio">
-                      <Briefcase size={48} />
-                      <h4>{t("profile.noPortfolioItems", "No portfolio items yet")}</h4>
-                      <p>{t("profile.noPortfolioHint", "Click \"Add Project\" to showcase your work")}</p>
-                    </div>
-                  ) : (
-                    <div className="portfolio-upload-grid">
-                      {portfolio.map(item => (
-                        <div key={item.id} className="portfolio-upload-item">
-                          <div className="portfolio-upload-image">
-                            <img src={item.images[0] || "https://via.placeholder.com/600x400?text=No+Image"} alt={item.title} />
-                            <button className="portfolio-upload-edit" onClick={() => openEditPortfolio(item)} disabled={isLoading}>
-                              <Edit size={14} />
-                            </button>
-                            <button className="portfolio-upload-delete" onClick={() => handleDeletePortfolio(item.id)} disabled={isLoading}>
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                          <div className="portfolio-upload-info">
-                            <h4>{item.title}</h4>
-                            <p>{item.description}</p>
-                            <div className="portfolio-upload-meta">
-                              <a href={item.url} target="_blank" rel="noopener noreferrer" className="portfolio-url">
-                                <ExternalLink size={12} />
-                                {item.url.length > 30 ? item.url.substring(0, 30) + '...' : item.url}
-                              </a>
-                              <span className="portfolio-date">{item.created_at}</span>
-                            </div>
-                            <div className="portfolio-upload-tech">
-                              {item.skills.map((skill, i) => <span key={i}>{skill}</span>)}
-                            </div>
-                          </div>
+                  <div className="portfolio-premium-section">
+                    <div className="portfolio-premium-header">
+                      <div className="portfolio-header-content">
+                        <div className="portfolio-header-icon">
+                          <Briefcase size={22} />
                         </div>
-                      ))}
+                        <div>
+                          <h2>{t("profile.portfolioProjects", "Portfolio Projects")}</h2>
+                          <p>{t("profile.portfolioDesc2", "Showcase your best work with project images and descriptions")}</p>
+                        </div>
+                      </div>
+                      <button className="btn-add-premium" onClick={openAddPortfolio} disabled={isLoading}>
+                        <Plus size={18} /> {t("profile.addProject", "Add Project")}
+                      </button>
                     </div>
-                  )}
-                </div>
+
+                    {portfolio.length === 0 ? (
+                      <div className="portfolio-empty-state">
+                        <div className="empty-state-icon-box">
+                          <Briefcase size={48} />
+                        </div>
+                        <h3>{t("profile.noPortfolioItems", "No portfolio items yet")}</h3>
+                        <p>{t("profile.noPortfolioHint", "Click \"Add Project\" to showcase your work")}</p>
+                        <button className="btn-outline-premium" onClick={openAddPortfolio}>
+                          <Plus size={16} /> {t("profile.addProject", "Add Project")}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="portfolio-premium-grid">
+                        {portfolio.map(item => (
+                          <div key={item.id} className="portfolio-premium-card">
+                            <div className="portfolio-card-media">
+                              <img 
+                                src={item.media && item.media.length > 0 ? avatarSrc(item.media[0].url) : "https://via.placeholder.com/600x400?text=No+Media"} 
+                                alt={item.title} 
+                                className="portfolio-thumbnail"
+                              />
+                              <div className="portfolio-card-overlay">
+                                <div className="portfolio-card-actions">
+                                  <button className="action-circle-btn" onClick={() => openEditPortfolio(item)} title={t("profile.edit", "Edit")}>
+                                    <Edit size={16} />
+                                  </button>
+                                  <button className="action-circle-btn delete" onClick={() => handleDeletePortfolio(item.id)} title={t("profile.delete", "Delete")}>
+                                    <Trash2 size={16} />
+                                  </button>
+                                </div>
+                                <div className="portfolio-card-badge">
+                                  {item.media?.length || 0} <ImageIcon size={12} />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="portfolio-card-content">
+                              <h3 className="portfolio-card-title">{item.title}</h3>
+                              <p className="portfolio-card-desc" title={item.description}>{item.description}</p>
+                              
+                              <div className="portfolio-card-footer">
+                                {item.skills && item.skills.length > 0 && (
+                                  <div className="portfolio-card-skills">
+                                    {item.skills.slice(0, 3).map((skill, sIdx) => (
+                                      <span key={sIdx} className="portfolio-skill-tag">{skill}</span>
+                                    ))}
+                                    {item.skills.length > 3 && (
+                                      <span className="portfolio-skill-more">+{item.skills.length - 3}</span>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                {item.url && (
+                                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="portfolio-card-link" title={item.url}>
+                                    <Link2 size={14} /> {t("profile.viewProject", "View")}
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                 <div className="cv-divider">
                   <span>{t("profile.resumeCV", "Resume / CV")}</span>
@@ -2451,129 +2505,173 @@ const MyProfile = () => {
 
       {/* PORTFOLIO MODAL */}
       {showPortfolioModal && (
-        <div className="modal-overlay" onClick={() => setShowPortfolioModal(false)}>
-          <div className="modal-content portfolio-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>{editingPortfolio ? "Edit Project" : "Add New Project"}</h2>
-              <button className="modal-close" onClick={() => setShowPortfolioModal(false)} disabled={isLoading}>
+        <div className="modal-overlay" onClick={() => !isLoading && setShowPortfolioModal(false)}>
+          <div className="portfolio-premium-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header-premium">
+              <div className="header-icon-box">
+                <Briefcase size={20} />
+              </div>
+              <div>
+                <h2>{editingPortfolio ? t("profile.editProject", "Edit Project") : t("profile.addProject", "Add New Project")}</h2>
+                <p>{t("profile.portfolioModalSub", "Fill in the details to showcase your professional work")}</p>
+              </div>
+              <button className="modal-close-premium" onClick={() => setShowPortfolioModal(false)} disabled={isLoading}>
                 <X size={20} />
               </button>
             </div>
 
-            <div className="modal-body">
-              <div className="form-group">
-                <label>Title <span className="required">*</span></label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Enter project title"
-                  value={portfolioForm.title}
-                  onChange={(e) => handlePortfolioInputChange("title", e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  className="form-input"
-                  rows={3}
-                  placeholder="Describe your project..."
-                  value={portfolioForm.description}
-                  onChange={(e) => handlePortfolioInputChange("description", e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Project URL <span className="required">*</span></label>
-                <input
-                  type="url"
-                  className="form-input"
-                  placeholder="https://example.com"
-                  value={portfolioForm.url}
-                  onChange={(e) => handlePortfolioInputChange("url", e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Images <span className="optional">(0-5 images)</span></label>
-                <div className="image-upload-area">
-                  <input
-                    type="file"
-                    id="portfolio-images"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    style={{ display: 'none' }}
-                    disabled={isLoading}
-                  />
-                  <label htmlFor="portfolio-images" className="image-upload-btn" style={{ opacity: isLoading ? 0.6 : 1 }}>
-                    <ImageIcon size={20} />
-                    <span>Upload Images ({portfolioForm.images.length}/5)</span>
-                  </label>
-                </div>
-                {portfolioForm.images.length > 0 && (
-                  <div className="image-preview-grid">
-                    {portfolioForm.images.map((img, index) => (
-                      <div key={index} className="image-preview-item">
-                        <img src={img} alt={`Preview ${index + 1}`} />
-                        <button
-                          className="image-remove-btn"
-                          onClick={() => handleRemoveImage(index)}
-                          disabled={isLoading}
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
+            <div className="modal-body-premium">
+              <div className="form-premium-grid">
+                <div className="form-left-col">
+                  <div className="form-group-premium">
+                    <label>{t("profile.projectTitle", "Project Title")} <span className="req">*</span></label>
+                    <input
+                      type="text"
+                      className="premium-input"
+                      placeholder={t("profile.titlePlaceholder", "e.g. E-commerce Website")}
+                      value={portfolioForm.title}
+                      onChange={(e) => handlePortfolioInputChange("title", e.target.value)}
+                      disabled={isLoading}
+                    />
                   </div>
-                )}
-              </div>
 
-              <div className="form-group">
-                <label>Skills/Technologies</label>
-                <div className="skills-input-wrapper">
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="Enter skill and press Enter"
-                    value={newSkillInput}
-                    onChange={(e) => setNewSkillInput(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddSkill();
-                      }
-                    }}
-                    disabled={isLoading}
-                  />
-                  <button className="btn-secondary" onClick={handleAddSkill} type="button" disabled={isLoading}>
-                    <Plus size={16} />Add
-                  </button>
-                </div>
-                {portfolioForm.skills.length > 0 && (
-                  <div className="skills-tags">
-                    {portfolioForm.skills.map((skill, index) => (
-                      <span key={index} className="skill-tag">
-                        {skill}
-                        <button onClick={() => handleRemoveSkill(skill)} disabled={isLoading}>
-                          <X size={12} />
-                        </button>
-                      </span>
-                    ))}
+                  <div className="form-group-premium">
+                    <label>{t("profile.projectUrl", "Project URL")}</label>
+                    <div className="input-with-icon">
+                      <Link2 size={16} />
+                      <input
+                        type="url"
+                        className="premium-input icon-left"
+                        placeholder="https://example.com"
+                        value={portfolioForm.url || ""}
+                        onChange={(e) => handlePortfolioInputChange("url", e.target.value)}
+                        disabled={isLoading}
+                      />
+                    </div>
                   </div>
-                )}
+
+                  <div className="form-group-premium">
+                    <label>{t("profile.description", "Description")}</label>
+                    <textarea
+                      className="premium-textarea"
+                      rows={5}
+                      placeholder={t("profile.projectDescPlaceholder", "Briefly explain what you did, the tools used, and the results achieved...")}
+                      value={portfolioForm.description}
+                      onChange={(e) => handlePortfolioInputChange("description", e.target.value)}
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-right-col">
+                  <div className="form-group-premium">
+                    <label>{t("profile.media", "Project Media")} <span className="optional">(max 10)</span></label>
+                    <div className="media-upload-container">
+                      <input
+                        type="file"
+                        id="portfolio-files"
+                        multiple
+                        accept="image/*,application/pdf"
+                        onChange={handlePortfolioFileSelect}
+                        style={{ display: 'none' }}
+                        disabled={isLoading}
+                      />
+                      <label htmlFor="portfolio-files" className="media-dropzone" style={{ opacity: isLoading ? 0.6 : 1 }}>
+                        <Upload size={24} />
+                        <span>{t("profile.uploadMedia", "Click to upload images or PDF")}</span>
+                        <small>{t("profile.uploadLimit", "Images, PDF up to 5MB")}</small>
+                      </label>
+                    </div>
+
+                    {/* Previews */}
+                    <div className="media-previews-list">
+                      {/* Server-side existing media */}
+                      {portfolioForm.media.map((med) => (
+                        <div key={med.id} className="media-preview-box">
+                          {med.media_type === 'image' ? (
+                            <img src={avatarSrc(med.url)} alt="existing" />
+                          ) : (
+                            <div className="file-icon-preview"><FileText size={24} /></div>
+                          )}
+                          <button
+                            className="btn-remove-p"
+                            onClick={() => handleRemoveExistingMedia(med.id)}
+                            disabled={isLoading}
+                            type="button"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+
+                      {/* Local newly selected files */}
+                      {portfolioForm.files.map((file, idx) => (
+                        <div key={`new-${idx}`} className="media-preview-box new">
+                          {file.type.startsWith('image/') ? (
+                            <img src={URL.createObjectURL(file)} alt="new" />
+                          ) : (
+                            <div className="file-icon-preview"><FileText size={24} /></div>
+                          )}
+                          <div className="new-badge">New</div>
+                          <button
+                            className="btn-remove-p"
+                            onClick={() => handleRemovePortfolioFile(idx)}
+                            disabled={isLoading}
+                            type="button"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="form-group-premium">
+                    <label>{t("profile.skills", "Skills & Technologies")}</label>
+                    <div className="skill-input-premium">
+                      <input
+                        type="text"
+                        className="premium-input"
+                        placeholder={t("profile.addSkillPlaceholder", "Add skill...")}
+                        value={newSkillInput}
+                        onChange={(e) => setNewSkillInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddSkill();
+                          }
+                        }}
+                        disabled={isLoading}
+                      />
+                      <button className="skill-add-btn" onClick={handleAddSkill} type="button" disabled={isLoading}>
+                        <Plus size={18} />
+                      </button>
+                    </div>
+                    <div className="skills-tag-p-list">
+                      {portfolioForm.skills.map((skill, index) => (
+                        <span key={index} className="skill-tag-p">
+                          {skill}
+                          <button onClick={() => handleRemoveSkill(skill)} disabled={isLoading}>
+                            <X size={12} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="modal-footer">
-              <button className="btn-outline" onClick={() => setShowPortfolioModal(false)} disabled={isLoading}>
-                Cancel
+            <div className="modal-footer-premium">
+              <button className="btn-cancel-p" onClick={() => setShowPortfolioModal(false)} disabled={isLoading}>
+                {t("profile.cancel", "Cancel")}
               </button>
-              <button className="btn-primary" onClick={handleSavePortfolio} disabled={isLoading}>
-                {isLoading ? <><RefreshCw size={16} className="spinning" /> Saving...</> : <><Save size={16} /> {editingPortfolio ? "Update Project" : "Add Project"}</>}
+              <button className="btn-save-p" onClick={handleSavePortfolio} disabled={isLoading || !portfolioForm.title}>
+                {isLoading ? (
+                  <><RefreshCw size={18} className="spinning" /> {t("profile.saving", "Saving...")}</>
+                ) : (
+                  <><Save size={18} /> {editingPortfolio ? t("profile.updateProject", "Update Project") : t("profile.publishProject", "Publish Project")}</>
+                )}
               </button>
             </div>
           </div>

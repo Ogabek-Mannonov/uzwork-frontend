@@ -396,18 +396,45 @@ export default function PublicProfile() {
       {/* Portfolio */}
       {portfolio.length > 0 && (
         <div className="public-portfolio-section soft-fade-in stagger-6">
-          <h2>{t("publicProfile.portfolio")}</h2>
-          <div className="public-portfolio-grid">
+          <div className="section-header-premium">
+            <h2 className="section-title-premium">{t("publicProfile.portfolio")}</h2>
+            <div className="title-underline"></div>
+          </div>
+          
+          <div className="public-portfolio-premium-grid">
             {portfolio.map((item, i) => (
-              <div key={i} className="portfolio-item-card">
-                {(item.cover_image_url || (item.media && item.media[0]?.url)) && (
-                  <div className="portfolio-img-wrapper">
-                    <img src={item.cover_image_url || item.media[0]?.url} alt={item.title} />
+              <div key={i} className="portfolio-premium-card-public">
+                <div className="portfolio-card-media-public">
+                  <img 
+                    src={item.media && item.media.length > 0 ? avatarSrc(item.media[0].url) : "https://via.placeholder.com/600x400?text=No+Media"} 
+                    alt={item.title} 
+                  />
+                  <div className="portfolio-media-count">
+                    {item.media?.length || 0} <FiBriefcase size={10} />
                   </div>
-                )}
-                <div className="portfolio-content">
-                  <h4 className="portfolio-title">{item.title}</h4>
-                  {item.description && <p className="portfolio-desc">{item.description?.slice(0, 120)}...</p>}
+                </div>
+                <div className="portfolio-card-content-public">
+                  <h4 className="portfolio-title-public">{item.title}</h4>
+                  <p className="portfolio-desc-public" title={item.description}>
+                    {item.description}
+                  </p>
+                  
+                  {item.skills && item.skills.length > 0 && (
+                    <div className="portfolio-skills-public">
+                      {item.skills.slice(0, 4).map((skill, sIdx) => (
+                        <span key={sIdx} className="skill-chip-mini">{skill}</span>
+                      ))}
+                      {item.skills.length > 4 && (
+                        <span className="skill-more-mini">+{item.skills.length - 4}</span>
+                      )}
+                    </div>
+                  )}
+
+                  {item.url && (
+                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="portfolio-link-public">
+                      <FiExternalLink size={14} /> {t("profile.viewProject", "View Project")}
+                    </a>
+                  )}
                 </div>
               </div>
             ))}

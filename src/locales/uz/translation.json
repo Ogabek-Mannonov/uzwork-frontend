@@ -304,7 +304,19 @@
     "cvTip5": "Xatolar uchun diqqat bilan tekshiring",
     "selectCategory": "Sohangizni tanlang",
     "addSkillPlaceholder": "Ko'nikma kiriting va Enter bosing",
-    "bioPlaceholder": "Professional tajriba, ko'nikmalar va mutaxassisligingiz haqida yozing..."
+    "portfolioModalSub": "Professional ishlaringizni namoyish qilish uchun tafsilotlarni to'ldiring",
+    "projectTitle": "Loyiha nomi",
+    "projectUrl": "Loyiha havolasi (URL)",
+    "description": "Tavsif",
+    "projectDescPlaceholder": "Nima qilganingiz, qaysi vositalardan foydalanganingiz va qanday natijaga erishganingiz haqida qisqacha yozing...",
+    "media": "Loyiha media fayllari",
+    "uploadMedia": "Rasm yoki PDF yuklash uchun bosing",
+    "uploadLimit": "Rasm, PDF (maks. 5MB)",
+    "skills": "Ko'nikmalar va Texnologiyalar",
+    "publishProject": "Loyihani chop etish",
+    "updateProject": "Loyihani yangilash",
+    "saving": "Saqlanmoqda...",
+    "viewProject": "Loyihani ko'rish"
   },
   "publicProfile": {
     "aboutMe": "O'zim haqimda",

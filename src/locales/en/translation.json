@@ -304,7 +304,19 @@
     "cvTip5": "Proofread carefully for errors",
     "selectCategory": "Select your category",
     "addSkillPlaceholder": "Enter skill and press Enter",
-    "bioPlaceholder": "Write about your professional experience, skills, and expertise..."
+    "portfolioModalSub": "Fill in the details to showcase your professional work",
+    "projectTitle": "Project Title",
+    "projectUrl": "Project URL",
+    "description": "Description",
+    "projectDescPlaceholder": "Briefly explain what you did, the tools used, and the results achieved...",
+    "media": "Project Media",
+    "uploadMedia": "Click to upload images or PDF",
+    "uploadLimit": "Images, PDF (max 5MB)",
+    "skills": "Skills & Technologies",
+    "publishProject": "Publish Project",
+    "updateProject": "Update Project",
+    "saving": "Saving...",
+    "viewProject": "View Project"
   },
   "publicProfile": {
     "aboutMe": "About Me",
