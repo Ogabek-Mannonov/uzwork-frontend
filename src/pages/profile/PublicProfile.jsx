@@ -18,7 +18,11 @@ const BACKEND = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://loc
 function avatarSrc(url) {
   if (!url) return null;
   if (url.startsWith("http")) return url;
-  return `${BACKEND}${url}`;
+  
+  // Ensure we don't have double slashes if the URL already starts with one
+  // or add a slash if it's missing.
+  const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+  return `${BACKEND}${cleanUrl}`;
 }
 
 function AvatarImage({ src, size = 16, className = "", alt = "Avatar" }) {
@@ -406,7 +410,11 @@ export default function PublicProfile() {
               <div key={i} className="portfolio-premium-card-public">
                 <div className="portfolio-card-media-public">
                   <img 
-                    src={item.media && item.media.length > 0 ? avatarSrc(item.media[0].url) : "https://via.placeholder.com/600x400?text=No+Media"} 
+                    src={
+                      (item.media && item.media.length > 0) ? avatarSrc(item.media[0].url) : 
+                      (item.portfolio_media && item.portfolio_media.length > 0) ? avatarSrc(item.portfolio_media[0].url) :
+                      "https://via.placeholder.com/600x400?text=No+Media"
+                    } 
                     alt={item.title} 
                   />
                   <div className="portfolio-media-count">

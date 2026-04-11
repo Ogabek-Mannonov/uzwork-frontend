@@ -47,6 +47,8 @@ import {
   ExternalLink,
   Link2,
   Image as ImageIcon,
+  Video,
+  Music,
   TrendingUp,
   DollarSign,
   Calendar,
@@ -79,7 +81,11 @@ const BACKEND = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://loc
 function avatarSrc(url) {
   if (!url) return null;
   if (url.startsWith("http")) return url;
-  return `${BACKEND}${url}`;
+  
+  // Ensure we don't have double slashes if the URL already starts with one
+  // or add a slash if it's missing.
+  const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+  return `${BACKEND}${cleanUrl}`;
 }
 
 function AvatarImage({ src, size = 16, className = "" }) {
@@ -139,6 +145,7 @@ const MyProfile = () => {
     skills: []
   });
   const [newSkillInput, setNewSkillInput] = useState("");
+  const [portSkillSuggestions, setPortSkillSuggestions] = useState([]);
   
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [editingLangIdx, setEditingLangIdx] = useState(null);
@@ -173,20 +180,9 @@ const MyProfile = () => {
   const [skillSearch, setSkillSearch] = useState("");
   const [skillSuggestions, setSkillSuggestions] = useState([]);
   const [activeSuggestion, setActiveSuggestion] = useState(0);
-  const [categories, setCategories] = useState([]);
-
-
   const showMessage = (type, text) => {
     setMessage({ type, text });
   };
-
-  useEffect(() => {
-    const fetchCats = async () => {
-      const res = await getCategories();
-      if (res?.success) setCategories(res.data);
-    };
-    fetchCats();
-  }, []);
 
   useEffect(() => {
     if (message.text) {
@@ -237,17 +233,25 @@ const MyProfile = () => {
         }
 
         const portRes = await getMyPortfolio();
-        // [FIX]: Portfel ma'lumotlari to'g'ridan to'g'ri array emas, balki .data.items ni ichida keladi.
-        if (portRes?.data?.items && Array.isArray(portRes.data.items)) {
-          setPortfolio(portRes.data.items.map(p => ({
+        console.log("[Portfolio FETCH] backend response:", portRes);
+        
+        // Robust handling of portfolio data structure
+        const portItems = portRes?.data?.items || portRes?.data || portRes || [];
+        
+        if (Array.isArray(portItems)) {
+          setPortfolio(portItems.map(p => ({
             id: p.id,
             title: p.title,
+            role: p.role || "",
             description: p.description,
-            url: p.project_url,
-            images: p.media && p.media.length > 0 ? p.media.map(m => m.url) : [],
+            url: p.project_url || p.url,
+            media: p.media || p.portfolio_media || [],
             skills: p.skills || [],
             created_at: p.created_at
           })));
+        } else if (portRes?.success && portRes?.data?.items) {
+           // Fallback for some specific structures
+           setPortfolio(portRes.data.items);
         }
 
         // Sertifikatlarni backenddan olish
@@ -265,6 +269,19 @@ const MyProfile = () => {
     };
     fetchData();
   }, []);
+
+  // Update portfolio skill suggestions
+  useEffect(() => {
+    if (newSkillInput.trim().length > 0) {
+      const filtered = PROFESSIONAL_SKILLS.filter(s => 
+        s.toLowerCase().includes(newSkillInput.toLowerCase()) && 
+        !portfolioForm.skills.includes(s)
+      ).slice(0, 5);
+      setPortSkillSuggestions(filtered);
+    } else {
+      setPortSkillSuggestions([]);
+    }
+  }, [newSkillInput, portfolioForm.skills]);
 
   const [userData, setUserData] = useState({
     id: "",
@@ -303,35 +320,7 @@ const MyProfile = () => {
 
   const [certificates, setCertificates] = useState([]);
 
-  const [portfolio, setPortfolio] = useState([
-    {
-      id: 1,
-      title: "E-commerce Platform",
-      description: "Full-stack marketplace with 50k+ active users",
-      url: "https://example.com/ecommerce",
-      images: ["https://images.unsplash.com/photo-1557821552-17105176677c?w=600"],
-      skills: ["React", "Node.js", "PostgreSQL"],
-      created_at: "2024-01-15"
-    },
-    {
-      id: 2,
-      title: "Real-time Analytics Dashboard",
-      description: "Data visualization platform for enterprise clients",
-      url: "https://example.com/analytics",
-      images: ["https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600"],
-      skills: ["Vue.js", "Python", "Redis"],
-      created_at: "2024-02-10"
-    },
-    {
-      id: 3,
-      title: "Mobile Banking App",
-      description: "Secure fintech solution with biometric auth",
-      url: "https://example.com/banking",
-      images: ["https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=600"],
-      skills: ["React Native", "Firebase"],
-      created_at: "2024-03-05"
-    }
-  ]);
+  const [portfolio, setPortfolio] = useState([]);
 
   const [passwordForm, setPasswordForm] = useState({
     current: "",
@@ -671,6 +660,7 @@ const MyProfile = () => {
     setEditingPortfolio(null);
     setPortfolioForm({
       title: "",
+      role: "",
       description: "",
       url: "",
       media: [],
@@ -684,8 +674,9 @@ const MyProfile = () => {
     setEditingPortfolio(item);
     setPortfolioForm({
       title: item.title,
+      role: item.role || "",
       description: item.description,
-      url: item.url,
+      url: item.url || item.project_url || "",
       media: item.media || [],
       files: [],
       skills: item.skills || []
@@ -703,6 +694,7 @@ const MyProfile = () => {
     try {
       const payload = {
         title: portfolioForm.title,
+        role: portfolioForm.role,
         description: portfolioForm.description,
         project_url: portfolioForm.url,
         skills: portfolioForm.skills,
@@ -721,22 +713,33 @@ const MyProfile = () => {
 
       // Upload new files
       if (portfolioForm.files.length > 0) {
+        const uploadErrors = [];
         for (const file of portfolioForm.files) {
           const formData = new FormData();
           formData.append("media", file);
-          await addPortfolioMedia(itemId, formData);
+          const mediaRes = await addPortfolioMedia(itemId, formData);
+          if (!mediaRes?.success) {
+            uploadErrors.push(file.name);
+            console.error("Media upload failed:", file.name, mediaRes?.message);
+          }
+        }
+        if (uploadErrors.length > 0) {
+          showMessage("error", `Media yuklanmadi: ${uploadErrors.join(", ")}`);
         }
       }
 
       // Refresh data
       const portRes = await getMyPortfolio();
-      if (portRes?.success) {
-        setPortfolio(portRes.data.items.map(p => ({
+      const portItems = portRes?.data?.items || portRes?.data || portRes || [];
+      
+      if (Array.isArray(portItems)) {
+        setPortfolio(portItems.map(p => ({
           id: p.id,
           title: p.title,
+          role: p.role || "",
           description: p.description,
-          url: p.project_url,
-          media: p.media || [],
+          url: p.project_url || p.url,
+          media: p.media || p.portfolio_media || [],
           skills: p.skills || [],
           created_at: p.created_at
         })));
@@ -1815,49 +1818,36 @@ const MyProfile = () => {
                         </button>
                       </div>
                     ) : (
-                      <div className="portfolio-premium-grid">
+                      <div className="up-portfolio-grid">
                         {portfolio.map(item => (
-                          <div key={item.id} className="portfolio-premium-card">
-                            <div className="portfolio-card-media">
+                          <div key={item.id} className="up-portfolio-card" onClick={() => openEditPortfolio(item)}>
+                            <div className="up-card-cover">
                               <img 
                                 src={item.media && item.media.length > 0 ? avatarSrc(item.media[0].url) : "https://via.placeholder.com/600x400?text=No+Media"} 
                                 alt={item.title} 
-                                className="portfolio-thumbnail"
                               />
-                              <div className="portfolio-card-overlay">
-                                <div className="portfolio-card-actions">
-                                  <button className="action-circle-btn" onClick={() => openEditPortfolio(item)} title={t("profile.edit", "Edit")}>
-                                    <Edit size={16} />
-                                  </button>
-                                  <button className="action-circle-btn delete" onClick={() => handleDeletePortfolio(item.id)} title={t("profile.delete", "Delete")}>
-                                    <Trash2 size={16} />
-                                  </button>
-                                </div>
-                                <div className="portfolio-card-badge">
-                                  {item.media?.length || 0} <ImageIcon size={12} />
-                                </div>
+                              <div className="up-card-actions" onClick={(e) => e.stopPropagation()}>
+                                <button className="up-action-btn" onClick={() => openEditPortfolio(item)} title={t("profile.edit", "Edit")}>
+                                  <Edit size={14} />
+                                </button>
+                                <button className="up-action-btn" onClick={() => handleDeletePortfolio(item.id)} title={t("profile.delete", "Delete")}>
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                              <div className="up-card-type-icon">
+                                <ImageIcon size={16} />
                               </div>
                             </div>
-                            <div className="portfolio-card-content">
-                              <h3 className="portfolio-card-title">{item.title}</h3>
-                              <p className="portfolio-card-desc" title={item.description}>{item.description}</p>
+                            <div className="up-card-content">
+                              <h3 className="up-card-title">{item.title}</h3>
+                              {item.role && <p className="up-card-role">{item.role}</p>}
                               
-                              <div className="portfolio-card-footer">
-                                {item.skills && item.skills.length > 0 && (
-                                  <div className="portfolio-card-skills">
-                                    {item.skills.slice(0, 3).map((skill, sIdx) => (
-                                      <span key={sIdx} className="portfolio-skill-tag">{skill}</span>
-                                    ))}
-                                    {item.skills.length > 3 && (
-                                      <span className="portfolio-skill-more">+{item.skills.length - 3}</span>
-                                    )}
-                                  </div>
-                                )}
-                                
-                                {item.url && (
-                                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="portfolio-card-link" title={item.url}>
-                                    <Link2 size={14} /> {t("profile.viewProject", "View")}
-                                  </a>
+                              <div className="up-card-skills">
+                                {item.skills && item.skills.slice(0, 3).map((skill, sIdx) => (
+                                  <span key={sIdx} className="up-mini-skill">{skill}</span>
+                                ))}
+                                {item.skills && item.skills.length > 3 && (
+                                  <span className="up-mini-skill">+{item.skills.length - 3}</span>
                                 )}
                               </div>
                             </div>
@@ -2503,180 +2493,194 @@ const MyProfile = () => {
         </div>
       )}
 
-      {/* PORTFOLIO MODAL */}
+      {/* PORTFOLIO MODAL - UPWORK REDESIGN */}
       {showPortfolioModal && (
-        <div className="modal-overlay" onClick={() => !isLoading && setShowPortfolioModal(false)}>
-          <div className="portfolio-premium-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header-premium">
-              <div className="header-icon-box">
-                <Briefcase size={20} />
-              </div>
-              <div>
-                <h2>{editingPortfolio ? t("profile.editProject", "Edit Project") : t("profile.addProject", "Add New Project")}</h2>
-                <p>{t("profile.portfolioModalSub", "Fill in the details to showcase your professional work")}</p>
-              </div>
-              <button className="modal-close-premium" onClick={() => setShowPortfolioModal(false)} disabled={isLoading}>
-                <X size={20} />
+        <div className="portfolio-modal-overlay" onClick={() => !isLoading && setShowPortfolioModal(false)}>
+          <div className="portfolio-upwork-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="up-modal-header">
+              <h2>{editingPortfolio ? t("profile.editProject", "Edit portfolio project") : t("profile.addProject", "Add a new portfolio project")}</h2>
+              <p className="up-modal-sub">{t("profile.allFieldsRequired", "All fields are required unless otherwise indicated.")}</p>
+              <button className="up-modal-close" onClick={() => setShowPortfolioModal(false)} disabled={isLoading}>
+                <X size={24} />
               </button>
             </div>
 
-            <div className="modal-body-premium">
-              <div className="form-premium-grid">
-                <div className="form-left-col">
-                  <div className="form-group-premium">
-                    <label>{t("profile.projectTitle", "Project Title")} <span className="req">*</span></label>
+            <div className="up-modal-body">
+              <div className="up-form-group">
+                <label>{t("profile.projectTitle", "Project title")} <span className="req">*</span></label>
+                <input
+                  type="text"
+                  className="up-input"
+                  placeholder={t("profile.enterTitle", "Enter a brief but descriptive title.")}
+                  value={portfolioForm.title}
+                  onChange={(e) => handlePortfolioInputChange("title", e.target.value.slice(0, 70))}
+                  disabled={isLoading}
+                />
+                <div className="up-field-count">{70 - (portfolioForm.title?.length || 0)} {t("profile.charsLeft", "characters left")}</div>
+              </div>
+
+              <div className="up-form-row">
+                <div className="up-form-group half">
+                  <label>{t("profile.yourRole", "Your role")} <span className="optional">(optional)</span></label>
+                  <input
+                    type="text"
+                    className="up-input"
+                    placeholder={t("profile.rolePlaceholder", "e.g., Front-end engineer or Marketing analyst")}
+                    value={portfolioForm.role || ""}
+                    onChange={(e) => handlePortfolioInputChange("role", e.target.value.slice(0, 100))}
+                    disabled={isLoading}
+                  />
+                  <div className="up-field-count">{100 - (portfolioForm.role?.length || 0)} {t("profile.charsLeft", "characters left")}</div>
+                </div>
+
+                <div className="up-form-group half">
+                  <label>{t("profile.projectUrl", "Project URL")} <span className="optional">(optional)</span></label>
+                  <input
+                    type="url"
+                    className="up-input"
+                    placeholder="https://example.com"
+                    value={portfolioForm.url || ""}
+                    onChange={(e) => handlePortfolioInputChange("url", e.target.value)}
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+
+              <div className="up-form-group">
+                <label>{t("profile.projectDesc", "Project description")} <span className="req">*</span></label>
+                <textarea
+                  className="up-textarea"
+                  rows={4}
+                  placeholder={t("profile.descPlaceholder", "Briefly describe the project's goals, your solution and the impact you made here.")}
+                  value={portfolioForm.description}
+                  onChange={(e) => handlePortfolioInputChange("description", e.target.value.slice(0, 600))}
+                  disabled={isLoading}
+                />
+                <div className="up-field-count">{600 - (portfolioForm.description?.length || 0)} {t("profile.charsLeft", "characters left")}</div>
+              </div>
+
+              <div className="up-form-group">
+                <label>{t("profile.skillsDeliverables", "Skills and deliverables")} <span className="req">*</span></label>
+                <div className="up-skill-input-box">
+                  <div className="up-skills-selection">
+                    {portfolioForm.skills.map((skill, idx) => (
+                      <span key={idx} className="up-skill-tag">
+                        {skill}
+                        <button onClick={() => setPortfolioForm(prev => ({ ...prev, skills: prev.skills.filter((_, i) => i !== idx) }))}>
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
                     <input
                       type="text"
-                      className="premium-input"
-                      placeholder={t("profile.titlePlaceholder", "e.g. E-commerce Website")}
-                      value={portfolioForm.title}
-                      onChange={(e) => handlePortfolioInputChange("title", e.target.value)}
-                      disabled={isLoading}
+                      className="up-skill-ghost-input"
+                      placeholder={t("profile.typeToAddSkill", "Type to add skills relevant to this project")}
+                      value={newSkillInput}
+                      onChange={(e) => setNewSkillInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddSkill();
+                        }
+                      }}
+                      disabled={isLoading || portfolioForm.skills.length >= 10}
                     />
                   </div>
 
-                  <div className="form-group-premium">
-                    <label>{t("profile.projectUrl", "Project URL")}</label>
-                    <div className="input-with-icon">
-                      <Link2 size={16} />
-                      <input
-                        type="url"
-                        className="premium-input icon-left"
-                        placeholder="https://example.com"
-                        value={portfolioForm.url || ""}
-                        onChange={(e) => handlePortfolioInputChange("url", e.target.value)}
-                        disabled={isLoading}
-                      />
+                  {portSkillSuggestions.length > 0 && (
+                    <div className="up-skill-suggestions-container">
+                      <div className="up-skill-suggestions">
+                        {portSkillSuggestions.map((suggestion, idx) => (
+                          <div 
+                            key={idx} 
+                            className="up-suggestion-item"
+                            onClick={() => {
+                              if (portfolioForm.skills.length < 10) {
+                                handlePortfolioInputChange("skills", [...portfolioForm.skills, suggestion]);
+                                setNewSkillInput("");
+                                setPortSkillSuggestions([]);
+                              }
+                            }}
+                          >
+                            {suggestion}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="form-group-premium">
-                    <label>{t("profile.description", "Description")}</label>
-                    <textarea
-                      className="premium-textarea"
-                      rows={5}
-                      placeholder={t("profile.projectDescPlaceholder", "Briefly explain what you did, the tools used, and the results achieved...")}
-                      value={portfolioForm.description}
-                      onChange={(e) => handlePortfolioInputChange("description", e.target.value)}
-                      disabled={isLoading}
-                    />
-                  </div>
+                  <div className="up-field-count">{10 - portfolioForm.skills.length} {t("profile.skillsLeft", "skills left")}</div>
                 </div>
 
-                <div className="form-right-col">
-                  <div className="form-group-premium">
-                    <label>{t("profile.media", "Project Media")} <span className="optional">(max 10)</span></label>
-                    <div className="media-upload-container">
-                      <input
-                        type="file"
-                        id="portfolio-files"
-                        multiple
-                        accept="image/*,application/pdf"
-                        onChange={handlePortfolioFileSelect}
-                        style={{ display: 'none' }}
-                        disabled={isLoading}
-                      />
-                      <label htmlFor="portfolio-files" className="media-dropzone" style={{ opacity: isLoading ? 0.6 : 1 }}>
-                        <Upload size={24} />
-                        <span>{t("profile.uploadMedia", "Click to upload images or PDF")}</span>
-                        <small>{t("profile.uploadLimit", "Images, PDF up to 5MB")}</small>
-                      </label>
-                    </div>
-
-                    {/* Previews */}
-                    <div className="media-previews-list">
-                      {/* Server-side existing media */}
-                      {portfolioForm.media.map((med) => (
-                        <div key={med.id} className="media-preview-box">
-                          {med.media_type === 'image' ? (
-                            <img src={avatarSrc(med.url)} alt="existing" />
-                          ) : (
-                            <div className="file-icon-preview"><FileText size={24} /></div>
-                          )}
-                          <button
-                            className="btn-remove-p"
-                            onClick={() => handleRemoveExistingMedia(med.id)}
-                            disabled={isLoading}
-                            type="button"
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ))}
-
-                      {/* Local newly selected files */}
-                      {portfolioForm.files.map((file, idx) => (
-                        <div key={`new-${idx}`} className="media-preview-box new">
-                          {file.type.startsWith('image/') ? (
-                            <img src={URL.createObjectURL(file)} alt="new" />
-                          ) : (
-                            <div className="file-icon-preview"><FileText size={24} /></div>
-                          )}
-                          <div className="new-badge">New</div>
-                          <button
-                            className="btn-remove-p"
-                            onClick={() => handleRemovePortfolioFile(idx)}
-                            disabled={isLoading}
-                            type="button"
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+              <div className="up-form-group">
+                <label>{t("profile.projectMedia", "Project Media")}</label>
+                <div className="up-media-dropzone" onClick={() => document.getElementById('up-portfolio-files').click()}>
+                  <input
+                    type="file"
+                    id="up-portfolio-files"
+                    multiple
+                    accept="image/*,application/pdf"
+                    onChange={handlePortfolioFileSelect}
+                    style={{ display: 'none' }}
+                    disabled={isLoading}
+                  />
+                  <div className="up-media-icons">
+                    <div className="up-media-circle"><ImageIcon size={24} /></div>
+                    <div className="up-media-circle"><Video size={24} /></div>
+                    <div className="up-media-circle text">T</div>
+                    <div className="up-media-circle"><Link2 size={24} /></div>
+                    <div className="up-media-circle"><FileText size={24} /></div>
+                    <div className="up-media-circle"><Music size={24} /></div>
                   </div>
-
-                  <div className="form-group-premium">
-                    <label>{t("profile.skills", "Skills & Technologies")}</label>
-                    <div className="skill-input-premium">
-                      <input
-                        type="text"
-                        className="premium-input"
-                        placeholder={t("profile.addSkillPlaceholder", "Add skill...")}
-                        value={newSkillInput}
-                        onChange={(e) => setNewSkillInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddSkill();
-                          }
-                        }}
-                        disabled={isLoading}
-                      />
-                      <button className="skill-add-btn" onClick={handleAddSkill} type="button" disabled={isLoading}>
-                        <Plus size={18} />
-                      </button>
-                    </div>
-                    <div className="skills-tag-p-list">
-                      {portfolioForm.skills.map((skill, index) => (
-                        <span key={index} className="skill-tag-p">
-                          {skill}
-                          <button onClick={() => handleRemoveSkill(skill)} disabled={isLoading}>
-                            <X size={12} />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                  <p className="up-media-add-text">{t("profile.addPortfolioContent", "Add content")}</p>
                 </div>
+
+                {/* Media Previews */}
+                {(portfolioForm.media.length > 0 || portfolioForm.files.length > 0) && (
+                  <div className="up-media-previews">
+                    {portfolioForm.media.map((med) => (
+                      <div key={med.id} className="up-preview-item">
+                        {med.media_type === 'image' ? (
+                          <img src={avatarSrc(med.url)} alt="existing" />
+                        ) : (
+                          <div className="up-file-icon"><FileText size={32} /></div>
+                        )}
+                        <button className="up-remove-media" onClick={() => handleRemoveExistingMedia(med.id)} disabled={isLoading}>
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                    {portfolioForm.files.map((file, idx) => (
+                      <div key={`new-${idx}`} className="up-preview-item new">
+                        {file.type.startsWith('image/') ? (
+                          <img src={URL.createObjectURL(file)} alt="new" />
+                        ) : (
+                          <div className="up-file-icon"><FileText size={32} /></div>
+                        )}
+                        <div className="up-new-label">New</div>
+                        <button className="up-remove-media" onClick={() => handleRemovePortfolioFile(idx)} disabled={isLoading}>
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="modal-footer-premium">
-              <button className="btn-cancel-p" onClick={() => setShowPortfolioModal(false)} disabled={isLoading}>
-                {t("profile.cancel", "Cancel")}
+            <div className="up-modal-footer">
+              <button className="up-btn-link" onClick={() => setShowPortfolioModal(false)} disabled={isLoading}>
+                {t("profile.saveAsDraft", "Save as draft")}
               </button>
-              <button className="btn-save-p" onClick={handleSavePortfolio} disabled={isLoading || !portfolioForm.title}>
-                {isLoading ? (
-                  <><RefreshCw size={18} className="spinning" /> {t("profile.saving", "Saving...")}</>
-                ) : (
-                  <><Save size={18} /> {editingPortfolio ? t("profile.updateProject", "Update Project") : t("profile.publishProject", "Publish Project")}</>
-                )}
+              <button className="up-btn-primary" onClick={handleSavePortfolio} disabled={isLoading}>
+                {isLoading ? <RefreshCw size={18} className="spinning" /> : t("profile.nextPreview", "Next: Preview")}
               </button>
             </div>
           </div>
         </div>
       )}
+
       {/* ===== CERTIFICATION MODAL (Upwork Style) ===== */}
       {showCertModal && (
         <div className="modal-overlay" onClick={() => !certLoading && setShowCertModal(false)}>
