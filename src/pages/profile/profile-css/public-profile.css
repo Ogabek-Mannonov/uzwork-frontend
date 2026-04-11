@@ -596,32 +596,55 @@
 }
 
 .public-bio {
-  font-size: 16px;
-  line-height: 1.7;
-  color: var(--text-2);
-  transition: all 0.4s ease;
-  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text);
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
 }
 
-.public-bio:not(.expanded) {
-  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+.bio-quote-container {
+  position: relative;
+  background: rgba(var(--brand-rgb), 0.03);
+  border-left: 4px solid var(--brand);
+  padding: 32px 32px 32px 48px;
+  border-radius: 4px 24px 24px 4px;
+  margin-top: 16px;
+  transition: all 0.3s ease;
+}
+
+.dark .bio-quote-container {
+  background: rgba(255, 255, 255, 0.03);
+  border-left-color: var(--brand);
+}
+
+.bio-quote-icon {
+  position: absolute;
+  top: 16px;
+  left: 14px;
+  font-size: 24px;
+  color: var(--brand);
+  opacity: 0.2;
 }
 
 .bio-toggle-btn {
+  margin-top: 12px;
   background: transparent;
   border: none;
+  border-radius: 8px;
   color: var(--brand);
+  font-size: 13px;
   font-weight: 700;
-  font-size: 14px;
   cursor: pointer;
-  padding: 10px 0;
-  transition: var(--transition);
+  padding: 6px 12px;
+  transition: all 0.2s ease;
+  background: rgba(var(--brand-rgb), 0.05);
 }
 
 .bio-toggle-btn:hover {
-  text-decoration: underline;
-  opacity: 0.8;
+  background: rgba(var(--brand-rgb), 0.1);
+  transform: translateY(-1px);
 }
 
 .public-skills-grid {

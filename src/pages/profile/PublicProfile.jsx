@@ -13,6 +13,7 @@ import {
   FiLink, FiSend, FiLinkedin, FiPhone, FiMail,
   FiClock, FiCheckCircle, FiTerminal, FiCpu
 } from "react-icons/fi";
+import { FaQuoteLeft } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import "./profile-css/public-profile.css";
 import "../../assets/style/theme.css";
@@ -312,17 +313,20 @@ export default function PublicProfile() {
             {profile.bio && (
               <div className="bio-section soft-fade-in stagger-3">
                 <h3 className="section-title">{t("publicProfile.aboutMe")}</h3>
-                <div className={`public-bio ${isBioExpanded ? 'expanded' : ''}`}>
-                  {profile.bio.length > 300 && !isBioExpanded 
-                    ? `${profile.bio.substring(0, 300)}...` 
-                    : profile.bio
-                  }
+                <div className="bio-quote-container">
+                  <FaQuoteLeft className="bio-quote-icon" />
+                  <div className={`public-bio ${isBioExpanded ? 'expanded' : ''}`}>
+                    {profile.bio.length > 500 && !isBioExpanded 
+                      ? `${profile.bio.substring(0, 500)}...` 
+                      : profile.bio
+                    }
+                  </div>
+                  {profile.bio.length > 500 && (
+                    <button className="bio-toggle-btn" onClick={() => setIsBioExpanded(!isBioExpanded)}>
+                      {isBioExpanded ? t("common.showLess", "Kamroq ko'rsatish") : t("common.readMore", "Batafsil")}
+                    </button>
+                  )}
                 </div>
-                {profile.bio.length > 300 && (
-                  <button className="bio-toggle-btn" onClick={() => setIsBioExpanded(!isBioExpanded)}>
-                    {isBioExpanded ? t("common.showLess", "Kamroq ko'rsatish") : t("common.readMore", "Batafsil")}
-                  </button>
-                )}
               </div>
             )}
 
