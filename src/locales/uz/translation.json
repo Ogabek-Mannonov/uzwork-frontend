@@ -251,6 +251,8 @@
     "portfolioDesc": "Eng yaxshi ishlaringizni namoyish qiling",
     "noPortfolio": "Hali portfolio elementlari yo'q",
     "addPortfolio": "Portfolio qo'shish",
+    "mySkills": "Ko'nikmalar",
+    "membershipProfessional": "Professional",
     "hourlyRate": "Soatlik narx",
     "availability": "Mavjudligi",
     "responseTime": "Javob berish vaqti",
@@ -330,7 +332,24 @@
     "publishProject": "Loyihani chop etish",
     "updateProject": "Loyihani yangilash",
     "saving": "Saqlanmoqda...",
-    "viewProject": "Loyihani ko'rish"
+    "viewProject": "Loyihani ko'rish",
+    "status": {
+      "available_now": "Hozir band emas",
+      "available": "Faol",
+      "busy": "Band",
+      "away": "Uzoqda"
+    }
+  },
+  "skills": {
+    "React": "React",
+    "JavaScript": "JavaScript",
+    "Node.js": "Node.js",
+    "Python": "Python",
+    "Design": "Dizayn",
+    "UI/UX": "UI/UX",
+    "Accounting": "Buxgalteriya",
+    "Marketing": "Marketing",
+    "English": "Ingliz tili"
   },
   "publicProfile": {
     "aboutMe": "O'zim haqimda",

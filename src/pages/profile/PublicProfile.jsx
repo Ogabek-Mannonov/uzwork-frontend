@@ -9,18 +9,19 @@ import { getUserProfile } from "../../api/common";
 import {
   FiArrowLeft, FiMapPin, FiDollarSign, FiStar,
   FiBriefcase, FiAward, FiFileText, FiExternalLink,
-  FiShield, FiCalendar, FiGlobe
+  FiShield, FiCalendar, FiGlobe, FiShare2,
+  FiLink, FiSend, FiLinkedin, FiPhone, FiMail,
+  FiClock, FiCheckCircle, FiTerminal, FiCpu
 } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
+import "./profile-css/public-profile.css";
+import "../../assets/style/theme.css";
 
 const BACKEND = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
 
 function avatarSrc(url) {
   if (!url) return null;
   if (url.startsWith("http")) return url;
-  
-  // Ensure we don't have double slashes if the URL already starts with one
-  // or add a slash if it's missing.
   const cleanUrl = url.startsWith("/") ? url : `/${url}`;
   return `${BACKEND}${cleanUrl}`;
 }
@@ -40,9 +41,6 @@ function AvatarImage({ src, size = 16, className = "", alt = "Avatar" }) {
   );
 }
 
-import "./profile-css/public-profile.css";
-import "../../assets/style/theme.css";
-
 export default function PublicProfile() {
   const { t } = useTranslation();
   const { id } = useParams();
@@ -51,6 +49,10 @@ export default function PublicProfile() {
   const [portfolio, setPortfolio] = useState([]);
   const [certifications, setCertifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  const [isBioExpanded, setIsBioExpanded] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -62,7 +64,6 @@ export default function PublicProfile() {
           getPublicCertifications(id),
         ]);
 
-        // Normalize profile data
         const rawData = profileRes?.data || (profileRes?.user ? profileRes : null);
 
         if (rawData) {
@@ -75,7 +76,7 @@ export default function PublicProfile() {
             first_name: u.first_name,
             last_name: u.last_name,
             username: u.username,
-            email: u.email,
+            email: u.email || p.email || rawData.email || "",
             avatar_url: p.avatar_url || u.avatar_url || "",
             title: p.title || "",
             bio: p.bio || "",
@@ -89,18 +90,16 @@ export default function PublicProfile() {
             languages: p.languages || [],
             cv_url: p.cv_url || "",
             cover_url: p.cover_url || "",
-            phone: u.phone || "",
-            availability_status: p.availability_status || "Available now",
+            phone: u.phone || p.phone || rawData.phone || "",
+            availability_status: p.availability_status || t("profile.status.available", "Hozir band emas"),
           });
         } else {
           setProfile(null);
         }
 
-        // Portfolio
         const portData = portfolioRes?.data?.items || portfolioRes?.data || portfolioRes || [];
         setPortfolio(Array.isArray(portData) ? portData : []);
 
-        // Certifications
         const certData =
           certRes?.data?.certifications ||
           certRes?.data?.items ||
@@ -118,6 +117,22 @@ export default function PublicProfile() {
     };
     fetch();
   }, [id]);
+  
+  const handleShare = (platform) => {
+    const url = window.location.href;
+    const text = t("publicProfile.shareText", "UzWork'da {{name}}ning professional profilini ko'ring!", { name: profile?.fullName });
+    
+    if (platform === 'copy') {
+      navigator.clipboard.writeText(url);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } else if (platform === 'telegram') {
+      window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
+    } else if (platform === 'linkedin') {
+      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+    }
+    setShowShareMenu(false);
+  };
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -127,7 +142,23 @@ export default function PublicProfile() {
     }
   };
 
-  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const MONTHS = [
+    t("common.months.jan", "Jan"), t("common.months.feb", "Feb"), t("common.months.mar", "Mar"), 
+    t("common.months.apr", "Apr"), t("common.months.may", "May"), t("common.months.jun", "Jun"), 
+    t("common.months.jul", "Jul"), t("common.months.aug", "Aug"), t("common.months.sep", "Sep"), 
+    t("common.months.oct", "Oct"), t("common.months.nov", "Nov"), t("common.months.dec", "Dec")
+  ];
+
+  const renderProficiencyDots = (lvl) => {
+    const dotsCount = lvl === 'Basic' ? 1 : lvl === 'Conversational' ? 2 : lvl === 'Fluent' ? 3 : 4;
+    return (
+      <div className="proficiency-container">
+        {[1,2,3,4].map(i => (
+          <div key={i} className={`prof-dot ${i <= dotsCount ? 'active' : ''}`} />
+        ))}
+      </div>
+    );
+  };
 
   if (loading) return (
     <div className="public-profile-container">
@@ -179,276 +210,278 @@ export default function PublicProfile() {
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
                 </svg>
               </span>
+              
+              <div className="share-container">
+                <button 
+                  className={`public-share-btn ${showShareMenu ? 'active' : ''}`} 
+                  onClick={() => setShowShareMenu(!showShareMenu)}
+                  title={t("publicProfile.shareProfile", "Profilni ulashish")}
+                >
+                  <FiShare2 />
+                </button>
+                
+                {showShareMenu && (
+                  <div className="share-dropdown glass-card soft-fade-in">
+                    <button className="share-item" onClick={() => handleShare('copy')}>
+                      <FiLink /> {copySuccess ? t("common.copied", "Nusxa olindi!") : t("common.copyLink", "Havolani nusxalash")}
+                    </button>
+                    <button className="share-item" onClick={() => handleShare('telegram')}>
+                      <FiSend /> Telegram
+                    </button>
+                    <button className="share-item" onClick={() => handleShare('linkedin')}>
+                      <FiLinkedin /> LinkedIn
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-            {profile.username && <p className="public-username" style={{ color: 'var(--text-muted)', marginBottom: '8px', fontSize: '14px' }}>@{profile.username}</p>}
+            
+            {profile.username && <p className="public-username">@{profile.username}</p>}
             {profile.title && <p className="public-title">{profile.title}</p>}
 
-            <div className="profile-badges-row" style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-              <span className="profile-badge-item profile-badge-membership" style={{ 
-                display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: '600', padding: '4px 10px', borderRadius: '12px', background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' 
-              }}>
-                <FiAward size={14} /> Professional
-              </span>
-            </div>
-
-            {/* Stats Dashboard */}
-            <div className="stats-dashboard">
-              <div className="stat-card">
-                <FiDollarSign className="stat-icon" />
-                <div className="stat-info">
-                  <span className="stat-value">${profile.hourly_rate || 0}/hr</span>
-                  <span className="stat-label">{t("publicProfile.hourlyRate")}</span>
-                </div>
-              </div>
-
-              <div className="stat-card">
-                <FiStar className="stat-icon" />
-                <div className="stat-info">
-                  <span className="stat-value">{profile.job_success_score || 0}%</span>
-                  <span className="stat-label">{t("publicProfile.successScore")}</span>
-                </div>
-              </div>
-
-              <div className="stat-card">
-                <FiBriefcase className="stat-icon" />
-                <div className="stat-info">
-                  <span className="stat-value">${profile.total_earned || 0}</span>
-                  <span className="stat-label">{t("publicProfile.totalEarned")}</span>
-                </div>
-              </div>
-
-              <div className="stat-card">
-                <FiBriefcase className="stat-icon" />
-                <div className="stat-info">
-                  <span className="stat-value">{profile.jobs_completed || 0}</span>
-                  <span className="stat-label">{t("profile.jobsCompleted", "Jobs Completed")}</span>
-                </div>
-              </div>
-
-              <div className="stat-card">
-                <FiBriefcase className="stat-icon" />
-                <div className="stat-info">
-                  <span className="stat-value">{profile.active_projects || 0}</span>
-                  <span className="stat-label">{t("profile.activeProjects", "Active Projects")}</span>
-                </div>
-              </div>
-
-              {profile.location && (
+            <div className="header-meta-grid">
+              <div className="stats-dashboard">
                 <div className="stat-card">
-                  <FiMapPin className="stat-icon" />
+                  <div className="stat-icon"><FiDollarSign /></div>
                   <div className="stat-info">
-                    <span className="stat-value">{profile.location}</span>
-                    <span className="stat-label">{t("publicProfile.location")}</span>
+                    <span className="stat-value">
+                      ${profile.hourly_rate || 0}
+                      <span className="stat-unit">/{t("common.hour", "soat")}</span>
+                    </span>
+                    <span className="stat-label">{t("publicProfile.hourlyRate")}</span>
                   </div>
                 </div>
-              )}
-            </div>
 
-            <div className="availability-row" style={{ marginTop: '16px', display: 'flex', gap: '16px', color: 'var(--text-muted)', fontSize: '14px' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }}></div>
-                 {profile.availability_status}
-              </span>
-            </div>
+                <div className="stat-card">
+                  <div className="stat-icon"><FiStar /></div>
+                  <div className="stat-info">
+                    <span className="stat-value">{profile.job_success_score || 0}%</span>
+                    <span className="stat-label">{t("publicProfile.successScore")}</span>
+                  </div>
+                </div>
 
-            {profile.cv_url && (
-              <div className="action-row">
-                <a
-                  href={profile.cv_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="premium-btn primary"
-                >
-                  <FiFileText /> {t("publicProfile.viewResume")}
-                </a>
+                <div className="stat-card">
+                  <div className="stat-icon"><FiBriefcase /></div>
+                  <div className="stat-info">
+                    <span className="stat-value">${profile.total_earned || 0}</span>
+                    <span className="stat-label">{t("publicProfile.totalEarned")}</span>
+                  </div>
+                </div>
               </div>
-            )}
+
+              <div className="contact-quick-card glass-card">
+                <div className="availability-badges">
+                  <span className="availability-status-tag">
+                    <div className="pulse-dot"></div>
+                    {profile.availability_status && t(`profile.status.${profile.availability_status.toLowerCase().replace(/\s+/g, "_")}`, profile.availability_status)}
+                  </span>
+                  <span className="profile-membership-badge">
+                    <FiAward /> {t("profile.membershipProfessional", "Professional")}
+                  </span>
+                </div>
+                
+                <div className="contact-info-list">
+                  {profile.email && (
+                    <div className="contact-info-item">
+                      <FiMail /> <span>{profile.email}</span>
+                    </div>
+                  )}
+                  {profile.phone && (
+                    <div className="contact-info-item">
+                      <FiPhone /> <span>{profile.phone}</span>
+                    </div>
+                  )}
+                  {profile.location && (
+                    <div className="contact-info-item">
+                      <FiMapPin /> <span>{profile.location}</span>
+                    </div>
+                  )}
+                </div>
+
+                {profile.cv_url && (
+                  <a href={profile.cv_url} target="_blank" rel="noopener noreferrer" className="view-cv-btn">
+                    <FiFileText /> {t("publicProfile.viewResume")}
+                  </a>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="profile-content-grid">
-          <div className="profile-main-content">
-            {/* About Me */}
+        <div className="profile-main-content-full scroll-snap">
             {profile.bio && (
               <div className="bio-section soft-fade-in stagger-3">
                 <h3 className="section-title">{t("publicProfile.aboutMe")}</h3>
-                <p className="public-bio">{profile.bio}</p>
+                <div className={`public-bio ${isBioExpanded ? 'expanded' : ''}`}>
+                  {profile.bio.length > 300 && !isBioExpanded 
+                    ? `${profile.bio.substring(0, 300)}...` 
+                    : profile.bio
+                  }
+                </div>
+                {profile.bio.length > 300 && (
+                  <button className="bio-toggle-btn" onClick={() => setIsBioExpanded(!isBioExpanded)}>
+                    {isBioExpanded ? t("common.showLess", "Kamroq ko'rsatish") : t("common.readMore", "Batafsil")}
+                  </button>
+                )}
               </div>
             )}
 
-            {/* Certifications */}
-            {certifications.length > 0 && (
-              <div className="pub-cert-section soft-fade-in stagger-4">
-                <h3 className="section-title">
-                  <FiAward size={20} />
-                  {t("publicProfile.certifications", "Certifications")}
-                </h3>
-                <div className="pub-cert-list">
-                  {certifications.map((cert) => (
-                    <div key={cert.id} className="pub-cert-card">
-                      {/* Header: icon + title/issuer */}
-                      <div className="pub-cert-header">
-                        <div className="pub-cert-icon">
-                          <FiAward size={20} />
+            <div className="profile-info-combined-row soft-fade-in stagger-4">
+              <div className="combined-left">
+                  <div className="pub-cert-section">
+                    <h3 className="section-title">
+                      <FiAward />
+                      {t("publicProfile.certifications", "Certifications")}
+                    </h3>
+                    <div className="pub-cert-list">
+                      {certifications.length > 0 ? certifications.map((cert) => (
+                        <div key={cert.id} className="pub-cert-card">
+                          <div className="pub-cert-icon">
+                              <FiAward />
+                          </div>
+                          <div className="pub-cert-body">
+                            <h4 className="pub-cert-title">{cert.title}</h4>
+                            {cert.issuer && <p className="pub-cert-issuer">{cert.issuer}</p>}
+                          </div>
+                          {(cert.issue_month || cert.issue_year || cert.credential_id) && (
+                            <div className="pub-cert-meta">
+                              {(cert.issue_month || cert.issue_year) && (
+                                <span className="pub-cert-tag">
+                                  <FiCalendar size={11} />
+                                  {cert.issue_month
+                                    ? `${MONTHS[cert.issue_month - 1]} ${cert.issue_year || ""}`
+                                    : cert.issue_year}
+                                </span>
+                              )}
+                              {cert.credential_id && (
+                                <span className="pub-cert-tag">
+                                  <FiShield size={11} />
+                                  {t("profile.credentialId", "ID")}: {cert.credential_id}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          {cert.credential_url && (
+                            <a 
+                              href={cert.credential_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="pub-cert-link"
+                            >
+                              <FiExternalLink />
+                            </a>
+                          )}
                         </div>
-                        <div className="pub-cert-body">
-                          <h4 className="pub-cert-title">{cert.title}</h4>
-                          {cert.issuer && <p className="pub-cert-issuer">{cert.issuer}</p>}
+                      )) : (
+                        <div className="pub-cert-empty">{t("profile.noCertifications", "Sertifikatlar hali qo'shilmagan.")}</div>
+                      )}
+                    </div>
+                  </div>
+              </div>
+
+              <div className="section-vertical-divider"></div>
+
+              <div className="combined-right">
+                {profile.languages?.length > 0 && (
+                  <div className="combined-sub-section">
+                    <h3 className="section-title">
+                      <FiGlobe />
+                      {t("profile.languages", "Tillar")}
+                    </h3>
+                    <div className="public-languages-list">
+                      {profile.languages.map((lang, idx) => (
+                        <div key={idx} className="language-item-premium">
+                          <div className="lang-info-dash">
+                            <span className="lang-name">{lang.language}</span>
+                            <span className="lang-proficiency">
+                              {lang.proficiency === 'Basic' ? t("profile.profBasic", "Boshlang'ich") : 
+                               lang.proficiency === 'Conversational' ? t("profile.profConversational", "Suhbat darajasi") : 
+                               lang.proficiency === 'Fluent' ? t("profile.profFluent", "Erkin") : 
+                               lang.proficiency === 'Native/Bilingual' ? t("profile.profNativeBilingual", "Ona tili") : lang.proficiency}
+                            </span>
+                          </div>
+                          {renderProficiencyDots(lang.proficiency)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {profile.skills?.length > 0 && (
+                  <div className="combined-sub-section">
+                    <h3 className="section-title">
+                      <FiCpu />
+                      {t("profile.mySkills", "Ko'nikmalar")}
+                    </h3>
+                    <div className="public-skills-grid">
+                      {profile.skills.map((sk, i) => (
+                        <span key={i} className="public-skill-chip">{t(`skills.${sk}`, sk)}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {portfolio.length > 0 && (
+              <>
+                <div className="section-horizontal-divider"></div>
+                
+                <div className="public-portfolio-section-integrated">
+                  <div className="section-header-integrated">
+                    <h3 className="section-title">
+                      <FiBriefcase />
+                      {t("publicProfile.portfolio")}
+                    </h3>
+                  </div>
+                  
+                  <div className="public-portfolio-premium-grid">
+                    {portfolio.map((item, i) => (
+                      <div key={i} className="portfolio-premium-card-public">
+                        <div className="portfolio-card-media-public">
+                          <img 
+                            src={
+                              (item.media && item.media.length > 0) ? avatarSrc(item.media[0].url) : 
+                              (item.portfolio_media && item.portfolio_media.length > 0) ? avatarSrc(item.portfolio_media[0].url) :
+                              "https://via.placeholder.com/600x400?text=No+Media"
+                            } 
+                            alt={item.title} 
+                          />
+                          <div className="portfolio-media-count">
+                            {item.media?.length || 0} <FiBriefcase size={10} />
+                          </div>
+                        </div>
+                        <div className="portfolio-card-content-public">
+                          <h4 className="portfolio-title-public">{item.title}</h4>
+                          <p className="portfolio-desc-public" title={item.description}>
+                            {item.description}
+                          </p>
+                          
+                          {item.skills && item.skills.length > 0 && (
+                            <div className="portfolio-skills-public">
+                              {item.skills.slice(0, 4).map((skill, sIdx) => (
+                                <span key={sIdx} className="skill-chip-mini">{skill}</span>
+                              ))}
+                              {item.skills.length > 4 && (
+                                <span className="skill-more-mini">+{item.skills.length - 4}</span>
+                              )}
+                            </div>
+                          )}
+
+                          {item.url && (
+                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="portfolio-link-public">
+                              <FiExternalLink size={14} /> {t("profile.viewProject", "Loyihani ko'rish")}
+                            </a>
+                          )}
                         </div>
                       </div>
-
-                      {/* Divider */}
-                      {(cert.issue_month || cert.issue_year || cert.credential_id || cert.credential_url) && (
-                        <div className="pub-cert-divider" />
-                      )}
-
-                      {/* Meta tags */}
-                      {(cert.issue_month || cert.issue_year || cert.credential_id) && (
-                        <div className="pub-cert-meta">
-                          {(cert.issue_month || cert.issue_year) && (
-                            <span className="pub-cert-tag">
-                              <FiCalendar size={11} />
-                              {cert.issue_month
-                                ? `${MONTHS[cert.issue_month - 1]} ${cert.issue_year || ""}`
-                                : cert.issue_year}
-                            </span>
-                          )}
-                          {cert.credential_id && (
-                            <span className="pub-cert-tag">
-                              <FiShield size={11} />
-                              ID: {cert.credential_id}
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Credential link */}
-                      {cert.credential_url && (
-                        <a
-                          href={cert.credential_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="pub-cert-link"
-                        >
-                          <FiExternalLink size={13} />
-                          {t("publicProfile.showCredential", "Show Credential")}
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <aside className="profile-sidebar">
-            {/* Languages */}
-            {profile.languages?.length > 0 && (
-              <div className="public-skills-section soft-fade-in stagger-5" style={{ marginBottom: '24px' }}>
-                <h3 className="section-title">
-                  <FiGlobe style={{ marginRight: '8px' }} />
-                  {t("publicProfile.languages", "Languages")}
-                </h3>
-                <div className="public-languages-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {profile.languages.map((lang, idx) => (
-                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: '500', color: 'var(--text-color)' }}>{lang.language}</span>
-                      <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                        {lang.proficiency === 'Basic' ? t("profile.profBasic", "Basic") : 
-                         lang.proficiency === 'Conversational' ? t("profile.profConversational", "Conversational") : 
-                         lang.proficiency === 'Fluent' ? t("profile.profFluent", "Fluent") : 
-                         lang.proficiency === 'Native/Bilingual' ? t("profile.profNativeBilingual", "Native/Bilingual") : lang.proficiency}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            {/* Skills */}
-            {profile.skills?.length > 0 && (
-              <div className="public-skills-section soft-fade-in stagger-5">
-                <h3 className="section-title">{t("publicProfile.skills")}</h3>
-                <div className="public-skills-grid">
-                  {profile.skills.map((sk, i) => (
-                    <span key={i} className="public-skill-chip">{sk}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-            {/* Contact Info Sidebar */}
-            <div className="public-skills-section soft-fade-in stagger-5" style={{ marginBottom: '24px' }}>
-               <h3 className="section-title">{t("profile.contactDetails", "Contact Details")}</h3>
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px', color: 'var(--text)' }}>
-                 {profile.email && (
-                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                     <span style={{ color: 'var(--text-muted)' }}>{t("profile.email", "Email")}</span>
-                     <span style={{ fontWeight: '500' }}>{profile.email}</span>
-                   </div>
-                 )}
-                 {profile.phone && (
-                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                     <span style={{ color: 'var(--text-muted)' }}>{t("profile.phone", "Phone")}</span>
-                     <span style={{ fontWeight: '500' }}>{profile.phone}</span>
-                   </div>
-                 )}
-               </div>
-            </div>
-          </aside>
-        </div>
-      </div>
-
-      {/* Portfolio */}
-      {portfolio.length > 0 && (
-        <div className="public-portfolio-section soft-fade-in stagger-6">
-          <div className="section-header-premium">
-            <h2 className="section-title-premium">{t("publicProfile.portfolio")}</h2>
-            <div className="title-underline"></div>
-          </div>
-          
-          <div className="public-portfolio-premium-grid">
-            {portfolio.map((item, i) => (
-              <div key={i} className="portfolio-premium-card-public">
-                <div className="portfolio-card-media-public">
-                  <img 
-                    src={
-                      (item.media && item.media.length > 0) ? avatarSrc(item.media[0].url) : 
-                      (item.portfolio_media && item.portfolio_media.length > 0) ? avatarSrc(item.portfolio_media[0].url) :
-                      "https://via.placeholder.com/600x400?text=No+Media"
-                    } 
-                    alt={item.title} 
-                  />
-                  <div className="portfolio-media-count">
-                    {item.media?.length || 0} <FiBriefcase size={10} />
+                    ))}
                   </div>
                 </div>
-                <div className="portfolio-card-content-public">
-                  <h4 className="portfolio-title-public">{item.title}</h4>
-                  <p className="portfolio-desc-public" title={item.description}>
-                    {item.description}
-                  </p>
-                  
-                  {item.skills && item.skills.length > 0 && (
-                    <div className="portfolio-skills-public">
-                      {item.skills.slice(0, 4).map((skill, sIdx) => (
-                        <span key={sIdx} className="skill-chip-mini">{skill}</span>
-                      ))}
-                      {item.skills.length > 4 && (
-                        <span className="skill-more-mini">+{item.skills.length - 4}</span>
-                      )}
-                    </div>
-                  )}
-
-                  {item.url && (
-                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="portfolio-link-public">
-                      <FiExternalLink size={14} /> {t("profile.viewProject", "View Project")}
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+              </>
+            )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

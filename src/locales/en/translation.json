@@ -251,6 +251,8 @@
     "portfolioDesc": "Showcase your best work",
     "noPortfolio": "No portfolio items yet",
     "addPortfolio": "Add portfolio item",
+    "mySkills": "Skills",
+    "membershipProfessional": "Professional",
     "hourlyRate": "Hourly Rate",
     "availability": "Availability",
     "responseTime": "Response Time",
@@ -330,7 +332,24 @@
     "publishProject": "Publish Project",
     "updateProject": "Update Project",
     "saving": "Saving...",
-    "viewProject": "View Project"
+    "viewProject": "View Project",
+    "status": {
+      "available_now": "Available now",
+      "available": "Available",
+      "busy": "Busy",
+      "away": "Away"
+    }
+  },
+  "skills": {
+    "React": "React",
+    "JavaScript": "JavaScript",
+    "Node.js": "Node.js",
+    "Python": "Python",
+    "Design": "Design",
+    "UI/UX": "UI/UX",
+    "Accounting": "Accounting",
+    "Marketing": "Marketing",
+    "English": "English"
   },
   "publicProfile": {
     "aboutMe": "About Me",

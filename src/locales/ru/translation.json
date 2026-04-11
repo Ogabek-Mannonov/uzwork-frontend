@@ -251,6 +251,8 @@
     "portfolioDesc": "Представьте свои лучшие работы",
     "noPortfolio": "Пока нет работ в портфолио",
     "addPortfolio": "Добавить в портфолио",
+    "mySkills": "Навыки",
+    "membershipProfessional": "Профессионал",
     "hourlyRate": "Почасовая ставка",
     "availability": "Доступность",
     "responseTime": "Время ответа",
@@ -330,7 +332,24 @@
     "publishProject": "Опубликовать проект",
     "updateProject": "Обновить проект",
     "saving": "Сохранение...",
-    "viewProject": "Посмотреть проект"
+    "viewProject": "Посмотреть проект",
+    "status": {
+      "available_now": "Доступен сейчас",
+      "available": "Доступен",
+      "busy": "Занят",
+      "away": "Нет на месте"
+    }
+  },
+  "skills": {
+    "React": "React",
+    "JavaScript": "JavaScript",
+    "Node.js": "Node.js",
+    "Python": "Python",
+    "Design": "Дизайн",
+    "UI/UX": "UI/UX",
+    "Accounting": "Бухгалтерия",
+    "Marketing": "Маркетинг",
+    "English": "Английский язык"
   },
   "publicProfile": {
     "aboutMe": "О себе",
