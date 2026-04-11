@@ -4,6 +4,8 @@ import "../../../assets/Freelancer/FindW/FindWork.css";
 import Projects from "../../components/projectsCards";
 import JobDetailsDrawer from "../../components/JobDetailsDrawer";
 import { useTranslation } from "react-i18next";
+import { getMyProfile } from "../../../api/profile";
+import { getMyPortfolio, getMyCertifications } from "../../../api/freelancer";
 
 export default function FindWork() {
   const { t } = useTranslation();
@@ -17,7 +19,7 @@ export default function FindWork() {
   const [selectedJob, setSelectedJob] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Filter States (hidden behind a toggle if needed, or simple right now)
+  // Filter States
   const [showFilters, setShowFilters] = useState(false);
   const [jobType, setJobType] = useState("all"); 
   const [budgetRange, setBudgetRange] = useState("all"); 
@@ -26,13 +28,72 @@ export default function FindWork() {
 
   // User details
   const [userData, setUserData] = useState(null);
+  const [profileCompletion, setProfileCompletion] = useState(0);
+  const [completionItems, setCompletionItems] = useState([]);
+
+  // Calculate profile completion percentage
+  const calculateCompletion = (user, profile, portfolioItems = [], certifications = []) => {
+    const checks = [
+      { label: "Avatar", done: !!user?.avatar_url },
+      { label: "Ism / Familiya", done: !!(user?.first_name && user?.last_name) },
+      { label: "Sarlavha (Title)", done: !!(profile?.title && profile.title.trim()) },
+      { label: "Bio", done: !!(profile?.bio && profile.bio.length >= 20) },
+      { label: "Ko'nikmalar", done: Array.isArray(profile?.skills) ? profile.skills.length >= 1 : false },
+      { label: "Soatlik stavka", done: !!(profile?.hourly_rate && Number(profile.hourly_rate) > 0) },
+      { label: "Kategoriya", done: !!profile?.category_id },
+      { label: "Joylashuv", done: !!(profile?.location && profile.location.trim()) },
+      { label: "Portfolio", done: portfolioItems.length >= 1 },
+      { label: "Sertifikat", done: certifications.length >= 1 },
+    ];
+    const done = checks.filter(c => c.done).length;
+    const pct = Math.round((done / checks.length) * 100);
+    return { pct, checks };
+  };
 
   useEffect(() => {
+    // Load basic user from localStorage first for fast render
     try {
       const stored = localStorage.getItem("user");
       if (stored) setUserData(JSON.parse(stored));
     } catch(e) {}
+
+    // Then fetch full profile from API for accurate completion
+    const fetchProfile = async () => {
+      try {
+        // Fetch all 3 in parallel
+        const [profileRes, portfolioRes, certRes] = await Promise.all([
+          getMyProfile(),
+          getMyPortfolio(),
+          getMyCertifications(),
+        ]);
+
+        let user = {}, profile = {}, portfolioItems = [], certifications = [];
+
+        if (profileRes?.success) {
+          user = profileRes.data?.user || profileRes.data || {};
+          profile = profileRes.data?.profile || profileRes.data || {};
+          // Update userData with fresh info (avatar, name, title etc.)
+          setUserData(prev => ({ ...prev, ...user, title: profile?.title }));
+        }
+
+        if (portfolioRes?.success) {
+          portfolioItems = portfolioRes.data || [];
+        }
+
+        if (certRes?.success) {
+          certifications = certRes.data || [];
+        }
+
+        const { pct, checks } = calculateCompletion(user, profile, portfolioItems, certifications);
+        setProfileCompletion(pct);
+        setCompletionItems(checks);
+      } catch(e) {
+        console.error("Profile completion fetch error:", e);
+      }
+    };
+    fetchProfile();
   }, []);
+
 
   const handleProjectClick = (job) => {
     setSelectedJob(job);
@@ -193,11 +254,36 @@ export default function FindWork() {
             <div className="fw-profile-progress">
               <div className="fw-progress-text">
                 <a href="/profile">{t("findWork.layout.sidebar.completeProfile")}</a>
-                <span className="fw-progress-pct">70%</span>
+                <span className={`fw-progress-pct ${profileCompletion === 100 ? 'complete' : ''}`}>
+                  {profileCompletion}%
+                </span>
               </div>
               <div className="fw-progress-bar-bg">
-                <div className="fw-progress-bar-fill" style={{ width: '70%' }}></div>
+                <div 
+                  className="fw-progress-bar-fill" 
+                  style={{ 
+                    width: `${profileCompletion}%`,
+                    background: profileCompletion === 100 
+                      ? 'linear-gradient(90deg, #10b981, #059669)'
+                      : profileCompletion >= 70
+                      ? 'linear-gradient(90deg, #3b82f6, #6366f1)'
+                      : profileCompletion >= 40
+                      ? 'linear-gradient(90deg, #f59e0b, #f97316)'
+                      : 'linear-gradient(90deg, #ef4444, #f97316)'
+                  }}
+                ></div>
               </div>
+              {/* Checklist of missing items */}
+              {profileCompletion < 100 && completionItems.length > 0 && (
+                <div className="fw-completion-checklist">
+                  {completionItems.map((item, i) => (
+                    <div key={i} className={`fw-completion-item ${item.done ? 'done' : 'missing'}`}>
+                      <span className="fw-check-icon">{item.done ? '✓' : '○'}</span>
+                      <span>{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

@@ -74,6 +74,29 @@ import { PROFESSIONAL_SKILLS } from "../../utils/skills";
 import { useTranslation } from "react-i18next";
 import { useThemeContext } from "../../pages/components/Theme/ThemeContext";
 
+const BACKEND = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
+
+function avatarSrc(url) {
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  return `${BACKEND}${url}`;
+}
+
+function AvatarImage({ src, size = 16, className = "" }) {
+  const [error, setError] = useState(false);
+  if (!src || error) {
+    return <User size={size} className={className} />;
+  }
+  return (
+    <img 
+      src={avatarSrc(src)} 
+      alt="Avatar" 
+      className={className}
+      onError={() => setError(true)}
+    />
+  );
+}
+
 const MyProfile = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -618,6 +641,12 @@ const MyProfile = () => {
       
       await updateMyProfile({ languages: newLanguages });
       setUserData(prev => ({ ...prev, languages: newLanguages }));
+      
+      // Sync localStorage
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      localStorage.setItem("user", JSON.stringify({ ...storedUser, languages: newLanguages }));
+      window.dispatchEvent(new Event("authChange"));
+
       setShowLanguageModal(false);
       showMessage("success", t("profile.skillsUpdated", "Languages updated successfully"));
     } catch (error) {
@@ -778,6 +807,12 @@ const MyProfile = () => {
       if (!updateRes.success) throw new Error(updateRes.message || updateRes.error);
 
       setUserData(prev => ({ ...prev, profilePicture: imageUrl }));
+      
+      // Sync localStorage
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      localStorage.setItem("user", JSON.stringify({ ...storedUser, avatar_url: imageUrl }));
+      window.dispatchEvent(new Event("authChange"));
+
       showMessage("success", "Profile picture updated successfully!");
     } catch (err) {
       showMessage("error", err.message || "Failed to update avatar");
@@ -955,6 +990,19 @@ const MyProfile = () => {
 
       // Update local state
       setUserData(prev => ({ ...prev, ...editFormData }));
+      
+      // [SYNC]: Update localStorage for header consistency
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      // Pick common fields that might be in the 'user' object
+      const updatedUser = { ...storedUser };
+      if (payload.first_name !== undefined) updatedUser.first_name = payload.first_name;
+      if (payload.last_name !== undefined) updatedUser.last_name = payload.last_name;
+      if (payload.email !== undefined) updatedUser.email = payload.email;
+      if (payload.phone !== undefined) updatedUser.phone = payload.phone;
+      
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      window.dispatchEvent(new Event("authChange"));
+
       setEditingSection(null);
       showMessage("success", `${section.charAt(0).toUpperCase() + section.slice(1)} updated successfully!`);
     } catch (err) {
@@ -1225,7 +1273,7 @@ const MyProfile = () => {
                   <span className="section-badge" style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 10, background: 'var(--surface, rgba(255,255,255,0.9))', color: 'var(--blue, #3b82f6)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '600', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
                     <User size={14} />{t("profile.professionalProfile", "Professional Profile")}
                   </span>
-                  <img src={userData.coverPhoto} alt="Cover" className="cover-image" />
+                  <img src={avatarSrc(userData.coverPhoto)} alt="Cover" className="cover-image" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                   <button className="change-cover-btn" onClick={() => document.getElementById('cover-upload-input').click()} disabled={isLoading}>
                     <Camera size={15} /> {t("profile.edit", "Edit")}
                   </button>
@@ -1243,7 +1291,7 @@ const MyProfile = () => {
                   {/* Avatar va ism qismi */}
                   <div className="profile-avatar-section">
                     <div className="avatar-wrapper">
-                      <img src={userData.profilePicture} alt="Profile" className="profile-avatar" />
+                      <AvatarImage src={userData.profilePicture} size={80} className="profile-avatar" />
                       <button className="change-avatar-btn" onClick={() => document.getElementById('avatar-upload-input').click()} disabled={isLoading}>
                         <Camera size={14} />
                       </button>

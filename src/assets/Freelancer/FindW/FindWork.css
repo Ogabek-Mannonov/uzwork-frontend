@@ -376,16 +376,59 @@
 
 .fw-progress-bar-bg {
   width: 100%;
-  height: 4px;
+  height: 6px;
   background: var(--border);
-  border-radius: 2px;
+  border-radius: 99px;
   overflow: hidden;
 }
 
 .fw-progress-bar-fill {
   height: 100%;
   background: var(--brand, #3b82f6);
-  border-radius: 2px;
+  border-radius: 99px;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Completion checklist */
+.fw-completion-checklist {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fw-completion-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  padding: 3px 0;
+}
+
+.fw-completion-item.done {
+  color: #10b981;
+}
+
+.fw-completion-item.missing {
+  color: var(--muted);
+}
+
+.fw-check-icon {
+  font-size: 0.75rem;
+  width: 14px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.fw-progress-pct {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text);
+  transition: color 0.3s;
+}
+
+.fw-progress-pct.complete {
+  color: #10b981;
 }
 
 /* Common Card Styles */

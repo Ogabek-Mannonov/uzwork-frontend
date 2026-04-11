@@ -13,6 +13,29 @@ import {
 } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 
+const BACKEND = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
+
+function avatarSrc(url) {
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  return `${BACKEND}${url}`;
+}
+
+function AvatarImage({ src, size = 16, className = "", alt = "Avatar" }) {
+  const [error, setError] = useState(false);
+  if (!src || error) {
+    return <div className={className} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-secondary, #f1f5f9)', color: 'var(--text-muted, #64748b)', fontSize: size / 2 }}>{alt[0]?.toUpperCase() || "?"}</div>;
+  }
+  return (
+    <img 
+      src={avatarSrc(src)} 
+      alt={alt} 
+      className={className}
+      onError={() => setError(true)}
+    />
+  );
+}
+
 import "./profile-css/public-profile.css";
 import "../../assets/style/theme.css";
 
@@ -131,7 +154,7 @@ export default function PublicProfile() {
       <div className="public-profile-card soft-fade-in stagger-2">
         <div className="public-profile-cover">
           {profile.cover_url ? (
-            <img src={profile.cover_url} alt="Cover" className="public-cover-img" />
+            <img src={avatarSrc(profile.cover_url)} alt="Cover" className="public-cover-img" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
           ) : (
             <div className="public-cover-placeholder" />
           )}
@@ -140,10 +163,7 @@ export default function PublicProfile() {
 
         <div className="profile-main-info">
           <div className="public-avatar-wrapper">
-            {profile.avatar_url
-              ? <img src={profile.avatar_url} alt={profile.fullName} className="public-avatar-img" />
-              : (profile.fullName || "?")[0]?.toUpperCase()
-            }
+            <AvatarImage src={profile.avatar_url} alt={profile.fullName} size={100} className="public-avatar-img" />
             <div className="online-indicator"></div>
           </div>
 

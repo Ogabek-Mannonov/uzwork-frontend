@@ -24,6 +24,23 @@ function avatarSrc(url) {
   return `${BACKEND}${url}`;
 }
 
+function AvatarImage({ src, size = 16, className = "" }) {
+  const [error, setError] = React.useState(false);
+  
+  if (!src || error) {
+    return <User size={size} className={className} />;
+  }
+
+  return (
+    <img 
+      src={avatarSrc(src)} 
+      alt="Avatar" 
+      className={className}
+      onError={() => setError(true)}
+    />
+  );
+}
+
 // ══════════════════════════════════════════════════════════
 // PREMIUM LANG SWITCHER
 // ══════════════════════════════════════════════════════════
@@ -393,20 +410,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                 title="Profile" 
                 onClick={() => setProfileOpen(!profileOpen)}
               >
-                {user?.avatar_url ? (
-                  <img 
-                    src={avatarSrc(user.avatar_url)} 
-                    alt="Avatar" 
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      // Fallback logic handled by CSS or state? 
-                      // Actually, if it errors, we just hide it and the User icon would be nice to have but we can't easily fallback inside JSX like this without state.
-                      // Better approach: use state if it fails.
-                    }}
-                  />
-                ) : (
-                  <User size={16} />
-                )}
+                <AvatarImage src={user?.avatar_url} />
               </button>
               {profileOpen && (
                 <div className="profile-dropdown-menu" style={{
