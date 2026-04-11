@@ -1,7 +1,7 @@
 // src/pages/auth/Login.jsx
 import React, { useState } from "react";
 import { FaUser, FaLock, FaPhoneAlt, FaEye, FaEyeSlash } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
 import "./authcss/login.css";
@@ -291,9 +291,9 @@ return (
                 <span>{t("auth.rememberMe", "Meni eslab qol")}</span>
               </label>
 
-              <a href="/forgot-password" className="forgot-link">
+              <Link to="/forgot-password" className="forgot-link">
                 {t("auth.forgotPassword", "Parolni unutdingizmi?")}
-              </a>
+              </Link>
             </div>
 
             <button

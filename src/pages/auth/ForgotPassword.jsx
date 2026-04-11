@@ -2,12 +2,14 @@ import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaLock, FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { useTranslation } from "react-i18next";
 
 import "./authcss/forgotPassword.css";
 import { forgotPassword, resetPassword } from "../../api/auth";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // step: request -> reset -> done
   const [step, setStep] = useState("request");
