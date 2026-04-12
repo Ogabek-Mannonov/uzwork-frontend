@@ -339,8 +339,9 @@ function AuthHeader({ i18n, changeLanguage, user }) {
 
   const links = useMemo(() => [
     { to: "/find-work", label: t("navbar.findWork") },
-    { to: "/saved",     label: t("navbar.savedJobs") },
+    { to: "/my-jobs",   label: t("navbar.myJobs") },
     { to: "/proposals", label: t("navbar.proposals") },
+    { to: "/reports",   label: t("navbar.reports") },
     { to: "/messages",  label: t("navbar.messages") },
   ], [t]);
 
