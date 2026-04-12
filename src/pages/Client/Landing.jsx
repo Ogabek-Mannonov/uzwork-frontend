@@ -414,7 +414,7 @@ const EditPanel = ({ job, onSave, onCancel }) => {
 /* ================================================================
    MAIN COMPONENT (HEADER O'CHIRILGAN)
    ================================================================ */
-const JobDetails = () => {
+const Landing = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -926,4 +926,4 @@ const JobDetails = () => {
   );
 };
 
-export default JobDetails;
+export default Landing;
