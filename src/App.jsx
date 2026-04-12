@@ -56,6 +56,7 @@ import MyJobs from "./pages/Client/MyJobs.jsx";
 import BillingPayments from "./pages/Client/Payments.jsx";
 import ContractManagement from "./pages/Client/ContractManegment.jsx";
 import SecuritySettings from "./pages/Client/Security.jsx";
+import Escrow from "./pages/Client/Escrow.jsx";
 
 function App() {
   return (
@@ -115,6 +116,7 @@ function App() {
             <Route path="/client/payments" element={<BillingPayments />} />  
             <Route path="/client/management" element={<ContractManagement />} />
             <Route path="/client/security" element={<SecuritySettings />} />
+            <Route path="/client/escrow" element={<Escrow />} />
 
             {/* Contracts */}
             <Route path="/contracts" element={<ContractsList />} />
