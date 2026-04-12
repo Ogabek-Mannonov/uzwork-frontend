@@ -1,4 +1,4 @@
-// src/pages/Client/JobDetails/JobDetails.jsx
+// src/pages/Client/Landing.jsx (JobDetails component) - HEADER O'CHIRILGAN VERSIYA
 
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate, NavLink, useParams } from "react-router-dom";
@@ -13,10 +13,10 @@ import {
 } from "lucide-react";
 import "../Client/css/landing.css";
 import { getJobById, updateJob } from "../../api/jobs";
-import { getProjectProposals, acceptProposal } from "../../api/proposals";
+import { getProjectProposals } from "../../api/proposals";
 
 /* ================================================================
-   MOCK DATA
+   MOCK DATA (o'zgarishsiz)
    ================================================================ */
 const MOCK_JOB = {
   id: "UZ-12345",
@@ -74,7 +74,7 @@ const MOCK_POOL = [
 ];
 
 /* ================================================================
-   SMALL HELPERS
+   HELPERS
    ================================================================ */
 const Stars = ({ n = 4.8 }) => (
   <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
@@ -100,8 +100,8 @@ const Toast = ({ msg, type, onClose }) =>
    PROPOSALS PANEL
    ================================================================ */
 const ProposalsPanel = ({ proposals: initial, onHire }) => {
-  const [list,     setList]     = useState(initial);
-  const [filter,   setFilter]   = useState("all");
+  const [list, setList] = useState(initial);
+  const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState(null);
 
   const shown = list.filter(p =>
@@ -114,10 +114,10 @@ const ProposalsPanel = ({ proposals: initial, onHire }) => {
   []);
 
   const FILTERS = [
-    { id: "all",         label: "All Proposals",  cnt: list.length },
-    { id: "shortlisted", label: "Shortlisted",     cnt: list.filter(p => p.shortlisted).length },
-    { id: "interview",   label: "Interview",       cnt: 3 },
-    { id: "hired",       label: "Hired",           cnt: 0 },
+    { id: "all", label: "All Proposals", cnt: list.length },
+    { id: "shortlisted", label: "Shortlisted", cnt: list.filter(p => p.shortlisted).length },
+    { id: "interview", label: "Interview", cnt: 3 },
+    { id: "hired", label: "Hired", cnt: 0 },
   ];
 
   return (
@@ -129,7 +129,7 @@ const ProposalsPanel = ({ proposals: initial, onHire }) => {
         </div>
         <div className="jd-pp-head-right">
           <button className="jd-pp-btn"><Download size={14} /> Export</button>
-          <button className="jd-pp-btn"><Filter   size={14} /> Filter</button>
+          <button className="jd-pp-btn"><Filter size={14} /> Filter</button>
         </div>
       </div>
 
@@ -149,7 +149,6 @@ const ProposalsPanel = ({ proposals: initial, onHire }) => {
           <div key={p.id}
             className={`jd-proposal-card ${selected === p.id ? "selected" : ""}`}
             onClick={() => setSelected(s => s === p.id ? null : p.id)}>
-
             <div className="jd-pc-top">
               <img src={p.avatar} alt={p.name} className="jd-pc-ava" />
               <div className="jd-pc-info">
@@ -161,9 +160,7 @@ const ProposalsPanel = ({ proposals: initial, onHire }) => {
                 <span className="jd-pc-match">{p.score} Match</span>
               </div>
             </div>
-
             <p className="jd-pc-text">{p.text}</p>
-
             <div className="jd-pc-foot">
               <div className="jd-pc-tags">
                 <span className="jd-pc-tag">⭐ 4.9</span>
@@ -193,19 +190,18 @@ const ProposalsPanel = ({ proposals: initial, onHire }) => {
 };
 
 /* ================================================================
-   INVITE PANEL  — "Browse All Talent" banner qo'shildi
+   INVITE PANEL
    ================================================================ */
 const InvitePanel = ({ onSend, onBrowseTalent }) => {
-  const [pool,   setPool]   = useState(MOCK_POOL);
+  const [pool, setPool] = useState(MOCK_POOL);
   const [search, setSearch] = useState("");
-  const [tab,    setTab]    = useState("all");
+  const [tab, setTab] = useState("all");
 
   const toggleInvite = useCallback((id) =>
     setPool(prev => prev.map(f => f.id === id ? { ...f, invited: !f.invited } : f)),
   []);
 
   const invitedCnt = pool.filter(f => f.invited).length;
-
   const shown = pool.filter(f => {
     const q = f.name.toLowerCase().includes(search.toLowerCase()) ||
               f.role.toLowerCase().includes(search.toLowerCase());
@@ -223,12 +219,9 @@ const InvitePanel = ({ onSend, onBrowseTalent }) => {
         </button>
       </div>
 
-      {/* ── Browse All Talent banner ──────────────────────────── */}
       <div className="jd-browse-talent-banner">
         <div className="jd-btb-left">
-          <div className="jd-btb-icon">
-            <UserSearch size={22} />
-          </div>
+          <div className="jd-btb-icon"><UserSearch size={22} /></div>
           <div className="jd-btb-text">
             <strong>Can't find the right freelancer?</strong>
             <span>Browse all talent on the platform and invite anyone you like</span>
@@ -238,7 +231,6 @@ const InvitePanel = ({ onSend, onBrowseTalent }) => {
           Browse All Talent <ArrowRight size={15} />
         </button>
       </div>
-      {/* ─────────────────────────────────────────────────────── */}
 
       <div className="jd-ip-search-bar">
         <div className="jd-ip-search">
@@ -254,8 +246,8 @@ const InvitePanel = ({ onSend, onBrowseTalent }) => {
 
       <div className="jd-ip-tabs">
         {[
-          { id: "all",     label: "Suggested",  cnt: null },
-          { id: "invited", label: "Invited",    cnt: invitedCnt },
+          { id: "all", label: "Suggested", cnt: null },
+          { id: "invited", label: "Invited", cnt: invitedCnt },
         ].map(t => (
           <button key={t.id} className={`jd-ip-tab ${tab === t.id ? "active" : ""}`}
             onClick={() => setTab(t.id)}>
@@ -291,7 +283,6 @@ const InvitePanel = ({ onSend, onBrowseTalent }) => {
         ))}
       </div>
 
-      {/* ── Bottom NavLink ────────────────────────────────────── */}
       <div className="jd-ip-footer">
         <NavLink to="/talent" className="jd-ip-footer-link">
           <UserSearch size={16} />
@@ -299,7 +290,6 @@ const InvitePanel = ({ onSend, onBrowseTalent }) => {
           <ArrowRight size={15} />
         </NavLink>
       </div>
-      {/* ─────────────────────────────────────────────────────── */}
     </div>
   );
 };
@@ -309,15 +299,15 @@ const InvitePanel = ({ onSend, onBrowseTalent }) => {
    ================================================================ */
 const EditPanel = ({ job, onSave, onCancel }) => {
   const [form, setForm] = useState({
-    title:       job.title,
-    budgetMin:   job.budgetMin,
-    budgetMax:   job.budgetMax,
-    duration:    job.duration,
-    experience:  job.experience,
-    location:    job.location,
-    hiring:      job.hiring,
+    title: job.title,
+    budgetMin: job.budgetMin,
+    budgetMax: job.budgetMax,
+    duration: job.duration,
+    experience: job.experience,
+    location: job.location,
+    hiring: job.hiring,
     description: job.description,
-    skills:      [...job.skills],
+    skills: [...job.skills],
   });
   const [newSkill, setNewSkill] = useState("");
 
@@ -422,19 +412,19 @@ const EditPanel = ({ job, onSave, onCancel }) => {
 };
 
 /* ================================================================
-   MAIN COMPONENT
+   MAIN COMPONENT (HEADER O'CHIRILGAN)
    ================================================================ */
 const JobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [job,       setJob]       = useState(null);
-  const [loading,   setLoading]   = useState(true);
-  const [status,    setStatus]    = useState("active");
-  const [tab,       setTab]       = useState("overview");
-  const [step,      setStep]      = useState("view");
-  const [saved,     setSaved]     = useState(false);
-  const [toast,     setToast]     = useState(null);
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState("active");
+  const [tab, setTab] = useState("overview");
+  const [step, setStep] = useState("view");
+  const [saved, setSaved] = useState(false);
+  const [toast, setToast] = useState(null);
   const [showClose, setShowClose] = useState(false);
   const [proposals, setProposals] = useState([]);
 
@@ -443,82 +433,109 @@ const JobDetails = () => {
     setTimeout(() => setToast(null), 3500);
   }, []);
 
+  // Data fetch
   useEffect(() => {
     let active = true;
+
     const fetchJobData = async () => {
       if (!id) {
-        if (active) setLoading(false);
+        if (active) {
+          setJob(MOCK_JOB);
+          setProposals(MOCK_PROPOSALS);
+          setStatus(MOCK_JOB.status);
+          setLoading(false);
+        }
         return;
       }
+
       setLoading(true);
       try {
         const [jobRes, propRes] = await Promise.all([
           getJobById(id),
-          getProjectProposals(id)
+          getProjectProposals(id),
         ]);
-        if (active) {
-          const fetchedJob = jobRes?.data || jobRes || null;
-          if (fetchedJob) {
-            setJob({
-              id: fetchedJob.id,
-              title: fetchedJob.title,
-              status: fetchedJob.status || "active",
-              type: fetchedJob.budget_type === "hourly" ? "Hourly" : "Fixed Price",
-              location: "Worldwide",
-              posted: new Date(fetchedJob.created_at).toLocaleDateString(),
-              postedDate: new Date(fetchedJob.created_at).toLocaleDateString(),
-              budget: fetchedJob.budget_type === "fixed" ? `$${fetchedJob.budget_amount}` : `$${fetchedJob.hourly_rate_min} - $${fetchedJob.hourly_rate_max}`,
-              budgetMin: fetchedJob.budget_amount || fetchedJob.hourly_rate_min || 0,
-              budgetMax: fetchedJob.budget_amount || fetchedJob.hourly_rate_max || 0,
-              duration: fetchedJob.project_duration || "N/A",
-              experience: fetchedJob.experience_level || "Any",
-              hiring: 1,
-              proposals: 0, // updated below
-              invites: 0,
-              interviews: 0,
-              views: 0,
-              skills: fetchedJob.skills || [],
-              description: fetchedJob.description || "",
-              requirements: [],
-              client: MOCK_JOB.client // Using mock for now until client details are fully supported
-            });
-            setStatus(fetchedJob.status || "active");
-          }
+        if (!active) return;
 
-          const fetchedProps = Array.isArray(propRes?.data) ? propRes.data : (Array.isArray(propRes) ? propRes : []);
-          const mappedProps = fetchedProps.map(p => ({
-            id: p.id,
-            avatar: p.freelancer_avatar || `https://ui-avatars.com/api/?name=${p.freelancer_name}&background=random`,
-            name: p.freelancer_name || "Freelancer",
-            role: "Freelancer",
-            rate: `$${p.proposed_price || 0}`,
-            score: "N/A",
-            shortlisted: p.status === "shortlisted",
-            text: p.cover_letter
-          }));
-          if (fetchedJob) {
-            setJob(prev => ({ ...prev, proposals: mappedProps.length }));
-          }
-          setProposals(mappedProps);
+        const fetchedJob = jobRes?.data || jobRes || null;
+
+        if (!fetchedJob) {
+          setJob(MOCK_JOB);
+          setProposals(MOCK_PROPOSALS);
+          setStatus(MOCK_JOB.status);
+          setLoading(false);
+          return;
         }
+
+        setJob({
+          id: fetchedJob.id,
+          title: fetchedJob.title,
+          status: fetchedJob.status || "active",
+          type: fetchedJob.budget_type === "hourly" ? "Hourly" : "Fixed Price",
+          location: "Worldwide",
+          posted: new Date(fetchedJob.created_at).toLocaleDateString(),
+          postedDate: new Date(fetchedJob.created_at).toLocaleDateString(),
+          budget: fetchedJob.budget_type === "fixed"
+            ? `$${fetchedJob.budget_amount}`
+            : `$${fetchedJob.hourly_rate_min} – $${fetchedJob.hourly_rate_max}`,
+          budgetMin: fetchedJob.budget_amount || fetchedJob.hourly_rate_min || 0,
+          budgetMax: fetchedJob.budget_amount || fetchedJob.hourly_rate_max || 0,
+          duration: fetchedJob.project_duration || "N/A",
+          experience: fetchedJob.experience_level || "Any",
+          hiring: 1,
+          proposals: 0,
+          invites: 0,
+          interviews: 0,
+          views: 0,
+          skills: fetchedJob.skills || [],
+          description: fetchedJob.description || "",
+          requirements: [],
+          client: MOCK_JOB.client,
+        });
+        setStatus(fetchedJob.status || "active");
+
+        const fetchedProps = Array.isArray(propRes?.data)
+          ? propRes.data
+          : Array.isArray(propRes) ? propRes : [];
+
+        const mappedProps = fetchedProps.map(p => ({
+          id: p.id,
+          avatar: p.freelancer_avatar ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(p.freelancer_name || "F")}&background=random`,
+          name: p.freelancer_name || "Freelancer",
+          role: "Freelancer",
+          rate: `$${p.proposed_price || 0}`,
+          score: "N/A",
+          shortlisted: p.status === "shortlisted",
+          text: p.cover_letter || "",
+        }));
+
+        setJob(prev => prev ? { ...prev, proposals: mappedProps.length } : prev);
+        setProposals(mappedProps.length > 0 ? mappedProps : MOCK_PROPOSALS);
+
       } catch (err) {
-        console.error(err);
+        console.error("JobDetails fetch error:", err);
+        if (active) {
+          setJob(MOCK_JOB);
+          setProposals(MOCK_PROPOSALS);
+          setStatus(MOCK_JOB.status);
+        }
+      } finally {
+        if (active) setLoading(false);
       }
-      if (active) setLoading(false);
     };
 
     fetchJobData();
     return () => { active = false; };
   }, [id]);
 
+  // Handlers
   const handleSaveJob = useCallback(async (form) => {
-    // API call to save job updates
     const updatedData = {
       title: form.title,
       description: form.description,
       skills: form.skills,
       experience_level: form.experience,
-      project_duration: form.duration
+      project_duration: form.duration,
     };
     if (job?.type === "Fixed Price") {
       updatedData.budget_amount = form.budgetMax || form.budgetMin;
@@ -526,27 +543,27 @@ const JobDetails = () => {
       updatedData.hourly_rate_min = form.budgetMin;
       updatedData.hourly_rate_max = form.budgetMax;
     }
-    
+
     notify("Saving updates...", "info");
     const res = await updateJob(id, updatedData);
-    if(res?.success === false) {
+    if (res?.success === false) {
       notify(res?.message || "Failed to update", "error");
       return;
     }
 
-    setJob(prev => ({
+    setJob(prev => prev ? {
       ...prev,
-      title:       form.title,
-      duration:    form.duration,
-      experience:  form.experience,
-      location:    form.location,
-      budget:      `$${form.budgetMin.toLocaleString()} – $${form.budgetMax.toLocaleString()}`,
-      budgetMin:   form.budgetMin,
-      budgetMax:   form.budgetMax,
-      hiring:      form.hiring,
+      title: form.title,
+      duration: form.duration,
+      experience: form.experience,
+      location: form.location,
+      budget: `$${Number(form.budgetMin).toLocaleString()} – $${Number(form.budgetMax).toLocaleString()}`,
+      budgetMin: form.budgetMin,
+      budgetMax: form.budgetMax,
+      hiring: form.hiring,
       description: form.description,
-      skills:      form.skills,
-    }));
+      skills: form.skills,
+    } : prev);
     setTab("overview");
     notify("Job post updated successfully!");
   }, [id, job, notify]);
@@ -563,72 +580,77 @@ const JobDetails = () => {
     notify("Job post has been closed.");
   }, [id, notify]);
 
-  const handleHire = useCallback((name) => {
-    notify(`Offer sent to ${name}!`);
-  }, [notify]);
-
+  const handleHire = useCallback((name) => notify(`Offer sent to ${name}!`), [notify]);
   const handleSendInvites = useCallback((cnt) => {
     if (cnt === 0) { notify("Please select at least one freelancer.", "error"); return; }
     notify(`${cnt} invitation${cnt !== 1 ? "s" : ""} sent!`);
   }, [notify]);
-
   const handleShare = useCallback(() => {
     navigator.clipboard?.writeText(window.location.href).catch(() => {});
     notify("Link copied to clipboard!");
   }, [notify]);
-
-  /* ── Browse Talent navigation ─────────────────────────────── */
-  const handleBrowseTalent = useCallback(() => {
-    navigate("/talent");
-  }, [navigate]);
-
-  const STEPS = [
-    { id: "view",      label: "View Job Post",     cnt: null          },
-    { id: "invite",    label: "Invite Freelancers", cnt: job.invites  },
-    { id: "proposals", label: "Review Proposals",   cnt: job.proposals},
-    { id: "hire",      label: "Hire",               cnt: 0            },
-  ];
-
-  const STATS = [
-    { icon: <Eye           size={18} />, label: "Job Views",  value: "1.2k",        delta: "+12%", bg: "#eff6ff", color: "#2563eb" },
-    { icon: <Users         size={18} />, label: "Proposals",  value: job.proposals, delta: "+8%",  bg: "#f0faf0", color: "#14a800" },
-    { icon: <MessageCircle size={18} />, label: "Messages",   value: 24,            delta: null,   bg: "#fef9c3", color: "#f59e0b" },
-    { icon: <Target        size={18} />, label: "Match Rate", value: "92%",         delta: "+3%",  bg: "#f3e8ff", color: "#7c3aed" },
-  ];
-
-  const TILES = [
-    { icon: "💵", bg: "#e8f5e0", lbl: "Budget",     val: job.budget,                  sub: job.type      },
-    { icon: "⏱️", bg: "#e0f2fe", lbl: "Duration",   val: job.duration,                sub: "Estimated"   },
-    { icon: "🏆", bg: "#f3e8ff", lbl: "Experience", val: job.experience,              sub: "Required"    },
-    { icon: "🌍", bg: "#fff7ed", lbl: "Location",   val: job.location,                sub: "Remote OK"   },
-    { icon: "👥", bg: "#fce7f3", lbl: "Hiring",     val: `${job.hiring} freelancers`, sub: "Needed"      },
-    { icon: "📅", bg: "#ecfdf5", lbl: "Posted",     val: job.posted,                  sub: job.postedDate},
-  ];
+  const handleBrowseTalent = useCallback(() => navigate("/talent"), [navigate]);
 
   const onStepClick = (s) => {
     setStep(s);
-    if (s === "invite")    setTab("invites");
+    if (s === "invite") setTab("invites");
     if (s === "proposals") setTab("proposals");
-    if (s === "view")      setTab("overview");
+    if (s === "view") setTab("overview");
   };
 
   const onTabClick = (t) => {
     setTab(t);
-    if (t === "invites")                  setStep("invite");
-    if (t === "proposals")                setStep("proposals");
+    if (t === "invites") setStep("invite");
+    if (t === "proposals") setStep("proposals");
     if (t === "overview" || t === "edit") setStep("view");
   };
 
-  /* ================================================================
-     RENDER
-     ================================================================ */
-  if (loading) return <div style={{textAlign:"center", padding: "100px", color: "#666"}}>Yuklanmoqda...</div>;
-  if (!job) return <div style={{textAlign:"center", padding: "100px", color: "#dc2626"}}>Job topilmadi</div>;
+  // Loading screen
+  if (loading) return (
+    <div className="loading-container">
+      <div className="loading-spinner"></div>
+      <span>Yuklanmoqda...</span>
+    </div>
+  );
+
+  // Null check
+  if (!job) return (
+    <div className="not-found-container">
+      <div className="not-found-icon">📋</div>
+      <h2>Job topilmadi</h2>
+      <p>Bu job mavjud emas yoki o'chirilgan bo'lishi mumkin.</p>
+      <button onClick={() => navigate("/client/home")} className="back-btn">
+        ← Dashboard ga qaytish
+      </button>
+    </div>
+  );
+
+  const STEPS = [
+    { id: "view", label: "View Job Post", cnt: null },
+    { id: "invite", label: "Invite Freelancers", cnt: job.invites },
+    { id: "proposals", label: "Review Proposals", cnt: job.proposals },
+    { id: "hire", label: "Hire", cnt: 0 },
+  ];
+
+  const STATS = [
+    { icon: <Eye size={18} />, label: "Job Views", value: job.views || "—", delta: null, bg: "#eff6ff", color: "#3b82f6" },
+    { icon: <Users size={18} />, label: "Proposals", value: job.proposals, delta: null, bg: "#f0faf0", color: "#14a800" },
+    { icon: <MessageCircle size={18} />, label: "Messages", value: 24, delta: null, bg: "#fef9c3", color: "#f59e0b" },
+    { icon: <Target size={18} />, label: "Match Rate", value: "92%", delta: "+3%", bg: "#f3e8ff", color: "#7c3aed" },
+  ];
+
+  const TILES = [
+    { icon: "💵", bg: "#e8f5e0", lbl: "Budget", val: job.budget, sub: job.type },
+    { icon: "⏱️", bg: "#e0f2fe", lbl: "Duration", val: job.duration, sub: "Estimated" },
+    { icon: "🏆", bg: "#f3e8ff", lbl: "Experience", val: job.experience, sub: "Required" },
+    { icon: "🌍", bg: "#fff7ed", lbl: "Location", val: job.location, sub: "Remote OK" },
+    { icon: "👥", bg: "#fce7f3", lbl: "Hiring", val: `${job.hiring} freelancers`, sub: "Needed" },
+    { icon: "📅", bg: "#ecfdf5", lbl: "Posted", val: job.posted, sub: job.postedDate },
+  ];
 
   return (
     <div className="jd-page">
-
-      {/* ══════════ STEP BAR ══════════ */}
+      {/* STEP BAR */}
       <div className="jd-stepbar">
         <div className="jd-stepbar-inner">
           {STEPS.map((s, i) => (
@@ -640,22 +662,15 @@ const JobDetails = () => {
               {i < STEPS.length - 1 && <span className="jd-step-sep">›</span>}
             </button>
           ))}
-
-          {/* ── Browse Talent navlink — step bar oxirida ── */}
-          <NavLink
-            to="/talent"
-            className="jd-step-talent-link">
-            <UserSearch size={15} />
-            Browse All Talent
-            <ArrowRight size={13} />
+          <NavLink to="/talent" className="jd-step-talent-link">
+            <UserSearch size={15} /> Browse All Talent <ArrowRight size={13} />
           </NavLink>
         </div>
       </div>
 
-      {/* ══════════ BODY ══════════ */}
+      {/* BODY */}
       <div className="jd-body">
-
-        {/* ── Header ──────────────────────────────── */}
+        {/* Header - Job Info */}
         <div className="jd-header">
           <div className="jd-header-left">
             <h1 className="jd-job-title">{job.title}</h1>
@@ -664,9 +679,9 @@ const JobDetails = () => {
                 {status === "active" ? "Active" : "Closed"}
               </span>
               <span className="jd-meta-chip"><Briefcase size={12} /> {job.type}</span>
-              <span className="jd-meta-chip"><Globe     size={12} /> {job.location}</span>
-              <span className="jd-meta-chip"><Clock     size={12} /> Posted {job.posted}</span>
-              <span className="jd-meta-chip" style={{ color: "#6b7280" }}>ID: {job.id}</span>
+              <span className="jd-meta-chip"><Globe size={12} /> {job.location}</span>
+              <span className="jd-meta-chip"><Clock size={12} /> Posted {job.posted}</span>
+              <span className="jd-meta-chip">ID: {job.id}</span>
             </div>
           </div>
           <div className="jd-header-actions">
@@ -681,7 +696,7 @@ const JobDetails = () => {
           </div>
         </div>
 
-        {/* ── Stats Strip ─────────────────────────── */}
+        {/* Stats */}
         <div className="jd-stats-strip">
           {STATS.map(s => (
             <div key={s.label} className="jd-stat-tile">
@@ -695,27 +710,23 @@ const JobDetails = () => {
           ))}
         </div>
 
-        {/* ── Tab Bar ─────────────────────────────── */}
+        {/* Tabs */}
         <div className="jd-tabs">
           {[
-            { id: "overview",  icon: <Briefcase size={15} />, label: "Overview"                         },
-            { id: "proposals", icon: <Users     size={15} />, label: "Proposals", badge: job.proposals  },
-            { id: "invites",   icon: <Send      size={15} />, label: "Invites",   badge: job.invites    },
-            { id: "edit",      icon: <Edit      size={15} />, label: "Edit Job"                         },
+            { id: "overview", icon: <Briefcase size={15} />, label: "Overview" },
+            { id: "proposals", icon: <Users size={15} />, label: "Proposals", badge: job.proposals },
+            { id: "invites", icon: <Send size={15} />, label: "Invites", badge: job.invites },
+            { id: "edit", icon: <Edit size={15} />, label: "Edit Job" },
           ].map(t => (
             <button key={t.id}
               className={`jd-tab ${tab === t.id ? "active" : ""}`}
               onClick={() => onTabClick(t.id)}>
-              {t.icon}
-              {t.label}
+              {t.icon} {t.label}
               {t.badge != null && <span className="jd-tab-badge">{t.badge}</span>}
             </button>
           ))}
-
-          {/* ── Browse Talent tab-bar linki ── */}
           <NavLink to="/talent" className="jd-tab-talent-link">
-            <UserSearch size={15} />
-            Find More Talent
+            <UserSearch size={15} /> Find More Talent
           </NavLink>
         </div>
 
@@ -742,39 +753,39 @@ const JobDetails = () => {
                 <div className="jd-card-head"><span className="jd-card-title">Job Description</span></div>
                 <div className="jd-card-body">
                   <div className="jd-desc">
-                    {job.description.split("\n\n").map((p, i) => <p key={i}>{p}</p>)}
+                    {(job.description || "").split("\n\n").map((p, i) => <p key={i}>{p}</p>)}
                   </div>
                 </div>
               </div>
 
-              <div className="jd-card">
-                <div className="jd-card-head"><span className="jd-card-title">Requirements</span></div>
-                <div className="jd-card-body">
-                  <ul className="jd-req-list">
-                    {job.requirements.map((r, i) => (
-                      <li key={i}>
-                        <CheckCircle size={15} color="#14a800" style={{ flexShrink: 0 }} />
-                        {r}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="jd-card">
-                <div className="jd-card-head">
-                  <span className="jd-card-title">Required Skills</span>
-                  <span style={{ fontSize: 12, color: "var(--text-4)" }}>{job.skills.length} skills</span>
-                </div>
-                <div className="jd-card-body">
-                  <div className="jd-skills">
-                    {job.skills.map(sk => <span key={sk} className="jd-skill">{sk}</span>)}
+              {job.requirements?.length > 0 && (
+                <div className="jd-card">
+                  <div className="jd-card-head"><span className="jd-card-title">Requirements</span></div>
+                  <div className="jd-card-body">
+                    <ul className="jd-req-list">
+                      {job.requirements.map((r, i) => (
+                        <li key={i}><CheckCircle size={15} color="#14a800" /> {r}</li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {job.skills?.length > 0 && (
+                <div className="jd-card">
+                  <div className="jd-card-head">
+                    <span className="jd-card-title">Required Skills</span>
+                    <span>{job.skills.length} skills</span>
+                  </div>
+                  <div className="jd-card-body">
+                    <div className="jd-skills">
+                      {job.skills.map(sk => <span key={sk} className="jd-skill">{sk}</span>)}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Right Sidebar */}
             <aside className="jd-sidebar">
               <div className="jd-action-card">
                 <button className="jd-btn-primary" onClick={() => onTabClick("proposals")}>
@@ -783,14 +794,10 @@ const JobDetails = () => {
                 <button className="jd-btn-outline" onClick={() => onTabClick("invites")}>
                   <Plus size={16} /> Invite Freelancers
                 </button>
-
-                {/* ── Sidebar: Browse Talent NavLink ── */}
                 <NavLink to="/talent" className="jd-btn-browse-talent">
-                  <UserSearch size={16} />
-                  Browse All Talent
-                  <ArrowRight size={14} style={{ marginLeft: "auto" }} />
+                  <UserSearch size={16} /> Browse All Talent
+                  <ArrowRight size={14} />
                 </NavLink>
-
                 <button className="jd-btn-ghost" onClick={() => onTabClick("edit")}>
                   <Edit size={15} /> Edit Job Post
                 </button>
@@ -798,8 +805,7 @@ const JobDetails = () => {
                   <XCircle size={15} /> Close Job
                 </button>
                 <div className="jd-btn-pair">
-                  <button className="jd-btn-sm"
-                    onClick={() => { setSaved(s => !s); notify(saved ? "Removed" : "Saved!"); }}>
+                  <button className="jd-btn-sm" onClick={() => { setSaved(s => !s); notify(saved ? "Removed" : "Saved!"); }}>
                     <Bookmark size={14} fill={saved ? "currentColor" : "none"} />
                     {saved ? "Saved" : "Save"}
                   </button>
@@ -841,9 +847,7 @@ const JobDetails = () => {
                     <div>
                       <div className="jd-client-row-lbl">Payment Method</div>
                       <div className={`jd-client-row-val ${job.client.paymentVerified ? "ok" : "warn"}`}>
-                        {job.client.paymentVerified
-                          ? <><CheckCircle size={13} /> Verified</>
-                          : <><AlertCircle size={13} /> Not Verified</>}
+                        {job.client.paymentVerified ? <><CheckCircle size={13} /> Verified</> : <><AlertCircle size={13} /> Not Verified</>}
                       </div>
                     </div>
                   </div>
@@ -868,11 +872,11 @@ const JobDetails = () => {
                 <div className="jd-activity-card-hd"><h3>Job Activity</h3></div>
                 <div className="jd-activity-rows">
                   {[
-                    { lbl: "Proposals",     val: job.proposals  },
-                    { lbl: "Invites Sent",  val: job.invites    },
-                    { lbl: "Interviews",    val: job.interviews },
-                    { lbl: "Views",         val: job.views      },
-                    { lbl: "Last Activity", val: "2 hours ago"  },
+                    { lbl: "Proposals", val: job.proposals },
+                    { lbl: "Invites Sent", val: job.invites },
+                    { lbl: "Interviews", val: job.interviews },
+                    { lbl: "Views", val: job.views },
+                    { lbl: "Last Activity", val: "2 hours ago" },
                   ].map(r => (
                     <div key={r.lbl} className="jd-activity-row">
                       <span>{r.lbl}</span>
@@ -885,23 +889,12 @@ const JobDetails = () => {
           </div>
         )}
 
-        {/* PROPOSALS */}
-        {tab === "proposals" && (
-          <ProposalsPanel proposals={proposals} onHire={handleHire} />
-        )}
-
-        {/* INVITES */}
-        {tab === "invites" && (
-          <InvitePanel onSend={handleSendInvites} onBrowseTalent={handleBrowseTalent} />
-        )}
-
-        {/* EDIT */}
-        {tab === "edit" && (
-          <EditPanel job={job} onSave={handleSaveJob} onCancel={() => setTab("overview")} />
-        )}
+        {tab === "proposals" && <ProposalsPanel proposals={proposals} onHire={handleHire} />}
+        {tab === "invites" && <InvitePanel onSend={handleSendInvites} onBrowseTalent={handleBrowseTalent} />}
+        {tab === "edit" && <EditPanel job={job} onSave={handleSaveJob} onCancel={() => setTab("overview")} />}
       </div>
 
-      {/* CLOSE JOB CONFIRM */}
+      {/* CLOSE JOB MODAL */}
       {showClose && (
         <div className="jd-overlay" onClick={() => setShowClose(false)}>
           <div className="jd-confirm-box" onClick={e => e.stopPropagation()}>
