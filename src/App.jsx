@@ -54,6 +54,7 @@ import Onboarding from "./pages/Freelancer/Onboarding.jsx";
 import Landing from "./pages/Client/Landing.jsx";
 import MyJobs from "./pages/Client/MyJobs.jsx";
 import BillingPayments from "./pages/Client/Payments.jsx";
+import ActiveContracts from "./pages/Client/ActiveContracts.jsx";
 
 function App() {
   return (
@@ -111,6 +112,7 @@ function App() {
             <Route path="/client/postjob" element={<PostJob />} />
             <Route path="/client/my-jobs" element={<MyJobs />} />
             <Route path="/client/payments" element={<BillingPayments />} />
+            <Route path="/client/contract" element={<ActiveContracts />} />   
 
             {/* Contracts */}
             <Route path="/contracts" element={<ContractsList />} />
