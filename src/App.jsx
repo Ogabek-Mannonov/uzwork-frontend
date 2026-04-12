@@ -53,6 +53,7 @@ import FindWork from "./pages/Freelancer/FindW/FindWork.jsx";
 import Onboarding from "./pages/Freelancer/Onboarding.jsx";
 import Landing from "./pages/Client/Landing.jsx";
 import MyJobs from "./pages/Client/MyJobs.jsx";
+import BillingPayments from "./pages/Client/Payments.jsx";
 
 function App() {
   return (
@@ -109,7 +110,7 @@ function App() {
             <Route path="/client/talent" element={<FindTalent />} />
             <Route path="/client/postjob" element={<PostJob />} />
             <Route path="/client/my-jobs" element={<MyJobs />} />
-            
+            <Route path="/client/payments" element={<BillingPayments />} />
 
             {/* Contracts */}
             <Route path="/contracts" element={<ContractsList />} />
