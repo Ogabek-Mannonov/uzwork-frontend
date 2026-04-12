@@ -51,6 +51,8 @@ import PostJob from "./pages/Client/PostJob.jsx";
 // =================== Freelancer Pages =====================
 import FindWork from "./pages/Freelancer/FindW/FindWork.jsx";
 import Onboarding from "./pages/Freelancer/Onboarding.jsx";
+import Landing from "./pages/Client/Landing.jsx";
+import MyJobs from "./pages/Client/MyJobs.jsx";
 
 function App() {
   return (
@@ -83,6 +85,8 @@ function App() {
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/profile/:id" element={<PublicProfile />} />
           <Route path="/profile/client" element={<Client />} />
+          <Route path="/client/landing" element={<Landing />} />
+          
 
           {/* Protected area */}
           <Route element={<ProtectedRoute />}>
@@ -104,6 +108,8 @@ function App() {
             <Route path="/client/job/:id" element={<ClientHome />} />
             <Route path="/client/talent" element={<FindTalent />} />
             <Route path="/client/postjob" element={<PostJob />} />
+            <Route path="/client/my-jobs" element={<MyJobs />} />
+            
 
             {/* Contracts */}
             <Route path="/contracts" element={<ContractsList />} />
