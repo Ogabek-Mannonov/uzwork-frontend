@@ -44,7 +44,7 @@
   transition: var(--transition);
 }
 
-.dark .public-profile-card {
+[data-theme="dark"] .public-profile-card {
   background: var(--surface-2);
   border-color: var(--glass-border);
 }
@@ -114,7 +114,7 @@
   box-shadow: 0 30px 60px -15px rgba(37, 99, 235, 0.3);
 }
 
-.dark .public-avatar-wrapper {
+[data-theme="dark"] .public-avatar-wrapper {
   border-color: var(--surface-2);
 }
 
@@ -136,7 +136,7 @@
   z-index: 5;
 }
 
-.dark .online-indicator {
+[data-theme="dark"] .online-indicator {
   border-color: var(--surface-2);
 }
 
@@ -296,7 +296,7 @@
   opacity: 1;
 }
 
-.dark .stat-card {
+[data-theme="dark"] .stat-card {
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -349,7 +349,7 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
 }
 
-.dark .contact-quick-card {
+[data-theme="dark"] .contact-quick-card {
   background: rgba(15, 23, 42, 0.4);
   border-color: rgba(255, 255, 255, 0.1);
 }
@@ -505,7 +505,7 @@
   box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
 }
 
-.dark .profile-info-combined-row {
+[data-theme="dark"] .profile-info-combined-row {
   background: rgba(15, 23, 42, 0.4);
   backdrop-filter: blur(20px);
   border-color: rgba(255, 255, 255, 0.05);
@@ -614,7 +614,7 @@
   transition: all 0.3s ease;
 }
 
-.dark .bio-quote-container {
+[data-theme="dark"] .bio-quote-container {
   background: rgba(255, 255, 255, 0.03);
   border-left-color: var(--brand);
 }
@@ -849,7 +849,7 @@
   transform: scale(1.1) rotate(-8deg);
 }
 
-.dark .pub-cert-card {
+[data-theme="dark"] .pub-cert-card {
   background: rgba(255,255,255,0.02);
   border-color: rgba(255,255,255,0.05);
 }
@@ -944,7 +944,7 @@
   color: var(--text);
 }
 
-.dark .pub-cert-tag {
+[data-theme="dark"] .pub-cert-tag {
   background: rgba(37,99,235,0.1);
   border-color: rgba(37,99,235,0.2);
   color: var(--muted);
@@ -1003,7 +1003,7 @@
 }
 
 /* Dark mode extra polish */
-.dark .pub-cert-card:hover {
+[data-theme="dark"] .pub-cert-card:hover {
   border-color: rgba(99,102,241,0.35);
   box-shadow: 0 16px 40px rgba(99,102,241,0.15), 0 4px 16px rgba(0,0,0,0.2);
 }
@@ -1047,7 +1047,7 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
-.dark .portfolio-premium-card-public {
+[data-theme="dark"] .portfolio-premium-card-public {
   background: var(--surface-2);
   border-color: var(--glass-border);
 }
