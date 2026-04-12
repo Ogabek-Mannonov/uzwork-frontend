@@ -142,3 +142,43 @@ export const uploadImage = async (formData) => {
   }
 };
 
+// ===================== SECURITY =====================
+
+/** Security settings */
+export const getSecuritySettings = async () => {
+  // Mock data instead of API call
+  return {
+    success: true,
+    data: {
+      twoFactorEnabled: false,
+      biometricEnabled: false,
+      loginNotifications: true,
+      sessionTimeout: true,
+      passwordStrength: "strong",
+      lastPasswordChange: "2024-01-15",
+      activeSessions: [
+        {
+          id: 1,
+          device: "Windows PC - Chrome",
+          browser: "Chrome 120.0",
+          os: "Windows 11",
+          location: "Tashkent, Uzbekistan",
+          ip: "192.168.1.1",
+          lastActive: "Now",
+          current: true
+        },
+        {
+          id: 2,
+          device: "iPhone 14 Pro",
+          browser: "Safari 17.0",
+          os: "iOS 17.2",
+          location: "Tashkent, Uzbekistan",
+          ip: "192.168.1.2",
+          lastActive: "2 hours ago",
+          current: false
+        }
+      ]
+    }
+  };
+};
+

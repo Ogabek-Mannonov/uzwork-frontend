@@ -54,6 +54,8 @@ import Onboarding from "./pages/Freelancer/Onboarding.jsx";
 import Landing from "./pages/Client/Landing.jsx";
 import MyJobs from "./pages/Client/MyJobs.jsx";
 import BillingPayments from "./pages/Client/Payments.jsx";
+import ContractManagement from "./pages/Client/ContractManegment.jsx";
+import SecuritySettings from "./pages/Client/Security.jsx";
 
 function App() {
   return (
@@ -110,7 +112,9 @@ function App() {
             <Route path="/client/talent" element={<FindTalent />} />
             <Route path="/client/postjob" element={<PostJob />} />
             <Route path="/client/my-jobs" element={<MyJobs />} />
-            <Route path="/client/payments" element={<BillingPayments />} />
+            <Route path="/client/payments" element={<BillingPayments />} />  
+            <Route path="/client/management" element={<ContractManagement />} />
+            <Route path="/client/security" element={<SecuritySettings />} />
 
             {/* Contracts */}
             <Route path="/contracts" element={<ContractsList />} />

@@ -240,3 +240,59 @@ export const deleteCertificationFile = async (certId) => {
     return { success: false, message: err?.response?.data?.message || err?.message };
   }
 };
+
+// ===================== SECURITY =====================
+
+/** Security portfolio */
+export const getSecurityPortfolio = async () => {
+  // Mock data instead of API call
+  return {
+    success: true,
+    data: [
+      {
+        id: 1,
+        title: "E-commerce Website",
+        description: "Full-stack e-commerce platform with React and Node.js",
+        technologies: ["React", "Node.js", "MongoDB"],
+        image: "https://via.placeholder.com/300x200",
+        link: "https://example.com"
+      },
+      {
+        id: 2,
+        title: "Mobile App",
+        description: "Cross-platform mobile app using React Native",
+        technologies: ["React Native", "Firebase"],
+        image: "https://via.placeholder.com/300x200",
+        link: "https://example.com"
+      }
+    ]
+  };
+};
+
+/** Security certifications */
+export const getSecurityCertifications = async () => {
+  // Mock data instead of API call
+  return {
+    success: true,
+    data: [
+      {
+        id: 1,
+        name: "AWS Certified Developer",
+        issuer: "Amazon Web Services",
+        issueDate: "2023-06-15",
+        expiryDate: "2026-06-15",
+        credentialId: "AWS-DEV-123456",
+        file: "https://via.placeholder.com/300x200"
+      },
+      {
+        id: 2,
+        name: "Google Cloud Professional",
+        issuer: "Google Cloud",
+        issueDate: "2023-08-20",
+        expiryDate: "2026-08-20",
+        credentialId: "GC-PRO-789012",
+        file: "https://via.placeholder.com/300x200"
+      }
+    ]
+  };
+};
