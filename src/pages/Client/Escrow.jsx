@@ -196,7 +196,7 @@ const Escrow = () => {
             </div>
             <div className="stat-info">
               <span className="stat-value">${escrowBalance.held.toLocaleString()}</span>
-              <span className="stat-label">UsHLAB TURILGAN</span>
+              <span className="stat-label">USHLAB TURILGAN</span>
             </div>
           </div>
           <div className="stat-card">

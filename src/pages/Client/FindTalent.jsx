@@ -1,9 +1,4 @@
 // src/pages/Client/FindTalent/FindTalent.jsx
-// Browse Talent – Upwork-style
-// Backend: hamma filterlar state sifatida saqlanadi.
-// Tayyor bo'lganda useEffect + axios bilan API ga ulang:
-//   GET /api/freelancers?badge=top_rated&minRate=20&maxRate=80&location=...
-
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -24,7 +19,7 @@ const FREELANCERS = [
     id: 1,
     avatar:    "https://i.pravatar.cc/150?img=1",
     name:      "Alisher E.",
-    title:     "Full-Stack Developer \\ React \\ Node.js \\ PostgreSQL \\ REST API",
+    title:     "Full-Stack Developer | React | Node.js | PostgreSQL | REST API",
     location:  "Tashkent, Uzbekistan",
     online:    true,
     boosted:   true,
@@ -43,7 +38,7 @@ const FREELANCERS = [
     id: 2,
     avatar:    "https://i.pravatar.cc/150?img=5",
     name:      "Nilufar A.",
-    title:     "UI/UX Designer \\ Figma \\ Product Design \\ Design Systems \\ Mobile",
+    title:     "UI/UX Designer | Figma | Product Design | Design Systems | Mobile",
     location:  "Samarkand, Uzbekistan",
     online:    true,
     boosted:   false,
@@ -62,7 +57,7 @@ const FREELANCERS = [
     id: 3,
     avatar:    "https://i.pravatar.cc/150?img=3",
     name:      "Jasur M.",
-    title:     "React Native Developer \\ Mobile Apps \\ iOS \\ Android \\ Firebase",
+    title:     "React Native Developer | Mobile Apps | iOS | Android | Firebase",
     location:  "Tashkent, Uzbekistan",
     online:    false,
     boosted:   true,
@@ -81,7 +76,7 @@ const FREELANCERS = [
     id: 4,
     avatar:    "https://i.pravatar.cc/150?img=7",
     name:      "Sarvar K.",
-    title:     "DevOps Engineer \\ Docker \\ Kubernetes \\ CI/CD \\ AWS \\ Linux",
+    title:     "DevOps Engineer | Docker | Kubernetes | CI/CD | AWS | Linux",
     location:  "Bukhara, Uzbekistan",
     online:    true,
     boosted:   false,
@@ -100,7 +95,7 @@ const FREELANCERS = [
     id: 5,
     avatar:    "https://i.pravatar.cc/150?img=9",
     name:      "Zulfiya T.",
-    title:     "Content Writer \\ SEO \\ Blog Posts \\ Tech Articles \\ Copywriting",
+    title:     "Content Writer | SEO | Blog Posts | Tech Articles | Copywriting",
     location:  "Fergana, Uzbekistan",
     online:    true,
     boosted:   false,
@@ -119,26 +114,25 @@ const FREELANCERS = [
 
 const BADGE_OPTIONS = [
   { id: "top_rated_plus", label: "Top Rated Plus", icon: "🏆", bg: "#fef9c3", color: "#d97706" },
-  { id: "top_rated",      label: "Top Rated",      icon: "⭐", bg: "#eff6ff",  color: "#2563eb" },
-  { id: "rising_talent",  label: "Rising Talent",  icon: "📈", bg: "#f0faf0",  color: "#14a800" },
+  { id: "top_rated",      label: "Top Rated",      icon: "⭐", bg: "#dbeafe", color: "#2563eb" },
+  { id: "rising_talent",  label: "Rising Talent",  icon: "📈", bg: "#d1fae5", color: "#059669" },
 ];
 
 const SUCCESS_RATES = ["60% & up", "70% & up", "80% & up", "90% & up"];
-const HOURLY_BARS   = [90,60,40,30,20,15,10,8,6,5,4,3,3,2,2,1]; // histogram shape
+const HOURLY_BARS   = [90,60,40,30,20,15,10,8,6,5,4,3,3,2,2,1];
 
 /* ================================================================
    HELPERS
    ================================================================ */
-const Toast = ({ msg, onClose }) => msg ? (
+const FtToast = ({ msg, onClose }) => msg ? (
   <div className="ft-toast">
-    <CheckCircle size={16} color="#14a800" />
+    <CheckCircle size={16} color="#3b82f6" />
     <span>{msg}</span>
     <button className="ft-toast-x" onClick={onClose}><X size={13} /></button>
   </div>
 ) : null;
 
-/* collapsible filter section */
-const FilterSection = ({ title, info, children, defaultOpen = true }) => {
+const FtFilterSection = ({ title, info, children, defaultOpen = true }) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="ft-filter-section">
@@ -159,7 +153,7 @@ const FilterSection = ({ title, info, children, defaultOpen = true }) => {
 /* ================================================================
    FREELANCER CARD
    ================================================================ */
-const FreelancerCard = ({ fl, onInvite }) => {
+const FtFreelancerCard = ({ fl, onInvite }) => {
   const [invited, setInvited] = useState(false);
   const [liked,   setLiked]   = useState(false);
 
@@ -178,7 +172,7 @@ const FreelancerCard = ({ fl, onInvite }) => {
     <div className="ft-card">
       <div className="ft-card-inner">
 
-        {/* ── Top row ─── */}
+        {/* Top row */}
         <div className="ft-card-top">
           <div className="ft-ava-wrap">
             <img src={fl.avatar} alt={fl.name} className="ft-ava" />
@@ -213,7 +207,7 @@ const FreelancerCard = ({ fl, onInvite }) => {
           </div>
         </div>
 
-        {/* ── Stats row ─── */}
+        {/* Stats row */}
         <div className="ft-stats-row">
           <span className="ft-stat">{fl.rate}</span>
           <span className="ft-stat-sep" />
@@ -235,7 +229,7 @@ const FreelancerCard = ({ fl, onInvite }) => {
           )}
         </div>
 
-        {/* ── Skills ─── */}
+        {/* Skills */}
         <div className="ft-skills">
           {fl.skills.slice(0, MAX_SKILLS).map(sk => (
             <span key={sk} className="ft-skill-tag">{sk}</span>
@@ -245,7 +239,7 @@ const FreelancerCard = ({ fl, onInvite }) => {
           )}
         </div>
 
-        {/* ── Insights ─── */}
+        {/* Insights */}
         {fl.insights?.length > 0 && (
           <div className="ft-insights">
             <div className="ft-insights-hd">
@@ -256,7 +250,7 @@ const FreelancerCard = ({ fl, onInvite }) => {
               </div>
               <div className="ft-insights-feedback">
                 Insight feedback
-                <button className="ft-thumb-btn"><ThumbsUp  size={13} /></button>
+                <button className="ft-thumb-btn"><ThumbsUp size={13} /></button>
                 <button className="ft-thumb-btn"><ThumbsDown size={13} /></button>
               </div>
             </div>
@@ -266,7 +260,7 @@ const FreelancerCard = ({ fl, onInvite }) => {
           </div>
         )}
 
-        {/* ── Association ─── */}
+        {/* Association */}
         {fl.assoc && (
           <div className="ft-assoc">
             <div className="ft-assoc-logo-ph" style={{ background: fl.assoc.bg }}>
@@ -284,7 +278,7 @@ const FreelancerCard = ({ fl, onInvite }) => {
         )}
       </div>
 
-      {/* ── Card footer ─── */}
+      {/* Card footer */}
       <div className="ft-card-divider" />
       <div className="ft-card-footer">
         <button className="ft-card-footer-link">View Profile</button>
@@ -301,7 +295,7 @@ const FreelancerCard = ({ fl, onInvite }) => {
 const FindTalent = () => {
   const navigate = useNavigate();
 
-  /* ── filter state ─────────────────────────────────────────── */
+  /* filter state */
   const [search,      setSearch]      = useState("");
   const [badges,      setBadges]      = useState([]);
   const [minRate,     setMinRate]     = useState(10);
@@ -311,35 +305,38 @@ const FindTalent = () => {
   const [sort,        setSort]        = useState("relevance");
   const [toast,       setToast]       = useState("");
 
-  // API dan olingan freelancers
   const [freelancers, setFreelancers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetch = async () => {
       setLoading(true);
-      const res = await getFreelancers();
-      const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-      const mapped = list.map(item => ({
-        id: item.id,
-        avatar: item.avatar_url,
-        name: item.name || (item.first_name ? `${item.first_name} ${item.last_name || ""}` : "Freelancer"),
-        title: item.title || "Freelancer",
-        rate: `$${item.hourly_rate || 0}/hr`,
-        jobSuccess: item.job_success_score || 0,
-        earned: item.total_earned ? `$${item.total_earned}k+` : "$0",
-        location: item.location || "N/A",
-        skills: item.skills || [],
-        overview: item.bio || "",
-        badges: item.job_success_score > 90 ? ["top_rated"] : []
-      }));
-      setFreelancers(mapped);
-      setLoading(false);
+      try {
+        const res = await getFreelancers();
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : FREELANCERS);
+        const mapped = list.map(item => ({
+          id: item.id,
+          avatar: item.avatar_url || item.avatar,
+          name: item.name || (item.first_name ? `${item.first_name} ${item.last_name || ""}` : "Freelancer"),
+          title: item.title || "Freelancer",
+          rate: `$${item.hourly_rate || 0}/hr`,
+          jobSuccess: item.job_success_score || 0,
+          earned: item.total_earned ? `$${item.total_earned}k+` : "$0",
+          location: item.location || "N/A",
+          skills: item.skills || [],
+          overview: item.bio || "",
+          badges: item.job_success_score > 90 ? ["top_rated"] : []
+        }));
+        setFreelancers(mapped.length ? mapped : FREELANCERS);
+      } catch {
+        setFreelancers(FREELANCERS);
+      } finally {
+        setLoading(false);
+      }
     };
     fetch();
   }, []);
 
-  /* ── helpers ──────────────────────────────────────────────── */
   const notify = useCallback((msg) => {
     setToast(msg);
     setTimeout(() => setToast(""), 3000);
@@ -354,7 +351,6 @@ const FindTalent = () => {
     notify("Filters cleared!");
   };
 
-  /* client-side filter (Backend tayyor bo'lganda olib tashlang) */
   const shown = freelancers.filter(fl => {
     const rateNum = parseInt((fl.rate || "").replace(/\D/g, "")) || 0;
     const matchSearch = !search ||
@@ -375,13 +371,11 @@ const FindTalent = () => {
     (location ? 1 : 0) +
     (successRate ? 1 : 0);
 
-  /* ─────────────────────────────────────────────────────────── */
   return (
     <div className="ft-page">
 
-      {/* ── Top search bar ─── */}
+      {/* Top search bar */}
       <div className="ft-searchbar">
-        {/* Back link */}
         <button
           className="ft-back-btn"
           onClick={() => navigate("/client/home")}
@@ -408,16 +402,14 @@ const FindTalent = () => {
 
       <div className="ft-body">
 
-        {/* ══════════ FILTER SIDEBAR ══════════ */}
+        {/* FILTER SIDEBAR */}
         <aside className="ft-sidebar">
 
           <div className="ft-sidebar-hd">
             <div className="ft-sidebar-hd-title">
               <SlidersHorizontal size={15} /> Filters
               {activeFilterCount > 0 && (
-                <span style={{ background:"var(--green)", color:"#fff", borderRadius:"var(--radius-full)", fontSize:11, fontWeight:700, padding:"1px 7px", marginLeft:4 }}>
-                  {activeFilterCount}
-                </span>
+                <span className="ft-filter-count">{activeFilterCount}</span>
               )}
             </div>
             {activeFilterCount > 0 && (
@@ -426,7 +418,7 @@ const FindTalent = () => {
           </div>
 
           {/* Talent Badge */}
-          <FilterSection title="Talent badge" info="Badges awarded based on performance">
+          <FtFilterSection title="Talent badge" info="Badges awarded based on performance">
             {BADGE_OPTIONS.map(b => (
               <label key={b.id}
                 className={`ft-check-item ${badges.includes(b.id) ? "checked" : ""}`}
@@ -442,11 +434,10 @@ const FindTalent = () => {
                 </div>
               </label>
             ))}
-          </FilterSection>
+          </FtFilterSection>
 
           {/* Hourly Rate */}
-          <FilterSection title="Hourly rate">
-            {/* Histogram */}
+          <FtFilterSection title="Hourly rate">
             <div className="ft-rate-chart">
               {HOURLY_BARS.map((h, i) => {
                 const pct = i / HOURLY_BARS.length;
@@ -479,10 +470,10 @@ const FindTalent = () => {
                   onChange={e => setMaxRate(Number(e.target.value))} placeholder="Max" />
               </div>
             </div>
-          </FilterSection>
+          </FtFilterSection>
 
           {/* Location */}
-          <FilterSection title="Location">
+          <FtFilterSection title="Location">
             <select className="ft-location-select"
               value={location} onChange={e => setLocation(e.target.value)}>
               <option value="">City, country or region</option>
@@ -494,10 +485,10 @@ const FindTalent = () => {
               <option value="Kyrgyzstan">Kyrgyzstan</option>
               <option value="Remote">Remote (Any)</option>
             </select>
-          </FilterSection>
+          </FtFilterSection>
 
           {/* Job Success */}
-          <FilterSection title="Job success" info="Minimum job success score">
+          <FtFilterSection title="Job success" info="Minimum job success score">
             {SUCCESS_RATES.map(r => (
               <label key={r}
                 className={`ft-check-item ${successRate === r.split("%")[0] ? "checked" : ""}`}
@@ -510,19 +501,18 @@ const FindTalent = () => {
                 <span className="ft-check-label">{r}</span>
               </label>
             ))}
-          </FilterSection>
+          </FtFilterSection>
 
           {/* English Level */}
-          <FilterSection title="English level" defaultOpen={false}>
+          <FtFilterSection title="English level" defaultOpen={false}>
             {["Any level","Basic","Conversational","Fluent","Native"].map(l => (
               <label key={l} className="ft-check-item">
                 <div className="ft-checkbox"><Check size={10} className="ft-check-tick" /></div>
                 <span className="ft-check-label">{l}</span>
               </label>
             ))}
-          </FilterSection>
+          </FtFilterSection>
 
-          {/* Clear */}
           {activeFilterCount > 0 && (
             <button className="ft-clear-btn" onClick={clearFilters}>
               <X size={13} /> Clear all filters ({activeFilterCount})
@@ -530,10 +520,9 @@ const FindTalent = () => {
           )}
         </aside>
 
-        {/* ══════════ RESULTS ══════════ */}
+        {/* RESULTS */}
         <main className="ft-results">
 
-          {/* Top bar: Location pill + Sort */}
           <div className="ft-results-top">
             <button className="ft-filter-pill">
               <MapPin size={13} />
@@ -568,25 +557,24 @@ const FindTalent = () => {
             </select>
           </div>
 
-          {/* Freelancer cards */}
-          {shown.length > 0
-            ? shown.map(fl => (
-                <FreelancerCard
-                  key={fl.id}
-                  fl={fl}
-                  onInvite={(name) => notify(`Invitation sent to ${name}!`)}
-                />
-              ))
-            : (
-              <div className="ft-empty">
-                <div className="ft-empty-icon">🔍</div>
-                <div className="ft-empty-title">No freelancers found</div>
-                <div className="ft-empty-sub">Try adjusting your filters or search query</div>
-              </div>
-            )
-          }
+          {loading ? (
+            <div className="ft-loading">Loading freelancers...</div>
+          ) : shown.length > 0 ? (
+            shown.map(fl => (
+              <FtFreelancerCard
+                key={fl.id}
+                fl={fl}
+                onInvite={(name) => notify(`Invitation sent to ${name}!`)}
+              />
+            ))
+          ) : (
+            <div className="ft-empty">
+              <div className="ft-empty-icon">🔍</div>
+              <div className="ft-empty-title">No freelancers found</div>
+              <div className="ft-empty-sub">Try adjusting your filters or search query</div>
+            </div>
+          )}
 
-          {/* Load more */}
           {shown.length > 0 && (
             <div className="ft-load-more">
               <button className="ft-load-more-btn"
@@ -598,7 +586,7 @@ const FindTalent = () => {
         </main>
       </div>
 
-      <Toast msg={toast} onClose={() => setToast("")} />
+      <FtToast msg={toast} onClose={() => setToast("")} />
     </div>
   );
 };

@@ -1,9 +1,4 @@
 // src/pages/Client/PostJob/PostJob.jsx
-// Post a Job — 4-bosqichli wizard
-// Backend tayyor bo'lganda:
-//   POST /api/jobs        → job yaratish
-//   POST /api/jobs/draft  → qoralama saqlash
-
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -87,16 +82,13 @@ const STEP_TIPS = {
    INITIAL FORM STATE
    ================================================================ */
 const INITIAL = {
-  // Step 1
   title:       "",
   category:    "",
   description: "",
-  jobType:     "fixed",    // fixed | hourly
+  jobType:     "fixed",
   experience:  "",
-  // Step 2
   skills:      [],
-  // Step 3
-  budgetType:  "fixed",   // fixed | range | hourly
+  budgetType:  "fixed",
   budgetFixed: "",
   budgetMin:   "",
   budgetMax:   "",
@@ -105,18 +97,17 @@ const INITIAL = {
   duration:    "",
   scope:       "",
   freelancers: "1",
-  // Meta
   visibility:  "public",
 };
 
 /* ================================================================
    HELPERS
    ================================================================ */
-const Toast = ({ msg, type, onClose }) => msg ? (
+const PjToast = ({ msg, type, onClose }) => msg ? (
   <div className={`pj-toast ${type === "error" ? "error" : ""}`}>
     {type === "error"
-      ? <AlertCircle size={16} color="#dc2626" />
-      : <CheckCircle size={16} color="#14a800" />}
+      ? <AlertCircle size={16} color="#ef4444" />
+      : <CheckCircle size={16} color="#3b82f6" />}
     <span>{msg}</span>
     <button className="pj-toast-x" onClick={onClose}><X size={13} /></button>
   </div>
@@ -125,13 +116,12 @@ const Toast = ({ msg, type, onClose }) => msg ? (
 /* ================================================================
    STEP 1 — Job Details
    ================================================================ */
-const Step1 = ({ form, setForm, errors }) => {
+const PjStep1 = ({ form, setForm, errors }) => {
   const charLimit = 5000;
 
   return (
     <div className="pj-card-body">
 
-      {/* Job Title */}
       <div className="pj-form-group">
         <label className="pj-label">
           Job Title <span className="pj-label-req">*</span>
@@ -147,7 +137,6 @@ const Step1 = ({ form, setForm, errors }) => {
         {errors.title && <div className="pj-error-msg"><AlertCircle size={13} />{errors.title}</div>}
       </div>
 
-      {/* Category */}
       <div className="pj-form-group">
         <label className="pj-label">
           Category <span className="pj-label-req">*</span>
@@ -163,7 +152,6 @@ const Step1 = ({ form, setForm, errors }) => {
         {errors.category && <div className="pj-error-msg"><AlertCircle size={13} />{errors.category}</div>}
       </div>
 
-      {/* Job type */}
       <div className="pj-form-group">
         <label className="pj-label">Job Type <span className="pj-label-req">*</span></label>
         <div className="pj-type-grid">
@@ -185,7 +173,6 @@ const Step1 = ({ form, setForm, errors }) => {
         </div>
       </div>
 
-      {/* Description */}
       <div className="pj-form-group">
         <label className="pj-label">
           Job Description <span className="pj-label-req">*</span>
@@ -202,7 +189,6 @@ const Step1 = ({ form, setForm, errors }) => {
         {errors.description && <div className="pj-error-msg"><AlertCircle size={13} />{errors.description}</div>}
       </div>
 
-      {/* Experience level */}
       <div className="pj-form-group">
         <label className="pj-label">Experience Level <span className="pj-label-req">*</span></label>
         <div className="pj-exp-grid">
@@ -231,7 +217,7 @@ const Step1 = ({ form, setForm, errors }) => {
 /* ================================================================
    STEP 2 — Skills
    ================================================================ */
-const Step2 = ({ form, setForm, errors }) => {
+const PjStep2 = ({ form, setForm, errors }) => {
   const [input, setInput] = useState("");
   const [activeCat, setActiveCat] = useState("development");
 
@@ -281,7 +267,6 @@ const Step2 = ({ form, setForm, errors }) => {
           </div>
         )}
 
-        {/* Category tabs */}
         <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
           {Object.keys(SUGGESTED_SKILLS).map(cat => (
             <button
@@ -289,14 +274,14 @@ const Step2 = ({ form, setForm, errors }) => {
               onClick={() => setActiveCat(cat)}
               style={{
                 padding: "5px 13px",
-                borderRadius: "var(--radius-full)",
-                border: `1.5px solid ${activeCat === cat ? "var(--green)" : "var(--border)"}`,
-                background: activeCat === cat ? "var(--green-soft)" : "none",
-                color: activeCat === cat ? "var(--green)" : "var(--text-3)",
+                borderRadius: "var(--pj-radius-full)",
+                border: `1.5px solid ${activeCat === cat ? "var(--pj-blue)" : "var(--pj-border)"}`,
+                background: activeCat === cat ? "var(--pj-blue-soft)" : "none",
+                color: activeCat === cat ? "var(--pj-blue)" : "var(--pj-text-3)",
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: "pointer",
-                fontFamily: "var(--font)",
+                fontFamily: "var(--pj-font)",
                 transition: "all .15s",
                 textTransform: "capitalize",
               }}
@@ -318,7 +303,6 @@ const Step2 = ({ form, setForm, errors }) => {
 
       <div className="pj-divider" />
 
-      {/* Number of freelancers */}
       <div className="pj-form-group">
         <label className="pj-label">Number of Freelancers Needed</label>
         <div className="pj-type-grid">
@@ -346,11 +330,10 @@ const Step2 = ({ form, setForm, errors }) => {
 /* ================================================================
    STEP 3 — Budget & Timeline
    ================================================================ */
-const Step3 = ({ form, setForm, errors }) => {
+const PjStep3 = ({ form, setForm, errors }) => {
   return (
     <div className="pj-card-body">
 
-      {/* Budget type */}
       <div className="pj-form-group">
         <label className="pj-label">Payment Structure <span className="pj-label-req">*</span></label>
         <div className="pj-budget-type-grid">
@@ -372,7 +355,6 @@ const Step3 = ({ form, setForm, errors }) => {
         </div>
       </div>
 
-      {/* Budget input — fixed */}
       {form.budgetType === "fixed" && (
         <div className="pj-form-group">
           <label className="pj-label">Budget <span className="pj-label-req">*</span></label>
@@ -391,7 +373,6 @@ const Step3 = ({ form, setForm, errors }) => {
         </div>
       )}
 
-      {/* Budget — range */}
       {form.budgetType === "range" && (
         <div className="pj-form-group">
           <label className="pj-label">Budget Range <span className="pj-label-req">*</span></label>
@@ -422,7 +403,6 @@ const Step3 = ({ form, setForm, errors }) => {
         </div>
       )}
 
-      {/* Budget — hourly */}
       {form.budgetType === "hourly" && (
         <div className="pj-form-group">
           <label className="pj-label">Hourly Rate Range <span className="pj-label-req">*</span></label>
@@ -457,7 +437,6 @@ const Step3 = ({ form, setForm, errors }) => {
 
       <div className="pj-divider" />
 
-      {/* Duration */}
       <div className="pj-form-group">
         <label className="pj-label">Project Duration <span className="pj-label-req">*</span></label>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -468,9 +447,9 @@ const Step3 = ({ form, setForm, errors }) => {
               style={{
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "10px 16px",
-                border: `2px solid ${form.duration === d.id ? "var(--green)" : "var(--border)"}`,
-                background: form.duration === d.id ? "var(--green-soft)" : "var(--surface)",
-                borderRadius: "var(--radius)",
+                border: `2px solid ${form.duration === d.id ? "var(--pj-blue)" : "var(--pj-border)"}`,
+                background: form.duration === d.id ? "var(--pj-blue-soft)" : "var(--pj-surface)",
+                borderRadius: "var(--pj-radius)",
                 cursor: "pointer",
                 transition: "all .15s",
                 flexShrink: 0,
@@ -478,8 +457,8 @@ const Step3 = ({ form, setForm, errors }) => {
             >
               <span style={{ fontSize: 16 }}>{d.icon}</span>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{d.name}</div>
-                <div style={{ fontSize: 11, color: "var(--text-3)" }}>{d.sub}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--pj-text)" }}>{d.name}</div>
+                <div style={{ fontSize: 11, color: "var(--pj-text-3)" }}>{d.sub}</div>
               </div>
             </div>
           ))}
@@ -487,7 +466,6 @@ const Step3 = ({ form, setForm, errors }) => {
         {errors.duration && <div className="pj-error-msg" style={{ marginTop: 8 }}><AlertCircle size={13} />{errors.duration}</div>}
       </div>
 
-      {/* Project scope */}
       <div className="pj-form-group">
         <label className="pj-label">Project Scope</label>
         <div className="pj-scope-grid">
@@ -507,7 +485,6 @@ const Step3 = ({ form, setForm, errors }) => {
 
       <div className="pj-divider" />
 
-      {/* Visibility */}
       <div className="pj-form-group">
         <label className="pj-label">Visibility</label>
         <div className="pj-type-grid">
@@ -535,7 +512,7 @@ const Step3 = ({ form, setForm, errors }) => {
 /* ================================================================
    STEP 4 — Review & Publish
    ================================================================ */
-const Step4 = ({ form }) => {
+const PjStep4 = ({ form }) => {
   const getBudgetStr = () => {
     if (form.budgetType === "fixed")  return `$${form.budgetFixed} USD (Fixed Price)`;
     if (form.budgetType === "range")  return `$${form.budgetMin} – $${form.budgetMax} USD`;
@@ -551,31 +528,29 @@ const Step4 = ({ form }) => {
 
   return (
     <div className="pj-card-body">
-      {/* Title preview */}
       <div style={{
-        background: "var(--bg)",
-        borderRadius: "var(--radius)",
+        background: "var(--pj-bg)",
+        borderRadius: "var(--pj-radius)",
         padding: "16px 18px",
         marginBottom: 24,
-        border: "1px solid var(--border-2)",
+        border: "1px solid var(--pj-border-2)",
       }}>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".8px", textTransform: "uppercase", color: "var(--text-4)", marginBottom: 6 }}>Job Title</div>
-        <div style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", fontFamily: "var(--font-head)", lineHeight: 1.3 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".8px", textTransform: "uppercase", color: "var(--pj-text-4)", marginBottom: 6 }}>Job Title</div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: "var(--pj-text)", fontFamily: "var(--pj-font-head)", lineHeight: 1.3 }}>
           {form.title || "—"}
         </div>
         {form.category && (
           <div style={{ marginTop: 6, display: "flex", gap: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", background: "var(--blue-soft)", color: "var(--blue)", borderRadius: "var(--radius-full)", border: "1px solid var(--blue-border)" }}>
+            <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", background: "var(--pj-blue-soft)", color: "var(--pj-blue)", borderRadius: "var(--pj-radius-full)", border: "1px solid var(--pj-blue-border)" }}>
               {form.category}
             </span>
-            <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", background: "var(--green-soft)", color: "var(--green)", borderRadius: "var(--radius-full)", border: "1px solid var(--green-border)" }}>
+            <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", background: "var(--pj-green-soft)", color: "var(--pj-green)", borderRadius: "var(--pj-radius-full)", border: "1px solid var(--pj-green-border)" }}>
               {form.jobType === "fixed" ? "Fixed Price" : "Hourly"}
             </span>
           </div>
         )}
       </div>
 
-      {/* Details */}
       <div className="pj-preview-section">
         <div className="pj-preview-section-title">Job Details</div>
         {[
@@ -593,7 +568,6 @@ const Step4 = ({ form }) => {
         ))}
       </div>
 
-      {/* Skills */}
       <div className="pj-preview-section">
         <div className="pj-preview-section-title">Required Skills ({form.skills.length})</div>
         {form.skills.length > 0 ? (
@@ -603,33 +577,31 @@ const Step4 = ({ form }) => {
             ))}
           </div>
         ) : (
-          <div style={{ fontSize: 13, color: "var(--text-4)" }}>No skills added</div>
+          <div style={{ fontSize: 13, color: "var(--pj-text-4)" }}>No skills added</div>
         )}
       </div>
 
-      {/* Description */}
       <div className="pj-preview-section">
         <div className="pj-preview-section-title">Description</div>
-        <div style={{ fontSize: 14, color: "var(--text-2)", lineHeight: 1.75, whiteSpace: "pre-wrap" }}>
-          {form.description || <span style={{ color: "var(--text-4)" }}>No description provided</span>}
+        <div style={{ fontSize: 14, color: "var(--pj-text-2)", lineHeight: 1.75, whiteSpace: "pre-wrap" }}>
+          {form.description || <span style={{ color: "var(--pj-text-4)" }}>No description provided</span>}
         </div>
       </div>
 
-      {/* Escrow info */}
       <div style={{
         display: "flex", alignItems: "flex-start", gap: 12,
         padding: "14px 16px",
-        background: "var(--green-soft)",
-        border: "1px solid var(--green-border)",
-        borderRadius: "var(--radius)",
+        background: "var(--pj-blue-soft)",
+        border: "1px solid var(--pj-blue-border)",
+        borderRadius: "var(--pj-radius)",
         marginTop: 8,
       }}>
         <span style={{ fontSize: 20, flexShrink: 0 }}>🔒</span>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 3 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--pj-text)", marginBottom: 3 }}>
             Escrow Protection
           </div>
-          <div style={{ fontSize: 12.5, color: "var(--text-3)", lineHeight: 1.55 }}>
+          <div style={{ fontSize: 12.5, color: "var(--pj-text-3)", lineHeight: 1.55 }}>
             Your payment is held securely in escrow until you approve the final work. You only pay when you're satisfied.
           </div>
         </div>
@@ -639,18 +611,15 @@ const Step4 = ({ form }) => {
 };
 
 /* ================================================================
-   SIDEBAR CONTENT (changes per step)
+   SIDEBAR CONTENT
    ================================================================ */
-const StepSidebar = ({ step, form }) => {  // 'form' is now used below
+const PjStepSidebar = ({ step, form }) => {
   const progress = ((step - 1) / (STEPS.length - 1)) * 100;
   const tips = STEP_TIPS[step] || [];
-
-  // Using 'form' to show some stats in the example card
   const skillCount = form?.skills?.length || 0;
 
   return (
     <div className="pj-sidebar">
-      {/* Progress */}
       <div className="pj-progress-card">
         <div className="pj-progress-title">
           Progress
@@ -671,7 +640,6 @@ const StepSidebar = ({ step, form }) => {  // 'form' is now used below
         </div>
       </div>
 
-      {/* Tips */}
       <div className="pj-tips-card">
         <div className="pj-tips-head">
           <div className="pj-tips-head-icon"><Lightbulb size={15} /></div>
@@ -687,7 +655,6 @@ const StepSidebar = ({ step, form }) => {  // 'form' is now used below
         </div>
       </div>
 
-      {/* Example / stats - now using form data */}
       <div className="pj-example-card">
         <h3><Star size={13} /> Your Progress</h3>
         <ul className="pj-example-list">
@@ -719,7 +686,6 @@ const PostJob = () => {
     setTimeout(() => setToast(null), 3500);
   }, []);
 
-  /* ── Validation ─────────────────────────────────────────── */
   const validate = useCallback((currentStep) => {
     const e = {};
 
@@ -747,7 +713,6 @@ const PostJob = () => {
     return Object.keys(e).length === 0;
   }, [form]);
 
-  /* ── Navigation ─────────────────────────────────────────── */
   const handleNext = () => {
     if (!validate(step)) {
       notify("Please fill in all required fields.", "error");
@@ -772,40 +737,41 @@ const PostJob = () => {
     if (num < step) { setStep(num); setErrors({}); }
   };
 
-  /* ── Save Draft ─────────────────────────────────────────── */
   const handleSaveDraft = () => {
-    // Backend: POST /api/jobs/draft
     notify("Draft saved! You can continue later from My Jobs.");
   };
 
-  /* ── Publish ────────────────────────────────────────────── */
   const handlePublish = async () => {
     if (!validate(step)) {
       notify("Please review all fields before publishing.", "error");
       return;
     }
     
-    const res = await createJob({
-      title: form.title,
-      description: form.desc,
-      category: form.category,
-      skills: form.skills,
-      budget_type: form.payType,     // 'hourly' yoki 'fixed'
-      budget_amount: form.payType === "fixed" ? Number(form.budget) : null,
-      hourly_rate_min: form.payType === "hourly" ? Number(form.rateMin) : null,
-      hourly_rate_max: form.payType === "hourly" ? Number(form.rateMax) : null,
-      experience_level: form.experience,
-      status: "active"
-    });
+    try {
+      const res = await createJob({
+        title: form.title,
+        description: form.description,
+        category: form.category,
+        skills: form.skills,
+        budget_type: form.jobType,
+        budget_amount: form.budgetType === "fixed" ? Number(form.budgetFixed) : null,
+        hourly_rate_min: form.budgetType === "hourly" ? Number(form.hourlyMin) : null,
+        hourly_rate_max: form.budgetType === "hourly" ? Number(form.hourlyMax) : null,
+        experience_level: form.experience,
+        status: "active"
+      });
 
-    if (res?.success === false) {
-      notify(res?.message || "Xatolik yuz berdi", "error");
-    } else {
-      setSuccess(true);
+      if (res?.success === false) {
+        notify(res?.message || "Xatolik yuz berdi", "error");
+      } else {
+        setSuccess(true);
+      }
+    } catch (error) {
+      console.error(error);
+      notify("Xatolik yuz berdi. Iltimos qayta urinib ko'ring.", "error");
     }
   };
 
-  /* ── Step content config ─────────────────────────────────── */
   const STEP_META = {
     1: { badge: "Step 1 of 4",  title: "Tell us about your job",           desc: "Start with a clear title, category and detailed description." },
     2: { badge: "Step 2 of 4",  title: "What skills are required?",        desc: "Add the key skills a freelancer needs to complete your job." },
@@ -815,7 +781,6 @@ const PostJob = () => {
 
   const meta = STEP_META[step];
 
-  /* ── Success screen ─────────────────────────────────────── */
   if (success) {
     return (
       <div className="pj-page">
@@ -836,7 +801,7 @@ const PostJob = () => {
             <button className="pj-success-btn-secondary" onClick={() => { setSuccess(false); setForm(INITIAL); setStep(1); }}>
               Post Another Job
             </button>
-            <button className="pj-success-btn-secondary" onClick={() => navigate("/talent")}>
+            <button className="pj-success-btn-secondary" onClick={() => navigate("/client/find")}>
               Browse Talent
             </button>
           </div>
@@ -845,11 +810,9 @@ const PostJob = () => {
     );
   }
 
-  /* ── Main render ────────────────────────────────────────── */
   return (
     <div className="pj-page">
 
-      {/* ── Header ──────────────────────────────────────────── */}
       <header className="pj-header">
         <div className="pj-header-left">
           <button className="pj-back-btn" onClick={() => navigate(-1)}>
@@ -869,7 +832,6 @@ const PostJob = () => {
         </div>
       </header>
 
-      {/* ── Stepper ─────────────────────────────────────────── */}
       <div className="pj-stepper">
         <div className="pj-steps">
           {STEPS.map(s => (
@@ -890,9 +852,7 @@ const PostJob = () => {
         </div>
       </div>
 
-      {/* ── Main Content ────────────────────────────────────── */}
       <div className="pj-main">
-        {/* Form Card */}
         <div>
           <div className="pj-card" key={step}>
             <div className="pj-card-head">
@@ -903,12 +863,11 @@ const PostJob = () => {
               <p className="pj-card-desc">{meta.desc}</p>
             </div>
 
-            {step === 1 && <Step1 form={form} setForm={setForm} errors={errors} />}
-            {step === 2 && <Step2 form={form} setForm={setForm} errors={errors} />}
-            {step === 3 && <Step3 form={form} setForm={setForm} errors={errors} />}
-            {step === 4 && <Step4 form={form} />}
+            {step === 1 && <PjStep1 form={form} setForm={setForm} errors={errors} />}
+            {step === 2 && <PjStep2 form={form} setForm={setForm} errors={errors} />}
+            {step === 3 && <PjStep3 form={form} setForm={setForm} errors={errors} />}
+            {step === 4 && <PjStep4 form={form} />}
 
-            {/* Nav row */}
             <div className="pj-nav-row">
               <button
                 className="pj-btn-back"
@@ -931,11 +890,10 @@ const PostJob = () => {
           </div>
         </div>
 
-        {/* Sidebar */}
-        <StepSidebar step={step} form={form} />
+        <PjStepSidebar step={step} form={form} />
       </div>
 
-      <Toast msg={toast?.msg} type={toast?.type} onClose={() => setToast(null)} />
+      <PjToast msg={toast?.msg} type={toast?.type} onClose={() => setToast(null)} />
     </div>
   );
 };

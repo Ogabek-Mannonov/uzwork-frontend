@@ -1,4 +1,4 @@
-// src/pages/Client/MyJobs.jsx - Mock versiya (API tayyor bo'lmaganda)
+// src/pages/Client/MyJobs.jsx
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import "../Client/css/myjobs.css";
 
-// Mock API funksiyalari (vaqtincha)
+// Mock API functions
 const getMyJobs = async () => {
   return {
     data: [
@@ -160,11 +160,11 @@ const MyJobs = () => {
   const getStatusBadge = (status) => {
     switch(status) {
       case "active":
-        return <span className="status-badge active"><CheckCircle size={12} /> Aktiv</span>;
+        return <span className="mj-status-badge mj-active"><CheckCircle size={12} /> Aktiv</span>;
       case "draft":
-        return <span className="status-badge draft"><Edit size={12} /> Qoralama</span>;
+        return <span className="mj-status-badge mj-draft"><Edit size={12} /> Qoralama</span>;
       case "closed":
-        return <span className="status-badge closed"><Archive size={12} /> Yopiq</span>;
+        return <span className="mj-status-badge mj-closed"><Archive size={12} /> Yopiq</span>;
       default:
         return null;
     }
@@ -172,242 +172,248 @@ const MyJobs = () => {
 
   if (loading) {
     return (
-      <div className="myjobs-loading">
-        <div className="spinner"></div>
+      <div className="mj-loading">
+        <div className="mj-spinner"></div>
         <p>Yuklanmoqda...</p>
       </div>
     );
   }
 
   return (
-    <div className="myjobs-page">
-      <div className="myjobs-header">
-        <div>
-          <h1>Mening joblarim</h1>
-          <p>Barcha e'lon qilgan joblaringizni boshqaring</p>
-        </div>
-        <button className="post-job-btn" onClick={() => navigate("/client/postjob")}>
-          <Plus size={18} /> Yangi job e'lon qilish
-        </button>
-      </div>
-
-      <div className="myjobs-tabs">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            className={`tab-btn ${activeTab === tab.id ? "active" : ""}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.icon}
-            {tab.label}
-            <span className="tab-count">{tab.count}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="myjobs-search">
-        <div className="search-box">
-          <Search size={18} />
-          <input
-            type="text"
-            placeholder="Job nomi yoki ko'nikmalar bo'yicha qidirish..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
-            <button onClick={() => setSearchTerm("")}>
-              <X size={14} />
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="myjobs-list">
-        {filteredJobs.length === 0 ? (
-          <div className="empty-state">
-            <Briefcase size={48} strokeWidth={1} />
-            <h3>Hech qanday job topilmadi</h3>
-            <p>Hali hech qanday job e'lon qilmagansiz</p>
-            <button className="btn-primary" onClick={() => navigate("/client/postjob")}>
-              <Plus size={16} /> Birinchi jobni e'lon qilish
-            </button>
+    <div className="mj-page">
+      <div className="mj-container">
+        {/* Header */}
+        <div className="mj-header">
+          <div>
+            <h1>Mening joblarim</h1>
+            <p>Barcha e'lon qilgan joblaringizni boshqaring</p>
           </div>
-        ) : (
-          filteredJobs.map(job => (
-            <div key={job.id} className="job-card">
-              <div className="job-card-header">
-                <div className="job-title-section">
-                  <h3>{job.title}</h3>
-                  {getStatusBadge(job.status)}
-                </div>
-                <div className="job-actions">
-                  <button 
-                    className="action-btn"
-                    onClick={() => navigate(`/client/landing/${job.id}`)}
-                    title="Ko'rish"
-                  >
-                    <Eye size={16} />
-                  </button>
-                  <button 
-                    className="action-btn"
-                    onClick={() => navigate(`/client/edit-job/${job.id}`)}
-                    title="Tahrirlash"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button 
-                    className="action-btn"
-                    onClick={() => handleDuplicateJob(job)}
-                    title="Nusxalash"
-                  >
-                    <Copy size={16} />
-                  </button>
-                  {job.status === "draft" && (
+          <button className="mj-post-btn" onClick={() => navigate("/client/postjob")}>
+            <Plus size={18} /> Yangi job e'lon qilish
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="mj-tabs">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              className={`mj-tab-btn ${activeTab === tab.id ? "mj-active" : ""}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.icon}
+              {tab.label}
+              <span className="mj-tab-count">{tab.count}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Search */}
+        <div className="mj-search">
+          <div className="mj-search-box">
+            <Search size={18} />
+            <input
+              type="text"
+              placeholder="Job nomi yoki ko'nikmalar bo'yicha qidirish..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button className="mj-search-clear" onClick={() => setSearchTerm("")}>
+                <X size={14} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Jobs List */}
+        <div className="mj-list">
+          {filteredJobs.length === 0 ? (
+            <div className="mj-empty">
+              <Briefcase size={48} strokeWidth={1} />
+              <h3>Hech qanday job topilmadi</h3>
+              <p>Hali hech qanday job e'lon qilmagansiz</p>
+              <button className="mj-btn-primary" onClick={() => navigate("/client/postjob")}>
+                <Plus size={16} /> Birinchi jobni e'lon qilish
+              </button>
+            </div>
+          ) : (
+            filteredJobs.map(job => (
+              <div key={job.id} className="mj-card">
+                <div className="mj-card-header">
+                  <div className="mj-title-section">
+                    <h3>{job.title}</h3>
+                    {getStatusBadge(job.status)}
+                  </div>
+                  <div className="mj-card-actions">
                     <button 
-                      className="action-btn danger"
-                      onClick={() => setShowDeleteModal(job)}
-                      title="O'chirish"
+                      className="mj-action-btn"
+                      onClick={() => navigate(`/client/landing/${job.id}`)}
+                      title="Ko'rish"
                     >
-                      <Trash2 size={16} />
+                      <Eye size={16} />
+                    </button>
+                    <button 
+                      className="mj-action-btn"
+                      onClick={() => navigate(`/client/edit-job/${job.id}`)}
+                      title="Tahrirlash"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button 
+                      className="mj-action-btn"
+                      onClick={() => handleDuplicateJob(job)}
+                      title="Nusxalash"
+                    >
+                      <Copy size={16} />
+                    </button>
+                    {job.status === "draft" && (
+                      <button 
+                        className="mj-action-btn mj-danger"
+                        onClick={() => setShowDeleteModal(job)}
+                        title="O'chirish"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                    <button 
+                      className="mj-action-btn"
+                      onClick={() => setShowStatusModal(job)}
+                      title="Holatni o'zgartirish"
+                    >
+                      <MoreHorizontal size={16} />
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="mj-card-details">
+                  <div className="mj-detail-item">
+                    <DollarSign size={14} />
+                    <span>${job.budget_amount || job.budget || 0}</span>
+                  </div>
+                  <div className="mj-detail-item">
+                    <Users size={14} />
+                    <span>{job.proposals_count || 0} ta proposal</span>
+                  </div>
+                  <div className="mj-detail-item">
+                    <Eye size={14} />
+                    <span>{job.views || 0} ta ko'rish</span>
+                  </div>
+                  <div className="mj-detail-item">
+                    <Clock size={14} />
+                    <span>{new Date(job.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                
+                <div className="mj-skills">
+                  {job.skills?.slice(0, 5).map(skill => (
+                    <span key={skill} className="mj-skill-tag">{skill}</span>
+                  ))}
+                  {job.skills?.length > 5 && (
+                    <span className="mj-skill-tag mj-more">+{job.skills.length - 5}</span>
+                  )}
+                </div>
+                
+                <div className="mj-card-footer">
+                  {job.status === "active" && (
+                    <>
+                      <button 
+                        className="mj-footer-btn mj-primary"
+                        onClick={() => navigate(`/client/proposals/${job.id}`)}
+                      >
+                        <Users size={14} /> Proposals ({job.proposals_count || 0})
+                      </button>
+                      <button 
+                        className="mj-footer-btn mj-outline"
+                        onClick={() => navigate(`/client/invite/${job.id}`)}
+                      >
+                        <Plus size={14} /> Freelancer taklif qilish
+                      </button>
+                    </>
+                  )}
+                  {job.status === "draft" && (
+                    <>
+                      <button 
+                        className="mj-footer-btn mj-primary"
+                        onClick={() => navigate(`/client/edit-job/${job.id}`)}
+                      >
+                        <Edit size={14} /> To'ldirish
+                      </button>
+                      <button 
+                        className="mj-footer-btn mj-outline"
+                        onClick={() => navigate(`/client/job-preview/${job.id}`)}
+                      >
+                        <Eye size={14} /> Oldindan ko'rish
+                      </button>
+                    </>
+                  )}
+                  {job.status === "closed" && (
+                    <button 
+                      className="mj-footer-btn mj-outline"
+                      onClick={() => navigate(`/client/landing/${job.id}`)}
+                    >
+                      <Eye size={14} /> Ko'rish
                     </button>
                   )}
-                  <button 
-                    className="action-btn"
-                    onClick={() => setShowStatusModal(job)}
-                    title="Holatni o'zgartirish"
-                  >
-                    <MoreHorizontal size={16} />
-                  </button>
                 </div>
               </div>
-              
-              <div className="job-card-details">
-                <div className="detail-item">
-                  <DollarSign size={14} />
-                  <span>${job.budget_amount || job.budget || 0}</span>
-                </div>
-                <div className="detail-item">
-                  <Users size={14} />
-                  <span>{job.proposals_count || 0} ta proposal</span>
-                </div>
-                <div className="detail-item">
-                  <Eye size={14} />
-                  <span>{job.views || 0} ta ko'rish</span>
-                </div>
-                <div className="detail-item">
-                  <Clock size={14} />
-                  <span>{new Date(job.created_at).toLocaleDateString()}</span>
-                </div>
+            ))
+          )}
+        </div>
+
+        {/* Delete Modal */}
+        {showDeleteModal && (
+          <div className="mj-modal-overlay" onClick={() => setShowDeleteModal(null)}>
+            <div className="mj-modal-content" onClick={e => e.stopPropagation()}>
+              <div className="mj-modal-icon mj-danger">
+                <Trash2 size={24} />
               </div>
-              
-              <div className="job-card-skills">
-                {job.skills?.slice(0, 5).map(skill => (
-                  <span key={skill} className="skill-tag">{skill}</span>
-                ))}
-                {job.skills?.length > 5 && (
-                  <span className="skill-tag more">+{job.skills.length - 5}</span>
-                )}
-              </div>
-              
-              <div className="job-card-footer">
-                {job.status === "active" && (
-                  <>
-                    <button 
-                      className="footer-btn primary"
-                      onClick={() => navigate(`/client/proposals/${job.id}`)}
-                    >
-                      <Users size={14} /> Proposals ({job.proposals_count || 0})
-                    </button>
-                    <button 
-                      className="footer-btn outline"
-                      onClick={() => navigate(`/client/invite/${job.id}`)}
-                    >
-                      <Plus size={14} /> Freelancer taklif qilish
-                    </button>
-                  </>
-                )}
-                {job.status === "draft" && (
-                  <>
-                    <button 
-                      className="footer-btn primary"
-                      onClick={() => navigate(`/client/edit-job/${job.id}`)}
-                    >
-                      <Edit size={14} /> To'ldirish
-                    </button>
-                    <button 
-                      className="footer-btn outline"
-                      onClick={() => navigate(`/client/job-preview/${job.id}`)}
-                    >
-                      <Eye size={14} /> Oldindan ko'rish
-                    </button>
-                  </>
-                )}
-                {job.status === "closed" && (
-                  <button 
-                    className="footer-btn outline"
-                    onClick={() => navigate(`/client/landing/${job.id}`)}
-                  >
-                    <Eye size={14} /> Ko'rish
-                  </button>
-                )}
+              <h3>Jobni o'chirish</h3>
+              <p>"{showDeleteModal.title}" nomli jobni o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi.</p>
+              <div className="mj-modal-actions">
+                <button className="mj-btn-cancel" onClick={() => setShowDeleteModal(null)}>Bekor qilish</button>
+                <button className="mj-btn-danger" onClick={() => handleDeleteJob(showDeleteModal.id)}>O'chirish</button>
               </div>
             </div>
-          ))
+          </div>
+        )}
+
+        {/* Status Modal */}
+        {showStatusModal && (
+          <div className="mj-modal-overlay" onClick={() => setShowStatusModal(null)}>
+            <div className="mj-modal-content" onClick={e => e.stopPropagation()}>
+              <div className="mj-modal-icon">
+                <MoreHorizontal size={24} />
+              </div>
+              <h3>Job holatini o'zgartirish</h3>
+              <p>"{showStatusModal.title}" jobining holatini tanlang</p>
+              <div className="mj-status-options">
+                <button 
+                  className="mj-status-option"
+                  onClick={() => handleStatusChange(showStatusModal.id, "active")}
+                >
+                  <CheckCircle size={16} /> Aktiv qilish
+                </button>
+                <button 
+                  className="mj-status-option"
+                  onClick={() => handleStatusChange(showStatusModal.id, "paused")}
+                >
+                  <Clock size={16} /> Pauzaga qo'yish
+                </button>
+                <button 
+                  className="mj-status-option"
+                  onClick={() => handleStatusChange(showStatusModal.id, "closed")}
+                >
+                  <Archive size={16} /> Yopish
+                </button>
+              </div>
+              <div className="mj-modal-actions">
+                <button className="mj-btn-cancel" onClick={() => setShowStatusModal(null)}>Yopish</button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
-
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="modal-overlay" onClick={() => setShowDeleteModal(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-icon danger">
-              <Trash2 size={24} />
-            </div>
-            <h3>Jobni o'chirish</h3>
-            <p>"{showDeleteModal.title}" nomli jobni o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi.</p>
-            <div className="modal-actions">
-              <button className="btn-cancel" onClick={() => setShowDeleteModal(null)}>Bekor qilish</button>
-              <button className="btn-danger" onClick={() => handleDeleteJob(showDeleteModal.id)}>O'chirish</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Status Modal */}
-      {showStatusModal && (
-        <div className="modal-overlay" onClick={() => setShowStatusModal(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-icon">
-              <MoreHorizontal size={24} />
-            </div>
-            <h3>Job holatini o'zgartirish</h3>
-            <p>"{showStatusModal.title}" jobining holatini tanlang</p>
-            <div className="status-options">
-              <button 
-                className="status-option"
-                onClick={() => handleStatusChange(showStatusModal.id, "active")}
-              >
-                <CheckCircle size={16} /> Aktiv qilish
-              </button>
-              <button 
-                className="status-option"
-                onClick={() => handleStatusChange(showStatusModal.id, "paused")}
-              >
-                <Clock size={16} /> Pauzaga qo'yish
-              </button>
-              <button 
-                className="status-option"
-                onClick={() => handleStatusChange(showStatusModal.id, "closed")}
-              >
-                <Archive size={16} /> Yopish
-              </button>
-            </div>
-            <div className="modal-actions">
-              <button className="btn-cancel" onClick={() => setShowStatusModal(null)}>Yopish</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
