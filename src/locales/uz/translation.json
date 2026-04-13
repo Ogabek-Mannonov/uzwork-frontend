@@ -628,5 +628,43 @@
     "loading": "Yuklanmoqda...",
     "retry": "Qayta urinish",
     "saving": "Saqlanmoqda..."
+  },
+  "wallet": {
+    "title": "Mening hamyonim",
+    "availableBalance": "Mavjud balans",
+    "lockedBalance": "Muzlatilgan (Escrow)",
+    "totalSpent": "Umumiy sarf",
+    "totalEarned": "Umumiy daromad",
+    "myCards": "Mening kartalarim",
+    "addCard": "Karta qo'shish",
+    "noCards": "Hali kartalar qo'shilmagan",
+    "transactions": "So'nggi amallar",
+    "noTransactions": "Tranzaksiyalar topilmadi",
+    "deposit": "Pul qo'shish",
+    "withdraw": "Pul yechish",
+    "amountPlaceholder": "Summani kiriting",
+    "cardNumberPlaceholder": "Karta raqami",
+    "cardHolderPlaceholder": "Ega ismi",
+    "expiryDatePlaceholder": "PP/YY",
+    "mainCard": "Asosiy",
+    "setAsMain": "Asosiy qilish",
+    "deleteCard": "O'chirish",
+    "confirmDelete": "Haqiqatdan ham ushbu kartani o'chirib tashlamoqchimisiz?",
+    "yes": "Ha",
+    "no": "Yo'q",
+    "types": {
+      "deposit": "Pul qo'shish",
+      "withdrawal": "Pul yechish",
+      "escrow_hold": "Escrow ushlab turish",
+      "escrow_release": "To'lov o'tkazildi",
+      "fee": "Xizmat haqi",
+      "refund": "Qaytarildi"
+    },
+    "history": "Tranzaksiyalar tarixi",
+    "topUpDemo": "Demo: Balansni to'ldirish",
+    "successDeposit": "Mablag' muvaffaqiyatli qo'shildi!",
+    "successCard": "Karta muvaffaqiyatli qo'shildi!",
+    "successDelete": "Karta o'chirildi",
+    "errorGeneric": "Xatolik yuz berdi"
   }
 }
