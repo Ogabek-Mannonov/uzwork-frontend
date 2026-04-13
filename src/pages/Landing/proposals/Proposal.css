@@ -1,0 +1,447 @@
+/* ===========================
+   Proposal Page — Premium CSS
+   =========================== */
+
+.proposal-page {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+  min-height: 80vh;
+  position: relative;
+}
+
+/* Back button */
+.proposal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: var(--brand);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 28px;
+  transition: var(--transition);
+}
+
+.proposal-back:hover {
+  opacity: 0.75;
+  transform: translateX(-2px);
+}
+
+/* Toast */
+.proposal-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease;
+}
+
+.proposal-toast--success {
+  background: #10b981;
+  color: #fff;
+}
+
+.proposal-toast--error {
+  background: #ef4444;
+  color: #fff;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Layout */
+.proposal-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+/* ---- MAIN FORM AREA ---- */
+.proposal-main {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 36px 40px;
+  box-shadow: var(--shadow-sm);
+}
+
+.proposal-main__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.proposal-main__title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 4px;
+  letter-spacing: -0.02em;
+}
+
+.proposal-main__sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Form fields */
+.proposal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.proposal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.proposal-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.proposal-req {
+  color: #ef4444;
+  margin-left: 4px;
+}
+
+.proposal-hint {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.proposal-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.7;
+  resize: vertical;
+  min-height: 200px;
+  font-family: inherit;
+  transition: var(--transition);
+  box-sizing: border-box;
+}
+
+.proposal-textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-light);
+  background: var(--surface);
+}
+
+.proposal-char-count {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+}
+
+/* Row: price & duration side by side */
+.proposal-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.proposal-input-wrap {
+  position: relative;
+}
+
+.proposal-input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.proposal-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  transition: var(--transition);
+  box-sizing: border-box;
+}
+
+.proposal-input--icon {
+  padding-left: 40px;
+}
+
+.proposal-input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-light);
+  background: var(--surface);
+}
+
+/* Buttons */
+.proposal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: var(--radius-full);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1px solid transparent;
+  font-family: inherit;
+}
+
+.proposal-btn--primary {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+
+.proposal-btn--primary:hover:not(:disabled) {
+  background: var(--brand-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+.proposal-btn--primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.proposal-btn--outline {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.proposal-btn--outline:hover {
+  background: var(--surface-2);
+}
+
+.proposal-btn--full {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* Spinner */
+.proposal-spin {
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- ASIDE ---- */
+.proposal-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 100px;
+}
+
+.proposal-aside__loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+  color: var(--muted);
+}
+
+/* Job Card */
+.proposal-job-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.proposal-job-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--brand-light);
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.proposal-job-card__title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 10px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.proposal-job-card__desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+
+.proposal-job-card__budget {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.proposal-job-card__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.proposal-skill-tag {
+  background: var(--chip-bg);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+}
+
+.proposal-job-card__client {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* Tips Card */
+.proposal-tips {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 22px 24px;
+}
+
+.proposal-tips__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 14px;
+}
+
+.proposal-tips__list {
+  padding-left: 20px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.proposal-tips__list li {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ---- SUCCESS STATE ---- */
+.proposal-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 80px 20px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.proposal-success__icon {
+  width: 96px;
+  height: 96px;
+  background: #ecfdf5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.proposal-success__title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+
+.proposal-success__desc {
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0 0 36px;
+}
+
+.proposal-success__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .proposal-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .proposal-aside {
+    position: static;
+  }
+
+  .proposal-main {
+    padding: 24px 20px;
+  }
+
+  .proposal-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -18,6 +18,7 @@ export default function FindWork() {
   // Drawer State
   const [selectedJob, setSelectedJob] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [savedIds, setSavedIds] = useState(new Set());
 
   // Filter States
   const [showFilters, setShowFilters] = useState(false);
@@ -95,9 +96,30 @@ export default function FindWork() {
   }, []);
 
 
-  const handleProjectClick = (job) => {
-    setSelectedJob(job);
+  const handleProjectClick = async (job) => {
+    try {
+      // Fetch full details to get client analytics (rating, hire rate, etc.)
+      const { getJobById } = await import("../../../api/jobs");
+      const res = await getJobById(job.id);
+      if (res?.success) {
+        setSelectedJob(res.data.project || res.data);
+      } else {
+        setSelectedJob(job); // Fallback to list data
+      }
+    } catch (e) {
+      console.error("Error fetching full job details:", e);
+      setSelectedJob(job);
+    }
     setIsDrawerOpen(true);
+  };
+
+  const handleSaveToggle = (jobId) => {
+    setSavedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(jobId)) next.delete(jobId);
+      else next.add(jobId);
+      return next;
+    });
   };
 
   const tabs = [
@@ -331,11 +353,8 @@ export default function FindWork() {
         isOpen={isDrawerOpen}
         job={selectedJob}
         onClose={() => setIsDrawerOpen(false)}
-        onToggleLike={() => {
-            // This is a bit complex as likedIds is inside Projects component. 
-            // For now, let's keep it simple or just show the info.
-        }}
-        isLiked={false}
+        savedIds={[...savedIds]}
+        onSaveToggle={handleSaveToggle}
       />
     </div>
   );

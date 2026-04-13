@@ -340,3 +340,41 @@
         width: 100%;
     }
 }
+
+/* Deadline row */
+.jd-deadline-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: -8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.jd-deadline-label {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.jd-deadline-value {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* Spinner for save button */
+.jd-spin {
+  animation: jd-spin-anim 0.7s linear infinite;
+}
+
+@keyframes jd-spin-anim {
+  to { transform: rotate(360deg); }
+}
+
+/* Activity section title */
+.jd-activity-section h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
