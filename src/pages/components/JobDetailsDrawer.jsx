@@ -18,13 +18,18 @@ export default function JobDetailsDrawer({ job, isOpen, onClose, savedIds = [], 
     if (isOpen) {
       document.body.style.overflow = "hidden";
       const timer = setTimeout(() => setIsAnimating(true), 10);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+      };
     } else {
       const timer = setTimeout(() => {
         setIsAnimating(false);
         document.body.style.overflow = "unset";
       }, 400);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        document.body.style.overflow = "unset"; // Har doim reset qilish
+      };
     }
   }, [isOpen]);
 
