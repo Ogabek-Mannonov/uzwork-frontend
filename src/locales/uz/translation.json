@@ -580,6 +580,30 @@
       "next": "Keyingi"
     }
   },
+  "myJobsFreelancer": {
+    "title": "Mening ishlarim",
+    "subtitle": "Barcha faol va yakunlangan loyihalaringizni boshqaring",
+    "activeProjects": "Faol loyihalar",
+    "totalEarnings": "Umumiy daromad",
+    "tabs": {
+      "active": "Faol",
+      "completed": "Yakunlangan",
+      "all": "Barchasi"
+    },
+    "searchPlaceholder": "Loyiha yoki mijoz nomi bo'yicha qidirish...",
+    "empty": {
+      "noProjects": "Loyihalar topilmadi",
+      "desc": "Sizda hali hech qanday {{status}} loyiha yo'q. Mijozlarga taklif yuboring va ishlarni boshlang!",
+      "findWork": "Ish topish"
+    },
+    "contract": {
+      "amount": "Summa",
+      "startDate": "Boshlangan sana",
+      "lastUpdate": "Oxirgi yangilanish",
+      "chat": "Chat",
+      "details": "Batafsil"
+    }
+  },
   "onboarding": {
     "step": "Bosqich",
     "welcomeTitle": "Xush kelibsiz! Platformaga kirish uchun oz qoldi.",

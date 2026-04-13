@@ -53,6 +53,7 @@ import FindWork from "./pages/Freelancer/FindW/FindWork.jsx";
 import Onboarding from "./pages/Freelancer/Onboarding.jsx";
 import Landing from "./pages/Client/Landing.jsx";
 import MyJobs from "./pages/Client/MyJobs.jsx";
+import MyJobsFreelancer from "./pages/Freelancer/MyJobs.jsx";
 import BillingPayments from "./pages/Client/Payments.jsx";
 import ContractManagement from "./pages/Client/ContractManegment.jsx";
 import SecuritySettings from "./pages/Client/Security.jsx";
@@ -100,6 +101,7 @@ function App() {
             {/* Proposals (freelancer) */}
             <Route element={<RoleRoute allow={["freelancer"]} />}>
               <Route path="/find-work" element={<FindWork />} />
+              <Route path="/my-jobs" element={<MyJobsFreelancer />} />
               <Route path="/proposals" element={<Proposal />} />
               <Route path="/my-proposals" element={<MyProposals />} />
               <Route path="/proposals/new/:jobId" element={<Proposal />} />

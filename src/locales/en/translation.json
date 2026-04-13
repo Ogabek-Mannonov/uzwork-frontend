@@ -580,6 +580,30 @@
       "next": "Next"
     }
   },
+  "myJobsFreelancer": {
+    "title": "My Jobs",
+    "subtitle": "Manage all your active and completed projects",
+    "activeProjects": "Active projects",
+    "totalEarnings": "Total earnings",
+    "tabs": {
+      "active": "Active",
+      "completed": "Completed",
+      "all": "All"
+    },
+    "searchPlaceholder": "Search by project or client name...",
+    "empty": {
+      "noProjects": "No projects found",
+      "desc": "You don't have any {{status}} projects yet. Send proposals to clients and start working!",
+      "findWork": "Find Work"
+    },
+    "contract": {
+      "amount": "Amount",
+      "startDate": "Start date",
+      "lastUpdate": "Last update",
+      "chat": "Chat",
+      "details": "Details"
+    }
+  },
   "onboarding": {
     "step": "Step",
     "welcomeTitle": "Welcome! You're almost there.",
