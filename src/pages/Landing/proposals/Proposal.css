@@ -472,8 +472,8 @@
 }
 
 .security-shield {
-  background: #f0fdf4;
-  color: #166534;
+  background: #eff6ff;
+  color: #1d4ed8;
   padding: 20px;
   border-radius: 12px;
   display: flex;
@@ -533,7 +533,7 @@
   animation: slideIn 0.3s ease;
 }
 
-.proposal-toast--success { background: #10b981; color: #fff; }
+.proposal-toast--success { background: #2563eb; color: #fff; }
 .proposal-toast--error { background: #ef4444; color: #fff; }
 
 @keyframes slideIn {
