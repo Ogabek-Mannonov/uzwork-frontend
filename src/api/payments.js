@@ -72,3 +72,33 @@ export const getPaymentDetail = async (id) => {
     return { success: false, message: err?.response?.data?.message || err?.message };
   }
 };
+
+/** Kartalarni olish */
+export const getCards = async () => {
+  try {
+    const res = await api.get("/payments/cards");
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Karta qo'shish */
+export const addCard = async (payload) => {
+  try {
+    const res = await api.post("/payments/cards", payload);
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Karta o'chirish */
+export const deleteCard = async (id) => {
+  try {
+    const res = await api.delete(`/payments/cards/${id}`);
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
