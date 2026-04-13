@@ -628,5 +628,43 @@
     "loading": "Loading...",
     "retry": "Retry",
     "saving": "Saving..."
+  },
+  "wallet": {
+    "title": "My Wallet",
+    "availableBalance": "Available Balance",
+    "lockedBalance": "Frozen (Escrow)",
+    "totalSpent": "Total Spent",
+    "totalEarned": "Total Earned",
+    "myCards": "My Cards",
+    "addCard": "Add Card",
+    "noCards": "No cards added yet",
+    "transactions": "Recent Activity",
+    "noTransactions": "No transactions found",
+    "deposit": "Add Funds",
+    "withdraw": "Withdraw",
+    "amountPlaceholder": "Enter amount",
+    "cardNumberPlaceholder": "Card number",
+    "cardHolderPlaceholder": "Cardholder name",
+    "expiryDatePlaceholder": "MM/YY",
+    "mainCard": "Primary",
+    "setAsMain": "Set as Primary",
+    "deleteCard": "Delete Card",
+    "confirmDelete": "Are you sure you want to delete this card?",
+    "yes": "Yes, Delete",
+    "no": "Cancel",
+    "types": {
+      "deposit": "Deposit",
+      "withdrawal": "Withdrawal",
+      "escrow_hold": "Escrow Hold",
+      "escrow_release": "Payment Released",
+      "fee": "Service Fee",
+      "refund": "Refunded"
+    },
+    "history": "Transaction History",
+    "topUpDemo": "Demo: Top up Balance",
+    "successDeposit": "Funds added successfully!",
+    "successCard": "Card added successfully!",
+    "successDelete": "Card deleted",
+    "errorGeneric": "An error occurred"
   }
 }

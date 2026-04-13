@@ -628,5 +628,42 @@
     "loading": "Загрузка...",
     "retry": "Повторить",
     "saving": "Сохранение..."
+  },
+  "wallet": {
+    "title": "Мой кошелек",
+    "availableBalance": "Доступный баланс",
+    "lockedBalance": "Заморожено (Escrow)",
+    "totalSpent": "Всего потрачено",
+    "totalEarned": "Всего заработано",
+    "myCards": "Мои карты",
+    "addCard": "Добавить карту",
+    "noCards": "Карты еще не добавлены",
+    "transactions": "Последние операции",
+    "noTransactions": "Транзакции не найдены",
+    "deposit": "Пополнить баланс",
+    "withdraw": "Вывод средств",
+    "amountPlaceholder": "Введите сумму",
+    "cardNumberPlaceholder": "Номер карты",
+    "cardHolderPlaceholder": "Имя владельца",
+    "expiryDatePlaceholder": "ММ/ГГ",
+    "mainCard": "Основная",
+    "setAsMain": "Сделать основной",
+    "deleteCard": "Удалить карту",
+    "confirmDelete": "Вы действительно хотите удалить эту карту?",
+    "yes": "Да",
+    "no": "Нет",
+    "types": {
+      "deposit": "Пополнение",
+      "withdrawal": "Вывод средств",
+      "escrow_hold": "Удержание Escrow",
+      "escrow_release": "Платеж проведен",
+      "fee": "Комиссия",
+      "refund": "Возврат"
+    },
+    "history": "История транзакций",
+    "topUpDemo": "Демо: Пополнить баланс",
+    "successDeposit": "Средства успешно добавлены!",
+    "successCard": "Карта успешно добавлена!",
+    "errorGeneric": "Произошла ошибка"
   }
 }
