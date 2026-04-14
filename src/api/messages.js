@@ -27,9 +27,9 @@ export const getChatHistory = async (chatId) => {
  * Xabar yuborish
  * Backend kutadi: { chat_id, message_text, type?, file_url? }
  */
-export const sendMessage = async ({ chat_id, message_text, type = "text", file_url }) => {
+export const sendMessage = async ({ chat_id, message_text, type = "text", file_url, reply_to_id }) => {
   try {
-    const res = await api.post("/messages", { chat_id, message_text, type, file_url });
+    const res = await api.post("/messages", { chat_id, message_text, type, file_url, reply_to_id });
     return res?.data;
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err?.message };
