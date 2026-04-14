@@ -35,6 +35,19 @@ export const getSocket = () => {
 
   globalSocket.on("connect", () => {
     console.log("✅ Socket connected:", globalSocket.id);
+    try {
+      const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
+      if (token) {
+        // Find user from local storage
+        const userStr = localStorage.getItem("user");
+        if (userStr) {
+          const u = JSON.parse(userStr);
+          if (u && u.id) {
+            globalSocket.emit("joinUser", u.id);
+          }
+        }
+      }
+    } catch(e) {}
   });
 
   globalSocket.on("connect_error", (err) => {

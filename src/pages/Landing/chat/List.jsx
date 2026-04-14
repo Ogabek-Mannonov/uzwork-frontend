@@ -1,6 +1,6 @@
 // src/pages/Landing/chat/List.jsx
-import { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate, useParams, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { useNavigate, useParams, Outlet } from "react-router-dom";
 import { getChats } from "../../../api/messages";
 import { getSocket } from "../../../hooks/useSocket";
 import i18n from "../../../i18n";
@@ -20,6 +20,7 @@ function formatTime(dateStr) {
   const d = new Date(dateStr);
   const now = new Date();
   const diffMs = now - d;
+  if (diffMs < 0) return "";
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
@@ -57,51 +58,93 @@ function Avatar({ user, size = "md" }) {
 // ── Main component ────────────────────────────────────────
 export default function ChatPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { id: activeChatId } = useParams();
 
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
   // ── load chats ─────────
   const loadChats = useCallback(async () => {
-    const res = await getChats();
-    if (res?.success !== false) {
-      const raw = res?.data?.chats || res?.chats || res?.data || res || [];
-      setChats(Array.isArray(raw) ? raw : []);
+    try {
+      const res = await getChats();
+      if (res?.success !== false) {
+        const raw = res?.data?.chats || res?.chats || res?.data || res || [];
+        setChats(Array.isArray(raw) ? raw : []);
+      }
+    } catch (e) {
+      console.error("Load chats error:", e);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
     loadChats();
   }, [loadChats]);
 
-  // ── socket: unread update ──
   useEffect(() => {
     const socket = getSocket();
-    const handleUnread = () => loadChats();
-    const handleRead = () => loadChats();
-    socket.on("unreadUpdate", handleUnread);
-    socket.on("messagesRead", handleRead);
-    socket.on("newMessage", handleUnread);
-    return () => {
-      socket.off("unreadUpdate", handleUnread);
-      socket.off("messagesRead", handleRead);
-      socket.off("newMessage", handleUnread);
+    
+    const handleNewMessage = (msg) => {
+      // O'zimiz yozgan bo'lsak unread countni oshirmaymiz
+      const isOur = String(msg.sender_id) === String(currentUser?.id);
+      
+      setChats(prev => {
+        let found = false;
+        const updated = prev.map(chat => {
+          const cid = chat.chat_id || chat.id;
+          if (String(cid) === String(msg.chat_id)) {
+            found = true;
+            return {
+              ...chat,
+              last_message_content: msg.content || msg.message,
+              last_message_at: msg.created_at,
+              unread_count: isOur ? (chat.unread_count || 0) : (chat.unread_count || 0) + 1
+            };
+          }
+          return chat;
+        });
+
+        if (!found) {
+          loadChats();
+          return prev;
+        }
+
+        // To make the most recently updated chat jump to top:
+        updated.sort((a, b) => new Date(b.last_message_at || b.chat_created_at) - new Date(a.last_message_at || a.chat_created_at));
+
+        return updated;
+      });
     };
-  }, [loadChats]);
+
+    const handleRead = ({ chatId }) => {
+      setChats(prev => prev.map(c => {
+        const cid = c.chat_id || c.id;
+        if (String(cid) === String(chatId)) {
+          return { ...c, unread_count: 0 };
+        }
+        return c;
+      }));
+    };
+
+    socket.on("newMessage", handleNewMessage);
+    socket.on("messagesRead", handleRead);
+    return () => {
+      socket.off("newMessage", handleNewMessage);
+      socket.off("messagesRead", handleRead);
+    };
+  }, [currentUser?.id]);
 
   // ── helpers ──────────────
   const getPartner = (chat) => chat.partner || null;
 
   const getPartnerName = (chat) => {
     const p = getPartner(chat);
-    if (!p) return `Chat #${chat.chat_id || chat.id}`;
+    if (!p) return i18n.t("chat.unknown", "Noma'lum");
     const full = `${p.first_name || ""} ${p.last_name || ""}`.trim();
     return full || p.username || i18n.t("chat.user", "Foydalanuvchi");
   };
@@ -112,11 +155,13 @@ export default function ChatPage() {
     return null;
   };
 
-  const filteredChats = chats.filter((c) => {
-    if (!search) return true;
-    const name = getPartnerName(c).toLowerCase();
-    return name.includes(search.toLowerCase());
-  });
+  const filteredChats = useMemo(() => {
+    return chats.filter((c) => {
+      if (!search) return true;
+      const name = getPartnerName(c).toLowerCase();
+      return name.includes(search.toLowerCase());
+    });
+  }, [chats, search, i18n.language]);
 
   const totalUnread = chats.reduce((sum, c) => sum + (c.unread_count || 0), 0);
 
@@ -172,12 +217,12 @@ export default function ChatPage() {
               <p>{search ? i18n.t("chat.notFound", "Topilmadi") : i18n.t("chat.noChatsYet", "Hali chatlar yo'q")}</p>
             </div>
           ) : (
-            filteredChats.map((chat) => {
-              const cid = chat.chat_id || chat.id;
-              const partner = getPartner(chat);
-              const type = getChatType(chat);
-              const isActive = cid === activeChatId;
-              const hasUnread = chat.unread_count > 0;
+              filteredChats.map((chat) => {
+                const cid = chat.chat_id || chat.id;
+                const partner = getPartner(chat);
+                const type = getChatType(chat);
+                const isActive = String(cid) === String(activeChatId);
+                const hasUnread = chat.unread_count > 0;
 
               return (
                 <div
@@ -187,6 +232,7 @@ export default function ChatPage() {
                 >
                   <div className="chat-item-avatar">
                     <Avatar user={partner} size="md" />
+                    {(partner?.is_online || partner?.online) && <span className="online-dot" />}
                   </div>
 
                   <div className="chat-item-info">

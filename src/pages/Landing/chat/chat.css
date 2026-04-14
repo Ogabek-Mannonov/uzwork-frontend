@@ -406,6 +406,11 @@
   font-weight: 500;
 }
 
+.chat-header-status .offline-status {
+  color: var(--muted, #64748b);
+  font-weight: 500;
+}
+
 .chat-header-status .typing {
   color: var(--accent);
   font-weight: 500;
@@ -968,15 +973,16 @@
 .chat-input-controls {
   display: flex;
   align-items: flex-end;
-  padding-bottom: 5px;
+  padding-bottom: 0px;
 }
 
 .emoji-toggle-btn {
   background: none;
   border: none;
-  color: #707579;
+  color: #64748b;
   cursor: pointer;
-  padding: 5px;
+  padding: 6px;
+  margin-left: -6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -986,8 +992,8 @@
 }
 
 .emoji-toggle-btn:hover, .emoji-toggle-btn.active {
-  background: rgba(0, 136, 204, 0.1);
-  color: #0088cc;
+  background: #ebf5ff;
+  color: var(--accent, #3b82f6);
 }
 
 .emoji-picker-container {
@@ -1033,17 +1039,18 @@
 .chat-input-wrapper {
   display: flex;
   align-items: flex-end;
-  gap: 10px;
-  background: #f3f4f6;
-  border: 1.5px solid transparent;
-  border-radius: var(--radius-xl);
-  padding: 8px 8px 8px 16px;
-  transition: all 0.2s;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #93c5fd; 
+  border-radius: 26px;
+  padding: 6px 16px; 
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
 .chat-input-wrapper:focus-within {
   background: white;
-  border-color: var(--accent);
+  border-color: var(--accent, #3b82f6);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -1078,14 +1085,15 @@
   border: none;
   background: transparent;
   resize: none;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text, #0f172a);
-  font-family: "Inter", sans-serif;
-  line-height: 1.5;
+  font-family: inherit;
+  line-height: 22px;
+  height: 22px;
   max-height: 140px;
-  min-height: 24px;
   outline: none;
-  padding: 4px 0;
+  padding: 0;
+  margin: 7px 0;
   overflow-y: auto;
   scrollbar-width: thin;
 }
@@ -1094,9 +1102,28 @@
   color: var(--muted, #64748b);
 }
 
+.telegram-mic-btn {
+  background: transparent;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #64748b;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0px;
+  margin-right: -4px;
+}
+
+.telegram-mic-btn:hover {
+  color: var(--accent, #3b82f6);
+  background: #f1f5f9;
+}
+
 .chat-send-btn {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
   cursor: pointer;
@@ -1108,6 +1135,8 @@
   flex-shrink: 0;
   background: #d1d5db;
   color: white;
+  margin-bottom: 0px;
+  margin-right: -4px;
 }
 
 .chat-send-btn.active {
