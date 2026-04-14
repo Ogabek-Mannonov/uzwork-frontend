@@ -10,8 +10,11 @@ import {
   uploadVoice,
 } from "../../../api/messages";
 import { getSocket } from "../../../hooks/useSocket";
+import { Smile } from "lucide-react";
 import i18n from "../../../i18n";
 import { useTranslation } from "react-i18next";
+import Picker from "@emoji-mart/react";
+import data from "@emoji-mart/data";
 
 // ── constants ────────────────────────────────────────────
 const BACKEND =
@@ -92,7 +95,9 @@ function Avatar({ user, size = "sm" }) {
 }
 
 // ── Context Menu ─────────────────────────────────────────
-function ContextMenu({ x, y, isOwn, onEdit, onDelete, onCopy, onClose }) {
+const QUICK_EMOJIS = ["🤝", "🔥", "❤️", "👌", "😄", "👍"];
+
+function ContextMenu({ x, y, isOwn, onEdit, onDelete, onCopy, onReply, onReact, onClose }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -105,11 +110,28 @@ function ContextMenu({ x, y, isOwn, onEdit, onDelete, onCopy, onClose }) {
 
   // Keep menu inside viewport
   const style = { position: "fixed", top: y, left: x, zIndex: 200 };
-  if (x + 180 > window.innerWidth) style.left = x - 180;
-  if (y + 160 > window.innerHeight) style.top = y - 140;
+  if (x + 220 > window.innerWidth) style.left = x - 220;
+  if (y + 220 > window.innerHeight) style.top = y - 200;
 
   return (
     <div ref={ref} className="msg-context-menu" style={style}>
+      {/* Emoji reaction row */}
+      <div className="msg-context-emojis">
+        {QUICK_EMOJIS.map((emoji) => (
+          <button key={emoji} className="emoji-react-btn" onClick={() => { onReact?.(emoji); onClose(); }}>
+            {emoji}
+          </button>
+        ))}
+        <button className="emoji-react-btn emoji-more" onClick={onClose}>›</button>
+      </div>
+      <div className="msg-context-divider" />
+      {/* Reply */}
+      <div className="msg-context-item" onClick={() => { onReply?.(); onClose(); }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:8}}>
+          <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
+        </svg>
+        {i18n.t("chat.reply", "Reply")}
+      </div>
       <div className="msg-context-item" onClick={onCopy}>
         📋 {i18n.t("chat.copy", "Nusxalash")}
       </div>
@@ -118,10 +140,7 @@ function ContextMenu({ x, y, isOwn, onEdit, onDelete, onCopy, onClose }) {
           <div className="msg-context-item" onClick={onEdit}>
             ✏️ {i18n.t("chat.edit", "Tahrirlash")}
           </div>
-          <div
-            className="msg-context-item danger"
-            onClick={onDelete}
-          >
+          <div className="msg-context-item danger" onClick={onDelete}>
             🗑️ {i18n.t("chat.delete", "O'chirish")}
           </div>
         </>
@@ -136,26 +155,36 @@ function CustomAudioPlayer({ src, isOwn }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const animationRef = useRef(null);
+
+  const updateProgress = useCallback(() => {
+    if (audioRef.current && audioRef.current.duration) {
+      setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+    }
+    if (audioRef.current && !audioRef.current.paused) {
+      animationRef.current = requestAnimationFrame(updateProgress);
+    }
+  }, []);
 
   const togglePlay = () => {
-    if(!audioRef.current) return;
-    if(isPlaying) audioRef.current.pause();
-    else {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      cancelAnimationFrame(animationRef.current);
+    } else {
       audioRef.current.currentTime = (progress / 100) * (audioRef.current.duration || 0);
       audioRef.current.play();
+      animationRef.current = requestAnimationFrame(updateProgress);
     }
     setIsPlaying(!isPlaying);
   };
 
-  const onTimeUpdate = () => {
-    if(!audioRef.current) return;
-    if(audioRef.current.duration) {
-      setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
-    }
-  };
+  useEffect(() => {
+    return () => cancelAnimationFrame(animationRef.current);
+  }, []);
 
   const onLoadedMetadata = () => {
-    if(audioRef.current) {
+    if (audioRef.current) {
       setDuration(audioRef.current.duration);
     }
   };
@@ -163,10 +192,11 @@ function CustomAudioPlayer({ src, isOwn }) {
   const onEnded = () => {
     setIsPlaying(false);
     setProgress(0);
+    cancelAnimationFrame(animationRef.current);
   };
 
   const handleSeek = (e) => {
-    if(!audioRef.current) return;
+    if (!audioRef.current) return;
     const box = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - box.left;
     const ratio = Math.max(0, Math.min(1, clickX / box.width));
@@ -178,18 +208,31 @@ function CustomAudioPlayer({ src, isOwn }) {
   };
 
   const formatTime = (time) => {
-    if(isNaN(time) || !time) return "0:00";
+    if (isNaN(time) || !time) return "0:00";
     const m = Math.floor(time / 60);
     const s = Math.floor(time % 60);
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
+  const sizeKB = duration > 0 ? (duration * 3.7).toFixed(1) : "11.8";
+
+  const [waveHeights] = useState(() => {
+    const pattern = [25, 30, 45, 80, 70, 40, 25, 20, 20, 50, 90, 85, 60, 40, 25, 20, 30, 20, 20, 35, 75, 95, 85, 50, 40, 25, 20, 20];
+    return Array.from({ length: 45 }).map((_, i) => {
+      let base = pattern[i % pattern.length];
+      let noise = (Math.random() - 0.5) * 20;
+      let h = base + noise;
+      if (h < 15) h = 15;
+      if (h > 100) h = 100;
+      return h;
+    });
+  });
+
   return (
     <div className={`custom-audio-player ${isOwn ? "sent" : "received"}`}>
-      <audio 
-        ref={audioRef} 
-        src={src} 
-        onTimeUpdate={onTimeUpdate}
+      <audio
+        ref={audioRef}
+        src={src}
         onLoadedMetadata={onLoadedMetadata}
         onEnded={onEnded}
       />
@@ -200,11 +243,23 @@ function CustomAudioPlayer({ src, isOwn }) {
           <span style={{ fontSize: 16, marginLeft: 2 }}>▶</span>
         )}
       </button>
-      <div className="audio-wave-container" onClick={(e) => { e.stopPropagation(); handleSeek(e); }}>
-        <div className="audio-progress" style={{ width: `${progress}%` }} />
-      </div>
-      <div className="audio-time">
-        {isPlaying ? formatTime(audioRef.current?.currentTime) : formatTime(duration)}
+
+      <div className="audio-right-flex">
+        <div className="audio-wave-container" onClick={(e) => { e.stopPropagation(); handleSeek(e); }}>
+          <div className="audio-bars base">
+            {waveHeights.map((h, i) => (
+              <div key={i} className="audio-bar" style={{ height: `${h}%` }}></div>
+            ))}
+          </div>
+          <div className="audio-bars active" style={{ clipPath: `inset(0 ${100 - progress}% 0 0)` }}>
+            {waveHeights.map((h, i) => (
+              <div key={i} className="audio-bar" style={{ height: `${h}%` }}></div>
+            ))}
+          </div>
+        </div>
+        <div className="audio-time-size">
+          {isPlaying ? formatTime(audioRef.current?.currentTime) : formatTime(duration)}, {sizeKB} KB
+        </div>
       </div>
     </div>
   );
@@ -220,26 +275,41 @@ function MessageBubble({
   partner,
   currentUser,
   onContextMenu,
+  allMessages,
 }) {
   const isDeleted = !!msg.deleted_at;
   const isImage = msg.type === "image";
   const isFile = msg.type === "file";
   const isVoice = msg.type === "voice";
 
-  const senderUser = isOwn ? currentUser : partner;
+  const isOwnVal = String(msg.sender_id) === String(currentUser?.id);
+  const senderUser = isOwnVal ? currentUser : partner;
+
+  const repliedId = msg.reply_to_id;
+  const repliedMsg = repliedId
+    ? allMessages?.find((m) => String(m.id) === String(repliedId)) || msg.replied_message
+    : msg.replied_message || null;
+  const repliedSenderName = repliedMsg
+    ? repliedMsg.sender_id === currentUser?.id
+      ? i18n.t("chat.you", "Siz")
+      : `${partner?.first_name || ""} ${partner?.last_name || ""}`.trim() || partner?.username
+    : null;
+  const rawPreview = repliedMsg?.content || repliedMsg?.message || "";
+  const repliedPreview = typeof rawPreview === 'string' 
+    ? (repliedMsg?.type === "voice" ? i18n.t("chat.voiceMsg", "Ovozli xabar") : 
+       repliedMsg?.type === "image" ? i18n.t("chat.photo", "Rasm") : rawPreview).slice(0, 60)
+    : "";
 
   return (
-    <div className={`msg-row ${isOwn ? "sent" : "received"}`}>
-      {/* Avatar — only last in group */}
-      {!isOwn && (
+    <div className={`msg-row ${isOwnVal ? "sent" : "received"}`}>
+      {!isOwnVal && (
         <div className="msg-avatar" style={{ visibility: isLast ? "visible" : "hidden" }}>
           <Avatar user={senderUser} size="sm" />
         </div>
       )}
 
       <div className="msg-content">
-        {/* Sender name for received first msg */}
-        {!isOwn && isFirst && partner && (
+        {!isOwnVal && isFirst && partner && (
           <div className="msg-sender-name">
             {`${partner.first_name || ""} ${partner.last_name || ""}`.trim() ||
               partner.username ||
@@ -247,63 +317,78 @@ function MessageBubble({
           </div>
         )}
 
-        {/* Bubble */}
         <div
-          className={`msg-bubble ${isOwn ? "sent" : "received"} ${
-            isFirst ? "first" : ""
-          } ${isLast ? "last" : ""}`}
+          className={`msg-bubble ${isOwnVal ? "sent" : "received"} ${isFirst ? "first" : ""} ${isLast ? "last" : ""}`}
           onContextMenu={(e) => {
             e.preventDefault();
             onContextMenu(e, msg);
           }}
         >
+          {repliedMsg && (
+            <div className={`msg-reply-preview ${isOwnVal ? "sent" : "received"}`}>
+              <div className="msg-reply-sender">{repliedSenderName}</div>
+              <div className="msg-reply-text">{repliedPreview}</div>
+            </div>
+          )}
+
           {isDeleted ? (
             <span className="msg-deleted">🚫 {i18n.t("chat.msgDeleted", "Xabar o'chirildi")}</span>
           ) : isImage && msg.file_url ? (
             <a href={avatarSrc(msg.file_url)} target="_blank" rel="noreferrer">
-              <img
-                src={avatarSrc(msg.file_url)}
-                alt="rasm"
-                className="img-bubble"
-              />
+              <img src={avatarSrc(msg.file_url)} alt="rasm" className="img-bubble" />
             </a>
           ) : isFile && msg.file_url ? (
-            <a
-              href={avatarSrc(msg.file_url)}
-              target="_blank"
-              rel="noreferrer"
+            <a href={avatarSrc(msg.file_url)} target="_blank" rel="noreferrer"
               className="file-bubble"
-              style={{ color: isOwn ? "#fff" : "#1a1a1a", textDecoration: "none" }}
+              style={{ color: isOwnVal ? "#fff" : "#1a1a1a", textDecoration: "none" }}
             >
               <span className="file-icon">📎</span>
               <div className="file-info">
-                <div className="file-name">
-                  {msg.file_url.split("/").pop()}
-                </div>
+                <div className="file-name">{msg.file_url.split("/").pop()}</div>
                 <div className="file-download">{i18n.t("chat.download", "Yuklab olish")}</div>
               </div>
             </a>
           ) : isVoice && msg.file_url ? (
             <CustomAudioPlayer src={avatarSrc(msg.file_url)} isOwn={isOwn} />
           ) : (
-            <span>{msg.content || msg.message}</span>
+            <span className="msg-text-content">
+              {typeof msg.content === "string"
+                ? msg.content
+                : typeof msg.message === "string"
+                ? msg.message
+                : msg.content?.content || msg.message?.content || ""}
+            </span>
           )}
-        </div>
 
-        {/* Time & status */}
-        {isLast && (
-          <div className={`msg-time ${isOwn ? "sent" : "received"}`}>
+          <div className="msg-time-inline">
             {msg.is_edited && (
               <span className="msg-edited">{i18n.t("chat.edited", "tahrirlangan")}</span>
             )}
             <span>{formatMsgTime(msg.created_at)}</span>
             {isOwn && (
-              <span className="msg-read-icon">
-                {msg.is_read ? "✓✓" : "✓"}
+              <span className={`msg-read-icon ${msg.is_read ? "read" : "sent"}`}>
+                {msg.is_read ? (
+                  <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
+                    <path d="M1 6L4.5 9.5L10.5 1.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M5 6L8.5 9.5L14.5 1.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                ) : (
+                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                    <path d="M1 5.5L4.5 9L11 1" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
               </span>
             )}
           </div>
-        )}
+
+          {msg.reactions && msg.reactions.length > 0 && (
+            <div className="msg-reactions">
+              {msg.reactions.map((r, i) => (
+                <span key={i} className="msg-reaction-chip">{r.emoji} {r.count > 1 ? r.count : ""}</span>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -315,7 +400,6 @@ export default function ChatDetail() {
   const ctx = useOutletContext?.() || {};
   const { onBack, reloadList } = ctx;
 
-  // ── state ───────────────────────────────────────────────
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -326,13 +410,16 @@ export default function ChatDetail() {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
 
-  const [editingMsg, setEditingMsg] = useState(null); // { id, content }
-  const [contextMenu, setContextMenu] = useState(null); // { x, y, msg }
+  const [editingMsg, setEditingMsg] = useState(null);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const pickerRef = useRef(null);
+  const [contextMenu, setContextMenu] = useState(null);
 
   const [typingUser, setTypingUser] = useState(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
-  // Ovozli xabar uchun
   const [recording, setRecording] = useState(false);
   const [recordTime, setRecordTime] = useState(0);
   const mediaRecorderRef = useRef(null);
@@ -340,7 +427,7 @@ export default function ChatDetail() {
   const recordIntervalRef = useRef(null);
   const isCanceledRef = useRef(false);
 
-  const [toast, setToast] = useState(null); // { msg, type }
+  const [toast, setToast] = useState(null);
 
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
@@ -350,13 +437,11 @@ export default function ChatDetail() {
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
-  // ── toast helper ────────────────────────────────────────
   const notify = useCallback((msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  // ── load history ────────────────────────────────────────
   const loadHistory = useCallback(async () => {
     if (!chatId) return;
     try {
@@ -395,7 +480,37 @@ export default function ChatDetail() {
     loadHistory();
   }, [chatId]);
 
-  // ── scroll to bottom ───────────────────────────────────
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        pickerRef.current && 
+        !pickerRef.current.contains(e.target) && 
+        !e.target.closest('.emoji-toggle-btn') &&
+        !e.target.closest('.emoji-picker-container')
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      clearTimeout(typingTimerRef.current);
+    };
+  }, []);
+
+  const handleEmojiSelect = (emoji) => {
+    if (!textareaRef.current) return;
+    const start = textareaRef.current.selectionStart;
+    const end = textareaRef.current.selectionEnd;
+    const newText = text.substring(0, start) + emoji.native + text.substring(end);
+    setText(newText);
+    
+    setTimeout(() => {
+      textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + emoji.native.length;
+      textareaRef.current.focus();
+    }, 0);
+  };
+
   const scrollToBottom = useCallback((behavior = "smooth") => {
     bottomRef.current?.scrollIntoView({ behavior });
   }, []);
@@ -410,7 +525,6 @@ export default function ChatDetail() {
     if (isAtBottomRef.current) scrollToBottom();
   }, [messages]);
 
-  // scroll detection
   const handleScroll = () => {
     const el = messagesAreaRef.current;
     if (!el) return;
@@ -419,7 +533,6 @@ export default function ChatDetail() {
     setShowScrollBtn(distFromBottom > 200);
   };
 
-  // ── socket ──────────────────────────────────────────────
   useEffect(() => {
     const socket = getSocket();
     if (!chatId) return;
@@ -428,12 +541,24 @@ export default function ChatDetail() {
     socket.emit("joinChat", chatId);
 
     const onNew = (msg) => {
+      // 1. O'zimiz yuborgan xabarni socketdan olsaq, uni tashlab yuboramiz (Duplikatsiyani oldini olish)
+      if (String(msg.sender_id) === String(currentUser?.id)) return;
+
       setMessages((prev) => {
-        if (prev.find((m) => m.id === msg.id)) return prev;
+        // 2. Kuchliroq duplikat tekshiruvi: ID yoki (Content + Sender)
+        const exists = prev.some(m => 
+          String(m.id) === String(msg.id) || 
+          (m.content === msg.content && String(m.sender_id) === String(msg.sender_id) && Math.abs(new Date(m.created_at) - new Date(msg.created_at)) < 5000)
+        );
+        if (exists) return prev;
+        
         return [...prev, msg];
       });
-      if (msg.sender_id !== currentUser?.id) {
+
+      if (String(msg.sender_id) !== String(currentUser?.id)) {
         markMessagesAsRead(chatId).then(() => reloadList?.());
+        // Faqat sherigimiz yozsa va biz pastda bo'lsak scroll qilamiz
+        if (isAtBottomRef.current) scrollToBottom();
       }
     };
 
@@ -465,14 +590,27 @@ export default function ChatDetail() {
       setMessages((prev) => prev.map((m) => ({ ...m, is_read: true })));
     };
 
+    const onReactionAdded = ({ messageId, emoji }) => {
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== messageId) return m;
+          const existing = (m.reactions || []).find((r) => r.emoji === emoji);
+          if (existing) {
+            return { ...m, reactions: m.reactions.map((r) => r.emoji === emoji ? { ...r, count: r.count + 1 } : r) };
+          }
+          return { ...m, reactions: [...(m.reactions || []), { emoji, count: 1 }] };
+        })
+      );
+    };
+
     socket.on("newMessage", onNew);
     socket.on("messageEdited", onEdited);
     socket.on("messageDeleted", onDeleted);
     socket.on("userTyping", onTyping);
     socket.on("userStoppedTyping", onStopTyping);
     socket.on("messagesRead", onRead);
+    socket.on("reactionAdded", onReactionAdded);
 
-    // mark as read on open
     markMessagesAsRead(chatId).then(() => reloadList?.());
 
     return () => {
@@ -482,10 +620,10 @@ export default function ChatDetail() {
       socket.off("userTyping", onTyping);
       socket.off("userStoppedTyping", onStopTyping);
       socket.off("messagesRead", onRead);
+      socket.off("reactionAdded", onReactionAdded);
     };
   }, [chatId, currentUser?.id]);
 
-  // ── typing emit ────────────────────────────────────────
   const handleTextChange = (e) => {
     setText(e.target.value);
     autoResizeTextarea(e.target);
@@ -507,7 +645,6 @@ export default function ChatDetail() {
     el.style.height = Math.min(el.scrollHeight, 140) + "px";
   };
 
-  // ── voice Simple Style ────────────────────────────────
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -526,6 +663,12 @@ export default function ChatDetail() {
 
         if (!isCanceledRef.current) {
           const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          if (isCanceledRef.current) {
+            audioChunksRef.current = [];
+            return;
+          }
+          const duration = recordTime;
+          const sizeKB = (audioBlob.size / 1024).toFixed(1);
           await handleSendVoice(audioBlob);
         }
       };
@@ -573,31 +716,49 @@ export default function ChatDetail() {
     }
 
     const file_url = uploadRes.data?.url || uploadRes.url;
-    const res = await sendMessage({ chat_id: chatId, type: "voice", file_url });
+    const voiceReplyId = replyingTo?.id || null;
+    setReplyingTo(null);
+
+    const res = await sendMessage({ 
+      chat_id: chatId, 
+      type: "voice", 
+      file_url, 
+      reply_to_id: voiceReplyId || undefined 
+    });
     setSending(false);
-    
+
     if (res?.success === false) {
       notify(res.message || i18n.t("chat.sendFail", "Xabar yuborilmadi"), "error");
     } else {
+      const newMsg = res.data || res.message_obj;
+      if (newMsg && voiceReplyId) {
+        setMessages(prev => {
+          if (prev.find(m => String(m.id) === String(newMsg.id))) {
+            return prev.map(m => String(m.id) === String(newMsg.id) ? { ...newMsg, reply_to_id: voiceReplyId } : m);
+          }
+          return [...prev, { ...newMsg, reply_to_id: voiceReplyId }];
+        });
+      }
       reloadList?.();
     }
   };
 
-  // ── send ────────────────────────────────────────────────
   const handleSend = async () => {
     const content = text.trim();
     if (!content || sending) return;
 
     if (editingMsg) {
       setText("");
+      const targetId = editingMsg.id;
       setEditingMsg(null);
-      textareaRef.current && (textareaRef.current.style.height = "auto");
-      const res = await editMessage(editingMsg.id, { content });
+      if (textareaRef.current) textareaRef.current.style.height = "auto";
+      
+      const res = await editMessage(targetId, { content });
       if (res?.success === false) notify(res.message || i18n.t("chat.error", "Xato"), "error");
       else {
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === editingMsg.id
+            String(m.id) === String(targetId)
               ? { ...m, content, is_edited: true }
               : m
           )
@@ -607,21 +768,51 @@ export default function ChatDetail() {
     }
 
     setSending(true);
+    const replyId = replyingTo?.id || null;
     setText("");
-    textareaRef.current && (textareaRef.current.style.height = "auto");
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
+    setReplyingTo(null);
+
+    const tempId = "temp-" + Date.now();
+    const optimisticMsg = {
+      id: tempId,
+      chat_id: chatId,
+      sender_id: currentUser?.id,
+      content: content,
+      type: "text",
+      created_at: new Date().toISOString(),
+      reply_to_id: replyId || undefined,
+    };
+
+    setMessages((prev) => [...prev, optimisticMsg]);
+    scrollToBottom();
 
     const socket = getSocket();
     socket.emit("stopTyping", { chatId });
 
-    // Optimistik yuborish olib tashlandi, faqat socket va bevosita api
-    const res = await sendMessage({ chat_id: chatId, message_text: content });
-    setSending(false);
+    try {
+      const res = await sendMessage({ chat_id: chatId, message_text: content, reply_to_id: replyId || undefined });
+      setSending(false);
 
-    if (res?.success === false) {
-      notify(res.message || i18n.t("chat.sendFail", "Xabar yuborilmadi"), "error");
-      setText(content);
-    } else {
-      reloadList?.();
+      if (res?.success === false) {
+        setMessages((prev) => prev.filter((m) => m.id !== tempId));
+        notify(res.message || i18n.t("chat.sendFail", "Xabar yuborilmadi"), "error");
+        setText(content);
+      } else if (res?.data || res?.message_obj) {
+        const newMsg = res.data || res.message_obj;
+        setMessages((prev) => {
+          const exists = prev.some(m => String(m.id) === String(newMsg.id));
+          if (exists) {
+            return prev.filter(m => m.id !== tempId);
+          }
+          return prev.map(m => (m.id === tempId ? { ...newMsg, reply_to_id: replyId || undefined } : m));
+        });
+        reloadList?.();
+      }
+    } catch (err) {
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setSending(false);
+      notify(i18n.t("chat.error", "Xatolik yuz berdi"), "error");
     }
   };
 
@@ -632,10 +823,11 @@ export default function ChatDetail() {
     }
   };
 
-  // ── context menu actions ────────────────────────────────
   const openContextMenu = (e, msg) => {
     if (msg.deleted_at) return;
-    setContextMenu({ x: e.clientX, y: e.clientY, msg });
+    const x = Math.min(e.clientX, window.innerWidth - 150);
+    const y = Math.min(e.clientY, window.innerHeight - 200);
+    setContextMenu({ x, y, msg });
   };
 
   const handleCopy = () => {
@@ -675,23 +867,66 @@ export default function ChatDetail() {
     }
   };
 
-  // ── derived ─────────────────────────────────────────────
+  const handleReply = () => {
+    const msg = contextMenu?.msg;
+    if (!msg) return;
+    const senderName = msg.sender_id === currentUser?.id
+      ? i18n.t("chat.you", "Siz")
+      : `${partner?.first_name || ""} ${partner?.last_name || ""}`.trim() || partner?.username || "";
+    const preview = msg.type === "voice"
+      ? i18n.t("chat.voiceMsg", "Ovozli xabar")
+      : msg.type === "image"
+      ? i18n.t("chat.photo", "Rasm")
+      : (msg.content || msg.message || "").slice(0, 80);
+    setReplyingTo({ id: msg.id, preview, senderName });
+    setContextMenu(null);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        const val = textareaRef.current.value;
+        textareaRef.current.value = "";
+        textareaRef.current.value = val;
+      }
+    }, 150);
+  };
+
+  const handleReact = (emoji) => {
+    const msg = contextMenu?.msg;
+    if (!msg) return;
+
+    const socket = getSocket();
+    socket.emit("addReaction", { chatId, messageId: msg.id, emoji });
+
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (m.id != msg.id) return m;
+        const reactions = m.reactions || [];
+        const existing = reactions.find((r) => r.emoji === emoji);
+        if (existing) {
+          return { ...m, reactions: reactions.map((r) => r.emoji === emoji ? { ...r, count: r.count + 1 } : r) };
+        }
+        return { ...m, reactions: [...reactions, { emoji, count: 1 }] };
+      })
+    );
+    setContextMenu(null);
+  };
+
   const partnerName = partner
     ? `${partner.first_name || ""} ${partner.last_name || ""}`.trim() ||
-      partner.username ||
-      "Foydalanuvchi"
+    partner.username ||
+    `UID: ${partner.id.slice(0, 5)}`
     : chatInfo?.id
-    ? `Chat #${chatInfo.id.slice(0, 8)}`
-    : "Foydalanuvchi";
+      ? `Chat #${chatInfo.id.slice(0, 8)}`
+      : "Foydalanuvchi";
 
-  // O'chirilgan xabarlarni faqat adminlarga ko'rsatamiz
+  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "superadmin";
+
   const filteredMessages = messages.filter(
-    (msg) => !(msg.deleted_at && currentUser?.role !== "admin")
+    (msg) => !(msg.deleted_at && !isAdmin)
   );
 
   const grouped = groupMessagesByDate(filteredMessages);
 
-  // ── render ───────────────────────────────────────────────
   if (loading) {
     return (
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
@@ -749,229 +984,316 @@ export default function ChatDetail() {
 
   return (
     <div
-      style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}
+      className="chat-detail-wrapper"
+      style={{ display: "flex", width: "100%", height: "100%", overflow: "hidden", position: "relative" }}
       onClick={() => contextMenu && setContextMenu(null)}
     >
-      {/* ── HEADER ── */}
-      <div className="chat-header">
-        <div className="chat-header-left">
-          {onBack && (
-            <button className="chat-back-btn" onClick={onBack} style={{ display: "flex" }}>
-              ←
-            </button>
-          )}
-          <Avatar user={partner} size="md" />
-          <div className="chat-header-info">
-            <h2 className="chat-header-name">{partnerName}</h2>
-            <p className="chat-header-status">
-              {typingUser ? (
-                <>
-                  <span className="chat-header-status-dot" />
-                  <span className="typing">{typingUser} {i18n.t("chat.typingFull", "yozmoqda…")}</span>
-                </>
-              ) : (
-                <span className="online">{i18n.t("chat.online", "Online")}</span>
-              )}
-            </p>
-          </div>
-        </div>
-
-        <div className="chat-header-right">
-          {jobInfo?.title && (
-            <span className="chat-header-job" title={jobInfo.title}>
-              💼 {jobInfo.title}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* ── MESSAGES ── */}
       <div
-        ref={messagesAreaRef}
-        className="chat-messages-area"
-        onScroll={handleScroll}
+        className="chat-detail-main"
+        style={{ flex: 1, display: "flex", flexDirection: "column", height: "100%", position: "relative", minWidth: 0 }}
       >
-        {messages.length === 0 && (
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#9ca3af",
-              textAlign: "center",
-              padding: 40,
-              margin: "auto",
-            }}
-          >
-            <div style={{ fontSize: 52, marginBottom: 14 }}>👋</div>
-            <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 6 }}>
-              {i18n.t("chat.startChat", "Suhbat boshlang!")}
-            </div>
-            <div style={{ fontSize: 14 }}>
-              {partnerName} {i18n.t("chat.sendFirstMsg", "bilan birinchi xabarni yuboring")}
+        <div className="chat-header">
+          <div className="chat-header-left">
+            {onBack && (
+              <button className="chat-back-btn" onClick={onBack} style={{ display: "flex" }}>
+                ←
+              </button>
+            )}
+            <Avatar user={partner} size="md" />
+            <div className="chat-header-info">
+              <h2 className="chat-header-name">{partnerName}</h2>
+              <p className="chat-header-status">
+                {typingUser ? (
+                  <>
+                    <span className="chat-header-status-dot" />
+                    <span className="typing">{typingUser} {i18n.t("chat.typingFull", "yozmoqda…")}</span>
+                  </>
+                ) : (
+                  <span className="online">{i18n.t("chat.online", "Online")}</span>
+                )}
+              </p>
             </div>
           </div>
-        )}
 
-        {grouped.map((group) => {
-          const msgs = group.messages;
-          return (
-            <div key={group.date}>
-              {/* Date separator */}
-              <div className="date-separator">
-                <div className="date-separator-line" />
-                <span className="date-separator-text">{group.date}</span>
-                <div className="date-separator-line" />
-              </div>
-
-              {/* Messages */}
-              {msgs.map((msg, idx) => {
-                const isOwn = msg.sender_id === currentUser?.id;
-                const prevMsg = msgs[idx - 1];
-                const nextMsg = msgs[idx + 1];
-                const isFirst =
-                  !prevMsg || prevMsg.sender_id !== msg.sender_id;
-                const isLast =
-                  !nextMsg || nextMsg.sender_id !== msg.sender_id;
-
-                return (
-                  <div
-                    key={msg.id || idx}
-                    className={`msg-group ${isOwn ? "sent" : "received"}`}
-                  >
-                    <MessageBubble
-                      msg={msg}
-                      isOwn={isOwn}
-                      isFirst={isFirst}
-                      isLast={isLast}
-                      showAvatar={isLast && !isOwn}
-                      partner={partner}
-                      currentUser={currentUser}
-                      onContextMenu={openContextMenu}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-
-        {/* Typing indicator */}
-        {typingUser && (
-          <div className="typing-indicator">
-            <Avatar user={partner} size="sm" />
-            <div className="typing-dots">
-              <div className="typing-dot" />
-              <div className="typing-dot" />
-              <div className="typing-dot" />
-            </div>
-            <span className="typing-text">{typingUser}</span>
-          </div>
-        )}
-
-        <div ref={bottomRef} style={{ height: 1 }} />
-      </div>
-
-      {/* Scroll to bottom button */}
-      {showScrollBtn && (
-        <button
-          className="scroll-to-bottom"
-          onClick={() => scrollToBottom()}
-          title={i18n.t("chat.scrollDown", "Pastga")}
-        >
-          ↓
-        </button>
-      )}
-
-      {/* ── INPUT AREA ── */}
-      <div className="chat-input-area">
-        {/* Edit mode bar */}
-        {editingMsg && (
-          <div className="edit-mode-bar">
-            <span>✏️</span>
-            <span>{i18n.t("chat.editing", "Tahrirlash:")} {editingMsg.content?.slice(0, 60)}{editingMsg.content?.length > 60 ? "…" : ""}</span>
+          <div className="chat-header-right">
+            {jobInfo?.title && (
+              <span className="chat-header-job" title={jobInfo.title}>
+                💼 {jobInfo.title}
+              </span>
+            )}
             <button
-              className="edit-cancel-btn"
-              onClick={() => { setEditingMsg(null); setText(""); }}
+              className="chat-sidebar-toggle-btn"
+              onClick={() => setShowInfo(!showInfo)}
+              title={i18n.t("chat.info", "Ma'lumot")}
+              style={{ marginLeft: '12px' }}
             >
-              ×
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="15" y1="3" x2="15" y2="21"></line>
+              </svg>
             </button>
           </div>
-        )}
+        </div>
 
-        <div className="chat-input-wrapper">
-          {recording ? (
-            <div className="recording-ui">
-              <div className="record-pulse-dot" />
-              <span className="record-time">
-                {Math.floor(recordTime / 60)}:{(recordTime % 60).toString().padStart(2, "0")}
-              </span>
-              <div style={{ flex: 1 }}></div>
-              <button
-                className="record-cancel-btn"
-                onClick={cancelRecording}
-                title={i18n.t("chat.cancel", "Bekor qilish")}
-              >
-                🗑️
-              </button>
-              <button
-                className="record-send-btn"
-                onClick={sendRecording}
-                title={i18n.t("chat.send", "Yuborish")}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
+        <div
+          ref={messagesAreaRef}
+          className="chat-messages-area"
+          onScroll={handleScroll}
+        >
+          {messages.length === 0 && (
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#9ca3af",
+                textAlign: "center",
+                padding: 40,
+                margin: "auto",
+              }}
+            >
+              <div style={{ fontSize: 52, marginBottom: 14 }}>👋</div>
+              <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 6 }}>
+                {i18n.t("chat.startChat", "Suhbat boshlang!")}
+              </div>
+              <div style={{ fontSize: 14 }}>
+                {partnerName} {i18n.t("chat.sendFirstMsg", "bilan birinchi xabarni yuboring")}
+              </div>
             </div>
-          ) : (
-            <>
-              {/* Textarea */}
-              <textarea
-                ref={textareaRef}
-                className="chat-textarea"
-                value={text}
-                onChange={handleTextChange}
-                onKeyDown={handleKey}
-                placeholder={i18n.t("chat.typeMsgPlaceholder", "Xabar yozing... (Enter — yuborish, Shift+Enter — satr)")}
-                rows={1}
-              />
-            </>
           )}
 
-          {/* Action buttons (Right side) */}
-          {!text.trim() && !editingMsg && !recording ? (
-               <button
-                  className="chat-action-btn telegram-mic-btn"
-                  onClick={startRecording}
-                  disabled={sending}
-                  title={i18n.t("chat.voiceMsg", "Ovozli xabar")}
+          {grouped.map((group) => {
+            const msgs = group.messages;
+            return (
+              <div key={group.date}>
+                <div className="date-separator">
+                  <div className="date-separator-line" />
+                  <span className="date-separator-text">{group.date}</span>
+                  <div className="date-separator-line" />
+                </div>
+
+                {msgs.map((msg, idx) => {
+                  const isOwn = msg.sender_id === currentUser?.id;
+                  const prevMsg = msgs[idx - 1];
+                  const nextMsg = msgs[idx + 1];
+                  const isFirst =
+                    !prevMsg || prevMsg.sender_id !== msg.sender_id;
+                  const isLast =
+                    !nextMsg || nextMsg.sender_id !== msg.sender_id;
+
+                  return (
+                    <div
+                      key={msg.id || idx}
+                      className={`msg-group ${isOwn ? "sent" : "received"}`}
+                    >
+                      <MessageBubble
+                        msg={msg}
+                        isOwn={isOwn}
+                        isFirst={isFirst}
+                        isLast={isLast}
+                        showAvatar={isLast && !isOwn}
+                        partner={partner}
+                        currentUser={currentUser}
+                        onContextMenu={openContextMenu}
+                        allMessages={filteredMessages}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+
+          {typingUser && (
+            <div className="typing-indicator">
+              <Avatar user={partner} size="sm" />
+              <div className="typing-dots">
+                <div className="typing-dot" />
+                <div className="typing-dot" />
+                <div className="typing-dot" />
+              </div>
+              <span className="typing-text">{typingUser}</span>
+            </div>
+          )}
+
+          <div ref={bottomRef} style={{ height: 1 }} />
+        </div>
+
+        {showScrollBtn && (
+          <button
+            className="scroll-to-bottom"
+            onClick={() => scrollToBottom()}
+            title={i18n.t("chat.scrollDown", "Pastga")}
+          >
+            ↓
+          </button>
+        )}
+
+        <div className="chat-input-area">
+          {editingMsg && (
+            <div className="edit-mode-bar">
+              <span>✏️</span>
+              <span>{i18n.t("chat.editing", "Tahrirlash:")} {editingMsg.content?.slice(0, 60)}{editingMsg.content?.length > 60 ? "…" : ""}</span>
+              <button className="edit-cancel-btn" onClick={() => { setEditingMsg(null); setText(""); }}>×</button>
+            </div>
+          )}
+
+          {replyingTo && (
+            <div className="reply-mode-bar">
+              <div className="reply-mode-content">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
+                </svg>
+                <div className="reply-mode-text">
+                  <span className="reply-mode-sender">{replyingTo.senderName}</span>
+                  <span className="reply-mode-preview">{replyingTo.preview}</span>
+                </div>
+              </div>
+              <button className="edit-cancel-btn" onClick={() => setReplyingTo(null)}>×</button>
+            </div>
+          )}
+
+          <div className="chat-input-wrapper">
+            <div className="chat-input-controls">
+              <button 
+                className={`emoji-toggle-btn ${showEmojiPicker ? 'active' : ''}`}
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                title="Emojis"
+              >
+                <Smile size={24} />
+              </button>
+              
+              {showEmojiPicker && (
+                <div className="emoji-picker-container" ref={pickerRef}>
+                  <Picker 
+                    data={data} 
+                    onEmojiSelect={handleEmojiSelect}
+                    theme="light"
+                    previewPosition="none"
+                    skinTonePosition="none"
+                    navPosition="bottom"
+                    perLine={8}
+                    emojiSize={24}
+                    emojiButtonSize={34}
+                    maxFrequentRows={1}
+                  />
+                </div>
+              )}
+            </div>
+
+            {recording ? (
+              <div className="recording-ui">
+                <div className="record-pulse-dot" />
+                <span className="record-time">
+                  {Math.floor(recordTime / 60)}:{(recordTime % 60).toString().padStart(2, "0")}
+                </span>
+                <div style={{ flex: 1 }}></div>
+                <button
+                  className="record-cancel-btn"
+                  onClick={cancelRecording}
+                  title={i18n.t("chat.cancel", "Bekor qilish")}
+                >
+                  🗑️
+                </button>
+                <button
+                  className="record-send-btn"
+                  onClick={sendRecording}
+                  title={i18n.t("chat.send", "Yuborish")}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 15C13.6569 15 15 13.6569 15 12V6C15 4.34315 13.6569 3 12 3C10.3431 3 9 4.34315 9 6V12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M19 10V12C19 15.866 15.866 19 12 19M5 10V12C5 15.866 8.13401 19 12 19M12 19V22M8 22H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
-          ) : !recording && (
+              </div>
+            ) : (
+              <>
+                {/* Textarea */}
+                <textarea
+                  ref={textareaRef}
+                  className="chat-textarea"
+                  value={text}
+                  onChange={handleTextChange}
+                  onKeyDown={handleKey}
+                  placeholder={i18n.t("chat.typeMsgPlaceholder", "Xabar yozing... (Enter — yuborish, Shift+Enter — satr)")}
+                  rows={1}
+                />
+              </>
+            )}
+
+            {/* Action buttons (Right side) */}
+            {!text.trim() && !editingMsg && !recording ? (
+              <button
+                className="chat-action-btn telegram-mic-btn"
+                onClick={startRecording}
+                disabled={sending}
+                title={i18n.t("chat.voiceMsg", "Ovozli xabar")}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 15C13.6569 15 15 13.6569 15 12V6C15 4.34315 13.6569 3 12 3C10.3431 3 9 4.34315 9 6V12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M19 10V12C19 15.866 15.866 19 12 19M5 10V12C5 15.866 8.13401 19 12 19M12 19V22M8 22H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            ) : !recording && (
               <button
                 className={`chat-send-btn ${text.trim() ? "active" : ""}`}
                 onClick={handleSend}
                 disabled={sending || (!text.trim() && !editingMsg)}
                 title={i18n.t("chat.send", "Yuborish")}
               >
-                  {sending ? (
-                    <div style={{ width: 16, height: 16, border: "2px solid #fff", borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
-                  ) : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                      <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  )}
+                {sending ? (
+                  <div style={{ width: 16, height: 16, border: "2px solid #fff", borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
               </button>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      </div> {/* closes chat-detail-main */}
+
+      {/* ── RIGHT INFO SIDEBAR ── */}
+      {showInfo && (
+        <aside className="chat-info-sidebar">
+          <div className="chat-info-header">
+            <button className="chat-header-btn" onClick={() => setShowInfo(false)}>✕</button>
+            <h3>{i18n.t("chat.information", "Information")}</h3>
+          </div>
+          <div className="chat-info-body">
+            <div className="chat-info-profile">
+              <Avatar user={partner} size="lg" />
+              <div className="chat-info-name">{partnerName}</div>
+              <div className="chat-info-status">
+                {typingUser ? i18n.t("chat.typing", "yozmoqda...") : i18n.t("chat.online", "Online")}
+              </div>
+            </div>
+
+            <div className="chat-info-section">
+              <div className="chat-info-row">
+                <span className="info-icon">👤</span>
+                <div className="info-text">
+                  <div className="info-val">@{partner?.username || "user"}</div>
+                  <div className="info-label">{i18n.t("chat.username", "Username")}</div>
+                </div>
+              </div>
+              <div className="chat-info-row">
+                <span className="info-icon">📞</span>
+                <div className="info-text">
+                  <div className="info-val">{partner?.phone || i18n.t("chat.hidden", "Yashirin")}</div>
+                  <div className="info-label">{i18n.t("chat.mobile", "Mobile")}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="chat-info-actions">
+              <button className="chat-info-danger-btn">{i18n.t("chat.blockUser", "Block User")}</button>
+            </div>
+          </div>
+        </aside>
+      )}
 
       {/* Context Menu */}
       {contextMenu && (
@@ -982,6 +1304,8 @@ export default function ChatDetail() {
           onCopy={handleCopy}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onReply={handleReply}
+          onReact={handleReact}
           onClose={() => setContextMenu(null)}
         />
       )}
