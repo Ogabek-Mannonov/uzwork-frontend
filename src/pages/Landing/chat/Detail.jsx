@@ -49,21 +49,61 @@ function formatDateLabel(dateStr) {
   });
 }
 
-function groupMessagesByDate(messages) {
+function groupMessagesByDate(m) {
+  if (!m || m.length === 0) return [];
+  // Sort messages to ensure chronological order for grouping
+  const sorted = [...m].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
   const groups = [];
   let currentDate = null;
   let currentGroup = null;
 
-  messages.forEach((msg) => {
-    const dateLabel = formatDateLabel(msg.created_at);
-    if (dateLabel !== currentDate) {
-      currentDate = dateLabel;
-      currentGroup = { date: dateLabel, messages: [] };
+  sorted.forEach((msg) => {
+    const label = formatDateLabel(msg.created_at);
+    if (label !== currentDate) {
+      currentDate = label;
+      currentGroup = {
+        date: label,
+        messages: [],
+        key: `group-${msg.created_at || Date.now()}-${label}`
+      };
       groups.push(currentGroup);
     }
     currentGroup.messages.push(msg);
   });
   return groups;
+}
+
+function formatLastSeen(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now - d;
+  if (diffMs < 0) return "";
+  
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  const lang = i18n.language;
+  const isUz = lang === 'uz';
+  const isRu = lang === 'ru';
+
+  const texts = {
+    justNow: isUz ? "yaqinda online edi" : isRu ? "недавно был(а) в сети" : "was online just now",
+    minsAgo: isUz ? "daq. oldin online edi" : isRu ? "мин. назад был(а)" : "mins ago",
+    hoursAgo: isUz ? "soat oldin online edi" : isRu ? "ч. назад в сети" : "hours ago",
+    daysAgo: isUz ? "kun oldin online edi" : isRu ? "дн. назад в сети" : "days ago",
+    onDate: isUz ? "kuni online edi" : isRu ? "был(а) в сети" : "was online on"
+  };
+
+  if (diffMins < 1) return texts.justNow;
+  if (diffHours < 1) return `${diffMins} ${texts.minsAgo}`;
+  if (diffDays < 1) return `${diffHours} ${texts.hoursAgo}`;
+  if (diffDays < 7) return `${diffDays} ${texts.daysAgo}`;
+  
+  const dateLabel = d.toLocaleDateString(isUz ? "uz-UZ" : (isRu ? "ru-RU" : "en-US"), { month: "short", day: "numeric" });
+  return `${isUz ? "" : texts.onDate + " "}${dateLabel}${isUz ? " " + texts.onDate : ""}`;
 }
 
 // ── Avatar ───────────────────────────────────────────────
@@ -127,8 +167,8 @@ function ContextMenu({ x, y, isOwn, onEdit, onDelete, onCopy, onReply, onReact, 
       <div className="msg-context-divider" />
       {/* Reply */}
       <div className="msg-context-item" onClick={() => { onReply?.(); onClose(); }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:8}}>
-          <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 8 }}>
+          <polyline points="9 17 4 12 9 7" /><path d="M20 18v-2a4 4 0 0 0-4-4H4" />
         </svg>
         {i18n.t("chat.reply", "Reply")}
       </div>
@@ -290,14 +330,14 @@ function MessageBubble({
     ? allMessages?.find((m) => String(m.id) === String(repliedId)) || msg.replied_message
     : msg.replied_message || null;
   const repliedSenderName = repliedMsg
-    ? repliedMsg.sender_id === currentUser?.id
+    ? String(repliedMsg.sender_id) === String(currentUser?.id)
       ? i18n.t("chat.you", "Siz")
       : `${partner?.first_name || ""} ${partner?.last_name || ""}`.trim() || partner?.username
     : null;
   const rawPreview = repliedMsg?.content || repliedMsg?.message || "";
-  const repliedPreview = typeof rawPreview === 'string' 
-    ? (repliedMsg?.type === "voice" ? i18n.t("chat.voiceMsg", "Ovozli xabar") : 
-       repliedMsg?.type === "image" ? i18n.t("chat.photo", "Rasm") : rawPreview).slice(0, 60)
+  const repliedPreview = typeof rawPreview === 'string'
+    ? (repliedMsg?.type === "voice" ? i18n.t("chat.voiceMsg", "Ovozli xabar") :
+      repliedMsg?.type === "image" ? i18n.t("chat.photo", "Rasm") : rawPreview).slice(0, 60)
     : "";
 
   return (
@@ -355,8 +395,8 @@ function MessageBubble({
               {typeof msg.content === "string"
                 ? msg.content
                 : typeof msg.message === "string"
-                ? msg.message
-                : msg.content?.content || msg.message?.content || ""}
+                  ? msg.message
+                  : msg.content?.content || msg.message?.content || ""}
             </span>
           )}
 
@@ -483,8 +523,8 @@ export default function ChatDetail() {
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
-        pickerRef.current && 
-        !pickerRef.current.contains(e.target) && 
+        pickerRef.current &&
+        !pickerRef.current.contains(e.target) &&
         !e.target.closest('.emoji-toggle-btn') &&
         !e.target.closest('.emoji-picker-container')
       ) {
@@ -504,7 +544,7 @@ export default function ChatDetail() {
     const end = textareaRef.current.selectionEnd;
     const newText = text.substring(0, start) + emoji.native + text.substring(end);
     setText(newText);
-    
+
     setTimeout(() => {
       textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + emoji.native.length;
       textareaRef.current.focus();
@@ -541,24 +581,25 @@ export default function ChatDetail() {
     socket.emit("joinChat", chatId);
 
     const onNew = (msg) => {
-      // 1. O'zimiz yuborgan xabarni socketdan olsaq, uni tashlab yuboramiz (Duplikatsiyani oldini olish)
-      if (String(msg.sender_id) === String(currentUser?.id)) return;
-
+      if (String(msg.chat_id) !== String(chatId)) return;
       setMessages((prev) => {
         // 2. Kuchliroq duplikat tekshiruvi: ID yoki (Content + Sender)
-        const exists = prev.some(m => 
-          String(m.id) === String(msg.id) || 
-          (m.content === msg.content && String(m.sender_id) === String(msg.sender_id) && Math.abs(new Date(m.created_at) - new Date(msg.created_at)) < 5000)
+        const exists = prev.some(m =>
+          String(m.id) === String(msg.id) ||
+          (m.content && msg.content && m.content === msg.content && String(m.sender_id) === String(msg.sender_id) && Math.abs(new Date(m.created_at) - new Date(msg.created_at)) < 5000)
         );
         if (exists) return prev;
-        
+
         return [...prev, msg];
       });
 
       if (String(msg.sender_id) !== String(currentUser?.id)) {
         markMessagesAsRead(chatId).then(() => reloadList?.());
-        // Faqat sherigimiz yozsa va biz pastda bo'lsak scroll qilamiz
-        if (isAtBottomRef.current) scrollToBottom();
+      }
+
+      // Yangi xabar kelganda (o'zimizniki yoki sherikniki), agar pastda bo'lsak, scroll qilamiz
+      if (isAtBottomRef.current) {
+        scrollToBottom();
       }
     };
 
@@ -582,11 +623,16 @@ export default function ChatDetail() {
       );
     };
 
-    const onTyping = ({ userId, username }) => {
-      if (userId !== currentUser?.id) setTypingUser(username || i18n.t("chat.typing", "Yozmoqda"));
+    const onTyping = (data) => {
+      if (data && data.chatId && String(data.chatId) !== String(chatId)) return;
+      if (data.userId !== currentUser?.id) setTypingUser(data.username || i18n.t("chat.typing", "Yozmoqda"));
     };
-    const onStopTyping = () => setTypingUser(null);
-    const onRead = () => {
+    const onStopTyping = (data) => {
+      if (data && data.chatId && String(data.chatId) !== String(chatId)) return;
+      setTypingUser(null);
+    };
+    const onRead = (data) => {
+      if (data && data.chatId && String(data.chatId) !== String(chatId)) return;
       setMessages((prev) => prev.map((m) => ({ ...m, is_read: true })));
     };
 
@@ -623,6 +669,31 @@ export default function ChatDetail() {
       socket.off("reactionAdded", onReactionAdded);
     };
   }, [chatId, currentUser?.id]);
+
+  // Separate: listen to userStatus globally - uses functional setPartner to avoid stale closure
+  useEffect(() => {
+    const socket = getSocket();
+    const onUserStatus = (data) => {
+      setPartner(prev => {
+        if (!prev?.id) return prev;
+        if (String(data?.userId) !== String(prev.id)) return prev;
+        return {
+          ...prev,
+          is_online: data.isOnline,
+          last_seen: data.isOnline ? prev.last_seen : (data.lastSeen || new Date().toISOString())
+        };
+      });
+    };
+    socket.on("userStatus", onUserStatus);
+    return () => socket.off("userStatus", onUserStatus);
+  }, []); // no deps - functional update handles partner correctly
+
+  // Separate: emit checkStatus when partner is known
+  useEffect(() => {
+    if (!partner?.id) return;
+    const socket = getSocket();
+    socket.emit("checkStatus", partner.id);
+  }, [partner?.id]);
 
   const handleTextChange = (e) => {
     setText(e.target.value);
@@ -719,18 +790,18 @@ export default function ChatDetail() {
     const voiceReplyId = replyingTo?.id || null;
     setReplyingTo(null);
 
-    const res = await sendMessage({ 
-      chat_id: chatId, 
-      type: "voice", 
-      file_url, 
-      reply_to_id: voiceReplyId || undefined 
+    const res = await sendMessage({
+      chat_id: chatId,
+      type: "voice",
+      file_url,
+      reply_to_id: voiceReplyId || undefined
     });
     setSending(false);
 
     if (res?.success === false) {
       notify(res.message || i18n.t("chat.sendFail", "Xabar yuborilmadi"), "error");
     } else {
-      const newMsg = res.data || res.message_obj;
+      const newMsg = res?.data?.message || res?.data || res?.message_obj;
       if (newMsg && voiceReplyId) {
         setMessages(prev => {
           if (prev.find(m => String(m.id) === String(newMsg.id))) {
@@ -752,7 +823,7 @@ export default function ChatDetail() {
       const targetId = editingMsg.id;
       setEditingMsg(null);
       if (textareaRef.current) textareaRef.current.style.height = "auto";
-      
+
       const res = await editMessage(targetId, { content });
       if (res?.success === false) notify(res.message || i18n.t("chat.error", "Xato"), "error");
       else {
@@ -799,7 +870,7 @@ export default function ChatDetail() {
         notify(res.message || i18n.t("chat.sendFail", "Xabar yuborilmadi"), "error");
         setText(content);
       } else if (res?.data || res?.message_obj) {
-        const newMsg = res.data || res.message_obj;
+        const newMsg = res?.data?.message || res?.data || res?.message_obj;
         setMessages((prev) => {
           const exists = prev.some(m => String(m.id) === String(newMsg.id));
           if (exists) {
@@ -870,14 +941,14 @@ export default function ChatDetail() {
   const handleReply = () => {
     const msg = contextMenu?.msg;
     if (!msg) return;
-    const senderName = msg.sender_id === currentUser?.id
+    const senderName = String(msg.sender_id) === String(currentUser?.id)
       ? i18n.t("chat.you", "Siz")
       : `${partner?.first_name || ""} ${partner?.last_name || ""}`.trim() || partner?.username || "";
     const preview = msg.type === "voice"
       ? i18n.t("chat.voiceMsg", "Ovozli xabar")
       : msg.type === "image"
-      ? i18n.t("chat.photo", "Rasm")
-      : (msg.content || msg.message || "").slice(0, 80);
+        ? i18n.t("chat.photo", "Rasm")
+        : (msg.content || msg.message || "").slice(0, 80);
     setReplyingTo({ id: msg.id, preview, senderName });
     setContextMenu(null);
     setTimeout(() => {
@@ -920,6 +991,13 @@ export default function ChatDetail() {
       : "Foydalanuvchi";
 
   const isAdmin = currentUser?.role === "admin" || currentUser?.role === "superadmin";
+
+  const partnerLastMsg = messages.slice().reverse().find(m => String(m.sender_id) === String(partner?.id));
+  const fallbackLastSeen = partnerLastMsg?.created_at || chatInfo?.created_at;
+  const actualLastSeen = partner?.last_seen || partner?.last_active || partner?.last_online || fallbackLastSeen || new Date(Date.now() - 1000 * 60 * 60).toISOString();
+  
+  // They are strictly online if the server explicitly tells us they are, otherwise we don't guess unless they literally just sent a message right now.
+  const isComputedOnline = partner?.is_online === true || partner?.online === true || (partner?.is_online !== false && partnerLastMsg && (new Date() - new Date(partnerLastMsg.created_at) < 30 * 1000));
 
   const filteredMessages = messages.filter(
     (msg) => !(msg.deleted_at && !isAdmin)
@@ -1008,8 +1086,10 @@ export default function ChatDetail() {
                     <span className="chat-header-status-dot" />
                     <span className="typing">{typingUser} {i18n.t("chat.typingFull", "yozmoqda…")}</span>
                   </>
-                ) : (
+                ) : isComputedOnline ? (
                   <span className="online">{i18n.t("chat.online", "Online")}</span>
+                ) : (
+                  <span className="offline-status">{formatLastSeen(actualLastSeen)}</span>
                 )}
               </p>
             </div>
@@ -1067,7 +1147,7 @@ export default function ChatDetail() {
           {grouped.map((group) => {
             const msgs = group.messages;
             return (
-              <div key={group.date}>
+              <div key={group.key}>
                 <div className="date-separator">
                   <div className="date-separator-line" />
                   <span className="date-separator-text">{group.date}</span>
@@ -1075,13 +1155,13 @@ export default function ChatDetail() {
                 </div>
 
                 {msgs.map((msg, idx) => {
-                  const isOwn = msg.sender_id === currentUser?.id;
+                  const isOwn = String(msg.sender_id) === String(currentUser?.id);
                   const prevMsg = msgs[idx - 1];
                   const nextMsg = msgs[idx + 1];
                   const isFirst =
-                    !prevMsg || prevMsg.sender_id !== msg.sender_id;
+                    !prevMsg || String(prevMsg.sender_id) !== String(msg.sender_id);
                   const isLast =
-                    !nextMsg || nextMsg.sender_id !== msg.sender_id;
+                    !nextMsg || String(nextMsg.sender_id) !== String(msg.sender_id);
 
                   return (
                     <div
@@ -1144,7 +1224,7 @@ export default function ChatDetail() {
             <div className="reply-mode-bar">
               <div className="reply-mode-content">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
+                  <polyline points="9 17 4 12 9 7" /><path d="M20 18v-2a4 4 0 0 0-4-4H4" />
                 </svg>
                 <div className="reply-mode-text">
                   <span className="reply-mode-sender">{replyingTo.senderName}</span>
@@ -1157,18 +1237,18 @@ export default function ChatDetail() {
 
           <div className="chat-input-wrapper">
             <div className="chat-input-controls">
-              <button 
+              <button
                 className={`emoji-toggle-btn ${showEmojiPicker ? 'active' : ''}`}
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 title="Emojis"
               >
                 <Smile size={24} />
               </button>
-              
+
               {showEmojiPicker && (
                 <div className="emoji-picker-container" ref={pickerRef}>
-                  <Picker 
-                    data={data} 
+                  <Picker
+                    data={data}
                     onEmojiSelect={handleEmojiSelect}
                     theme="light"
                     previewPosition="none"
@@ -1216,7 +1296,7 @@ export default function ChatDetail() {
                   value={text}
                   onChange={handleTextChange}
                   onKeyDown={handleKey}
-                  placeholder={i18n.t("chat.typeMsgPlaceholder", "Xabar yozing... (Enter — yuborish, Shift+Enter — satr)")}
+                  placeholder={i18n.t("chat.typeMsgPlaceholder", "Xabar yozing... ")}
                   rows={1}
                 />
               </>
@@ -1267,7 +1347,7 @@ export default function ChatDetail() {
               <Avatar user={partner} size="lg" />
               <div className="chat-info-name">{partnerName}</div>
               <div className="chat-info-status">
-                {typingUser ? i18n.t("chat.typing", "yozmoqda...") : i18n.t("chat.online", "Online")}
+                {typingUser ? i18n.t("chat.typing", "yozmoqda...") : isComputedOnline ? i18n.t("chat.online", "Online") : formatLastSeen(actualLastSeen)}
               </div>
             </div>
 
@@ -1300,7 +1380,7 @@ export default function ChatDetail() {
         <ContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
-          isOwn={contextMenu.msg?.sender_id === currentUser?.id}
+          isOwn={String(contextMenu.msg?.sender_id) === String(currentUser?.id)}
           onCopy={handleCopy}
           onEdit={handleEdit}
           onDelete={handleDelete}
