@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useNavigate, useParams, Outlet } from "react-router-dom";
 import { getChats } from "../../../api/messages";
-import { getSocket } from "../../../hooks/useSocket";
+import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/useSocket";
 import i18n from "../../../i18n";
 import "./chat.css";
 
@@ -86,6 +86,31 @@ export default function ChatPage() {
     loadChats();
   }, [loadChats]);
 
+  // Real-time yangilash - har 30 soniyada chatsni yangilab last_seen ni yangilab turadi
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setChats(prev => [...prev]);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Load chats完成后, har bir partner uchun statusni Socket orqali so'rash (Telegram kabi)
+  useEffect(() => {
+    if (chats.length === 0) return;
+
+    const cleanup = onSocketReady((socket) => {
+      chats.forEach((chat) => {
+        const partner = chat.partner;
+        if (partner?.id) {
+          console.log("[presence] checkStatus emit (list):", partner.id);
+          socket.emit("checkStatus", partner.id);
+        }
+      });
+    });
+
+    return cleanup;
+  }, [chats.length]);
+
   useEffect(() => {
     const socket = getSocket();
     
@@ -131,13 +156,44 @@ export default function ChatPage() {
       }));
     };
 
+    socket.off("newMessage", handleNewMessage);
+    socket.off("messagesRead", handleRead);
     socket.on("newMessage", handleNewMessage);
     socket.on("messagesRead", handleRead);
+
+    // Sidebar'da online statusni real-vaqtda yangilash
+    const handleStatus = (data) => {
+      const status = normalizeUserStatus(data);
+      console.log("[presence] userStatus received (list):", status);
+
+      setChats(prev => prev.map(c => {
+        const partner = c.partner;
+        if (partner && String(partner.id) === String(status.userId)) {
+          const resolvedLastSeen = status.isOnline
+            ? null
+            : (status.lastSeen || partner.last_seen || partner.lastSeen || new Date().toISOString());
+
+          return {
+            ...c,
+            partner: {
+              ...partner,
+              is_online: status.isOnline,
+              last_seen: resolvedLastSeen
+            }
+          };
+        }
+        return c;
+      }));
+    };
+    socket.off("userStatus", handleStatus);
+    socket.on("userStatus", handleStatus);
+
     return () => {
       socket.off("newMessage", handleNewMessage);
       socket.off("messagesRead", handleRead);
+      socket.off("userStatus", handleStatus);
     };
-  }, [currentUser?.id]);
+  }, [currentUser?.id, loadChats]);
 
   // ── helpers ──────────────
   const getPartner = (chat) => chat.partner || null;
@@ -232,7 +288,6 @@ export default function ChatPage() {
                 >
                   <div className="chat-item-avatar">
                     <Avatar user={partner} size="md" />
-                    {(partner?.is_online || partner?.online) && <span className="online-dot" />}
                   </div>
 
                   <div className="chat-item-info">
@@ -279,3 +334,4 @@ export default function ChatPage() {
     </div>
   );
 }
+
