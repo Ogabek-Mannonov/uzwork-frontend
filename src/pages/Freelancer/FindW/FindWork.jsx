@@ -24,6 +24,8 @@ export default function FindWork() {
   const [showFilters, setShowFilters] = useState(false);
   const [jobType, setJobType] = useState("all"); 
   const [budgetRange, setBudgetRange] = useState("all"); 
+  const [proposalsTier, setProposalsTier] = useState("all");
+  const [clientHistory, setClientHistory] = useState("all");
   const [sortBy, setSortBy] = useState("created_at"); 
   const [sortOrder, setSortOrder] = useState("DESC");
 
@@ -147,9 +149,84 @@ export default function FindWork() {
   return (
     <div className="fw-layout">
       <div className="fw-container">
-        
-        {/* MAIN COLUMN (Left: ~70%) */}
-        <main className="fw-main-col">
+        {/* LEFT SIDEBAR (FILTERS) */}
+        <aside className={`fw-sidebar-left ${showFilters ? "mobile-open" : ""}`}>
+          <div className="fw-filter-sidebar-header">
+            <h3>Filtrlar</h3>
+            <button className="fw-close-filters-mobile" onClick={() => setShowFilters(false)}>✕</button>
+          </div>
+
+          <div className="fw-filter-group">
+            <h4>Ish turi</h4>
+            <label className="fw-filter-radio">
+              <input type="radio" name="jobType" value="all" checked={jobType === "all"} onChange={(e) => setJobType(e.target.value)} /> Barchasi
+            </label>
+            <label className="fw-filter-radio">
+              <input type="radio" name="jobType" value="hourly" checked={jobType === "hourly"} onChange={(e) => setJobType(e.target.value)} /> Soatbay
+            </label>
+            <label className="fw-filter-radio">
+              <input type="radio" name="jobType" value="fixed" checked={jobType === "fixed"} onChange={(e) => setJobType(e.target.value)} /> Qat'iy narx
+            </label>
+          </div>
+
+          <div className="fw-filter-group">
+            <h4>Takliflar soni</h4>
+            <label className="fw-filter-radio">
+              <input type="radio" name="proposals" value="all" checked={proposalsTier === "all"} onChange={(e) => setProposalsTier(e.target.value)} /> Barchasi
+            </label>
+            <label className="fw-filter-radio">
+              <input type="radio" name="proposals" value="less_5" checked={proposalsTier === "less_5"} onChange={(e) => setProposalsTier(e.target.value)} /> 5 tadan kam
+            </label>
+            <label className="fw-filter-radio">
+              <input type="radio" name="proposals" value="5_10" checked={proposalsTier === "5_10"} onChange={(e) => setProposalsTier(e.target.value)} /> 5 dan 10 tagacha
+            </label>
+            <label className="fw-filter-radio">
+              <input type="radio" name="proposals" value="10_15" checked={proposalsTier === "10_15"} onChange={(e) => setProposalsTier(e.target.value)} /> 10 dan 15 tagacha
+            </label>
+            <label className="fw-filter-radio">
+              <input type="radio" name="proposals" value="15_50" checked={proposalsTier === "15_50"} onChange={(e) => setProposalsTier(e.target.value)} /> 15 dan 50 tagacha
+            </label>
+          </div>
+
+          <div className="fw-filter-group">
+            <h4>Mijoz tarixi</h4>
+            <label className="fw-filter-radio">
+              <input type="radio" name="clientHistory" value="all" checked={clientHistory === "all"} onChange={(e) => setClientHistory(e.target.value)} /> Barchasi
+            </label>
+            <label className="fw-filter-radio">
+              <input type="radio" name="clientHistory" value="no_hires" checked={clientHistory === "no_hires"} onChange={(e) => setClientHistory(e.target.value)} /> Yangi mijoz (xarajati yo'q)
+            </label>
+            <label className="fw-filter-radio">
+              <input type="radio" name="clientHistory" value="has_hires" checked={clientHistory === "has_hires"} onChange={(e) => setClientHistory(e.target.value)} /> Xarajat qilgan mijoz
+            </label>
+          </div>
+
+          <div className="fw-filter-group">
+            <h4>Byudjet</h4>
+            <select className="fw-filter-select-full" value={budgetRange} onChange={(e) => setBudgetRange(e.target.value)}>
+              <option value="all">Istalgan summa</option>
+              <option value="0-100">$100 gacha</option>
+              <option value="100-500">$100 - $500</option>
+              <option value="500-1000">$500 - $1K</option>
+              <option value="1000+">$1K +</option>
+            </select>
+          </div>
+
+          <div className="fw-filter-group">
+            <h4>Tartiblash</h4>
+            <select className="fw-filter-select-full" value={`${sortBy}|${sortOrder}`} onChange={(e) => {
+              const [sb, so] = e.target.value.split('|'); 
+              setSortBy(sb); setSortOrder(so);
+            }}>
+              <option value="created_at|DESC">Eng yangi birinchi</option>
+              <option value="budget_min|DESC">Katta byudjet birinchi</option>
+              <option value="budget_min|ASC">Kichik byudjet birinchi</option>
+            </select>
+          </div>
+        </aside>
+
+        {/* MAIN COLUMN (Center: ~50-60%) */}
+        <main className="fw-main-col fw-middle-col">
           
           {/* BANNER */}
           <div className="fw-banner">
@@ -192,13 +269,6 @@ export default function FindWork() {
                   </button>
                 ))}
               </div>
-
-              <button 
-                className={`fw-filter-toggle ${showFilters ? "active" : ""}`}
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <Filter size={18} /> {t("findWork.layout.filterToggle")}
-              </button>
             </div>
 
             <p className="fw-tabs-subtitle">
@@ -206,42 +276,7 @@ export default function FindWork() {
             </p>
           </div>
 
-          {/* EXPANDABLE FILTERS SECTION */}
-          {showFilters && (
-            <div className="fw-expandable-filters">
-              <div className="fw-filter-box">
-                <span className="fw-filter-label">{t("findWork.layout.filters.jobType")}:</span>
-                <select value={jobType} onChange={(e) => setJobType(e.target.value)}>
-                  <option value="all">{t("findWork.layout.filters.all")}</option>
-                  <option value="fixed">{t("findWork.layout.filters.fixed")}</option>
-                  <option value="hourly">{t("findWork.layout.filters.hourly")}</option>
-                </select>
-              </div>
-
-              <div className="fw-filter-box">
-                <span className="fw-filter-label">{t("findWork.layout.filters.budget")}:</span>
-                <select value={budgetRange} onChange={(e) => setBudgetRange(e.target.value)}>
-                  <option value="all">{t("findWork.layout.filters.anyAmount")}</option>
-                  <option value="0-100">{t("findWork.layout.filters.upTo100")}</option>
-                  <option value="100-500">$100 - $500</option>
-                  <option value="500-1000">$500 - $1K</option>
-                  <option value="1000+">$1K +</option>
-                </select>
-              </div>
-
-              <div className="fw-filter-box">
-                <span className="fw-filter-label">{t("findWork.layout.filters.sort")}:</span>
-                <select value={`${sortBy}|${sortOrder}`} onChange={(e) => {
-                  const [sb, so] = e.target.value.split('|'); 
-                  setSortBy(sb); setSortOrder(so);
-                }}>
-                  <option value="created_at|DESC">{t("findWork.layout.filters.newestFirst")}</option>
-                  <option value="budget_min|DESC">{t("findWork.layout.filters.highestBudget")}</option>
-                  <option value="budget_min|ASC">{t("findWork.layout.filters.lowestBudget")}</option>
-                </select>
-              </div>
-            </div>
-          )}
+          {/* FILTERS NOW MOVED TO LEFT SIDEBAR */}
 
           {/* PROJECTS LIST */}
           <div className="fw-projects-container">
@@ -251,6 +286,8 @@ export default function FindWork() {
               jobType={jobType === 'all' ? null : jobType}
               minBudget={minBudget}
               maxBudget={maxBudget}
+              proposalsTier={proposalsTier === 'all' ? null : proposalsTier}
+              clientHistory={clientHistory === 'all' ? null : clientHistory}
               sortBy={sortBy}
               sortOrder={sortOrder}
               onProjectClick={handleProjectClick}

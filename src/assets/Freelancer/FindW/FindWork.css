@@ -16,7 +16,114 @@
   align-items: flex-start;
 }
 
-/* ===== MAIN COLUMN (Left: ~70%) ===== */
+/* ===== LEFT SIDEBAR (Filters) ===== */
+.fw-sidebar-left {
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+  position: sticky;
+  top: 100px; /* So it scrolls with page then sticks */
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+.fw-sidebar-left::-webkit-scrollbar {
+  width: 4px;
+}
+.fw-sidebar-left::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.fw-filter-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 8px;
+}
+
+.fw-filter-sidebar-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.fw-close-filters-mobile {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.fw-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fw-filter-group h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-2);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fw-filter-radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: var(--text);
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.2s;
+}
+
+.fw-filter-radio:hover {
+  color: var(--brand);
+}
+
+.fw-filter-radio input[type="radio"] {
+  accent-color: var(--brand);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.fw-filter-select-full {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  outline: none;
+  font-size: 0.95rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fw-filter-select-full:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ===== MAIN COLUMN (Center) ===== */
 .fw-main-col {
   flex: 1;
   min-width: 0; 
@@ -24,6 +131,7 @@
   flex-direction: column;
   gap: 24px;
 }
+
 
 /* BANNER - Premium Glassmorphism & Gradient */
 .fw-banner {
@@ -230,19 +338,7 @@
   margin: 20px 0 0;
 }
 
-/* EXPANDABLE FILTERS */
-.fw-expandable-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  background: var(--surface);
-  padding: 20px 24px;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
-  animation: fadeDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
+/* Remove old expandable filters */
 @keyframes fadeDown {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
@@ -532,6 +628,23 @@
   .fw-container {
     flex-direction: column;
     padding: 0 16px;
+  }
+  .fw-sidebar-left {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    border-radius: 0;
+    max-height: none;
+  }
+  .fw-sidebar-left.mobile-open {
+    display: flex;
+  }
+  .fw-close-filters-mobile {
+    display: block;
   }
   .fw-main-col {
     width: 100%;

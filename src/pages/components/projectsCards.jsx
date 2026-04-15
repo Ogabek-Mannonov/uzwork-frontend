@@ -10,9 +10,11 @@ export default function Projects({
   jobType = null,
   minBudget = null,
   maxBudget = null,
+  proposalsTier = null,
+  clientHistory = null,
   sortBy = "created_at",
   sortOrder = "DESC",
-  onProjectClick // Added this
+  onProjectClick
 }) {
   const { t } = useTranslation();
   const [jobs, setJobs] = useState([]);
@@ -27,7 +29,7 @@ export default function Projects({
   // Reset page when any filter config changes
   useEffect(() => {
     setPage(1);
-  }, [activeTab, searchQuery, jobType, minBudget, maxBudget, sortBy, sortOrder]);
+  }, [activeTab, searchQuery, jobType, minBudget, maxBudget, sortBy, sortOrder, proposalsTier, clientHistory]);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -43,6 +45,8 @@ export default function Projects({
           job_type: jobType || undefined,
           min_budget: minBudget !== null ? minBudget : undefined,
           max_budget: maxBudget !== null ? maxBudget : undefined,
+          proposals_tier: proposalsTier || undefined,
+          client_history: clientHistory || undefined,
           sort_by: sortBy,
           order: sortOrder
         };
@@ -97,7 +101,7 @@ export default function Projects({
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [page, activeTab, searchQuery]);
+  }, [page, activeTab, searchQuery, jobType, minBudget, maxBudget, sortBy, sortOrder, proposalsTier, clientHistory]);
 
   const toggleLike = async (id) => {
     // Optimistik yangilash (darhol UI o'zgaradi)
