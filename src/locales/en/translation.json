@@ -415,7 +415,11 @@
     "noChatsYet": "No chats yet",
     "noMessagesOut": "No message",
     "selectChat": "Select a Chat",
-    "chooseFromLeft": "Select a chat from the left or start a new conversation"
+    "chooseFromLeft": "Select a chat from the left or start a new conversation",
+    "justNow": "Just now",
+    "minsAgo": "{{n}}m ago",
+    "hoursAgo": "{{n}}h ago",
+    "daysAgo": "{{n}}d ago"
   },
   "auth": {
     "enterEmailPhone": "Please enter your email or phone number",

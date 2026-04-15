@@ -9,7 +9,7 @@ import {
   deleteMessage,
   uploadVoice,
 } from "../../../api/messages";
-import { getSocket } from "../../../hooks/useSocket";
+import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/useSocket";
 import { Smile } from "lucide-react";
 import i18n from "../../../i18n";
 import { useTranslation } from "react-i18next";
@@ -76,34 +76,32 @@ function groupMessagesByDate(m) {
 
 function formatLastSeen(dateStr) {
   if (!dateStr) return "";
-  const d = new Date(dateStr);
+
+  const parsePresenceDate = (raw) => {
+    if (!raw) return null;
+    if (raw instanceof Date) return raw;
+    const s = String(raw).trim();
+    // PostgreSQL timestamp without timezone holatida UTC deb talqin qilamiz
+    if (!/[zZ]|[+\-]\d{2}:\d{2}$/.test(s)) {
+      return new Date(`${s.replace(" ", "T")}Z`);
+    }
+    return new Date(s);
+  };
+
+  const d = parsePresenceDate(dateStr);
+  if (isNaN(d.getTime())) return "";
+
   const now = new Date();
   const diffMs = now - d;
   if (diffMs < 0) return "";
-  
+
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
 
-  const lang = i18n.language;
-  const isUz = lang === 'uz';
-  const isRu = lang === 'ru';
-
-  const texts = {
-    justNow: isUz ? "yaqinda online edi" : isRu ? "недавно был(а) в сети" : "was online just now",
-    minsAgo: isUz ? "daq. oldin online edi" : isRu ? "мин. назад был(а)" : "mins ago",
-    hoursAgo: isUz ? "soat oldin online edi" : isRu ? "ч. назад в сети" : "hours ago",
-    daysAgo: isUz ? "kun oldin online edi" : isRu ? "дн. назад в сети" : "days ago",
-    onDate: isUz ? "kuni online edi" : isRu ? "был(а) в сети" : "was online on"
-  };
-
-  if (diffMins < 1) return texts.justNow;
-  if (diffHours < 1) return `${diffMins} ${texts.minsAgo}`;
-  if (diffDays < 1) return `${diffHours} ${texts.hoursAgo}`;
-  if (diffDays < 7) return `${diffDays} ${texts.daysAgo}`;
-  
-  const dateLabel = d.toLocaleDateString(isUz ? "uz-UZ" : (isRu ? "ru-RU" : "en-US"), { month: "short", day: "numeric" });
-  return `${isUz ? "" : texts.onDate + " "}${dateLabel}${isUz ? " " + texts.onDate : ""}`;
+  if (diffMins < 1) return "Hozirgina online edi";
+  if (diffMins < 60) return `${diffMins} daqiqa oldin online edi`;
+  if (diffHours < 24) return `${diffHours} soat oldin online edi`;
+  return "";
 }
 
 // ── Avatar ───────────────────────────────────────────────
@@ -459,6 +457,7 @@ export default function ChatDetail() {
   const [typingUser, setTypingUser] = useState(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [presenceResolved, setPresenceResolved] = useState(false);
 
   const [recording, setRecording] = useState(false);
   const [recordTime, setRecordTime] = useState(0);
@@ -574,11 +573,12 @@ export default function ChatDetail() {
   };
 
   useEffect(() => {
-    const socket = getSocket();
     if (!chatId) return;
 
-    if (currentUser?.id) socket.emit("joinUser", currentUser.id);
-    socket.emit("joinChat", chatId);
+    const socket = getSocket();
+    const readyCleanup = onSocketReady((readySocket) => {
+      readySocket.emit("joinChat", chatId);
+    });
 
     const onNew = (msg) => {
       if (String(msg.chat_id) !== String(chatId)) return;
@@ -649,6 +649,14 @@ export default function ChatDetail() {
       );
     };
 
+    socket.off("newMessage", onNew);
+    socket.off("messageEdited", onEdited);
+    socket.off("messageDeleted", onDeleted);
+    socket.off("userTyping", onTyping);
+    socket.off("userStoppedTyping", onStopTyping);
+    socket.off("messagesRead", onRead);
+    socket.off("reactionAdded", onReactionAdded);
+
     socket.on("newMessage", onNew);
     socket.on("messageEdited", onEdited);
     socket.on("messageDeleted", onDeleted);
@@ -667,6 +675,7 @@ export default function ChatDetail() {
       socket.off("userStoppedTyping", onStopTyping);
       socket.off("messagesRead", onRead);
       socket.off("reactionAdded", onReactionAdded);
+      readyCleanup?.();
     };
   }, [chatId, currentUser?.id]);
 
@@ -674,16 +683,23 @@ export default function ChatDetail() {
   useEffect(() => {
     const socket = getSocket();
     const onUserStatus = (data) => {
+      const status = normalizeUserStatus(data);
+      console.log("[presence] userStatus received (detail):", status);
+
       setPartner(prev => {
         if (!prev?.id) return prev;
-        if (String(data?.userId) !== String(prev.id)) return prev;
+        if (String(status.userId) !== String(prev.id)) return prev;
+        setPresenceResolved(true);
+        const resolvedLastSeen = status.isOnline ? null : (status.lastSeen || null);
+
         return {
           ...prev,
-          is_online: data.isOnline,
-          last_seen: data.isOnline ? prev.last_seen : (data.lastSeen || new Date().toISOString())
+          is_online: status.isOnline,
+          last_seen: resolvedLastSeen
         };
       });
     };
+    socket.off("userStatus", onUserStatus);
     socket.on("userStatus", onUserStatus);
     return () => socket.off("userStatus", onUserStatus);
   }, []); // no deps - functional update handles partner correctly
@@ -691,8 +707,12 @@ export default function ChatDetail() {
   // Separate: emit checkStatus when partner is known
   useEffect(() => {
     if (!partner?.id) return;
-    const socket = getSocket();
-    socket.emit("checkStatus", partner.id);
+    setPresenceResolved(false);
+    const cleanup = onSocketReady((socket) => {
+      console.log("[presence] checkStatus emit (detail):", partner.id);
+      socket.emit("checkStatus", partner.id);
+    });
+    return cleanup;
   }, [partner?.id]);
 
   const handleTextChange = (e) => {
@@ -992,12 +1012,12 @@ export default function ChatDetail() {
 
   const isAdmin = currentUser?.role === "admin" || currentUser?.role === "superadmin";
 
-  const partnerLastMsg = messages.slice().reverse().find(m => String(m.sender_id) === String(partner?.id));
-  const fallbackLastSeen = partnerLastMsg?.created_at || chatInfo?.created_at;
-  const actualLastSeen = partner?.last_seen || partner?.last_active || partner?.last_online || fallbackLastSeen || new Date(Date.now() - 1000 * 60 * 60).toISOString();
-  
-  // They are strictly online if the server explicitly tells us they are, otherwise we don't guess unless they literally just sent a message right now.
-  const isComputedOnline = partner?.is_online === true || partner?.online === true || (partner?.is_online !== false && partnerLastMsg && (new Date() - new Date(partnerLastMsg.created_at) < 30 * 1000));
+  const actualLastSeen = partner?.last_seen || partner?.lastSeen || partner?.last_active || partner?.last_online || null;
+
+  // Faqat server tomonidan is_online: true deb tasdiqlangan bo'lsagina Online ko'rsatamiz.
+  // Taxmin qilmaymiz (oxirgi xabar vaqtiga qarab emas).
+  const isComputedOnline = partner?.is_online === true || partner?.isOnline === true || partner?.online === true;
+  const canShowOfflineStatus = presenceResolved && !isComputedOnline && !!actualLastSeen;
 
   const filteredMessages = messages.filter(
     (msg) => !(msg.deleted_at && !isAdmin)
@@ -1088,8 +1108,10 @@ export default function ChatDetail() {
                   </>
                 ) : isComputedOnline ? (
                   <span className="online">{i18n.t("chat.online", "Online")}</span>
-                ) : (
+                ) : canShowOfflineStatus ? (
                   <span className="offline-status">{formatLastSeen(actualLastSeen)}</span>
+                ) : (
+                  <span className="offline-status"></span>
                 )}
               </p>
             </div>
@@ -1347,7 +1369,13 @@ export default function ChatDetail() {
               <Avatar user={partner} size="lg" />
               <div className="chat-info-name">{partnerName}</div>
               <div className="chat-info-status">
-                {typingUser ? i18n.t("chat.typing", "yozmoqda...") : isComputedOnline ? i18n.t("chat.online", "Online") : formatLastSeen(actualLastSeen)}
+                {typingUser
+                  ? i18n.t("chat.typing", "yozmoqda...")
+                  : isComputedOnline
+                    ? i18n.t("chat.online", "Online")
+                    : canShowOfflineStatus
+                      ? formatLastSeen(actualLastSeen)
+                      : ""}
               </div>
             </div>
 
@@ -1397,3 +1425,4 @@ export default function ChatDetail() {
     </div>
   );
 }
+

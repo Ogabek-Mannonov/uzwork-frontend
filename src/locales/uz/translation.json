@@ -415,7 +415,11 @@
     "noChatsYet": "Hali chatlar yo'q",
     "noMessagesOut": "Xabar yo'q",
     "selectChat": "Suhbat tanlang",
-    "chooseFromLeft": "Chap tarafdan chatni tanlang yoki yangi muloqot boshlang"
+    "chooseFromLeft": "Chap tarafdan chatni tanlang yoki yangi muloqot boshlang",
+    "justNow": "Hozirgina",
+    "minsAgo": "{{n}} daqiqa oldin",
+    "hoursAgo": "{{n}} soat oldin",
+    "daysAgo": "{{n}} kun oldin"
   },
   "auth": {
     "enterEmailPhone": "Iltimos, email yoki telefon raqamni kiriting",
