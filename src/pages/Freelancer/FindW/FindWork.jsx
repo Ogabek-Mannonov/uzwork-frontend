@@ -39,9 +39,14 @@ export default function FindWork() {
     const checks = [
       { label: "Avatar", done: !!user?.avatar_url },
       { label: "Ism / Familiya", done: !!(user?.first_name && user?.last_name) },
-      { label: "Sarlavha (Title)", done: !!(profile?.title && profile.title.trim()) },
+      { label: "Sarlavha (Title)", done: !!(profile?.title && profile.title.trim && profile.title.trim()) },
       { label: "Bio", done: !!(profile?.bio && profile.bio.length >= 20) },
-      { label: "Ko'nikmalar", done: Array.isArray(profile?.skills) ? profile.skills.length >= 1 : false },
+      { label: "Ko'nikmalar", done: (() => {
+          try {
+            const parsed = typeof profile?.skills === 'string' ? JSON.parse(profile.skills) : profile?.skills;
+            return Array.isArray(parsed) ? parsed.length >= 1 : false;
+          } catch(e) { return false; }
+      })() },
       { label: "Soatlik stavka", done: !!(profile?.hourly_rate && Number(profile.hourly_rate) > 0) },
       { label: "Kategoriya", done: !!profile?.category_id },
       { label: "Joylashuv", done: !!(profile?.location && profile.location.trim()) },
@@ -80,11 +85,13 @@ export default function FindWork() {
         }
 
         if (portfolioRes?.success) {
-          portfolioItems = portfolioRes.data || [];
+          // Backend returns { data: { portfolio: [...] } } or { data: [...] }
+          portfolioItems = portfolioRes.data?.portfolio || portfolioRes.data?.items || (Array.isArray(portfolioRes.data) ? portfolioRes.data : []);
         }
 
         if (certRes?.success) {
-          certifications = certRes.data || [];
+          // Backend returns { data: { certifications: [...] } } or { data: [...] }
+          certifications = certRes.data?.certifications || (Array.isArray(certRes.data) ? certRes.data : []);
         }
 
         const { pct, checks } = calculateCompletion(user, profile, portfolioItems, certifications);
@@ -95,6 +102,15 @@ export default function FindWork() {
       }
     };
     fetchProfile();
+
+    // Foydalanuvchi boshqa tabdan qaytib kelganda foizni qayta hisoblasin
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchProfile();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
 
@@ -341,6 +357,15 @@ export default function FindWork() {
                       <span>{item.label}</span>
                     </div>
                   ))}
+                </div>
+              )}
+              
+              {/* 100% Success Message */}
+              {profileCompletion === 100 && (
+                <div className="fw-completion-success" style={{ marginTop: '12px', padding: '12px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: '#059669', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                     <CheckCircle size={16} color="#10b981" /> Profilingiz 100% to'ldirildi! Endi ishlarni olish imkoniyatingiz yuqori.
+                  </p>
                 </div>
               )}
             </div>
