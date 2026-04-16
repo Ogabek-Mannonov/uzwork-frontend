@@ -401,7 +401,7 @@
     "editing": "Editing:",
     "cancel": "Cancel",
     "send": "Send",
-    "typeMsgPlaceholder": "Type message... (Enter to send, Shift+Enter for new line)",
+    "typeMsgPlaceholder": "Type message...",
     "voiceMsg": "Voice message",
     "now": "Now",
     "min": "m",

@@ -401,7 +401,7 @@
     "editing": "Редактирование:",
     "cancel": "Отмена",
     "send": "Отправить",
-    "typeMsgPlaceholder": "Напишите сообщение... (Enter — отправить, Shift+Enter — строка)",
+    "typeMsgPlaceholder": "Напишите сообщение...",
     "voiceMsg": "Голосовое сообщение",
     "now": "Сейчас",
     "min": "м",
