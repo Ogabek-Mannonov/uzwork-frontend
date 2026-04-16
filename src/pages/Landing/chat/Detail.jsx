@@ -10,9 +10,10 @@ import {
   uploadVoice,
 } from "../../../api/messages";
 import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/useSocket";
-import { Smile } from "lucide-react";
+import { Smile, Globe, Settings2, X } from "lucide-react";
 import i18n from "../../../i18n";
 import { useTranslation } from "react-i18next";
+import { translateToUzbek } from "../../../api/translate_service";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 
@@ -104,6 +105,15 @@ function formatLastSeen(dateStr) {
   return "";
 }
 
+function getMsgText(msg) {
+  if (!msg) return "";
+  // Check common properties
+  const content = msg.content || msg.message || msg.message_text || "";
+  if (typeof content === "string") return content;
+  // If it's an object, try to find a text field
+  return content?.content || content?.message || content?.text || content?.message_text || "";
+}
+
 // ── Avatar ───────────────────────────────────────────────
 function Avatar({ user, size = "sm" }) {
   const name = user
@@ -135,7 +145,7 @@ function Avatar({ user, size = "sm" }) {
 // ── Context Menu ─────────────────────────────────────────
 const QUICK_EMOJIS = ["🤝", "🔥", "❤️", "👌", "😄", "👍"];
 
-function ContextMenu({ x, y, isOwn, onEdit, onDelete, onCopy, onReply, onReact, onClose }) {
+function ContextMenu({ x, y, isOwn, onEdit, onDelete, onCopy, onReply, onTranslate, onReact, onClose }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -172,6 +182,10 @@ function ContextMenu({ x, y, isOwn, onEdit, onDelete, onCopy, onReply, onReact, 
       </div>
       <div className="msg-context-item" onClick={onCopy}>
         📋 {i18n.t("chat.copy", "Nusxalash")}
+      </div>
+      <div className="msg-context-item" onClick={() => { onTranslate?.(); onClose(); }}>
+        <Globe size={14} strokeWidth={2.2} style={{ marginRight: 8 }} />
+        {i18n.t("chat.translate", "Tarjima qilish")}
       </div>
       {isOwn && (
         <>
@@ -314,6 +328,7 @@ function MessageBubble({
   currentUser,
   onContextMenu,
   allMessages,
+  translation,
 }) {
   const isDeleted = !!msg.deleted_at;
   const isImage = msg.type === "image";
@@ -387,15 +402,18 @@ function MessageBubble({
               </div>
             </a>
           ) : isVoice && msg.file_url ? (
-            <CustomAudioPlayer src={avatarSrc(msg.file_url)} isOwn={isOwn} />
+            <CustomAudioPlayer src={avatarSrc(msg.file_url)} isOwn={isOwnVal} />
           ) : (
             <span className="msg-text-content">
-              {typeof msg.content === "string"
-                ? msg.content
-                : typeof msg.message === "string"
-                  ? msg.message
-                  : msg.content?.content || msg.message?.content || ""}
+              {getMsgText(msg)}
             </span>
+          )}
+
+          {translation && (
+            <div className="msg-translation">
+              <div className="msg-translation-divider" />
+              <div className="msg-translation-text">{translation}</div>
+            </div>
           )}
 
           <div className="msg-time-inline">
@@ -403,7 +421,7 @@ function MessageBubble({
               <span className="msg-edited">{i18n.t("chat.edited", "tahrirlangan")}</span>
             )}
             <span>{formatMsgTime(msg.created_at)}</span>
-            {isOwn && (
+            {isOwnVal && (
               <span className={`msg-read-icon ${msg.is_read ? "read" : "sent"}`}>
                 {msg.is_read ? (
                   <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
@@ -458,6 +476,11 @@ export default function ChatDetail() {
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [presenceResolved, setPresenceResolved] = useState(false);
+  const [showTranslate, setShowTranslate] = useState(true);
+  const [translations, setTranslations] = useState({});
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [targetLang, setTargetLang] = useState("uz");
+  const [showTranslateSettings, setShowTranslateSettings] = useState(false);
 
   const [recording, setRecording] = useState(false);
   const [recordTime, setRecordTime] = useState(0);
@@ -583,7 +606,6 @@ export default function ChatDetail() {
     const onNew = (msg) => {
       if (String(msg.chat_id) !== String(chatId)) return;
       setMessages((prev) => {
-        // 2. Kuchliroq duplikat tekshiruvi: ID yoki (Content + Sender)
         const exists = prev.some(m =>
           String(m.id) === String(msg.id) ||
           (m.content && msg.content && m.content === msg.content && String(m.sender_id) === String(msg.sender_id) && Math.abs(new Date(m.created_at) - new Date(msg.created_at)) < 5000)
@@ -597,7 +619,6 @@ export default function ChatDetail() {
         markMessagesAsRead(chatId).then(() => reloadList?.());
       }
 
-      // Yangi xabar kelganda (o'zimizniki yoki sherikniki), agar pastda bo'lsak, scroll qilamiz
       if (isAtBottomRef.current) {
         scrollToBottom();
       }
@@ -679,13 +700,10 @@ export default function ChatDetail() {
     };
   }, [chatId, currentUser?.id]);
 
-  // Separate: listen to userStatus globally - uses functional setPartner to avoid stale closure
   useEffect(() => {
     const socket = getSocket();
     const onUserStatus = (data) => {
       const status = normalizeUserStatus(data);
-      console.log("[presence] userStatus received (detail):", status);
-
       setPartner(prev => {
         if (!prev?.id) return prev;
         if (String(status.userId) !== String(prev.id)) return prev;
@@ -702,14 +720,12 @@ export default function ChatDetail() {
     socket.off("userStatus", onUserStatus);
     socket.on("userStatus", onUserStatus);
     return () => socket.off("userStatus", onUserStatus);
-  }, []); // no deps - functional update handles partner correctly
+  }, []);
 
-  // Separate: emit checkStatus when partner is known
   useEffect(() => {
     if (!partner?.id) return;
     setPresenceResolved(false);
     const cleanup = onSocketReady((socket) => {
-      console.log("[presence] checkStatus emit (detail):", partner.id);
       socket.emit("checkStatus", partner.id);
     });
     return cleanup;
@@ -758,8 +774,6 @@ export default function ChatDetail() {
             audioChunksRef.current = [];
             return;
           }
-          const duration = recordTime;
-          const sizeKB = (audioBlob.size / 1024).toFixed(1);
           await handleSendVoice(audioBlob);
         }
       };
@@ -831,6 +845,61 @@ export default function ChatDetail() {
         });
       }
       reloadList?.();
+    }
+  };
+
+  const handleTranslateChat = async () => {
+    if (isTranslating) return;
+    setIsTranslating(true);
+    const newTranslations = { ...translations };
+
+    try {
+      const textMessages = messages.filter(
+        (m) => !m.deleted_at && (m.type === "text" || !m.type)
+      );
+
+      for (const msg of textMessages) {
+        const textToTranslate = getMsgText(msg);
+
+        if (textToTranslate && !translations[msg.id]) {
+          try {
+            const translated = await translateToUzbek(textToTranslate, targetLang);
+            newTranslations[msg.id] = translated;
+            setTranslations({ ...newTranslations });
+          } catch (err) {
+            console.error("Translation error for msg", msg.id, err);
+          }
+        }
+      }
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const handleTranslateSingleMessage = async (msg) => {
+    console.log("Translating single message:", msg);
+    const textToTranslate = getMsgText(msg);
+
+    if (!textToTranslate) {
+      console.warn("No text found to translate for msg:", msg.id);
+      notify(i18n.t("chat.noTextToTranslate", "Tarjima qilish uchun matn topilmadi"), "error");
+      return;
+    }
+
+    try {
+      notify(i18n.t("chat.translating", "Tarjima qilinmoqda..."), "info");
+      const translated = await translateToUzbek(textToTranslate, targetLang);
+      console.log("Translation result:", translated);
+      if (translated) {
+        setTranslations((prev) => {
+          const newState = { ...prev, [msg.id]: translated };
+          console.log("New translations state for msg", msg.id, ":", newState);
+          return newState;
+        });
+      }
+    } catch (err) {
+      console.error("Single message translation error", err);
+      notify(i18n.t("chat.translationError", "Tarjima qilishda xatolik"), "error");
     }
   };
 
@@ -1014,8 +1083,6 @@ export default function ChatDetail() {
 
   const actualLastSeen = partner?.last_seen || partner?.lastSeen || partner?.last_active || partner?.last_online || null;
 
-  // Faqat server tomonidan is_online: true deb tasdiqlangan bo'lsagina Online ko'rsatamiz.
-  // Taxmin qilmaymiz (oxirgi xabar vaqtiga qarab emas).
   const isComputedOnline = partner?.is_online === true || partner?.isOnline === true || partner?.online === true;
   const canShowOfflineStatus = presenceResolved && !isComputedOnline && !!actualLastSeen;
 
@@ -1137,6 +1204,22 @@ export default function ChatDetail() {
           </div>
         </div>
 
+        {showTranslate && (
+          <TranslateBar
+            isTranslating={isTranslating}
+            targetLang={targetLang}
+            showSettings={showTranslateSettings}
+            onToggleSettings={() => setShowTranslateSettings(!showTranslateSettings)}
+            onSelectLang={(lang) => {
+              setTargetLang(lang);
+              setShowTranslateSettings(false);
+              setTranslations({}); // Clear old translations when language changes
+            }}
+            onTranslate={handleTranslateChat}
+            onClose={() => setShowTranslate(false)}
+          />
+        )}
+
         <div
           ref={messagesAreaRef}
           className="chat-messages-area"
@@ -1200,6 +1283,7 @@ export default function ChatDetail() {
                         currentUser={currentUser}
                         onContextMenu={openContextMenu}
                         allMessages={filteredMessages}
+                        translation={translations[msg.id]}
                       />
                     </div>
                   );
@@ -1311,7 +1395,6 @@ export default function ChatDetail() {
               </div>
             ) : (
               <>
-                {/* Textarea */}
                 <textarea
                   ref={textareaRef}
                   className="chat-textarea"
@@ -1324,7 +1407,6 @@ export default function ChatDetail() {
               </>
             )}
 
-            {/* Action buttons (Right side) */}
             {!text.trim() && !editingMsg && !recording ? (
               <button
                 className="chat-action-btn telegram-mic-btn"
@@ -1355,9 +1437,8 @@ export default function ChatDetail() {
             )}
           </div>
         </div>
-      </div> {/* closes chat-detail-main */}
+      </div>
 
-      {/* ── RIGHT INFO SIDEBAR ── */}
       {showInfo && (
         <aside className="chat-info-sidebar">
           <div className="chat-info-header">
@@ -1403,7 +1484,6 @@ export default function ChatDetail() {
         </aside>
       )}
 
-      {/* Context Menu */}
       {contextMenu && (
         <ContextMenu
           x={contextMenu.x}
@@ -1413,12 +1493,12 @@ export default function ChatDetail() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onReply={handleReply}
+          onTranslate={() => handleTranslateSingleMessage(contextMenu.msg)}
           onReact={handleReact}
           onClose={() => setContextMenu(null)}
         />
       )}
 
-      {/* Toast */}
       {toast && (
         <div className={`chat-toast ${toast.type || ""}`}>{toast.msg}</div>
       )}
@@ -1426,3 +1506,80 @@ export default function ChatDetail() {
   );
 }
 
+// ── Translate Bar ────────────────────────────────────────
+function TranslateBar({ 
+  onTranslate, 
+  onClose, 
+  isTranslating, 
+  targetLang, 
+  showSettings, 
+  onToggleSettings, 
+  onSelectLang 
+}) {
+  const languages = [
+    { id: "uz", label: "O'zbekcha" },
+    { id: "ru", label: "Русский" },
+    { id: "en", label: "English" },
+    { id: "tr", label: "Türkçe" },
+    { id: "kk", label: "Қазақша" },
+    { id: "ky", label: "Кыргызcha" },
+    { id: "tk", label: "Türkmençe" },
+    { id: "tg", label: "Тоҷикӣ" },
+    { id: "de", label: "Deutsch" },
+    { id: "fr", label: "Français" },
+    { id: "es", label: "Español" },
+    { id: "zh", label: "中文" },
+    { id: "ko", label: "한국어" },
+    { id: "ar", label: "العربية" },
+  ];
+
+  const currentLangLabel = languages.find(l => l.id === targetLang)?.label || "O'zbekcha";
+
+  return (
+    <div className="translate-bar-container">
+      <div className={`translate-bar ${isTranslating ? 'busy' : ''}`} onClick={!isTranslating ? onTranslate : undefined}>
+        <div className="translate-bar-left">
+          <span className="translate-icon">
+            <Globe size={16} strokeWidth={2.5} className={isTranslating ? 'spin-anim' : ''} />
+          </span>
+          <span className="translate-text">
+            {isTranslating 
+              ? i18n.t("chat.translating", "Tarjima qilinmoqda...") 
+              : `${currentLangLabel} tiliga tarjima qilish`}
+          </span>
+        </div>
+        <div className="translate-bar-right">
+          <div className="translate-settings-wrapper">
+            <button 
+              className={`translate-settings-btn ${showSettings ? 'active' : ''}`} 
+              onClick={(e) => { e.stopPropagation(); onToggleSettings(); }}
+            >
+              <Settings2 size={16} strokeWidth={2.5} />
+            </button>
+            
+            {showSettings && (
+              <div className="translate-langs-menu" onClick={(e) => e.stopPropagation()}>
+                <div className="translate-menu-header">{i18n.t("chat.chooseLang", "Tilni tanlang")}</div>
+                {languages.map((lang) => (
+                  <div 
+                    key={lang.id} 
+                    className={`translate-lang-item ${targetLang === lang.id ? 'active' : ''}`}
+                    onClick={() => onSelectLang(lang.id)}
+                  >
+                    {lang.label}
+                    {targetLang === lang.id && <span className="check-mark">✓</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {!isTranslating && (
+            <button className="translate-settings-btn" onClick={(e) => { e.stopPropagation(); onClose?.(); }}>
+              <X size={16} strokeWidth={2.2} />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
