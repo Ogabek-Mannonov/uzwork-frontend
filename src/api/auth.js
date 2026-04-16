@@ -121,16 +121,81 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 401 bo‘lsa tokenni tozalash (ixtiyoriy, lekin foydali)
-api.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err?.response?.status === 401) {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user");
+// --- Silent Refresh Logic ---
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
     }
-    return Promise.reject(err);
+  });
+  failedQueue = [];
+};
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // 401 xatosi va bu so'rov hali qayta urinilmagan bo'lsa
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // Agar hozirda token yangilanayotgan bo'lsa, so'rovni navbatga qo'yamiz
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers["Authorization"] = "Bearer " + token;
+            return api(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = localStorage.getItem("refreshToken");
+      if (!refreshToken) {
+        clearAuth();
+        return Promise.reject(error);
+      }
+
+      try {
+        // Tokenni yangilash so'rovi
+        // Eslatma: 'api' emas, axios yoki boshqa instance ishlatish tavsiya qilinadi 
+        // interseptor cheksiz aylanib qolmasligi uchun. 
+        // Lekin bizda /auth/refresh ochiq bo'lishi kerak.
+        const res = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
+        const { accessToken, refreshToken: newRefreshToken } = res.data.data;
+
+        saveAuth({ 
+            accessToken, 
+            refreshToken: newRefreshToken, 
+            user: JSON.parse(localStorage.getItem("user")) 
+        });
+
+        api.defaults.headers.common["Authorization"] = "Bearer " + accessToken;
+        originalRequest.headers["Authorization"] = "Bearer " + accessToken;
+
+        processQueue(null, accessToken);
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        clearAuth();
+        // ixtiyoriy: window.location.href = "/login";
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return Promise.reject(error);
   }
 );
 
