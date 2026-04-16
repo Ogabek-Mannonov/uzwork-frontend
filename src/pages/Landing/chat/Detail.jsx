@@ -21,28 +21,60 @@ import data from "@emoji-mart/data";
 const BACKEND =
   import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
 
-// ── helpers ──────────────────────────────────────────────
+// --- date/image helpers ---
 function avatarSrc(url) {
   if (!url) return null;
   if (url.startsWith("http")) return url;
   return `${BACKEND}${url}`;
 }
 
+const parseUTC = (raw) => {
+  if (!raw) return null;
+  if (raw instanceof Date) return raw;
+  let s = String(raw).trim();
+  if (!s) return null;
+
+  // Z bilan tugasa yoki +/-05:00, +/-0500 kabi offset bo'lsa, uni boricha o'qiymiz
+  const hasTZ = /[zZ]$/.test(s) || /[+\-]\d{2}(:?\d{2})?$/.test(s);
+  
+  if (!hasTZ) {
+    // Agar TZ bo'lmasa, har doim UTC (Z) deb hisoblaymiz
+    // Space o'rniga T qo'yamiz va oxiriga Z qo'shamiz
+    s = s.replace(" ", "T");
+    if (!s.includes("Z")) s += "Z";
+  }
+  
+  const d = new Date(s);
+  // Agar Date noto'g'ri bo'lsa (Z qo'shilgach buzilsa), Z'siz o'qib ko'ramiz
+  if (isNaN(d.getTime())) {
+    return new Date(String(raw).trim());
+  }
+  return d;
+};
+
 function formatMsgTime(dateStr) {
-  if (!dateStr) return "";
-  return new Date(dateStr).toLocaleTimeString("uz-UZ", {
+  const d = parseUTC(dateStr);
+  if (!d) return "";
+  return d.toLocaleTimeString("uz-UZ", {
     hour: "2-digit",
     minute: "2-digit",
   });
 }
 
 function formatDateLabel(dateStr) {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
+  const d = parseUTC(dateStr);
+  if (!d) return "";
+  
   const now = new Date();
-  const diffDays = Math.floor((now - d) / 86400000);
-  if (diffDays === 0) return i18n.t("chat.today", "Bugun");
-  if (diffDays === 1) return i18n.t("chat.yesterday", "Kecha");
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  const msgDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  
+  if (msgDate.getTime() === today.getTime()) return i18n.t("chat.today", "Bugun");
+  if (msgDate.getTime() === yesterday.getTime()) return i18n.t("chat.yesterday", "Kecha");
+  
   return d.toLocaleDateString(i18n.language === 'uz' ? "uz-UZ" : (i18n.language === 'ru' ? "ru-RU" : "en-US"), {
     year: "numeric",
     month: "long",
@@ -50,47 +82,9 @@ function formatDateLabel(dateStr) {
   });
 }
 
-function groupMessagesByDate(m) {
-  if (!m || m.length === 0) return [];
-  // Sort messages to ensure chronological order for grouping
-  const sorted = [...m].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-
-  const groups = [];
-  let currentDate = null;
-  let currentGroup = null;
-
-  sorted.forEach((msg) => {
-    const label = formatDateLabel(msg.created_at);
-    if (label !== currentDate) {
-      currentDate = label;
-      currentGroup = {
-        date: label,
-        messages: [],
-        key: `group-${msg.created_at || Date.now()}-${label}`
-      };
-      groups.push(currentGroup);
-    }
-    currentGroup.messages.push(msg);
-  });
-  return groups;
-}
-
 function formatLastSeen(dateStr) {
-  if (!dateStr) return "";
-
-  const parsePresenceDate = (raw) => {
-    if (!raw) return null;
-    if (raw instanceof Date) return raw;
-    const s = String(raw).trim();
-    // PostgreSQL timestamp without timezone holatida UTC deb talqin qilamiz
-    if (!/[zZ]|[+\-]\d{2}:\d{2}$/.test(s)) {
-      return new Date(`${s.replace(" ", "T")}Z`);
-    }
-    return new Date(s);
-  };
-
-  const d = parsePresenceDate(dateStr);
-  if (isNaN(d.getTime())) return "";
+  const d = parseUTC(dateStr);
+  if (!d || isNaN(d.getTime())) return "";
 
   const now = new Date();
   const diffMs = now - d;
@@ -112,6 +106,31 @@ function getMsgText(msg) {
   if (typeof content === "string") return content;
   // If it's an object, try to find a text field
   return content?.content || content?.message || content?.text || content?.message_text || "";
+}
+
+function groupMessagesByDate(m) {
+  if (!m || m.length === 0) return [];
+  // Sort messages to ensure chronological order for grouping
+  const sorted = [...m].sort((a, b) => parseUTC(a.created_at) - parseUTC(b.created_at));
+
+  const groups = [];
+  let currentDate = null;
+  let currentGroup = null;
+
+  sorted.forEach((msg) => {
+    const label = formatDateLabel(msg.created_at);
+    if (label !== currentDate) {
+      currentDate = label;
+      currentGroup = {
+        date: label,
+        messages: [],
+        key: `group-${msg.created_at || Date.now()}-${label}`
+      };
+      groups.push(currentGroup);
+    }
+    currentGroup.messages.push(msg);
+  });
+  return groups;
 }
 
 // ── Avatar ───────────────────────────────────────────────
@@ -608,7 +627,7 @@ export default function ChatDetail() {
       setMessages((prev) => {
         const exists = prev.some(m =>
           String(m.id) === String(msg.id) ||
-          (m.content && msg.content && m.content === msg.content && String(m.sender_id) === String(msg.sender_id) && Math.abs(new Date(m.created_at) - new Date(msg.created_at)) < 5000)
+          (m.content && msg.content && m.content === msg.content && String(m.sender_id) === String(msg.sender_id) && Math.abs(parseUTC(m.created_at) - parseUTC(msg.created_at)) < 15000)
         );
         if (exists) return prev;
 

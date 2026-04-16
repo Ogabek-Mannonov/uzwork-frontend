@@ -15,9 +15,27 @@ function avatarSrc(url) {
   return `${BACKEND}${url}`;
 }
 
+const parseUTC = (raw) => {
+  if (!raw) return null;
+  if (raw instanceof Date) return raw;
+  let s = String(raw).trim();
+  if (!s) return null;
+  // Z bilan tugasa yoki +/-05:00 kabi offset bo'lsa, uni boricha o'qiymiz
+  const hasTZ = /[zZ]$/.test(s) || /[+\-]\d{2}(:?\d{2})?$/.test(s);
+  if (!hasTZ) {
+    s = s.replace(" ", "T");
+    if (!s.includes("Z")) s += "Z";
+  }
+  const d = new Date(s);
+  if (isNaN(d.getTime())) {
+    return new Date(String(raw).trim());
+  }
+  return d;
+};
+
 function formatTime(dateStr) {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
+  const d = parseUTC(dateStr);
+  if (!d) return "";
   const now = new Date();
   const diffMs = now - d;
   if (diffMs < 0) return "";
@@ -140,7 +158,7 @@ export default function ChatPage() {
         }
 
         // To make the most recently updated chat jump to top:
-        updated.sort((a, b) => new Date(b.last_message_at || b.chat_created_at) - new Date(a.last_message_at || a.chat_created_at));
+        updated.sort((a, b) => parseUTC(b.last_message_at || b.chat_created_at) - parseUTC(a.last_message_at || a.chat_created_at));
 
         return updated;
       });
