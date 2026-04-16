@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   User,
   Settings as SettingsIcon,
@@ -10,6 +11,7 @@ import {
   FileText,
   Link,
   AlertTriangle,
+  ShieldCheck,
   ChevronRight,
   Search,
   Menu,
@@ -66,33 +68,66 @@ import {
   Heart,
   Bookmark,
   Flag,
-  MoreHorizontal
+  MoreHorizontal,
+  Zap,
+  XCircle,
+  Share2
 } from "lucide-react";
 import "../Client/css/klient.css";
-import { getMyProfile, updateMyProfile } from "../../api/common";
+import { 
+  getMyProfile, 
+  updateMyProfile, 
+  uploadImage, 
+  getSecuritySettings,
+  getNotifications
+} from "../../api/common";
+import { 
+  getBalance, 
+  getCards, 
+  addCard, 
+  deleteCard, 
+  getPayments 
+} from "../../api/payments";
+import { changePassword } from "../../api/auth";
+
+const BACKEND = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
+
+function avatarSrc(url) {
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+  return `${BACKEND}${cleanUrl}`;
+}
 
 const Settings = () => {
-  const [activeSection, setActiveSection] = useState("my-info");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sectionParam = searchParams.get("section") || "my-info";
+  const [activeSection, setActiveSection] = useState(sectionParam);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  // const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (sectionParam) {
+      setActiveSection(sectionParam);
+    }
+  }, [sectionParam]);
+  const [darkMode, setDarkMode] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
-  // const [searchQuery, setSearchQuery] = useState("");
-  // const [notifications, setNotifications] = useState(3);
-  // const [activeHeaderTab, setActiveHeaderTab] = useState("hire");
-  // const [showUserMenu, setShowUserMenu] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [notifications, setNotifications] = useState(3);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
-  // useEffect(() => {
-  //   if (darkMode) {
-  //     document.body.classList.add('dark-mode');
-  //   } else {
-  //     document.body.classList.remove('dark-mode');
-  //   }
-  // }, [darkMode]);
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [darkMode]);
 
   useEffect(() => {
     if (message.text) {
@@ -102,37 +137,6 @@ const Settings = () => {
       return () => clearTimeout(timer);
     }
   }, [message]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const profileRes = await getMyProfile();
-        if (profileRes?.data) {
-          const u = profileRes.data.user || {};
-          const p = profileRes.data.profile || {};
-          setUserData(prev => ({
-            ...prev,
-            name: u.first_name || "",
-            fullName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || "",
-            username: u.username ? `@${u.username}` : "",
-            email: u.email || "",
-            phone: u.phone || "",
-            location: p.location || "",
-            company: p.company_name || "",
-            companyDetails: p.company_description || "",
-            bio: p.bio || "",
-            profilePicture: p.avatar_url || u.avatar_url || "",
-            accountType: u.role || "",
-          }));
-        }
-      } catch (err) {
-        console.error(err);
-      }
-      setIsLoading(false);
-    };
-    fetchData();
-  }, []);
 
   const [userData, setUserData] = useState({
     name: "",
@@ -157,6 +161,92 @@ const Settings = () => {
     activeJobs: 3,
     rating: 4.9
   });
+
+  const [editingSection, setEditingSection] = useState(null); // 'name', 'bio', 'contact'
+  const [editFormData, setEditFormData] = useState({});
+  const [billingMethods, setBillingMethods] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [securityData, setSecurityData] = useState(null);
+  const [showAddCardModal, setShowAddCardModal] = useState(false);
+  const [newCardData, setNewCardData] = useState({ number: "", holder: "", expiry: "", cvc: "" });
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const profileRes = await getMyProfile();
+      if (profileRes?.data) {
+        const u = profileRes.data.user || {};
+        const p = profileRes.data.profile || {};
+        setUserData(prev => ({
+          ...prev,
+          name: u.first_name || "",
+          fullName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || "",
+          username: u.username ? `@${u.username}` : "",
+          email: u.email || "",
+          phone: u.phone || "",
+          location: p.location || "",
+          company: p.company_name || "",
+          companyDetails: p.company_description || "",
+          bio: p.company_description || p.bio || "",
+          profilePicture: p.avatar_url || u.avatar_url || "",
+          coverPhoto: p.cover_url || "",
+          accountType: u.role || "",
+          // Backend Stats (Real data integration)
+          totalSpent: p.total_spent || 0,
+          completedJobs: p.jobs_posted_count || p.completed_jobs || 0,
+          activeJobs: p.active_jobs_count || p.active_jobs || 0,
+          rating: parseFloat(p.rating || u.rating || 0),
+          membership: p.membership_tier || "Client Basic"
+        }));
+      }
+
+      // Fetch Balance
+      const balanceRes = await getBalance();
+      if (balanceRes?.success) {
+        setUserData(prev => ({
+          ...prev,
+          availableBalance: balanceRes.data.balance || 0,
+        }));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchSectionData = async (section) => {
+    if (!section) return;
+    setIsLoading(true);
+    try {
+      switch(section) {
+        case 'billing':
+          const [cardsRes, transRes] = await Promise.all([getCards(), getPayments()]);
+          if (cardsRes?.success) setBillingMethods(cardsRes.data || []);
+          if (transRes?.success) setTransactions(transRes.data || []);
+          break;
+        case 'password':
+          const securityRes = await getSecuritySettings();
+          if (securityRes?.success) {
+            setSecurityData(securityRes.data);
+            setActiveSessions(securityRes.data.activeSessions || []);
+          }
+          break;
+        default:
+          break;
+      }
+    } catch (err) {
+      console.error(`Error fetching data for ${section}:`, err);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchSectionData(activeSection);
+  }, [activeSection]);
 
   const navSections = [
     {
@@ -187,20 +277,20 @@ const Settings = () => {
   //   showMessage("info", `Navigating to ${headerNav.find(item => item.id === id).label}...`);
   // };
 
-  // const handleSearch = (e) => {
-  //   e.preventDefault();
-  //   if (searchQuery.trim()) {
-  //     showMessage("info", `Searching for "${searchQuery}"...`);
-  //   }
-  // };
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      showMessage("info", `Searching for "${searchQuery}"...`);
+    }
+  };
 
-  // const handleNotificationClick = () => {
-  //   setNotifications(0);
-  //   showMessage("success", "All notifications marked as read");
-  // };
+  const handleNotificationClick = () => {
+    setNotifications(0);
+    showMessage("success", "All notifications marked as read");
+  };
 
   const handleUserMenuClick = (action) => {
-    // setShowUserMenu(false);
+    setShowUserMenu(false);
     showMessage("info", `${action} clicked`);
   };
 
@@ -208,67 +298,7 @@ const Settings = () => {
     setMessage({ type, text });
   };
 
-  const notificationSettings = [
-    {
-      category: "Job Opportunities",
-      settings: [
-        { id: "job_alerts", label: "Job alerts", description: "Get notified about new jobs matching your skills", enabled: true },
-        { id: "proposal_updates", label: "Proposal updates", description: "Updates on your job proposals", enabled: true },
-        { id: "client_messages", label: "Client messages", description: "Direct messages from clients", enabled: true }
-      ]
-    },
-    {
-      category: "Account Activity",
-      settings: [
-        { id: "login_alerts", label: "Login alerts", description: "Get notified of new sign-ins to your account", enabled: true },
-        { id: "payment_updates", label: "Payment updates", description: "Payment confirmations and receipts", enabled: true },
-        { id: "security_alerts", label: "Security alerts", description: "Important security notifications", enabled: true }
-      ]
-    },
-    {
-      category: "Marketing",
-      settings: [
-        { id: "newsletter", label: "Newsletter", description: "Receive our monthly newsletter", enabled: false },
-        { id: "promotions", label: "Promotions", description: "Special offers and promotions", enabled: false },
-        { id: "tips", label: "Tips & resources", description: "Helpful tips and resources", enabled: true }
-      ]
-    }
-  ];
-
-  const billingMethods = [
-    { id: 1, type: "visa", last4: "4242", exp: "12/25", default: true },
-    { id: 2, type: "bank", account: "**** 1234", bank: "Kapital Bank", default: false }
-  ];
-
-  const transactions = [
-    {
-      id: 1,
-      project: "E-commerce Website Development",
-      freelancer: "Alisher E.",
-      date: "Jan 15, 2024",
-      amount: 1200,
-      type: "payment",
-      status: "completed"
-    },
-    {
-      id: 2,
-      project: "Mobile App UI Design",
-      freelancer: "Nilufar A.",
-      date: "Jan 10, 2024",
-      amount: 850,
-      type: "payment",
-      status: "completed"
-    },
-    {
-      id: 3,
-      project: "Logo Design",
-      freelancer: "Jasur M.",
-      date: "Jan 5, 2024",
-      amount: 350,
-      type: "payment",
-      status: "completed"
-    }
-  ];
+  // Constants
 
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -287,12 +317,20 @@ const Settings = () => {
 
   const [securitySettings, setSecuritySettings] = useState([
     { 
-      id: "2fa", 
-      label: "Two-factor authentication", 
-      description: "Add an extra layer of security to your account", 
+      id: "two_factor", 
+      label: "Two-step verification", 
+      description: "Add an extra layer of security to your account by requiring a code from your phone", 
+      enabled: false,
+      icon: <ShieldCheck size={20} />,
+      color: "#3b82f6"
+    },
+    { 
+      id: "biometric", 
+      label: "Biometric login", 
+      description: "Use your fingerprint or face recognition to log in quickly and securely", 
       enabled: false,
       icon: <Fingerprint size={20} />,
-      color: "#3b82f6"
+      color: "#ec4899"
     },
     { 
       id: "login_notify", 
@@ -303,20 +341,29 @@ const Settings = () => {
       color: "#10b981"
     },
     { 
-      id: "device_management", 
-      label: "Device management", 
-      description: "Manage and review devices that have access to your account", 
-      enabled: true,
-      icon: <Smartphone size={20} />,
-      color: "#8b5cf6"
-    },
-    { 
       id: "password_expiry", 
       label: "Password expiry", 
       description: "Require password change every 90 days for enhanced security", 
       enabled: false,
       icon: <Clock size={20} />,
       color: "#f59e0b"
+    }
+  ]);
+
+  const [notificationSettings, setNotificationSettings] = useState([
+    {
+      category: "Jobs & Proposals",
+      settings: [
+        { id: "proposal_received", label: "New proposal received", description: "Notify when a freelancer submits a proposal to your job", enabled: true },
+        { id: "proposal_withdrawn", label: "Proposal withdrawn", description: "Notify when a freelancer withdraws their proposal", enabled: false }
+      ]
+    },
+    {
+      category: "Payments & Billing",
+      settings: [
+        { id: "payment_success", label: "Payment successful", description: "Confirm when a payment has been processed correctly", enabled: true },
+        { id: "invoice_ready", label: "Invoice ready", description: "Notify when a new invoice is available for download", enabled: true }
+      ]
     }
   ]);
 
@@ -438,27 +485,40 @@ const Settings = () => {
     }
     
     setIsLoading(true);
-    
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const res = await changePassword({
+        current_password: passwordForm.currentPassword,
+        new_password: passwordForm.newPassword,
+        confirm_password: passwordForm.confirmPassword
+      });
+
+      if (res?.success === false) throw new Error(res.error || res.message);
+
       showMessage("success", "Password updated successfully!");
       setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
       setPasswordValidations({ length: false, uppercase: false, lowercase: false, number: false, special: false, match: false });
-    } catch {
-      showMessage("error", "Failed to update password. Please try again.");
+    } catch (err) {
+      showMessage("error", err.message || "Failed to update password. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const toggleSecuritySetting = (id) => {
-    setSecuritySettings(prev =>
-      prev.map(setting =>
-        setting.id === id ? { ...setting, enabled: !setting.enabled } : setting
-      )
-    );
-    const setting = securitySettings.find(s => s.id === id);
-    showMessage("success", `${setting.label} ${!setting.enabled ? 'enabled' : 'disabled'} successfully!`);
+  const handleToggleSecurity = (id) => {
+    setSecuritySettings(prev => prev.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s));
+    showMessage("success", "Security setting updated");
+    // TODO: Connect to updateSecuritySettings API
+  };
+
+  const handleToggleNotification = (catIdx, settingId) => {
+    setNotificationSettings(prev => {
+      const newSettings = [...prev];
+      const category = { ...newSettings[catIdx] };
+      category.settings = category.settings.map(s => s.id === settingId ? { ...s, enabled: !s.enabled } : s);
+      newSettings[catIdx] = category;
+      return newSettings;
+    });
+    showMessage("success", "Notification preference updated");
   };
 
   const handleRevokeSession = (sessionId) => {
@@ -470,41 +530,175 @@ const Settings = () => {
     showMessage("info", "2FA setup wizard will open...");
   };
 
-  const handleSaveProfile = async () => {
+  const handleSectionEdit = (section, initialData = {}) => {
+    setEditingSection(section);
+    setEditFormData({ ...userData, ...initialData });
+  };
+
+  const handleSectionCancel = () => {
+    setEditingSection(null);
+    setEditFormData({});
+  };
+
+  const handleSectionSave = async (section) => {
     setIsLoading(true);
     try {
-      const payload = {
-        first_name: userData.fullName.split(" ")[0] || userData.name,
-        last_name: userData.fullName.split(" ").slice(1).join(" ") || "",
-        phone: userData.phone,
-        location: userData.location,
-        bio: userData.bio,
-        company_name: userData.company,
-        company_description: userData.companyDetails
-      };
+      let payload = {};
+      
+      switch(section) {
+        case 'name':
+          // Ismni birinchi va oxirgi qismlarga ajratamiz (first_name, last_name)
+          const nameParts = editFormData.fullName.trim().split(' ');
+          payload = {
+            first_name: nameParts[0] || "",
+            last_name: nameParts.slice(1).join(' ') || ""
+          };
+          break;
+        case 'bio':
+          payload = { 
+            company_name: editFormData.company,
+            company_description: editFormData.bio 
+          };
+          break;
+        case 'contact':
+          payload = {
+            location: editFormData.location,
+            phone: editFormData.phone,
+            timezone: editFormData.timezone
+          };
+          break;
+        default:
+          payload = editFormData;
+      }
+
       const res = await updateMyProfile(payload);
       if (res?.success === false) throw new Error(res.error || res.message);
 
-      setIsEditing(false);
-      showMessage("success", "Profile updated successfully!");
+      // Ma'lumotlarni qayta yuklash
+      await fetchData();
+      
+      // LocalStorage ni yangilash (Header va boshqa joylar uchun)
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const updatedUser = { ...storedUser };
+      if (payload.first_name !== undefined) updatedUser.first_name = payload.first_name;
+      if (payload.last_name !== undefined) updatedUser.last_name = payload.last_name;
+      // Agar rasm ham yangilangan bo'lsa (buni fetchData qiladi, lekin biz zaxira qilamiz)
+      
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      window.dispatchEvent(new Event("authChange")); // Globallashgan ma'lumotlarni yangilash
+
+      setEditingSection(null);
+      showMessage("success", "Ma'lumotlar muvaffaqiyatli saqlandi!");
     } catch (err) {
-      showMessage("error", err.message || "Failed to update profile");
+      console.error("[Profile Update Error]:", err);
+      showMessage("error", err.message || "Ma'lumotlarni saqlashda xatolik yuz berdi");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // const toggleDarkMode = () => {
-  //   setDarkMode(!darkMode);
-  //   showMessage("success", `${!darkMode ? 'Dark' : 'Light'} mode activated`);
-  // };
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    showMessage("success", `${!darkMode ? 'Dark' : 'Light'} mode activated`);
+  };
 
   const passwordStrength = calculatePasswordStrength(passwordForm.newPassword);
 
+  const handleImageUpload = async (e, type) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Rasm hajmini va turini tekshirish (optional but good)
+    if (file.size > 5 * 1024 * 1024) {
+      showMessage("error", "Rasm hajmi 5MB dan kichik bo'lishi kerak");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file); // Must be 'file' instead of 'image' because multer on backend expects 'file'
+      formData.append("type", type); // 'avatar' or 'cover'
+
+      const res = await uploadImage(formData);
+      if (res?.success === false) throw new Error(res.message);
+
+      const imageUrl = res.data?.url || res.data?.avatar_url || res.data?.cover_url;
+      if (!imageUrl) throw new Error("Rasm manzili qaytarilmadi");
+
+      const payload = type === 'avatar' ? { avatar_url: imageUrl } : { cover_url: imageUrl };
+      const updateRes = await updateMyProfile(payload);
+      
+      if (updateRes?.success === false) throw new Error(updateRes.message || updateRes.error);
+
+      // Muvaffaqiyatli yuklangandan so'ng barcha ma'lumotlarni yangilash
+      await fetchData();
+
+      // LocalStorage avatarini yangilash
+      if (type === 'avatar') {
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        storedUser.avatar_url = imageUrl;
+        localStorage.setItem("user", JSON.stringify(storedUser));
+        window.dispatchEvent(new Event("authChange"));
+      }
+
+      showMessage("success", `${type === 'avatar' ? 'Profil rasmi' : 'Muqova'} muvaffaqiyatli yangilandi!`);
+    } catch (err) {
+      console.error("[Image Upload Error]:", err);
+      showMessage("error", err.message || "Rasmni yuklashda xatolik yuz berdi");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddBillingMethod = () => {
+    setShowAddCardModal(true);
+  };
+
+  const submitNewCard = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      // Mock payload Construction
+      const payload = {
+        number: newCardData.number.replace(/\s/g, ''),
+        holder: newCardData.holder,
+        expiry: newCardData.expiry,
+        cvc: newCardData.cvc
+      };
+      
+      const res = await addCard(payload);
+      if (res?.success === false) throw new Error(res.message);
+
+      showMessage("success", "New payment method added!");
+      setShowAddCardModal(false);
+      setNewCardData({ number: "", holder: "", expiry: "", cvc: "" });
+      fetchSectionData('billing');
+    } catch (err) {
+      showMessage("error", err.message || "Failed to add card");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteBillingMethod = async (id) => {
+    setIsLoading(true);
+    try {
+      const res = await deleteCard(id);
+      if (res?.success === false) throw new Error(res.message);
+      showMessage("success", "Card removed successfully");
+      fetchSectionData('billing');
+    } catch (err) {
+      showMessage("error", err.message || "Failed to remove card");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSectionChange = (id, label) => {
-    setActiveSection(id);
+    setSearchParams({ section: id });
     setShowMobileMenu(false);
-    showMessage("info", `Opening ${label}...`);
+    showMessage("info", `Opening ${label || id}...`);
   };
 
   return (
@@ -625,55 +819,9 @@ const Settings = () => {
       </header> */}
 
       {/* MAIN CONTENT */}
-      <div className="settings-main">
+      <div className="settings-main no-sidebar">
         
-        <aside className={`settings-sidebar ${showMobileMenu ? 'open' : ''}`}>
-          <div className="cl-sidebar-header">
-            <h2>Settings</h2>
-            <button 
-              className="close-sidebar"
-              onClick={() => setShowMobileMenu(false)}
-              aria-label="Close sidebar"
-            >
-              <X size={18} />
-            </button>
-          </div>
-          
-          <nav className="sidebar-nav">
-            {navSections.map((section, idx) => (
-              <div key={idx} className="nav-section">
-                <h3 className="section-title">{section.title}</h3>
-                <ul className="nav-list">
-                  {section.items.map(item => (
-                    <li key={item.id}>
-                      <button
-                        className={`cl-nav-link ${activeSection === item.id ? 'active' : ''}`}
-                        onClick={() => handleSectionChange(item.id, item.label)}
-                      >
-                        <span className="nav-icon">{item.icon}</span>
-                        <span className="nav-label">{item.label}</span>
-                        {item.badge && <span className="nav-badge">{item.badge}</span>}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </nav>
-          
-          <div className="sidebar-footer">
-            <button className="sidebar-footer-btn" onClick={() => handleUserMenuClick("Help & Support")}>
-              <HelpCircle size={16} />
-              Help & Support
-            </button>
-            <button className="sidebar-footer-btn" onClick={() => handleUserMenuClick("Sign Out")}>
-              <LogOut size={16} />
-              Sign Out
-            </button>
-          </div>
-        </aside>
-
-        <main className="settings-content">
+        <main className="settings-content-full">
           
           {message.text && (
             <div className={`message-banner ${message.type}`}>
@@ -687,261 +835,288 @@ const Settings = () => {
             </div>
           )}
 
-          {/* MY INFO SECTION */}
           {activeSection === "my-info" && (
-            <div className="content-section">
-              <div className="section-header">
-                <div className="header-left">
-                  <h1 className="section-title">My Info</h1>
-                  <span className="section-badge">
-                    <User size={14} />
-                    Personal Information
-                  </span>
-                </div>
+            <div className="content-section soft-fade-in" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+              <div className="section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                <h1 className="section-title" style={{ margin: 0, textTransform: 'uppercase', fontSize: '24px', lineHeight: '1', display: 'flex', alignItems: 'center', color: '#1e293b' }}>
+                  MENING MA'LUMOTLARIM
+                </h1>
                 <button 
-                  className={`edit-btn ${isEditing ? 'editing' : ''}`}
-                  onClick={() => setIsEditing(!isEditing)}
+                  className="view-profile-btn"
+                  onClick={() => window.open(`/profile/me`, '_blank')}
+                  style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 20px', borderRadius: '24px' }}
                 >
-                  {isEditing ? (
-                    <><X size={16} />Cancel</>
-                  ) : (
-                    <><Edit size={16} />Edit Profile</>
-                  )}
+                  <Eye size={16} /> Ochiq profilda ko'rish
                 </button>
               </div>
-              
-              <div className="profile-card">
+
+              <div className="profile-card soft-fade-in stagger-1">
                 <div className="profile-cover">
-                  <img src={userData.coverPhoto} alt="Cover" className="cover-image" />
-                  {isEditing && (
-                    <button className="change-cover-btn" onClick={() => handleUserMenuClick("Change cover")}>
-                      <Camera size={15} /> Change Cover
-                    </button>
-                  )}
+                  <span className="section-badge" style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 10, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', padding: '6px 16px', borderRadius: '20px', fontWeight: '700', fontSize: '12px' }}>
+                    <ShieldCheck size={14} style={{ marginRight: '6px' }} /> TASDIQLANGAN MIJOZ
+                  </span>
+                  <img src={avatarSrc(userData.coverPhoto) || "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1400"} alt="Cover" className="cover-image" />
+                  <button className="change-cover-btn" onClick={() => document.getElementById('cover-upload-input').click()}>
+                    <Camera size={15} /> Tahrirlash
+                  </button>
+                  <input type="file" id="cover-upload-input" style={{ display: 'none' }} accept="image/*" onChange={(e) => handleImageUpload(e, 'cover')} />
                 </div>
 
                 <div className="profile-content">
-                  <div className="profile-header-row-client">
-                    <div className="profile-left-client">
-                      <div className="avatar-wrapper">
-                        <img src={userData.profilePicture} alt="Profile" className="profile-avatar" />
-                        {isEditing && (
-                          <button className="change-avatar-btn" onClick={() => handleUserMenuClick("Change avatar")}>
-                            <Camera size={14} />
-                          </button>
-                        )}
-                        <span className="avatar-status online" />
-                      </div>
-                    </div>
-
-                    <div className="profile-center-client">
-                      <div className="profile-name-section-client">
-                        {isEditing ? (
-                          <input 
-                            type="text" 
-                            value={userData.fullName} 
-                            onChange={(e) => handleInputChange('fullName', e.target.value)} 
-                            className="edit-input name-edit-input" 
-                          />
-                        ) : (
-                          <h2 className="profile-fullname-client">{userData.fullName}</h2>
-                        )}
-                        
-                        {isEditing ? (
-                          <input 
-                            type="text" 
-                            value={userData.username} 
-                            onChange={(e) => handleInputChange('username', e.target.value)} 
-                            className="edit-input" 
-                            placeholder="@username" 
-                          />
-                        ) : (
-                          <p className="profile-username-client">{userData.username}</p>
-                        )}
-                        
-                        {isEditing ? (
-                          <input 
-                            type="text" 
-                            value={userData.company} 
-                            onChange={(e) => handleInputChange('company', e.target.value)} 
-                            className="edit-input" 
-                            placeholder="Company" 
-                          />
-                        ) : (
-                          <p className="profile-company-client">{userData.company}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="profile-right-client">
-                      <div className="profile-badges-row-client">
-                        <span
-                          className="profile-badge-item profile-badge-membership"
-                          onClick={() => handleSectionChange('membership', 'Membership')}
-                          title="Upgrade membership"
-                        >
-                          <Award size={14} />
-                          {userData.membership}
-                        </span>
-                        <span className="profile-badge-item profile-badge-verified">
-                          <CheckCircle size={14} />
-                          Verified
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="profile-bio-section-client">
-                    {isEditing ? (
-                      <textarea
-                        className="edit-textarea-bio-client"
-                        value={userData.bio}
-                        onChange={(e) => handleInputChange('bio', e.target.value)}
-                        rows={4}
-                        placeholder="Tell about yourself and your company..."
-                      />
-                    ) : (
-                      <div className="profile-bio-text-client">
-                        {userData.bio}
-                      </div>
-                    )}
-                    
-                    <div className="profile-meta-row-client">
-                      <span className="profile-meta-item-client">
-                        <MapPin size={14} />
-                        {userData.location}
-                      </span>
-                      <span className="profile-meta-item-client">
-                        <Star size={14} fill="currentColor" />
-                        {userData.rating} rating
-                      </span>
-                      <span className="profile-meta-item-client">
-                        <Briefcase size={14} />
-                        {userData.accountType}
-                      </span>
-                      <span className="profile-meta-item-client">
-                        <DollarSign size={14} />
-                        ${(userData.totalSpent / 1000).toFixed(1)}k spent
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="profile-stats">
-                    <div className="stat-item">
-                      <span className="stat-value">{userData.completedJobs}</span>
-                      <span className="stat-label">Jobs Posted</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-value">${(userData.totalSpent / 1000).toFixed(1)}k</span>
-                      <span className="stat-label">Total Spent</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-value">{userData.rating}</span>
-                      <span className="stat-label">Rating</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-value">{userData.activeJobs}</span>
-                      <span className="stat-label">Active</span>
-                    </div>
-                  </div>
-                  
-                  <div className="profile-details">
-                    <div className="details-grid">
-                      <div className="detail-item">
-                        <span className="detail-icon"><Mail size={16} /></span>
-                        <div className="detail-content">
-                          <span className="detail-label">Email</span>
-                          {isEditing ? (
-                            <input type="email" value={userData.email} onChange={(e) => handleInputChange('email', e.target.value)} className="edit-input" />
-                          ) : (
-                            <div className="detail-value-wrapper">
-                              <span className="detail-value">{userData.email}</span>
-                              <span className="verified-tag">Verified</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="detail-item">
-                        <span className="detail-icon"><Phone size={16} /></span>
-                        <div className="detail-content">
-                          <span className="detail-label">Phone</span>
-                          {isEditing ? (
-                            <input type="tel" value={userData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} className="edit-input" />
-                          ) : (
-                            <span className="detail-value">{userData.phone}</span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="detail-item">
-                        <span className="detail-icon"><MapPin size={16} /></span>
-                        <div className="detail-content">
-                          <span className="detail-label">Location</span>
-                          {isEditing ? (
-                            <input type="text" value={userData.location} onChange={(e) => handleInputChange('location', e.target.value)} className="edit-input" />
-                          ) : (
-                            <span className="detail-value">{userData.location}</span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="detail-item">
-                        <span className="detail-icon"><Globe size={16} /></span>
-                        <div className="detail-content">
-                          <span className="detail-label">Timezone</span>
-                          {isEditing ? (
-                            <select value={userData.timezone} onChange={(e) => handleInputChange('timezone', e.target.value)} className="edit-select">
-                              <option>GMT+5 (Tashkent)</option>
-                              <option>GMT+6 (Almaty)</option>
-                              <option>GMT+3 (Moscow)</option>
-                            </select>
-                          ) : (
-                            <span className="detail-value">{userData.timezone}</span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="detail-item">
-                        <span className="detail-icon"><Users size={16} /></span>
-                        <div className="detail-content">
-                          <span className="detail-label">Language</span>
-                          {isEditing ? (
-                            <select value={userData.language} onChange={(e) => handleInputChange('language', e.target.value)} className="edit-select">
-                              <option>English (US)</option>
-                              <option>Russian</option>
-                              <option>Uzbek</option>
-                            </select>
-                          ) : (
-                            <span className="detail-value">{userData.language}</span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="detail-item">
-                        <span className="detail-icon"><Building size={16} /></span>
-                        <div className="detail-content">
-                          <span className="detail-label">Company</span>
-                          {isEditing ? (
-                            <input type="text" value={userData.companyDetails} onChange={(e) => handleInputChange('companyDetails', e.target.value)} className="edit-input" />
-                          ) : (
-                            <span className="detail-value">{userData.companyDetails}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {isEditing && (
-                    <div className="profile-actions">
-                      <button className="btn-secondary" onClick={() => setIsEditing(false)}>Cancel</button>
-                      <button className="btn-primary" onClick={handleSaveProfile}>
-                        <Save size={16} />
-                        Save Changes
+                  <div className="profile-avatar-section">
+                    <div className="avatar-wrapper">
+                      <img src={avatarSrc(userData.profilePicture) || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300"} alt="Avatar" className="profile-avatar" />
+                      <button className="change-avatar-btn" onClick={() => document.getElementById('avatar-upload-input').click()}>
+                        <Camera size={14} />
                       </button>
+                      <input type="file" id="avatar-upload-input" style={{ display: 'none' }} accept="image/*" onChange={(e) => handleImageUpload(e, 'avatar')} />
+                      <span className="avatar-status online" />
                     </div>
-                  )}
+
+                    <div className="profile-name-section">
+                      {editingSection === 'name' ? (
+                        <div className="inline-edit-container" style={{ padding: '0 0 20px 0' }}>
+                          <input 
+                            type="text" 
+                            value={editFormData.fullName} 
+                            onChange={(e) => setEditFormData({...editFormData, fullName: e.target.value})} 
+                            className="inline-edit-input" 
+                            style={{ fontSize: '24px', fontWeight: '700', marginBottom: '12px' }}
+                            placeholder="To'liq ism"
+                          />
+                          <div className="inline-edit-actions">
+                            <button className="btn-cancel-inline" onClick={handleSectionCancel}>Bekor qilish</button>
+                            <button className="btn-save-inline" onClick={() => handleSectionSave('name')}>Saqlash</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="section-edit-trigger" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px' }} onClick={() => handleSectionEdit('name', { fullName: userData.fullName })}>
+                          <div>
+                            <h2 className="profile-fullname">{userData.fullName || "Mijoz Ismi"}</h2>
+                            <p style={{ color: '#64748b', margin: 0, fontSize: '16px' }}>{userData.email}</p>
+                          </div>
+                          <button className="tahrirlash-btn">
+                            <Edit size={14} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="profile-badges-row" style={{ marginTop: '60px' }}>
+                      <span className="profile-badge-item profile-badge-membership">
+                        <Award size={14} /> PREMIUM MIJOZ
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="profile-bio-section soft-fade-in stagger-2">
+                    {editingSection === 'bio' ? (
+                      <div className="inline-edit-container">
+                        <input 
+                          type="text" 
+                          value={editFormData.company} 
+                          onChange={(e) => setEditFormData({...editFormData, company: e.target.value})} 
+                          className="inline-edit-input" 
+                          style={{ marginBottom: '12px' }}
+                          placeholder="Kompaniya nomi"
+                        />
+                        <textarea 
+                          value={editFormData.bio} 
+                          onChange={(e) => setEditFormData({...editFormData, bio: e.target.value})} 
+                          className="inline-edit-textarea" 
+                          placeholder="Kompaniya haqida batafsil ma'lumot..."
+                        />
+                        <div className="inline-edit-actions" style={{ marginTop: '16px' }}>
+                          <button className="btn-cancel-inline" onClick={handleSectionCancel}>Bekor qilish</button>
+                          <button className="btn-save-inline" onClick={() => handleSectionSave('bio')}>Saqlash</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+                          <div>
+                            <span className="lux-label" style={{ display: 'block', marginBottom: '6px', fontSize: '11px', fontWeight: '700', color: '#64748b', letterSpacing: '1px' }}>KOMPANIYA NOMI</span>
+                            <div style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b' }}>{userData.company || userData.fullName}</div>
+                          </div>
+                          <button className="tahrirlash-btn" onClick={() => handleSectionEdit('bio', { company: userData.company, bio: userData.bio })}>
+                            <Edit size={14} />
+                          </button>
+                        </div>
+                        <div>
+                          <span className="lux-label" style={{ display: 'block', marginBottom: '8px', fontSize: '11px', fontWeight: '700', color: '#64748b', letterSpacing: '1px' }}>KOMPANIYA BIO</span>
+                          <div className="profile-bio-text">
+                            {userData.bio || "Kompaniya haqida ma'lumot kiritilmagan. Ma'lumot qo'shish uchun tahrirlash tugmasini bosing."}
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="profile-meta-row">
+                      <span className="profile-meta-item">
+                        <MapPin size={16} color="var(--blue)" /> {userData.location || "O'zbekiston"}
+                      </span>
+                      <span className="profile-meta-item">
+                        <Star size={16} color="#f59e0b" fill="#f59e0b" /> {userData.rating || "5.0"} MIJOZ REYTINGI
+                      </span>
+                      <span className="profile-meta-item" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => handleSectionEdit('contact', { phone: userData.phone, location: userData.location, timezone: userData.timezone })}>
+                        <Phone size={16} color="var(--blue)" /> {userData.phone || "+998 -- --- -- --"}
+                        <button className="tahrirlash-btn small">
+                          <Edit size={12} />
+                        </button>
+                      </span>
+                      {editingSection === 'contact' && (
+                        <div className="inline-edit-container" style={{ width: '100%', marginTop: '16px', background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                            <input type="text" value={editFormData.phone} onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})} className="inline-edit-input" placeholder="Telefon" />
+                            <input type="text" value={editFormData.location} onChange={(e) => setEditFormData({...editFormData, location: e.target.value})} className="inline-edit-input" placeholder="Manzil" />
+                          </div>
+                          <input type="text" value={editFormData.timezone} onChange={(e) => setEditFormData({...editFormData, timezone: e.target.value})} className="inline-edit-input" style={{ marginBottom: '12px' }} placeholder="Vaqt mintaqasi" />
+                          <div className="inline-edit-actions">
+                            <button className="btn-cancel-inline" onClick={handleSectionCancel}>Bekor qilish</button>
+                            <button className="btn-save-inline" onClick={() => handleSectionSave('contact')}>Saqlash</button>
+                          </div>
+                        </div>
+                      )}
+                      <span className="profile-meta-item">
+                        <Clock size={16} color="var(--blue)" /> {userData.timezone || "Tashkent (UTC+5)"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="unified-stats-grid soft-fade-in stagger-3">
+                    <div className="unified-stat-card">
+                      <span className="unified-stat-value">{userData.completedJobs || 0}</span>
+                      <span className="unified-stat-label">E'lonlar</span>
+                    </div>
+                    <div className="unified-stat-card">
+                      <span className="unified-stat-value">${(userData.totalSpent / 1000).toFixed(1)}k</span>
+                      <span className="unified-stat-label">Xarajatlar</span>
+                    </div>
+                    <div className="unified-stat-card">
+                      <span className="unified-stat-value">{userData.rating || "5.0"}</span>
+                      <span className="unified-stat-label">Reyting</span>
+                    </div>
+                    <div className="unified-stat-card">
+                      <span className="unified-stat-value">{userData.activeJobs || 0}</span>
+                      <span className="unified-stat-label">Aktiv</span>
+                    </div>
+                  </div>
                 </div>
+              </div>
+
+              {/* AI COMMAND CENTER - REIMAGINED */}
+              <div className="profile-card soft-fade-in stagger-4" style={{ 
+                padding: '32px', 
+                background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)', 
+                border: '1px dashed rgba(59, 130, 246, 0.4)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{ 
+                  position: 'absolute', 
+                  top: '-20px', 
+                  right: '-20px', 
+                  width: '100px', 
+                  height: '100px', 
+                  background: 'rgba(59, 130, 246, 0.05)', 
+                  borderRadius: '50%', 
+                  filter: 'blur(40px)' 
+                }} />
+                
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', position: 'relative', zIndex: 2 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{ 
+                      width: '44px', 
+                      height: '44px', 
+                      borderRadius: '12px', 
+                      background: 'var(--blue)', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      boxShadow: '0 8px 16px rgba(59, 130, 246, 0.2)'
+                    }}>
+                      <Zap size={22} color="white" />
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: '18px', fontWeight: '800', margin: 0, color: '#1e293b', letterSpacing: '-0.3px' }}>
+                        AI COMMAND CENTER
+                      </h3>
+                      <span style={{ fontSize: '11px', color: 'var(--blue)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        Privacy-First Intelligence
+                      </span>
+                    </div>
+                  </div>
+                  <button className="lux-btn-primary" style={{ 
+                    padding: '8px 24px', 
+                    fontSize: '13px', 
+                    borderRadius: '12px',
+                    background: 'white',
+                    color: 'var(--blue)',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
+                  }}>
+                    Boshqarish
+                  </button>
+                </div>
+                
+                <p style={{ 
+                  color: '#475569', 
+                  fontSize: '15px', 
+                  lineHeight: '1.7', 
+                  margin: 0, 
+                  maxWidth: '700px',
+                  position: 'relative',
+                  zIndex: 2
+                }}>
+                  Sizning barcha ma'lumotlaringiz xavfsiz holatda. <strong style={{color: '#1e293b'}}>Privacy Guard</strong> texnologiyasi orqali ma'lumotlaringiz sun'iy intellektni o'rgatish uchun foydalanilmaydi. Shaxsiy "Intelligence Mode" hozirda faollashtirilgan.
+                </p>
+              </div>
+
+              {/* ELITE ACTIONS FOOTER */}
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column',
+                alignItems: 'center', 
+                gap: '24px', 
+                marginTop: '64px', 
+                paddingBottom: '80px',
+                borderTop: '1px solid #f1f5f9',
+                paddingTop: '40px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                  <button className="footer-action-link" style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    color: '#94a3b8', 
+                    fontSize: '13px', 
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <XCircle size={14} /> Hisobni yopish
+                  </button>
+                  <div style={{ width: '4px', height: '4px', background: '#cbd5e1', borderRadius: '50%' }} />
+                  <button className="footer-action-link" style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    color: '#94a3b8', 
+                    fontSize: '13px', 
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <Share2 size={14} /> Egalikni o'tkazish
+                  </button>
+                </div>
+                <p style={{ color: '#cbd5e1', fontSize: '12px', fontWeight: '500' }}>
+                  UzWork © 2024 • Barcha huquqlar himoyalangan
+                </p>
               </div>
             </div>
           )}
@@ -993,63 +1168,61 @@ const Settings = () => {
               <div className="payment-methods">
                 <div className="section-subheader">
                   <h2>Payment Methods</h2>
-                  <button className="btn-outline" onClick={() => handleUserMenuClick("Add payment method")}>
+                  <button className="btn-outline" onClick={handleAddBillingMethod}>
                     <Plus size={16} />
                     Add Method
                   </button>
                 </div>
                 
                 <div className="methods-grid">
-                  {billingMethods.map(method => (
-                    <div key={method.id} className="method-card">
-                      <div className="method-header">
-                        {method.type === 'visa' ? (
-                          <div className="method-brand visa"><CreditCard size={24} /></div>
-                        ) : (
-                          <div className="method-brand bank"><Building size={24} /></div>
-                        )}
-                        {method.default && <span className="default-badge">Default</span>}
+                  {billingMethods.length > 0 ? (
+                    billingMethods.map(method => (
+                      <div key={method.id} className="method-card">
+                        <div className="method-header">
+                          {method.type === 'visa' || method.brand === 'visa' ? (
+                            <div className="method-brand visa"><CreditCard size={24} /></div>
+                          ) : (
+                            <div className="method-brand bank"><Building size={24} /></div>
+                          )}
+                          {method.default && <span className="default-badge">Default</span>}
+                        </div>
+                        <div className="method-body">
+                          <span className="method-number">•••• •••• •••• {method.last4}</span>
+                          <span className="method-expiry">Expires {method.exp || method.expiry}</span>
+                        </div>
+                        <div className="method-footer">
+                          <button className="method-action" onClick={() => handleDeleteBillingMethod(method.id)}>Remove</button>
+                        </div>
                       </div>
-                      <div className="method-body">
-                        {method.type === 'visa' ? (
-                          <>
-                            <span className="method-number">•••• •••• •••• {method.last4}</span>
-                            <span className="method-expiry">Expires {method.exp}</span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="method-bank">{method.bank}</span>
-                            <span className="method-account">Account {method.account}</span>
-                          </>
-                        )}
-                      </div>
-                      <div className="method-footer">
-                        <button className="method-action" onClick={() => handleUserMenuClick("Edit method")}>Edit</button>
-                        <button className="method-action" onClick={() => handleUserMenuClick("Remove method")}>Remove</button>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <div className="empty-state">No payment methods found.</div>
+                  )}
                 </div>
               </div>
               
               <div className="recent-transactions">
                 <div className="section-subheader">
                   <h2>Recent Transactions</h2>
-                  <button className="btn-link" onClick={() => handleUserMenuClick("View all transactions")}>View All</button>
+                  <button className="btn-link" onClick={() => fetchSectionData('billing')}>Refresh</button>
                 </div>
                 
                 <div className="transactions-list">
-                  {transactions.map(transaction => (
-                    <div key={transaction.id} className="transaction-item">
-                      <div className="transaction-icon"><Briefcase size={20} /></div>
-                      <div className="transaction-details">
-                        <h4>{transaction.project}</h4>
-                        <p>Paid to {transaction.freelancer} • {transaction.date}</p>
+                  {transactions.length > 0 ? (
+                    transactions.map(transaction => (
+                      <div key={transaction.id} className="transaction-item">
+                        <div className="transaction-icon"><Briefcase size={20} /></div>
+                        <div className="transaction-details">
+                          <h4>{transaction.project || transaction.title || "Payment"}</h4>
+                          <p>{transaction.date || transaction.created_at}</p>
+                        </div>
+                        <div className="transaction-amount">- ${transaction.amount}</div>
+                        <span className={`transaction-status ${transaction.status}`}>{transaction.status}</span>
                       </div>
-                      <div className="transaction-amount">- ${transaction.amount}</div>
-                      <span className="transaction-status completed">Completed</span>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <div className="empty-state">No transactions found.</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1155,7 +1328,7 @@ const Settings = () => {
 
                   <button type="submit" className="update-password-btn" disabled={isLoading}>
                     {isLoading ? (
-                      <><RefreshCw size={18} className="spinning" />Updating...</>
+                  <><RefreshCw size={18} className="spinning" />Updating...</>
                     ) : (
                       <><Save size={18} />Update Password</>
                     )}
@@ -1165,37 +1338,27 @@ const Settings = () => {
 
               <div className="security-settings-grid">
                 {securitySettings.map(setting => (
-                  <div key={setting.id} className="security-setting-card" style={{ borderColor: `${setting.color}30` }}>
-                    <div className="setting-header">
-                      <div className="setting-icon" style={{ backgroundColor: `${setting.color}15`, color: setting.color }}>
+                  <div key={setting.id} className="settings-item-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', backgroundColor: 'var(--card-bg)', border: '1px solid var(--light-border)', borderRadius: '12px', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <div className="item-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '42px', height: '42px', borderRadius: '10px', backgroundColor: `${setting.color}15`, color: setting.color }}>
                         {setting.icon}
                       </div>
-                      <div className="setting-info">
-                        <h3>{setting.label}</h3>
-                        <p>{setting.description}</p>
+                      <div className="item-info">
+                        <h3 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{setting.label}</h3>
+                        <p style={{ fontSize: '13px', color: 'var(--light-text-tertiary)', margin: 0 }}>{setting.description}</p>
                       </div>
                     </div>
-                    
-                    <div className="setting-footer">
-                      <div className="setting-status">
-                        <span className={`status-badge ${setting.enabled ? "enabled" : "disabled"}`}>
-                          {setting.enabled ? "Enabled" : "Disabled"}
-                        </span>
-                      </div>
-                      <label className="switch">
-                        <input type="checkbox" checked={setting.enabled} onChange={() => toggleSecuritySetting(setting.id)} />
-                        <span className="slider"></span>
-                      </label>
-                    </div>
-
-                    {setting.id === "2fa" && !setting.enabled && (
-                      <button className="enable-2fa-btn" onClick={handleEnable2FA}>
-                        <Shield size={14} />
-                        Set up 2FA
-                      </button>
-                    )}
+                    <label className="switch">
+                      <input 
+                        type="checkbox" 
+                        checked={setting.enabled} 
+                        onChange={() => handleToggleSecurity(setting.id)} 
+                      />
+                      <span className="slider"></span>
+                    </label>
                   </div>
                 ))}
+              </div>
 
                 <div className="security-tip-card">
                   <AlertTriangle size={20} />
@@ -1204,7 +1367,6 @@ const Settings = () => {
                     <p>Enable two-factor authentication to add an extra layer of security to your account.</p>
                   </div>
                 </div>
-              </div>
 
               <div className="sessions-card">
                 <div className="sessions-header">
@@ -1377,7 +1539,11 @@ const Settings = () => {
                             <p>{setting.description}</p>
                           </div>
                           <label className="switch">
-                            <input type="checkbox" checked={setting.enabled} onChange={() => handleUserMenuClick(`Toggle ${setting.label}`)} />
+                            <input 
+                              type="checkbox" 
+                              checked={setting.enabled} 
+                              onChange={() => handleToggleNotification(idx, setting.id)} 
+                            />
                             <span className="slider"></span>
                           </label>
                         </div>
@@ -1391,18 +1557,79 @@ const Settings = () => {
                 <h2>Delivery Preferences</h2>
                 <div className="preferences-options">
                   <label className="preference-option">
-                    <input type="checkbox" defaultChecked onChange={() => handleUserMenuClick("Toggle email notifications")} />
+                    <input type="checkbox" defaultChecked onChange={() => handleToggleNotification(0, 'all_email')} />
                     <span>Email notifications</span>
                   </label>
                   <label className="preference-option">
-                    <input type="checkbox" defaultChecked onChange={() => handleUserMenuClick("Toggle push notifications")} />
+                    <input type="checkbox" defaultChecked onChange={() => handleToggleNotification(0, 'all_push')} />
                     <span>Push notifications</span>
                   </label>
-                  <label className="preference-option">
-                    <input type="checkbox" onChange={() => handleUserMenuClick("Toggle SMS notifications")} />
-                    <span>SMS notifications</span>
-                  </label>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* ADD CARD MODAL */}
+          {showAddCardModal && (
+            <div className="modal-overlay">
+              <div className="modal-content card-modal">
+                <div className="modal-header">
+                  <h2>Add Payment Method</h2>
+                  <button className="close-modal" onClick={() => setShowAddCardModal(false)}>
+                    <X size={20} />
+                  </button>
+                </div>
+                <form onSubmit={submitNewCard} className="add-card-form">
+                  <div className="form-group">
+                    <label>Card Number</label>
+                    <input 
+                      type="text" 
+                      placeholder="0000 0000 0000 0000" 
+                      value={newCardData.number}
+                      onChange={(e) => setNewCardData({...newCardData, number: e.target.value})}
+                      maxLength={19}
+                      required
+                    />
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Expiry Date</label>
+                      <input 
+                        type="text" 
+                        placeholder="MM/YY" 
+                        value={newCardData.expiry}
+                        onChange={(e) => setNewCardData({...newCardData, expiry: e.target.value})}
+                        maxLength={5}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>CVC</label>
+                      <input 
+                        type="text" 
+                        placeholder="***" 
+                        value={newCardData.cvc}
+                        onChange={(e) => setNewCardData({...newCardData, cvc: e.target.value})}
+                        maxLength={3}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Card Holder Name</label>
+                    <input 
+                      type="text" 
+                      placeholder="John Doe" 
+                      value={newCardData.holder}
+                      onChange={(e) => setNewCardData({...newCardData, holder: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="btn-primary w-full" disabled={isLoading}>
+                    {isLoading ? <RefreshCw size={18} className="spinning" /> : <Save size={18} />}
+                    Add Payment Method
+                  </button>
+                </form>
               </div>
             </div>
           )}

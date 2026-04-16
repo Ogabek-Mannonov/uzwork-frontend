@@ -4,7 +4,8 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Sun, Moon, Menu, X, ChevronDown, Globe,
   Bell, HelpCircle, Settings, User, Search, Check,
-  FileText, CreditCard, Shield, Award, AlertTriangle, LogOut
+  FileText, CreditCard, Shield, Award, AlertTriangle, LogOut,
+  RefreshCw, Users
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useThemeContext } from "../Theme/ThemeContext";
@@ -337,17 +338,33 @@ function AuthHeader({ i18n, changeLanguage, user }) {
     return () => { document.body.style.overflow = ""; };
   }, [drawerOpen]);
 
-  const links = useMemo(() => [
-    { to: "/find-work", label: t("navbar.findWork") },
-    { to: "/my-jobs",   label: t("navbar.myJobs") },
-    { to: "/proposals", label: t("navbar.proposals") },
-    { to: "/reports",   label: t("navbar.reports") },
-    { to: "/messages",  label: t("navbar.messages") },
-  ], [t]);
+  const isClient = user?.role === "client";
+
+  const links = useMemo(() => {
+    if (isClient) {
+      return [
+        { to: "/client/talent", label: t("navbar.findTalent") || "Talent qidirish" },
+        { to: "/client/my-jobs", label: t("navbar.myJobs") || "Mening ishlarim" },
+        { to: "/proposals",     label: t("navbar.proposals") || "Takliflar" },
+        { to: "/messages",      label: t("navbar.messages") || "Xabarlar" },
+      ];
+    }
+    return [
+      { to: "/find-work", label: t("navbar.findWork") },
+      { to: "/my-jobs",   label: t("navbar.myJobs") },
+      { to: "/proposals", label: t("navbar.proposals") },
+      { to: "/reports",   label: t("navbar.reports") },
+      { to: "/messages",  label: t("navbar.messages") },
+    ];
+  }, [t, isClient]);
 
   const handleProfileNav = (section) => {
     setProfileOpen(false);
-    navigate(`/profile?section=${section}`);
+    if (isClient) {
+      navigate(`/profile/client?section=${section}`);
+    } else {
+      navigate(`/profile?section=${section}`);
+    }
   };
 
   const handleLogout = () => {
@@ -358,6 +375,15 @@ function AuthHeader({ i18n, changeLanguage, user }) {
         navigate("/login");
       });
     });
+  };
+
+  const handleSwitchRole = () => {
+    setProfileOpen(false);
+    const newRole = isClient ? "freelancer" : "client";
+    const updatedUser = { ...user, role: newRole };
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+    window.dispatchEvent(new Event("authChange"));
+    navigate(newRole === "client" ? "/client/landing" : "/find-work");
   };
 
   return (
@@ -382,7 +408,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
           <div className="nav__center">
             <div className="search" ref={jobsRef}>
               <span className="search__icon"><Search size={15} /></span>
-              <input className="search__input" placeholder={t("navbar.findWork") + "..."} />
+              <input className="search__input" placeholder={isClient ? "Talent qidirish..." : t("navbar.findWork") + "..."} />
               <span className="search__divider" />
               <button type="button" className="search__btn" onClick={() => setJobsOpen(v => !v)}>
                 Jobs <ChevronDown size={14} className={`search__btn-chevron${jobsOpen ? " open" : ""}`} />
@@ -421,28 +447,63 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                   boxShadow: "0 10px 25px rgba(0,0,0,0.1)", padding: "8px"
                 }}>
                   <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border, #e2e8f0)", marginBottom: "8px" }}>
-                    <span style={{ fontWeight: 600, fontSize: "14px", display: "block", color: "var(--text)" }}>Sozlamalar</span>
+                    <span style={{ fontWeight: 600, fontSize: "14px", display: "block", color: "var(--text)" }}>
+                      {isClient ? "Mijoz sozlamalari" : "Sozlamalar"}
+                    </span>
                   </div>
-                  {[
-                    { id: "my-info", label: "Mening ma'lumotlarim", icon: <User size={14} /> },
-                    { id: "cv-upload", label: "CV Yuklash", icon: <FileText size={14} /> },
-                    { id: "billing", label: "To'lovlar", icon: <CreditCard size={14} /> },
-                    { id: "password", label: "Parol va Xavfsizlik", icon: <Shield size={14} /> },
-                    { id: "membership", label: "A'zolik", icon: <Award size={14} /> },
-                    { id: "notifications", label: "Xabarnoma sozlamalari", icon: <Bell size={14} /> },
-                    { id: "appeals", label: "Shikoyatlar markazi", icon: <AlertTriangle size={14} /> }
-                  ].map(item => (
-                    <button key={item.id} onClick={() => handleProfileNav(item.id)} style={{
-                      display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "10px 12px",
-                      background: "none", border: "none", borderRadius: "6px", cursor: "pointer",
-                      fontSize: "14px", color: "var(--text, #1e293b)", textDecoration: "none", transition: "0.2s"
-                    }} onMouseOver={e => e.currentTarget.style.background = "var(--bg, #f1f5f9)"}
-                       onMouseOut={e => e.currentTarget.style.background = "none"}>
-                      <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary, #64748b)' }}>{item.icon}</span>
-                      {item.label}
-                    </button>
-                  ))}
+                  {isClient ? (
+                    // CLIENT MENU ITEMS
+                    [
+                      { id: "my-info", label: "Mening ma'lumotlarim", icon: <User size={14} /> },
+                      { id: "billing", label: "To'lovlar va hisob-kitob", icon: <CreditCard size={14} /> },
+                      { id: "password", label: "Parol va xavfsizlik", icon: <Shield size={14} /> },
+                      { id: "teams", label: "Jamoalar va a'zolar", icon: <Users size={14} /> },
+                      { id: "membership", label: "A'zolik", icon: <Award size={14} /> },
+                      { id: "notifications", label: "Bildirishnoma sozlamalari", icon: <Bell size={14} /> },
+                      { id: "tax", label: "Soliq ma'lumotlari", icon: <FileText size={14} /> },
+                      { id: "appeals", label: "Shikoyatlar markazi", icon: <AlertTriangle size={14} /> }
+                    ].map(item => (
+                      <button key={item.id} onClick={() => handleProfileNav(item.id)} style={{
+                        display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "10px 12px",
+                        background: "none", border: "none", borderRadius: "6px", cursor: "pointer",
+                        fontSize: "14px", color: "var(--text, #1e293b)", textDecoration: "none", transition: "0.2s"
+                      }} onMouseOver={e => e.currentTarget.style.background = "var(--bg, #f1f5f9)"}
+                         onMouseOut={e => e.currentTarget.style.background = "none"}>
+                        <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary, #64748b)' }}>{item.icon}</span>
+                        {item.label}
+                      </button>
+                    ))
+                  ) : (
+                    // FREELANCER MENU ITEMS
+                    [
+                      { id: "my-info", label: "Mening ma'lumotlarim", icon: <User size={14} /> },
+                      { id: "cv-upload", label: "CV Yuklash", icon: <FileText size={14} /> },
+                      { id: "billing", label: "To'lovlar", icon: <CreditCard size={14} /> },
+                      { id: "password", label: "Parol va Xavfsizlik", icon: <Shield size={14} /> },
+                      { id: "membership", label: "A'zolik", icon: <Award size={14} /> },
+                      { id: "notifications", label: "Xabarnoma sozlamalari", icon: <Bell size={14} /> },
+                      { id: "appeals", label: "Shikoyatlar markazi", icon: <AlertTriangle size={14} /> }
+                    ].map(item => (
+                      <button key={item.id} onClick={() => handleProfileNav(item.id)} style={{
+                        display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "10px 12px",
+                        background: "none", border: "none", borderRadius: "6px", cursor: "pointer",
+                        fontSize: "14px", color: "var(--text, #1e293b)", textDecoration: "none", transition: "0.2s"
+                      }} onMouseOver={e => e.currentTarget.style.background = "var(--bg, #f1f5f9)"}
+                         onMouseOut={e => e.currentTarget.style.background = "none"}>
+                        <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary, #64748b)' }}>{item.icon}</span>
+                        {item.label}
+                      </button>
+                    ))
+                  )}
                   <div style={{ margin: "8px 0", borderTop: "1px solid var(--border, #e2e8f0)" }}></div>
+                  <button onClick={handleSwitchRole} style={{
+                    display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "10px 12px",
+                    background: "var(--bg, #f1f5f9)", border: "none", borderRadius: "6px", cursor: "pointer",
+                    fontSize: "14px", color: "var(--blue)", fontWeight: 600, transition: "0.2s"
+                  }} onMouseOver={e => e.currentTarget.style.background = "var(--blue-light, #dbeafe)"} onMouseOut={e => e.currentTarget.style.background = "var(--bg, #f1f5f9)"}>
+                    <span style={{ display: 'flex', alignItems: 'center' }}><RefreshCw size={14} /></span>
+                    {isClient ? "Freelancer rejimiga o'tish" : "Mijoz rejimiga o'tish"}
+                  </button>
                   <button onClick={() => handleProfileNav("help")} style={{
                     display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "10px 12px",
                     background: "none", border: "none", borderRadius: "6px", cursor: "pointer",
@@ -495,10 +556,13 @@ function AuthHeader({ i18n, changeLanguage, user }) {
             <button className="drawer-icon-row" onClick={toggle}>
               {isDark ? <Sun size={16} /> : <Moon size={16} />} {isDark ? "Light mode" : "Dark mode"}
             </button>
-            <button className="drawer-icon-row"><Bell size={16} /> Notifications</button>
-            <button className="drawer-icon-row"><HelpCircle size={16} /> Help</button>
-            <button className="drawer-icon-row"><Settings size={16} /> Settings</button>
-            <button className="drawer-icon-row"><User size={16} /> Profile</button>
+            <button className="drawer-icon-row" onClick={() => { setDrawerOpen(false); /* notifications logic */ }}><Bell size={16} /> Notifications</button>
+            <button className="drawer-icon-row" onClick={() => { setDrawerOpen(false); navigate("/help"); }}><HelpCircle size={16} /> Help</button>
+            <button className="drawer-icon-row" onClick={() => { setDrawerOpen(false); handleProfileNav("my-info"); }}><Settings size={16} /> Settings</button>
+            <button className="drawer-icon-row" onClick={() => { setDrawerOpen(false); navigate(isClient ? "/profile/client" : "/profile"); }}><User size={16} /> Profile</button>
+            <button className="drawer-icon-row" onClick={handleSwitchRole} style={{ color: "var(--blue)", fontWeight: 600 }}>
+              <RefreshCw size={16} /> {isClient ? "Switch to Freelancer" : "Switch to Client"}
+            </button>
           </div>
         </div>
       </div>

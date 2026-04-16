@@ -334,6 +334,25 @@ export const resetPassword = async (payload) => {
   }
 };
 
+/* ===================== ✅ CHANGE PASSWORD ===================== */
+
+/**
+ * Change password for logged in user:
+ * payload: { current_password, new_password, confirm_password }
+ */
+export const changePassword = async (payload) => {
+  try {
+    const res = await api.put("/auth/change-password", payload);
+    return unwrap(res);
+  } catch (err) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Change-password request failed";
+    return { success: false, message: msg };
+  }
+};
+
 /* ===================================================================== */
 
 export default api;
