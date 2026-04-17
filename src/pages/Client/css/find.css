@@ -686,3 +686,63 @@ body { font-family: var(--ft-font); color: var(--ft-text); background: var(--ft-
   .ft-results-top { flex-direction: column; align-items: stretch; }
   .ft-sort-select { margin-left: 0; }
 }
+
+/* ============================================================
+   DARK MODE OVERRIDES
+   ============================================================ */
+body.dark-mode {
+  --ft-blue:          #60a5fa;
+  --ft-blue-dark:     #3b82f6;
+  --ft-blue-soft:     rgba(59, 130, 246, 0.15);
+  --ft-blue-light:    rgba(59, 130, 246, 0.05);
+  --ft-blue-border:   rgba(96, 165, 250, 0.2);
+  --ft-blue-glow:     rgba(59, 130, 246, 0.25);
+
+  --ft-green:         #34d399;
+  --ft-green-soft:    rgba(16, 185, 129, 0.15);
+  --ft-yellow:        #fbbf24;
+  --ft-yellow-soft:   rgba(245, 158, 11, 0.15);
+  --ft-purple:        #a78bfa;
+  --ft-purple-soft:   rgba(139, 92, 246, 0.15);
+  --ft-red:           #f87171;
+  --ft-red-soft:      rgba(239, 68, 68, 0.15);
+
+  --ft-text:          var(--text);
+  --ft-text-2:        var(--text-2);
+  --ft-text-3:        var(--muted);
+  --ft-text-4:        #64748b;
+
+  --ft-border:        var(--border);
+  --ft-border-2:      rgba(255, 255, 255, 0.05);
+  --ft-surface:       var(--surface);
+  --ft-bg:            var(--bg);
+  --ft-bg-2:          var(--surface-2);
+
+  --ft-shadow-xs:     0 1px 2px rgba(0,0,0,.3);
+  --ft-shadow-sm:     0 2px 6px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.2);
+  --ft-shadow-md:     0 6px 20px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.3);
+  --ft-shadow-lg:     0 16px 48px rgba(0,0,0,.6), 0 4px 12px rgba(0,0,0,.4);
+  --ft-shadow-blue:   0 6px 20px rgba(59,130,246,.15);
+}
+
+body.dark-mode .ft-page {
+  background: var(--ft-bg);
+}
+
+body.dark-mode .ft-insights {
+  background: var(--ft-bg-2);
+  border-color: var(--ft-border);
+}
+
+body.dark-mode .ft-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .ft-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-mode .ft-location-select,
+body.dark-mode .ft-sort-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
