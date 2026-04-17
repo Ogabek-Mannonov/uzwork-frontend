@@ -324,6 +324,11 @@ function AuthHeader({ i18n, changeLanguage, user }) {
   const profileRef = useRef(null);
   const navigate = useNavigate();
 
+  const isClient = user?.role === "client";
+
+  const [searchValue, setSearchValue] = useState("");
+  const [searchCat, setSearchCat] = useState(isClient ? "Talent" : "Jobs");
+
   useEffect(() => {
     const h = (e) => { 
       if (jobsRef.current && !jobsRef.current.contains(e.target)) setJobsOpen(false); 
@@ -338,15 +343,15 @@ function AuthHeader({ i18n, changeLanguage, user }) {
     return () => { document.body.style.overflow = ""; };
   }, [drawerOpen]);
 
-  const isClient = user?.role === "client";
+
 
   const links = useMemo(() => {
     if (isClient) {
       return [
-        { to: "/client/talent", label: t("navbar.findTalent") || "Talent qidirish" },
-        { to: "/client/my-jobs", label: t("navbar.myJobs") || "Mening ishlarim" },
-        { to: "/proposals",     label: t("navbar.proposals") || "Takliflar" },
-        { to: "/messages",      label: t("navbar.messages") || "Xabarlar" },
+        { to: "/client/talent", label: t("navbar.findTalent") },
+        { to: "/client/my-jobs", label: t("navbar.myJobs") },
+        { to: "/proposals",     label: t("navbar.proposals") },
+        { to: "/messages",      label: t("navbar.messages") },
       ];
     }
     return [
@@ -357,6 +362,28 @@ function AuthHeader({ i18n, changeLanguage, user }) {
       { to: "/messages",  label: t("navbar.messages") },
     ];
   }, [t, isClient]);
+
+  const handleSearch = (e) => {
+    if (e.key === "Enter" || e.type === "click") {
+      if (!searchValue.trim()) return;
+      
+      const q = encodeURIComponent(searchValue.trim());
+      if (searchCat === "Talent") {
+        navigate(`/client/talent?q=${q}`);
+      } else if (searchCat === "Jobs") {
+        navigate(`/find-work?q=${q}`);
+      } else {
+        navigate(`/jobs?q=${q}`);
+      }
+      setJobsOpen(false);
+    }
+  };
+
+  const categories = [
+    { key: "Jobs",     label: t("navbar.searchJobs") },
+    { key: "Talent",   label: t("navbar.searchTalent") },
+    { key: "Projects", label: t("navbar.searchProjects") }
+  ];
 
   const handleProfileNav = (section) => {
     setProfileOpen(false);
@@ -407,16 +434,24 @@ function AuthHeader({ i18n, changeLanguage, user }) {
 
           <div className="nav__center">
             <div className="search" ref={jobsRef}>
-              <span className="search__icon"><Search size={15} /></span>
-              <input className="search__input" placeholder={isClient ? "Talent qidirish..." : t("navbar.findWork") + "..."} />
+              <span className="search__icon" onClick={handleSearch} style={{ cursor: "pointer" }}><Search size={15} /></span>
+              <input 
+                className="search__input" 
+                placeholder={isClient ? t("navbar.findTalent") + "..." : t("navbar.findWork") + "..."} 
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onKeyDown={handleSearch}
+              />
               <span className="search__divider" />
               <button type="button" className="search__btn" onClick={() => setJobsOpen(v => !v)}>
-                Jobs <ChevronDown size={14} className={`search__btn-chevron${jobsOpen ? " open" : ""}`} />
+                {categories.find(c => c.key === searchCat)?.label} <ChevronDown size={14} className={`search__btn-chevron${jobsOpen ? " open" : ""}`} />
               </button>
               {jobsOpen && (
                 <div className="dropdown">
-                  {["Jobs", "Talent", "Projects"].map(item => (
-                    <button key={item} className="dropdown__item" onClick={() => setJobsOpen(false)}>{item}</button>
+                  {categories.map(cat => (
+                    <button key={cat.key} className="dropdown__item" onClick={() => { setSearchCat(cat.key); setJobsOpen(false); }}>
+                      {cat.label}
+                    </button>
                   ))}
                 </div>
               )}
