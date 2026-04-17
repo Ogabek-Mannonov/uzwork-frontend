@@ -10,6 +10,7 @@ import {
 import "../Client/css/find.css";
 import { getFreelancers } from "../../api/freelancer";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 /* ================================================================
    MOCK DATA
@@ -19,12 +20,12 @@ import { useEffect } from "react";
    ================================================================ */
 
 const BADGE_OPTIONS = [
-  { id: "top_rated_plus", label: "Top Rated Plus", icon: "🏆", bg: "#fef9c3", color: "#d97706" },
-  { id: "top_rated",      label: "Top Rated",      icon: "⭐", bg: "#dbeafe", color: "#2563eb" },
-  { id: "rising_talent",  label: "Rising Talent",  icon: "📈", bg: "#d1fae5", color: "#059669" },
+  { id: "top_rated_plus", icon: "🏆", bg: "#fef9c3", color: "#d97706" },
+  { id: "top_rated",      icon: "⭐", bg: "#dbeafe", color: "#2563eb" },
+  { id: "rising_talent",  icon: "📈", bg: "#d1fae5", color: "#059669" },
 ];
 
-const SUCCESS_RATES = ["60% & up", "70% & up", "80% & up", "90% & up"];
+const SUCCESS_RATES = ["60", "70", "80", "90"];
 const HOURLY_BARS   = [90,60,40,30,20,15,10,8,6,5,4,3,3,2,2,1];
 
 /* ================================================================
@@ -60,6 +61,7 @@ const FtFilterSection = ({ title, info, children, defaultOpen = true }) => {
    FREELANCER CARD
    ================================================================ */
 const FtFreelancerCard = ({ fl, onInvite }) => {
+  const { t } = useTranslation();
   const [invited, setInvited] = useState(false);
   const [liked,   setLiked]   = useState(false);
 
@@ -89,7 +91,7 @@ const FtFreelancerCard = ({ fl, onInvite }) => {
             <div className="ft-card-name-row">
               <span className="ft-card-name">{fl.name}</span>
               {fl.boosted && (
-                <span className="ft-boosted"><Zap size={11} /> Boosted</span>
+                <span className="ft-boosted"><Zap size={11} /> {t("findTalent.card.boosted")}</span>
               )}
             </div>
             <div className="ft-card-title">{fl.title}</div>
@@ -102,13 +104,13 @@ const FtFreelancerCard = ({ fl, onInvite }) => {
             <button
               className={`ft-heart-btn ${liked ? "liked" : ""}`}
               onClick={() => setLiked(l => !l)}
-              title="Save freelancer">
+              title={t("findTalent.card.save")}>
               <Heart size={17} fill={liked ? "currentColor" : "none"} />
             </button>
             <button
               className={`ft-invite-btn ${invited ? "invited" : ""}`}
               onClick={handleInvite}>
-              {invited ? <><Check size={14} /> Invited</> : "Invite to job"}
+              {invited ? <><Check size={14} /> {t("findTalent.card.invited")}</> : t("findTalent.card.invite")}
             </button>
           </div>
         </div>
@@ -119,17 +121,17 @@ const FtFreelancerCard = ({ fl, onInvite }) => {
           <span className="ft-stat-sep" />
           <span className={`ft-success-badge ${successClass}`}>
             {fl.jobSuccess >= 95
-              ? <><span style={{ fontSize: 13 }}>👑</span> {fl.jobSuccess}% Job Success</>
-              : <><Star size={12} fill="currentColor" /> {fl.jobSuccess}% Job Success</>
+              ? <><span style={{ fontSize: 13 }}>👑</span> {fl.jobSuccess}% {t("findTalent.card.success")}</>
+              : <><Star size={12} fill="currentColor" /> {fl.jobSuccess}% {t("findTalent.card.success")}</>
             }
           </span>
           <span className="ft-stat-sep" />
-          <span className="ft-stat">{fl.earned} earned</span>
+          <span className="ft-stat">{fl.earned} {t("findTalent.card.earned")}</span>
           {fl.consults && (
             <>
               <span className="ft-stat-sep" />
               <span className="ft-consult-badge">
-                <span style={{ fontSize: 13 }}>🎯</span> Offers consultations
+                <span style={{ fontSize: 13 }}>🎯</span> {t("findTalent.card.consults")}
               </span>
             </>
           )}
@@ -151,11 +153,11 @@ const FtFreelancerCard = ({ fl, onInvite }) => {
             <div className="ft-insights-hd">
               <div className="ft-insights-title">
                 <span style={{ fontSize: 14 }}>💡</span>
-                Insights about {fl.name.split(" ")[0]}
-                <span className="ft-filter-hd-info" title="AI-generated insights">?</span>
+                {t("findTalent.card.insights", { name: fl.name.split(" ")[0] })}
+                <span className="ft-filter-hd-info" title={t("findTalent.card.insightsInfo")}>?</span>
               </div>
               <div className="ft-insights-feedback">
-                Insight feedback
+                {t("findTalent.card.feedback")}
                 <button className="ft-thumb-btn"><ThumbsUp size={13} /></button>
                 <button className="ft-thumb-btn"><ThumbsDown size={13} /></button>
               </div>
@@ -173,7 +175,7 @@ const FtFreelancerCard = ({ fl, onInvite }) => {
               {fl.assoc.initials}
             </div>
             <div className="ft-assoc-text">
-              <div className="ft-assoc-by">Associated with</div>
+              <div className="ft-assoc-by">{t("findTalent.card.associatedWith")}</div>
               <div className="ft-assoc-name">{fl.assoc.name}</div>
             </div>
             <div>
@@ -187,9 +189,9 @@ const FtFreelancerCard = ({ fl, onInvite }) => {
       {/* Card footer */}
       <div className="ft-card-divider" />
       <div className="ft-card-footer">
-        <button className="ft-card-footer-link">View Profile</button>
-        <button className="ft-card-footer-link">Send Message</button>
-        <button className="ft-card-footer-link">Save</button>
+        <button className="ft-card-footer-link">{t("findTalent.card.viewProfile")}</button>
+        <button className="ft-card-footer-link">{t("findTalent.card.sendMessage")}</button>
+        <button className="ft-card-footer-link">{t("findTalent.card.saveAction")}</button>
       </div>
     </div>
   );
@@ -199,6 +201,7 @@ const FtFreelancerCard = ({ fl, onInvite }) => {
    MAIN PAGE
    ================================================================ */
 const FindTalent = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -236,12 +239,12 @@ const FindTalent = () => {
           return {
             id: item.id,
             avatar: item.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.first_name || "U")}&background=random`,
-            name: `${item.first_name || "Mutaxassis"} ${item.last_name || ""}`.trim(),
+            name: `${item.first_name || t("findTalent.card.mutaxassis")} ${item.last_name || ""}`.trim(),
             title: item.title || "Freelancer",
-            rate: item.hourly_rate ? `$${item.hourly_rate}/hr` : "Kelishiladi",
+            rate: item.hourly_rate ? `$${item.hourly_rate}/hr` : t("findTalent.card.negotiable"),
             jobSuccess: item.rating || 0,
-            earned: item.completed_jobs ? `${item.completed_jobs} ta topshirilgan` : "Yangi frilanser",
-            location: item.location || "O'zbekiston",
+            earned: item.completed_jobs ? `${item.completed_jobs} ${t("findTalent.card.jobsDone")}` : t("findTalent.card.newFreelancer"),
+            location: item.location || t("findTalent.nations.uz"),
             skills: Array.isArray(item.skills) ? item.skills : [],
             bio: item.bio || "",
             online: item.availability_status === 'available',
@@ -257,7 +260,7 @@ const FindTalent = () => {
       }
     };
     fetch();
-  }, [search, location, minRate, maxRate, successRate]);
+  }, [search, location, minRate, maxRate, successRate, t]);
 
   // Sync search from URL
   useEffect(() => {
@@ -276,7 +279,7 @@ const FindTalent = () => {
   const clearFilters = () => {
     setBadges([]); setMinRate(10); setMaxRate(150);
     setLocation(""); setSuccessRate("");
-    notify("Filters cleared!");
+    notify("Filtrlar tozalandi!");
   };
 
   const shown = freelancers;
@@ -295,7 +298,7 @@ const FindTalent = () => {
         <button
           className="ft-back-btn"
           onClick={() => navigate("/client/home")}
-          title="Back to Dashboard">
+          title="Bosh sahifaga qaytish">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6"/>
@@ -307,13 +310,13 @@ const FindTalent = () => {
           <input
             className="ft-search-input"
             type="text"
-            placeholder="Search for a skill or name"
+            placeholder={t("findTalent.results.searchPlaceholder")}
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-        <button className="ft-advanced-link">Advanced search</button>
-        <span className="ft-result-count">{shown.length} freelancers found</span>
+        <button className="ft-advanced-link">{t("findTalent.results.advancedSearch")}</button>
+        <span className="ft-result-count">{t("findTalent.results.freelancersFound", { count: shown.length })}</span>
       </div>
 
       <div className="ft-body">
@@ -323,18 +326,18 @@ const FindTalent = () => {
 
           <div className="ft-sidebar-hd">
             <div className="ft-sidebar-hd-title">
-              <SlidersHorizontal size={15} /> Filters
+              <SlidersHorizontal size={15} /> {t("findTalent.filter.title")}
               {activeFilterCount > 0 && (
                 <span className="ft-filter-count">{activeFilterCount}</span>
               )}
             </div>
             {activeFilterCount > 0 && (
-              <button className="ft-sidebar-clear" onClick={clearFilters}>Clear all</button>
+              <button className="ft-sidebar-clear" onClick={clearFilters}>{t("findTalent.filter.clearAll")}</button>
             )}
           </div>
 
           {/* Talent Badge */}
-          <FtFilterSection title="Talent badge" info="Badges awarded based on performance">
+          <FtFilterSection title={t("findTalent.filter.talentBadge")} info={t("findTalent.filter.talentBadgeInfo")}>
             {BADGE_OPTIONS.map(b => (
               <label key={b.id}
                 className={`ft-check-item ${badges.includes(b.id) ? "checked" : ""}`}
@@ -345,7 +348,7 @@ const FindTalent = () => {
                 <div className="ft-check-badge-wrap">
                   <div className="ft-badge-icon" style={{ background: b.bg }}>{b.icon}</div>
                   <span className="ft-check-label" style={{ color: badges.includes(b.id) ? b.color : undefined }}>
-                    {b.label}
+                    {t(`findTalent.badges.${b.id}`)}
                   </span>
                 </div>
               </label>
@@ -353,7 +356,7 @@ const FindTalent = () => {
           </FtFilterSection>
 
           {/* Hourly Rate */}
-          <FtFilterSection title="Hourly rate">
+          <FtFilterSection title={t("findTalent.filter.hourlyRate")}>
             <div className="ft-rate-chart">
               {HOURLY_BARS.map((h, i) => {
                 const pct = i / HOURLY_BARS.length;
@@ -365,7 +368,7 @@ const FindTalent = () => {
               })}
             </div>
             <div className="ft-rate-range">
-              <span>under ${minRate}</span>
+              <span>{t("findTalent.filter.under", { min: minRate })}</span>
               <span>${maxRate}+</span>
             </div>
             <input
@@ -383,28 +386,28 @@ const FindTalent = () => {
               <div className="ft-rate-input-wrap">
                 <span>$</span>
                 <input className="ft-rate-input" type="number" value={maxRate}
-                  onChange={e => setMaxRate(Number(e.target.value))} placeholder="Max" />
+                  onChange={e => setMaxRate(Number(e.target.value))} placeholder="Maks" />
               </div>
             </div>
           </FtFilterSection>
 
           {/* Location */}
-          <FtFilterSection title="Location">
+          <FtFilterSection title={t("findTalent.filter.location")}>
             <select className="ft-location-select"
               value={location} onChange={e => setLocation(e.target.value)}>
-              <option value="">City, country or region</option>
-              <option value="Uzbekistan">Uzbekistan</option>
-              <option value="Tashkent">Tashkent</option>
-              <option value="Samarkand">Samarkand</option>
-              <option value="Bukhara">Bukhara</option>
-              <option value="Kazakhstan">Kazakhstan</option>
-              <option value="Kyrgyzstan">Kyrgyzstan</option>
-              <option value="Remote">Remote (Any)</option>
+              <option value="">{t("findTalent.filter.searchLocation")}</option>
+              <option value="Uzbekistan">{t("findTalent.nations.uz")}</option>
+              <option value="Tashkent">{t("findTalent.nations.tashkent")}</option>
+              <option value="Samarkand">{t("findTalent.nations.samarkand")}</option>
+              <option value="Bukhara">{t("findTalent.nations.bukhara")}</option>
+              <option value="Kazakhstan">{t("findTalent.nations.kz")}</option>
+              <option value="Kyrgyzstan">{t("findTalent.nations.kg")}</option>
+              <option value="Remote">{t("findTalent.nations.remote")}</option>
             </select>
           </FtFilterSection>
 
           {/* Job Success */}
-          <FtFilterSection title="Job success" info="Minimum job success score">
+          <FtFilterSection title={t("findTalent.filter.jobSuccess")} info={t("findTalent.filter.jobSuccessInfo")}>
             {SUCCESS_RATES.map(r => (
               <label key={r}
                 className={`ft-check-item ${successRate === r.split("%")[0] ? "checked" : ""}`}
@@ -414,24 +417,30 @@ const FindTalent = () => {
                 <div className="ft-checkbox">
                   <Check size={10} className="ft-check-tick" />
                 </div>
-                <span className="ft-check-label">{r}</span>
+                <span className="ft-check-label">{t("findTalent.filter.successUp", { percent: r })}</span>
               </label>
             ))}
           </FtFilterSection>
 
           {/* English Level */}
-          <FtFilterSection title="English level" defaultOpen={false}>
-            {["Any level","Basic","Conversational","Fluent","Native"].map(l => (
-              <label key={l} className="ft-check-item">
+          <FtFilterSection title={t("findTalent.filter.englishLevel")} defaultOpen={false}>
+            {[
+              { id: "any", label: t("findTalent.englishLevels.any") },
+              { id: "basic", label: t("findTalent.englishLevels.basic") },
+              { id: "conversational", label: t("findTalent.englishLevels.conversational") },
+              { id: "fluent", label: t("findTalent.englishLevels.fluent") },
+              { id: "native", label: t("findTalent.englishLevels.native") }
+            ].map(l => (
+              <label key={l.id} className="ft-check-item">
                 <div className="ft-checkbox"><Check size={10} className="ft-check-tick" /></div>
-                <span className="ft-check-label">{l}</span>
+                <span className="ft-check-label">{l.label}</span>
               </label>
             ))}
           </FtFilterSection>
 
           {activeFilterCount > 0 && (
             <button className="ft-clear-btn" onClick={clearFilters}>
-              <X size={13} /> Clear all filters ({activeFilterCount})
+              <X size={13} /> {t("findTalent.filter.clearAllCount", { count: activeFilterCount })}
             </button>
           )}
         </aside>
@@ -442,7 +451,7 @@ const FindTalent = () => {
           <div className="ft-results-top">
             <button className="ft-filter-pill">
               <MapPin size={13} />
-              {location || "Location"}
+              {location || t("findTalent.results.location")}
               <ChevronDown size={12} />
             </button>
 
@@ -451,7 +460,7 @@ const FindTalent = () => {
               return (
                 <button key={b} className="ft-filter-pill active"
                   onClick={() => toggleBadge(b)}>
-                  {opt?.icon} {opt?.label} <X size={11} />
+                  {opt?.icon} {t(`findTalent.badges.${b}`)} <X size={11} />
                 </button>
               );
             })}
@@ -459,28 +468,28 @@ const FindTalent = () => {
             {successRate && (
               <button className="ft-filter-pill active"
                 onClick={() => setSuccessRate("")}>
-                ✅ {successRate}%+ success <X size={11} />
+                {t("findTalent.results.successCount", { percent: successRate })} <X size={11} />
               </button>
             )}
 
             <select className="ft-sort-select"
               value={sort} onChange={e => setSort(e.target.value)}>
-              <option value="relevance">Best Match</option>
-              <option value="rate_asc">Rate: Low to High</option>
-              <option value="rate_desc">Rate: High to Low</option>
-              <option value="success">Job Success</option>
-              <option value="earned">Most Earned</option>
+              <option value="relevance">{t("findTalent.results.sort.relevance")}</option>
+              <option value="rate_asc">{t("findTalent.results.sort.rate_asc")}</option>
+              <option value="rate_desc">{t("findTalent.results.sort.rate_desc")}</option>
+              <option value="success">{t("findTalent.results.sort.success")}</option>
+              <option value="earned">{t("findTalent.results.sort.earned")}</option>
             </select>
           </div>
 
           {loading ? (
-            <div className="ft-loading">Loading freelancers...</div>
+            <div className="ft-loading">{t("findTalent.results.loading")}</div>
           ) : shown.length > 0 ? (
             shown.map(fl => (
               <FtFreelancerCard
                 key={fl.id}
                 fl={fl}
-                onInvite={(name) => notify(`Invitation sent to ${name}!`)}
+                onInvite={(name) => notify(`${name} ga taklif yuborildi!`)}
               />
             ))
           ) : (
@@ -489,10 +498,10 @@ const FindTalent = () => {
                 <Search size={48} style={{ color: '#aaa', strokeWidth: 1.5, marginBottom: 16 }} />
               </div>
               <div className="ft-empty-title" style={{ fontSize: 20, fontWeight: 700, color: '#1a1a1a', marginBottom: 8 }}>
-                Hech qanday mutaxassis topilmadi
+                {t("findTalent.results.empty")}
               </div>
               <div className="ft-empty-sub" style={{ color: '#666', marginBottom: 24 }}>
-                Filtrlarni yoki qidiruv so'zini o'zgartirib ko'ring
+                {t("findTalent.results.emptySub")}
               </div>
               {activeFilterCount > 0 && (
                 <button 
@@ -507,7 +516,7 @@ const FindTalent = () => {
                   onMouseOver={(e) => e.target.style.backgroundColor = '#1d4ed8'}
                   onMouseOut={(e) => e.target.style.backgroundColor = '#2563eb'}
                 >
-                  Barcha filtrlarni tozalash ({activeFilterCount})
+                  {t("findTalent.filter.clearAllCount", { count: activeFilterCount })}
                 </button>
               )}
             </div>
@@ -516,8 +525,8 @@ const FindTalent = () => {
           {shown.length > 0 && (
             <div className="ft-load-more">
               <button className="ft-load-more-btn"
-                onClick={() => notify("Loading more freelancers...")}>
-                <RefreshCw size={15} /> Load more
+                onClick={() => notify(t("findTalent.results.loadingMore"))}>
+                <RefreshCw size={15} /> {t("findTalent.results.loadMore")}
               </button>
             </div>
           )}

@@ -1,4 +1,12 @@
 {
+  "findTalent": {
+    "badges": {"top_rated_plus": "Yuqori baholangan+","top_rated": "Yuqori baholangan","rising_talent": "Yangi iste'dod"},
+    "filter": {"title": "Filtrlar","clearAll": "Tozalash","clearAllCount": "Barcha filtrlarni tozalash ({{count}})","talentBadge": "Mutaxassis darajasi","talentBadgeInfo": "Natijalariga qarab berilgan yutuqlar","hourlyRate": "Soatlik ish haqi","under": "${{min}} dan kam","location": "Joylashuv","searchLocation": "Shahar, mamlakat yoki hudud","jobSuccess": "Muvaffaqiyat ko'rsatkichi","jobSuccessInfo": "Minimal ishdagi muvaffaqiyat foizi","successUp": "{{percent}}% va undan yuqori","englishLevel": "Ingliz tili darajasi"},
+    "results": {"searchPlaceholder": "Malaka yoki ism bo'yicha qidiring","advancedSearch": "Kengaytirilgan qidiruv","freelancersFound": "{{count}} ta mutaxassis topildi","location": "Joylashuv","successCount": "✅ {{percent}}%+ muvaffaqiyat","sort": {"relevance": "Eng mos tushadigan","rate_asc": "Narx: Arzondan Qimmatga","rate_desc": "Narx: Qimmatdan Arzonga","success": "Ishdagi muvaffaqiyat","earned": "Eng ko'p ishlagan"},"loading": "Mutaxassislar yuklanmoqda...","empty": "Hech qanday mutaxassis topilmadi","emptySub": "Filtrlarni yoki qidiruv so'zini o'zgartirib ko'ring","loadMore": "Yana yuklash","loadingMore": "Yana mutaxassislar yuklanmoqda..."},
+    "card": {"save": "Mutaxassisni saqlash","invited": "Taklif qilingan","invite": "Ishga taklif qilish","success": "Muvaffaqiyat","earned": "topilgan","consults": "Konsultatsiya beradi","insights": "{{name}} haqida qisqacha ma'lumot","insightsInfo": "AI tomonidan yozilgan ma'lumotlar","feedback": "Fikr-mulohaza bering","associatedWith": "Bilan bog'liq","viewProfile": "Profilni ko'rish","sendMessage": "Xabar yozish","saveAction": "Saqlash","boosted": "Tavsiya etilgan", "mutaxassis": "Mutaxassis", "negotiable": "Kelishiladi", "jobsDone": "ta topshirilgan", "newFreelancer": "Yangi frilanser"},
+    "nations": {"uz": "O'zbekiston","tashkent": "Toshkent","samarkand": "Samarqand","bukhara": "Buxoro","kz": "Qozog'iston","kg": "Qirg'iziston","remote": "Masofadan (Istalgan joy)"},
+    "englishLevels": {"any": "Istalgan daraja","basic": "Boshlang'ich","conversational": "So'zlashuvchi","fluent": "Erkin","native": "Ona tili"}
+  },
   "navbar": {
     "findWork": "Ish izlash",
     "savedJobs": "Saqlangan ishlar",

@@ -1,4 +1,12 @@
 {
+  "findTalent": {
+    "badges": {"top_rated_plus": "Top Rated Plus","top_rated": "Top Rated","rising_talent": "Rising Talent"},
+    "filter": {"title": "Filters","clearAll": "Clear all","clearAllCount": "Clear all filters ({{count}})","talentBadge": "Talent badge","talentBadgeInfo": "Badges awarded based on performance","hourlyRate": "Hourly rate","under": "under ${{min}}","location": "Location","searchLocation": "City, country or region","jobSuccess": "Job success","jobSuccessInfo": "Minimum job success score","successUp": "{{percent}}% & up","englishLevel": "English level"},
+    "results": {"searchPlaceholder": "Search for a skill or name","advancedSearch": "Advanced search","freelancersFound": "{{count}} freelancers found","location": "Location","successCount": "✅ {{percent}}%+ success","sort": {"relevance": "Best Match","rate_asc": "Rate: Low to High","rate_desc": "Rate: High to Low","success": "Job Success","earned": "Most Earned"},"loading": "Loading freelancers...","empty": "No freelancers found","emptySub": "Try adjusting your filters or search query","loadMore": "Load more","loadingMore": "Loading more freelancers..."},
+    "card": {"save": "Save freelancer","invited": "Invited","invite": "Invite to job","success": "Job Success","earned": "earned","consults": "Offers consultations","insights": "Insights about {{name}}","insightsInfo": "AI-generated insights","feedback": "Insight feedback","associatedWith": "Associated with","viewProfile": "View Profile","sendMessage": "Send Message","saveAction": "Save","boosted": "Boosted", "mutaxassis": "Specialist", "negotiable": "Negotiable", "jobsDone": "jobs done", "newFreelancer": "New freelancer"},
+    "nations": {"uz": "Uzbekistan","tashkent": "Tashkent","samarkand": "Samarkand","bukhara": "Bukhara","kz": "Kazakhstan","kg": "Kyrgyzstan","remote": "Remote (Any)"},
+    "englishLevels": {"any": "Any level","basic": "Basic","conversational": "Conversational","fluent": "Fluent","native": "Native"}
+  },
   "navbar": {
     "findWork": "Find Work",
     "savedJobs": "Saved Jobs",

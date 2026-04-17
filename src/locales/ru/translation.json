@@ -1,4 +1,12 @@
 {
+  "findTalent": {
+    "badges": {"top_rated_plus": "Высокий рейтинг+","top_rated": "Высокий рейтинг","rising_talent": "Восходящий талант"},
+    "filter": {"title": "Фильтры","clearAll": "Очистить все","clearAllCount": "Очистить все фильтры ({{count}})","talentBadge": "Уровень таланта","talentBadgeInfo": "Значки присуждаются на основе результатов","hourlyRate": "Почасовая ставка","under": "менее ${{min}}","location": "Локация","searchLocation": "Город, страна или регион","jobSuccess": "Успех работы","jobSuccessInfo": "Минимальный процент успеха","successUp": "{{percent}}% и выше","englishLevel": "Уровень английского"},
+    "results": {"searchPlaceholder": "Поиск по навыку или имени","advancedSearch": "Расширенный поиск","freelancersFound": "{{count}} специалистов найдено","location": "Локация","successCount": "✅ {{percent}}%+ успех","sort": {"relevance": "Наиболее подходящие","rate_asc": "Ставка: По возрастанию","rate_desc": "Ставка: По убыванию","success": "Успех работы","earned": "Наибольший заработок"},"loading": "Загрузка специалистов...","empty": "Специалисты не найдены","emptySub": "Попробуйте изменить фильтры или поисковый запрос","loadMore": "Загрузить больше","loadingMore": "Загрузка остальных..."},
+    "card": {"save": "Сохранить специалиста","invited": "Приглашен","invite": "Пригласить на работу","success": "Успех","earned": "заработано","consults": "Предлагает консультации","insights": "Информация о {{name}}","insightsInfo": "Сгенерировано ИИ","feedback": "Оценить","associatedWith": "Связан с","viewProfile": "Смотреть профиль","sendMessage": "Написать","saveAction": "Сохранить","boosted": "Продвигаемый", "mutaxassis": "Специалист", "negotiable": "Договорная", "jobsDone": "выполнено", "newFreelancer": "Новый фрилансер"},
+    "nations": {"uz": "Узбекистан","tashkent": "Ташкент","samarkand": "Самарканд","bukhara": "Бухара","kz": "Казахстан","kg": "Кыргызстан","remote": "Удаленно (Любой)"},
+    "englishLevels": {"any": "Любой уровень","basic": "Начальный","conversational": "Разговорный","fluent": "Свободный","native": "Как родной"}
+  },
   "navbar": {
     "findWork": "Найти работу",
     "savedJobs": "Сохранённые работы",
