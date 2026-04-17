@@ -788,15 +788,18 @@
 }
 
 .msg-reply-preview.received {
-  background: rgba(37, 99, 235, 0.05); /* Very light blue tint */
-  border-left-color: #2bb33f;      /* Telegram vibrant green */
+  background: rgba(37, 99, 235, 0.05);
+  /* Very light blue tint */
+  border-left-color: #2bb33f;
+  /* Telegram vibrant green */
 }
 
 /* Specific colors for Ogabek / Telegram style */
 .msg-reply-sender {
   font-size: 13px;
   font-weight: 700;
-  color: #2bb33f; /* Bright green sender name */
+  color: #2bb33f;
+  /* Bright green sender name */
   margin-bottom: 1px;
   white-space: nowrap;
   overflow: hidden;
@@ -809,7 +812,8 @@
 
 .msg-reply-text {
   font-size: 13px;
-  color: #555555; /* Darker grey for preview text */
+  color: #555555;
+  /* Darker grey for preview text */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -834,8 +838,15 @@
 }
 
 @keyframes slideInUp {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .reply-mode-content {
@@ -991,7 +1002,8 @@
   outline: none;
 }
 
-.emoji-toggle-btn:hover, .emoji-toggle-btn.active {
+.emoji-toggle-btn:hover,
+.emoji-toggle-btn.active {
   background: #ebf5ff;
   color: var(--accent, #3b82f6);
 }
@@ -1011,8 +1023,15 @@
 }
 
 @keyframes pickerFadeIn {
-  from { opacity: 0; transform: translateY(10px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .emoji-picker-container em-emoji-picker {
@@ -1031,6 +1050,7 @@
     left: 10px;
     right: 10px;
   }
+
   .emoji-picker-container em-emoji-picker {
     width: 100%;
   }
@@ -1041,11 +1061,11 @@
   align-items: flex-end;
   gap: 12px;
   background: #ffffff;
-  border: 1px solid #93c5fd; 
+  border: 1px solid #93c5fd;
   border-radius: 26px;
-  padding: 6px 16px; 
+  padding: 6px 16px;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .chat-input-wrapper:focus-within {
@@ -1862,6 +1882,7 @@
     transform: translateY(-100%);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -1918,13 +1939,25 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Translation Settings Dropdown ── */
@@ -2022,11 +2055,37 @@
   color: #569aff;
 }
 
+@keyframes translateFade {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+    /* Sal pastdan tepaga ko'tariladi */
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animated-translation {
+  animation: translateFade 0.5s ease forwards;
+  /* 0.5s = 500ms */
+  display: inline-block;
+}
+
 .check-mark {
   font-size: 12px;
 }
 
 @keyframes menuIn {
-  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

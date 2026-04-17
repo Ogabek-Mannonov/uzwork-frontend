@@ -13,7 +13,7 @@ import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/us
 import { Smile, Globe, Settings2, X } from "lucide-react";
 import i18n from "../../../i18n";
 import { useTranslation } from "react-i18next";
-import { translateToUzbek } from "../../../api/translate_service";
+import { translateToUzbek, translateBatchToUzbek } from "../../../api/translate_service";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 
@@ -36,14 +36,14 @@ const parseUTC = (raw) => {
 
   // Z bilan tugasa yoki +/-05:00, +/-0500 kabi offset bo'lsa, uni boricha o'qiymiz
   const hasTZ = /[zZ]$/.test(s) || /[+\-]\d{2}(:?\d{2})?$/.test(s);
-  
+
   if (!hasTZ) {
     // Agar TZ bo'lmasa, har doim UTC (Z) deb hisoblaymiz
     // Space o'rniga T qo'yamiz va oxiriga Z qo'shamiz
     s = s.replace(" ", "T");
     if (!s.includes("Z")) s += "Z";
   }
-  
+
   const d = new Date(s);
   // Agar Date noto'g'ri bo'lsa (Z qo'shilgach buzilsa), Z'siz o'qib ko'ramiz
   if (isNaN(d.getTime())) {
@@ -64,17 +64,17 @@ function formatMsgTime(dateStr) {
 function formatDateLabel(dateStr) {
   const d = parseUTC(dateStr);
   if (!d) return "";
-  
+
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  
+
   const msgDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  
+
   if (msgDate.getTime() === today.getTime()) return i18n.t("chat.today", "Bugun");
   if (msgDate.getTime() === yesterday.getTime()) return i18n.t("chat.yesterday", "Kecha");
-  
+
   return d.toLocaleDateString(i18n.language === 'uz' ? "uz-UZ" : (i18n.language === 'ru' ? "ru-RU" : "en-US"), {
     year: "numeric",
     month: "long",
@@ -348,6 +348,7 @@ function MessageBubble({
   onContextMenu,
   allMessages,
   translation,
+  allTranslations,
 }) {
   const isDeleted = !!msg.deleted_at;
   const isImage = msg.type === "image";
@@ -399,9 +400,17 @@ function MessageBubble({
           {repliedMsg && (
             <div className={`msg-reply-preview ${isOwnVal ? "sent" : "received"}`}>
               <div className="msg-reply-sender">{repliedSenderName}</div>
+              <div className="msg-reply-text">
+                {allTranslations?.[repliedMsg.id] || repliedPreview}
+              </div>
+            </div>
+          )
+          /* {repliedMsg && (
+            <div className={`msg-reply-preview ${isOwnVal ? "sent" : "received"}`}>
+              <div className="msg-reply-sender">{repliedSenderName}</div>
               <div className="msg-reply-text">{repliedPreview}</div>
             </div>
-          )}
+          )} */}
 
           {isDeleted ? (
             <span className="msg-deleted">🚫 {i18n.t("chat.msgDeleted", "Xabar o'chirildi")}</span>
@@ -423,16 +432,13 @@ function MessageBubble({
           ) : isVoice && msg.file_url ? (
             <CustomAudioPlayer src={avatarSrc(msg.file_url)} isOwn={isOwnVal} />
           ) : (
-            <span className="msg-text-content">
-              {getMsgText(msg)}
+            <span
+              /* key o'zgarganda React elementni qayta chizadi va animatsiya ishga tushadi */
+              key={translation ? "translated" : "original"}
+              className="msg-text-content animated-translation"
+            >
+              {translation ? translation : getMsgText(msg)}
             </span>
-          )}
-
-          {translation && (
-            <div className="msg-translation">
-              <div className="msg-translation-divider" />
-              <div className="msg-translation-text">{translation}</div>
-            </div>
           )}
 
           <div className="msg-time-inline">
@@ -498,6 +504,10 @@ export default function ChatDetail() {
   const [showTranslate, setShowTranslate] = useState(true);
   const [translations, setTranslations] = useState({});
   const [isTranslating, setIsTranslating] = useState(false);
+  const [isAutoTranslateOn, setIsAutoTranslateOn] = useState(false);
+  const [visibleMessageIds, setVisibleMessageIds] = useState(new Set());
+  const translatingIdsRef = useRef(new Set());
+  const processedIdsRef = useRef(new Set());
   const [targetLang, setTargetLang] = useState("uz");
   const [showTranslateSettings, setShowTranslateSettings] = useState(false);
 
@@ -517,6 +527,124 @@ export default function ChatDetail() {
   const isAtBottomRef = useRef(true);
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const observerRef = useRef(null);
+
+  useEffect(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        setVisibleMessageIds((prev) => {
+          const newVisibleIds = new Set(prev);
+          entries.forEach((entry) => {
+            const msgId = entry.target.getAttribute('data-message-id');
+            if (msgId) {
+              if (entry.isIntersecting) {
+                newVisibleIds.add(msgId);
+              } else {
+                newVisibleIds.delete(msgId);
+              }
+            }
+          });
+          return newVisibleIds;
+        });
+      },
+      {
+        root: messagesAreaRef.current,
+        rootMargin: '0px',
+        threshold: 0.1,
+      }
+    );
+
+    const messageElements = document.querySelectorAll('.msg-group[data-message-id]');
+    messageElements.forEach((el) => observerRef.current.observe(el));
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [messages]);
+
+  // Real-time avto-tarjima (Prefetching va Priority tizimi bilan)
+  useEffect(() => {
+    if (!isAutoTranslateOn) return;
+
+    const runTranslation = async () => {
+      // 1. Hali tarjima qilinmagan va o'zimiz yozmagan barcha xabarlarni topamiz
+      const allUntranslated = messages.filter(
+        (m) =>
+          !m.deleted_at &&
+          (m.type === "text" || !m.type) &&
+          String(m.sender_id) !== String(currentUser?.id) &&
+          !translations[m.id] &&
+          !translatingIdsRef.current.has(m.id) &&
+          !processedIdsRef.current.has(m.id) // <--- Xato bo'lganlarni qayta jo'natmaslik uchun
+      );
+
+      // Agar hamma narsa tarjima bo'lib bo'lgan bo'lsa, to'xtaymiz
+      if (allUntranslated.length === 0) {
+        setIsTranslating(false);
+        return;
+      }
+
+      // 2. Ko'rinib turgan xabarlarni 1-navbatga (VIP) chiqaramiz
+      const visibleUntranslated = allUntranslated.filter(m => visibleMessageIds.has(String(m.id)));
+
+      // 3. Ekranda ko'rinmayotgan xabarlarni eng yangisidan eskisiga qarab taxlaymiz 
+      // (chunki user odatda tepaga, ya'ni yaqin tarixga skroll qiladi)
+      const hiddenUntranslated = allUntranslated.filter(m => !visibleMessageIds.has(String(m.id)));
+      hiddenUntranslated.reverse();
+
+      // Ikkalasini birlashtiramiz (Oldin ko'rinadiganlar, keyin fondagilar)
+      const prioritizedMessages = [...visibleUntranslated, ...hiddenUntranslated];
+
+      // 4. Bittada maksimal 30 ta xabarni olib, "qutiga" solamiz (Batch)
+      const chunk = prioritizedMessages.slice(0, 30);
+
+      if (chunk.length === 0) return;
+
+      // Statusni "band" qilib belgilaymiz
+      chunk.forEach(m => translatingIdsRef.current.add(m.id));
+      setIsTranslating(true);
+
+      const batchPayload = chunk.map(m => ({
+        id: String(m.id),
+        text: getMsgText(m)
+      })).filter(m => m.text);
+
+      try {
+        if (batchPayload.length > 0) {
+          // Bitta API so'rovda 30 ta xabarni tarjima qilamiz
+          const newTranslationsMap = await translateBatchToUzbek(batchPayload, targetLang);
+
+          if (Object.keys(newTranslationsMap).length > 0) {
+            setTranslations((prev) => ({
+              ...prev,
+              ...newTranslationsMap
+            }));
+          }
+        }
+      } catch (err) {
+        console.error("Auto-translate batch error", err);
+      } finally {
+        chunk.forEach(m => {
+          translatingIdsRef.current.delete(m.id);
+          processedIdsRef.current.add(m.id); // Bir marta urindik, qayta urinmaymiz
+        });
+
+        // E'tibor bering: setIsTranslating(false) ni bu yerda chaqirmaymiz, 
+        // chunki dependencydagi `translations` o'zgargani uchun useEffect 
+        // o'zi qaytadan ishga tushib, keyingi 30 tani tarjima qilishni boshlaydi.
+      }
+    };
+
+    runTranslation();
+  }, [messages, isAutoTranslateOn, targetLang, visibleMessageIds, translations]);
+  // ↑ translations ni qo'shdik, shu sababli biri tugasa, ikkinchisi avtomatik boshlanadi
 
   const notify = useCallback((msg, type = "success") => {
     setToast({ msg, type });
@@ -867,33 +995,96 @@ export default function ChatDetail() {
     }
   };
 
-  const handleTranslateChat = async () => {
-    if (isTranslating) return;
-    setIsTranslating(true);
-    const newTranslations = { ...translations };
-
-    try {
-      const textMessages = messages.filter(
-        (m) => !m.deleted_at && (m.type === "text" || !m.type)
-      );
-
-      for (const msg of textMessages) {
-        const textToTranslate = getMsgText(msg);
-
-        if (textToTranslate && !translations[msg.id]) {
-          try {
-            const translated = await translateToUzbek(textToTranslate, targetLang);
-            newTranslations[msg.id] = translated;
-            setTranslations({ ...newTranslations });
-          } catch (err) {
-            console.error("Translation error for msg", msg.id, err);
-          }
-        }
-      }
-    } finally {
-      setIsTranslating(false);
+  // Avto-tarjimani yoqish/o'chirish tugmasi
+  const toggleAutoTranslate = () => {
+    if (isAutoTranslateOn) {
+      setIsAutoTranslateOn(false);
+      setTranslations({}); // O'chganda barcha tarjimalarni tozalash (asliga qaytish)
+    } else {
+      setIsAutoTranslateOn(true);
     }
   };
+
+
+
+  // Real-time avto-tarjima kuzatuvchisi (Messages o'zgarganda ishlaydi)
+  useEffect(() => {
+    if (!isAutoTranslateOn) return; // Agar rejim o'chiq bo'lsa, ishlamaydi
+
+    const runTranslation = async () => {
+      // Faqat sherikning, matnli va HALI TARJIMA QILINMAGAN xabarlarini topamiz
+      const untranslatedMessages = messages.filter(
+        (m) =>
+          !m.deleted_at &&
+          (m.type === "text" || !m.type) &&
+          String(m.sender_id) !== String(currentUser?.id) &&
+          !translations[m.id] // <--- Faqat yangi kelganlari yoki tarjima qilinmaganlari
+      );
+
+      if (untranslatedMessages.length === 0) return;
+
+      setIsTranslating(true);
+      try {
+        const translationPromises = untranslatedMessages.map(async (msg) => {
+          const textToTranslate = getMsgText(msg);
+          if (textToTranslate) {
+            try {
+              const translated = await translateToUzbek(textToTranslate, targetLang);
+              return { id: msg.id, text: translated };
+            } catch (err) {
+              console.error("Auto-translate error:", err);
+              return { id: msg.id, text: null };
+            }
+          }
+          return null;
+        });
+
+        const results = await Promise.all(translationPromises);
+
+        setTranslations((prev) => {
+          const newTrans = { ...prev };
+          results.forEach((res) => {
+            if (res && res.text) {
+              newTrans[res.id] = res.text;
+            }
+          });
+          return newTrans;
+        });
+      } finally {
+        setIsTranslating(false);
+      }
+    };
+
+    runTranslation();
+  }, [messages, isAutoTranslateOn, targetLang]);
+
+  // const handleTranslateChat = async () => {
+  //   if (isTranslating) return;
+  //   setIsTranslating(true);
+  //   const newTranslations = { ...translations };
+
+  //   try {
+  //     const textMessages = messages.filter(
+  //       (m) => !m.deleted_at && (m.type === "text" || !m.type)
+  //     );
+
+  //     for (const msg of textMessages) {
+  //       const textToTranslate = getMsgText(msg);
+
+  //       if (textToTranslate && !translations[msg.id]) {
+  //         try {
+  //           const translated = await translateToUzbek(textToTranslate, targetLang);
+  //           newTranslations[msg.id] = translated;
+  //           setTranslations({ ...newTranslations });
+  //         } catch (err) {
+  //           console.error("Translation error for msg", msg.id, err);
+  //         }
+  //       }
+  //     }
+  //   } finally {
+  //     setIsTranslating(false);
+  //   }
+  // };
 
   const handleTranslateSingleMessage = async (msg) => {
     console.log("Translating single message:", msg);
@@ -1227,15 +1418,21 @@ export default function ChatDetail() {
           <TranslateBar
             isTranslating={isTranslating}
             targetLang={targetLang}
+            isAutoTranslateOn={isAutoTranslateOn} // <-- Yangi qo'shildi
             showSettings={showTranslateSettings}
             onToggleSettings={() => setShowTranslateSettings(!showTranslateSettings)}
             onSelectLang={(lang) => {
               setTargetLang(lang);
               setShowTranslateSettings(false);
-              setTranslations({}); // Clear old translations when language changes
+              setTranslations({});
+              // Til o'zgarganda tarjimalar tozalanadi, useEffect esa darhol yangi tilga o'giradi
             }}
-            onTranslate={handleTranslateChat}
-            onClose={() => setShowTranslate(false)}
+            onToggleAutoTranslate={toggleAutoTranslate} // <-- handleTranslateChat o'rniga
+            onClose={() => {
+              setShowTranslate(false);
+              setIsAutoTranslateOn(false);
+              setTranslations({});
+            }}
           />
         )}
 
@@ -1291,6 +1488,7 @@ export default function ChatDetail() {
                     <div
                       key={msg.id || idx}
                       className={`msg-group ${isOwn ? "sent" : "received"}`}
+                      data-message-id={msg.id}
                     >
                       <MessageBubble
                         msg={msg}
@@ -1303,6 +1501,7 @@ export default function ChatDetail() {
                         onContextMenu={openContextMenu}
                         allMessages={filteredMessages}
                         translation={translations[msg.id]}
+                        allTranslations={translations}
                       />
                     </div>
                   );
@@ -1526,14 +1725,15 @@ export default function ChatDetail() {
 }
 
 // ── Translate Bar ────────────────────────────────────────
-function TranslateBar({ 
-  onTranslate, 
-  onClose, 
-  isTranslating, 
-  targetLang, 
-  showSettings, 
-  onToggleSettings, 
-  onSelectLang 
+function TranslateBar({
+  onToggleAutoTranslate, // onTranslate o'rniga
+  onClose,
+  isTranslating,
+  targetLang,
+  isAutoTranslateOn,     // Yangi parametr
+  showSettings,
+  onToggleSettings,
+  onSelectLang
 }) {
   const languages = [
     { id: "uz", label: "O'zbekcha" },
@@ -1556,32 +1756,34 @@ function TranslateBar({
 
   return (
     <div className="translate-bar-container">
-      <div className={`translate-bar ${isTranslating ? 'busy' : ''}`} onClick={!isTranslating ? onTranslate : undefined}>
+      <div className={`translate-bar ${isTranslating ? 'busy' : ''}`} onClick={!isTranslating ? onToggleAutoTranslate : undefined}>
         <div className="translate-bar-left">
           <span className="translate-icon">
             <Globe size={16} strokeWidth={2.5} className={isTranslating ? 'spin-anim' : ''} />
           </span>
           <span className="translate-text">
-            {isTranslating 
-              ? i18n.t("chat.translating", "Tarjima qilinmoqda...") 
-              : `${currentLangLabel} tiliga tarjima qilish`}
+            {isTranslating
+              ? i18n.t("chat.translating", "Tarjima qilinmoqda...")
+              : isAutoTranslateOn
+                ? i18n.t("chat.showOriginal", "Aslini ko'rsatish")
+                : `${currentLangLabel} tiliga tarjima qilish`}
           </span>
         </div>
         <div className="translate-bar-right">
           <div className="translate-settings-wrapper">
-            <button 
-              className={`translate-settings-btn ${showSettings ? 'active' : ''}`} 
+            <button
+              className={`translate-settings-btn ${showSettings ? 'active' : ''}`}
               onClick={(e) => { e.stopPropagation(); onToggleSettings(); }}
             >
               <Settings2 size={16} strokeWidth={2.5} />
             </button>
-            
+
             {showSettings && (
               <div className="translate-langs-menu" onClick={(e) => e.stopPropagation()}>
                 <div className="translate-menu-header">{i18n.t("chat.chooseLang", "Tilni tanlang")}</div>
                 {languages.map((lang) => (
-                  <div 
-                    key={lang.id} 
+                  <div
+                    key={lang.id}
                     className={`translate-lang-item ${targetLang === lang.id ? 'active' : ''}`}
                     onClick={() => onSelectLang(lang.id)}
                   >
