@@ -8,6 +8,10 @@
     "postJob": "Ish e'lon qilish",
     "reports": "Hisobotlar",
     "messages": "Xabarlar",
+    "findTalent": "Mutaxassis topish",
+    "searchJobs": "Ishlar",
+    "searchTalent": "Mutaxassislar",
+    "searchProjects": "Loyihalar",
     "login": "Kirish",
     "signup": "Ro'yxatdan o'tish"
   },

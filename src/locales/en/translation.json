@@ -8,6 +8,10 @@
     "postJob": "Post a Job",
     "reports": "Reports",
     "messages": "Messages",
+    "findTalent": "Find Talent",
+    "searchJobs": "Jobs",
+    "searchTalent": "Talent",
+    "searchProjects": "Projects",
     "login": "Log In",
     "signup": "Sign Up"
   },

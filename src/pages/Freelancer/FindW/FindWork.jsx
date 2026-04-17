@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search, Filter, ThumbsDown, Heart, CheckCircle, ChevronDown, Award, Star } from "lucide-react";
 import "../../../assets/Freelancer/FindW/FindWork.css";
 import Projects from "../../components/projectsCards";
@@ -9,6 +10,7 @@ import { getMyPortfolio, getMyCertifications } from "../../../api/freelancer";
 
 export default function FindWork() {
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
   
   // States
   const [activeTab, setActiveTab] = useState("recommended");
@@ -112,6 +114,15 @@ export default function FindWork() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
+
+  // Sync search from URL
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q) {
+      setSearchQuery(q);
+      setTempSearch(q);
+    }
+  }, [searchParams]);
 
 
   const handleProjectClick = async (job) => {

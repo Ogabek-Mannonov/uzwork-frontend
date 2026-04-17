@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getJobs } from "../../../api/jobs";
 
 function useDebounce(value, delay) {
@@ -13,10 +13,11 @@ function useDebounce(value, delay) {
 
 export default function JobsList() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("q") || "");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 

@@ -1,6 +1,6 @@
 // src/pages/Client/FindTalent/FindTalent.jsx
 import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search, ChevronDown, ChevronUp, MapPin,
   Heart, ThumbsUp, ThumbsDown, X,
@@ -14,103 +14,9 @@ import { useEffect } from "react";
 /* ================================================================
    MOCK DATA
    ================================================================ */
-const FREELANCERS = [
-  {
-    id: 1,
-    avatar:    "https://i.pravatar.cc/150?img=1",
-    name:      "Alisher E.",
-    title:     "Full-Stack Developer | React | Node.js | PostgreSQL | REST API",
-    location:  "Tashkent, Uzbekistan",
-    online:    true,
-    boosted:   true,
-    rate:      "$35/hr",
-    jobSuccess:99,
-    earned:    "$120K+",
-    consults:  true,
-    skills:    ["React", "Node.js", "TypeScript", "PostgreSQL", "Docker", "AWS", "GraphQL"],
-    insights: [
-      "Built multiple SaaS platforms with clean architecture and 99.9% uptime.",
-      "Clients praised consistent on-time delivery and clean, well-documented code.",
-    ],
-    assoc: { logo: null, bg: "#3b82f6", initials: "TC", name: "TechCore UZ", earned: "$85K+", earnedLbl: "earned" },
-  },
-  {
-    id: 2,
-    avatar:    "https://i.pravatar.cc/150?img=5",
-    name:      "Nilufar A.",
-    title:     "UI/UX Designer | Figma | Product Design | Design Systems | Mobile",
-    location:  "Samarkand, Uzbekistan",
-    online:    true,
-    boosted:   false,
-    rate:      "$28/hr",
-    jobSuccess:97,
-    earned:    "$64K+",
-    consults:  false,
-    skills:    ["Figma", "UI/UX", "Prototyping", "Design Systems", "Mobile Design", "Webflow"],
-    insights: [
-      "Delivered polished product designs that increased user retention by 40%.",
-      "Specialized in mobile-first design for fintech and e-commerce products.",
-    ],
-    assoc: null,
-  },
-  {
-    id: 3,
-    avatar:    "https://i.pravatar.cc/150?img=3",
-    name:      "Jasur M.",
-    title:     "React Native Developer | Mobile Apps | iOS | Android | Firebase",
-    location:  "Tashkent, Uzbekistan",
-    online:    false,
-    boosted:   true,
-    rate:      "$30/hr",
-    jobSuccess:94,
-    earned:    "$48K+",
-    consults:  true,
-    skills:    ["React Native", "iOS", "Android", "Firebase", "Redux", "TypeScript"],
-    insights: [
-      "Published 12+ apps to App Store and Google Play with 4.8+ average ratings.",
-      "Fast turnaround on prototypes — clients highlight MVP delivery in under 3 weeks.",
-    ],
-    assoc: { logo: null, bg: "#10b981", initials: "MA", name: "MobileAce", earned: "$40K+", earnedLbl: "earned" },
-  },
-  {
-    id: 4,
-    avatar:    "https://i.pravatar.cc/150?img=7",
-    name:      "Sarvar K.",
-    title:     "DevOps Engineer | Docker | Kubernetes | CI/CD | AWS | Linux",
-    location:  "Bukhara, Uzbekistan",
-    online:    true,
-    boosted:   false,
-    rate:      "$45/hr",
-    jobSuccess:91,
-    earned:    "$92K+",
-    consults:  false,
-    skills:    ["Docker", "Kubernetes", "AWS", "CI/CD", "Terraform", "Linux", "Nginx"],
-    insights: [
-      "Reduced deployment time by 70% for a fintech client through automated pipelines.",
-      "Managed infrastructure for platforms handling 500K+ daily active users.",
-    ],
-    assoc: null,
-  },
-  {
-    id: 5,
-    avatar:    "https://i.pravatar.cc/150?img=9",
-    name:      "Zulfiya T.",
-    title:     "Content Writer | SEO | Blog Posts | Tech Articles | Copywriting",
-    location:  "Fergana, Uzbekistan",
-    online:    true,
-    boosted:   false,
-    rate:      "$18/hr",
-    jobSuccess:88,
-    earned:    "$22K+",
-    consults:  false,
-    skills:    ["SEO Writing", "Copywriting", "Blog Posts", "English", "Russian", "Uzbek"],
-    insights: [
-      "Grew organic traffic by 3x for a startup blog in 6 months through SEO content.",
-      "Delivers error-free, engaging copy on tight deadlines — clients re-hire consistently.",
-    ],
-    assoc: null,
-  },
-];
+/* ================================================================
+   NO MOCK DATA (Using Real Backend)
+   ================================================================ */
 
 const BADGE_OPTIONS = [
   { id: "top_rated_plus", label: "Top Rated Plus", icon: "🏆", bg: "#fef9c3", color: "#d97706" },
@@ -294,12 +200,13 @@ const FtFreelancerCard = ({ fl, onInvite }) => {
    ================================================================ */
 const FindTalent = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   /* filter state */
   const [search,      setSearch]      = useState("");
   const [badges,      setBadges]      = useState([]);
   const [minRate,     setMinRate]     = useState(10);
-  const [maxRate,     setMaxRate]     = useState(100);
+  const [maxRate,     setMaxRate]     = useState(150);
   const [location,    setLocation]    = useState("");
   const [successRate, setSuccessRate] = useState("");
   const [sort,        setSort]        = useState("relevance");
@@ -312,30 +219,51 @@ const FindTalent = () => {
     const fetch = async () => {
       setLoading(true);
       try {
-        const res = await getFreelancers();
-        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : FREELANCERS);
-        const mapped = list.map(item => ({
-          id: item.id,
-          avatar: item.avatar_url || item.avatar,
-          name: item.name || (item.first_name ? `${item.first_name} ${item.last_name || ""}` : "Freelancer"),
-          title: item.title || "Freelancer",
-          rate: `$${item.hourly_rate || 0}/hr`,
-          jobSuccess: item.job_success_score || 0,
-          earned: item.total_earned ? `$${item.total_earned}k+` : "$0",
-          location: item.location || "N/A",
-          skills: item.skills || [],
-          overview: item.bio || "",
-          badges: item.job_success_score > 90 ? ["top_rated"] : []
-        }));
-        setFreelancers(mapped.length ? mapped : FREELANCERS);
-      } catch {
-        setFreelancers(FREELANCERS);
+        const params = {
+          search: search || undefined,
+          location: location || undefined,
+          min_rating: successRate ? parseInt(successRate) : undefined,
+        };
+        if (minRate > 10) params.min_rate = minRate;
+        if (maxRate < 150) params.max_rate = maxRate;
+
+        const res = await getFreelancers(params);
+
+        // Backend returns { success: true, data: { freelancers: [...] } }
+        let list = res?.data?.freelancers || [];
+        
+        const mapped = list.map(item => {
+          return {
+            id: item.id,
+            avatar: item.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.first_name || "U")}&background=random`,
+            name: `${item.first_name || "Mutaxassis"} ${item.last_name || ""}`.trim(),
+            title: item.title || "Freelancer",
+            rate: item.hourly_rate ? `$${item.hourly_rate}/hr` : "Kelishiladi",
+            jobSuccess: item.rating || 0,
+            earned: item.completed_jobs ? `${item.completed_jobs} ta topshirilgan` : "Yangi frilanser",
+            location: item.location || "O'zbekiston",
+            skills: Array.isArray(item.skills) ? item.skills : [],
+            bio: item.bio || "",
+            online: item.availability_status === 'available',
+            boosted: false,
+          };
+        });
+        setFreelancers(mapped);
+      } catch (error) {
+        console.error("Fetch freelancers error:", error);
+        setFreelancers([]);
       } finally {
         setLoading(false);
       }
     };
     fetch();
-  }, []);
+  }, [search, location, minRate, maxRate, successRate]);
+
+  // Sync search from URL
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q) setSearch(q);
+  }, [searchParams]);
 
   const notify = useCallback((msg) => {
     setToast(msg);
@@ -346,28 +274,16 @@ const FindTalent = () => {
     setBadges(prev => prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id]);
 
   const clearFilters = () => {
-    setBadges([]); setMinRate(10); setMaxRate(100);
+    setBadges([]); setMinRate(10); setMaxRate(150);
     setLocation(""); setSuccessRate("");
     notify("Filters cleared!");
   };
 
-  const shown = freelancers.filter(fl => {
-    const rateNum = parseInt((fl.rate || "").replace(/\D/g, "")) || 0;
-    const matchSearch = !search ||
-      (fl.name || "").toLowerCase().includes(search.toLowerCase()) ||
-      (fl.title || "").toLowerCase().includes(search.toLowerCase()) ||
-      (fl.skills || []).some(s => s.toLowerCase().includes(search.toLowerCase()));
-    const matchRate = rateNum >= minRate && rateNum <= maxRate;
-    const matchSuccess = !successRate ||
-      fl.jobSuccess >= parseInt(successRate);
-    const matchLoc = !location ||
-      fl.location.toLowerCase().includes(location.toLowerCase());
-    return matchSearch && matchRate && matchSuccess && matchLoc;
-  });
+  const shown = freelancers;
 
   const activeFilterCount =
     badges.length +
-    (minRate !== 10 || maxRate !== 100 ? 1 : 0) +
+    (minRate !== 10 || maxRate !== 150 ? 1 : 0) +
     (location ? 1 : 0) +
     (successRate ? 1 : 0);
 
@@ -568,10 +484,26 @@ const FindTalent = () => {
               />
             ))
           ) : (
-            <div className="ft-empty">
-              <div className="ft-empty-icon">🔍</div>
-              <div className="ft-empty-title">No freelancers found</div>
-              <div className="ft-empty-sub">Try adjusting your filters or search query</div>
+            <div className="ft-empty" style={{ padding: '60px 20px', textAlign: 'center' }}>
+              <div className="ft-empty-icon" style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
+              <div className="ft-empty-title" style={{ fontSize: 20, fontWeight: 700, color: '#1a1a1a', marginBottom: 8 }}>
+                Hech qanday mutaxassis topilmadi
+              </div>
+              <div className="ft-empty-sub" style={{ color: '#666', marginBottom: 24 }}>
+                Filtrlarni yoki qidiruv so'zini o'zgartirib ko'ring
+              </div>
+              {activeFilterCount > 0 && (
+                <button 
+                  className="ft-clear-btn" 
+                  onClick={clearFilters}
+                  style={{ 
+                    background: '#14a800', color: '#fff', border: 'none', 
+                    padding: '10px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer' 
+                  }}
+                >
+                  Barcha filtrlarni tozalash ({activeFilterCount})
+                </button>
+              )}
             </div>
           )}
 

@@ -8,6 +8,10 @@
     "postJob": "Разместить работу",
     "reports": "Отчёты",
     "messages": "Сообщения",
+    "findTalent": "Поиск талантов",
+    "searchJobs": "Работы",
+    "searchTalent": "Таланты",
+    "searchProjects": "Проекты",
     "login": "Войти",
     "signup": "Регистрация"
   },
