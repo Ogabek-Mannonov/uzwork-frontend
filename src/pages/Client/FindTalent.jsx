@@ -485,7 +485,9 @@ const FindTalent = () => {
             ))
           ) : (
             <div className="ft-empty" style={{ padding: '60px 20px', textAlign: 'center' }}>
-              <div className="ft-empty-icon" style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
+              <div className="ft-empty-icon" style={{ display: 'flex', justifyContent: 'center' }}>
+                <Search size={48} style={{ color: '#aaa', strokeWidth: 1.5, marginBottom: 16 }} />
+              </div>
               <div className="ft-empty-title" style={{ fontSize: 20, fontWeight: 700, color: '#1a1a1a', marginBottom: 8 }}>
                 Hech qanday mutaxassis topilmadi
               </div>
@@ -497,9 +499,13 @@ const FindTalent = () => {
                   className="ft-clear-btn" 
                   onClick={clearFilters}
                   style={{ 
-                    background: '#14a800', color: '#fff', border: 'none', 
-                    padding: '10px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer' 
+                    background: '#2563eb', color: '#fff', border: 'none', 
+                    padding: '10px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                    boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)'
                   }}
+                  onMouseOver={(e) => e.target.style.backgroundColor = '#1d4ed8'}
+                  onMouseOut={(e) => e.target.style.backgroundColor = '#2563eb'}
                 >
                   Barcha filtrlarni tozalash ({activeFilterCount})
                 </button>
