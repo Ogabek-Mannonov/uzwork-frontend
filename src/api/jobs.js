@@ -24,9 +24,9 @@ export const getJobById = async (id) => {
 };
 
 /** Mening ishlarim (client) */
-export const getMyJobs = async () => {
+export const getMyJobs = async (params = {}) => {
   try {
-    const res = await api.get("/projects/my");
+    const res = await api.get("/projects/my", { params });
     return res?.data;
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err?.message };

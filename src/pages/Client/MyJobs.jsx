@@ -1,110 +1,50 @@
-// src/pages/Client/MyJobs.jsx
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Briefcase, Eye, Edit, Trash2, Copy, Users,
   Clock, DollarSign, Search, X,
-  CheckCircle, Archive, Plus, MoreHorizontal
+  CheckCircle, Archive, Plus, MoreHorizontal,
+  AlertCircle
 } from "lucide-react";
+import { 
+  getMyJobs, 
+  deleteJob as apiDeleteJob, 
+  updateJob as apiUpdateJob,
+  createJob as apiCreateJob
+} from "../../api/jobs";
+import { useThemeContext } from "../components/Theme/ThemeContext";
 import "../Client/css/myjobs.css";
 
-// Mock API functions
-const getMyJobs = async () => {
-  return {
-    data: [
-      {
-        id: 1,
-        title: "Full-Stack Web Developer",
-        status: "active",
-        budget_amount: 5000,
-        proposals_count: 12,
-        views: 145,
-        created_at: "2024-01-15",
-        skills: ["React", "Node.js", "TypeScript", "PostgreSQL"]
-      },
-      {
-        id: 2,
-        title: "Mobile App Developer (React Native)",
-        status: "active",
-        budget_amount: 4000,
-        proposals_count: 8,
-        views: 98,
-        created_at: "2024-01-10",
-        skills: ["React Native", "Expo", "Firebase"]
-      },
-      {
-        id: 3,
-        title: "UI/UX Designer",
-        status: "draft",
-        budget_amount: 3000,
-        proposals_count: 0,
-        views: 0,
-        created_at: "2024-01-16",
-        skills: ["Figma", "Adobe XD", "UI Design", "UX Research"]
-      },
-      {
-        id: 4,
-        title: "DevOps Engineer",
-        status: "closed",
-        budget_amount: 6000,
-        proposals_count: 15,
-        views: 210,
-        created_at: "2023-12-20",
-        skills: ["AWS", "Docker", "Kubernetes", "CI/CD"]
-      }
-    ]
-  };
-};
-
-const deleteJob = async (id) => {
-  console.log("Deleting job:", id);
-  return { success: true };
-};
-
-const duplicateJob = async (id) => {
-  console.log("Duplicating job:", id);
-  return {
-    id: Date.now(),
-    title: `Job Copy ${id}`,
-    status: "draft",
-    budget_amount: 5000,
-    proposals_count: 0,
-    views: 0,
-    created_at: new Date().toISOString(),
-    skills: ["React", "Node.js"]
-  };
-};
-
-const updateJobStatus = async (id, status) => {
-  console.log("Updating job status:", id, status);
-  return { success: true };
-};
+// Mock functions removed, using real API from ../../api/jobs
 
 const MyJobs = () => {
   const navigate = useNavigate();
+  const { isDark } = useThemeContext();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  const fetchJobs = useCallback(async () => {
+  const fetchJobs = useCallback(async (currentSearch = searchTerm) => {
     setLoading(true);
     try {
-      const response = await getMyJobs();
-      const allJobs = response.data || response || [];
+      // Backend supports status param: open | in_progress | completed | cancelled | draft | all
+      let statusParam = null;
+      if (activeTab === "active") statusParam = "open";
+      else if (activeTab === "drafts") statusParam = "draft";
+      else if (activeTab === "closed") statusParam = "completed";
+
+      const response = await getMyJobs({ 
+        status: statusParam,
+        search: currentSearch,
+        limit: 100 
+      });
       
-      let filteredJobs = allJobs;
-      if (activeTab === "active") {
-        filteredJobs = allJobs.filter(job => job.status === "active");
-      } else if (activeTab === "drafts") {
-        filteredJobs = allJobs.filter(job => job.status === "draft");
-      } else if (activeTab === "closed") {
-        filteredJobs = allJobs.filter(job => job.status === "closed");
-      }
-      
-      setJobs(filteredJobs);
+      const allJobs = response?.data?.projects || response?.data || [];
+      setJobs(allJobs);
     } catch (error) {
       console.error("Error fetching jobs:", error);
     } finally {
@@ -112,61 +52,110 @@ const MyJobs = () => {
     }
   }, [activeTab]);
 
+  // Initial fetch
   useEffect(() => {
     fetchJobs();
-  }, [fetchJobs]);
+  }, [activeTab, fetchJobs]);
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchJobs(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const handleDeleteJob = async (jobId) => {
+    setActionLoading(true);
     try {
-      await deleteJob(jobId);
-      setJobs(jobs.filter(job => job.id !== jobId));
-      setShowDeleteModal(null);
+      const res = await apiDeleteJob(jobId);
+      if (res?.success !== false) {
+        setJobs(jobs.filter(job => job.id !== jobId));
+        setShowDeleteModal(null);
+      } else {
+        alert(res?.message || "O'chirishda xato yuz berdi");
+      }
     } catch (error) {
       console.error("Error deleting job:", error);
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleDuplicateJob = async (job) => {
+    setActionLoading(true);
     try {
-      const newJob = await duplicateJob(job.id);
-      setJobs([newJob, ...jobs]);
+      // Prepare payload for a new job based on existing one
+      const payload = {
+        title: `${job.title} (Copy)`,
+        description: job.description,
+        category: job.category,
+        required_skills: job.required_skills,
+        experience_level: job.experience_level,
+        budget_type: job.budget_type,
+        budget_min: job.budget_min,
+        budget_max: job.budget_max,
+        currency: job.currency,
+        duration: job.duration,
+        scope: job.scope,
+        visibility: job.visibility,
+        freelancers_needed: job.freelancers_needed,
+        status: "draft"
+      };
+      const res = await apiCreateJob(payload);
+      if (res?.success !== false) {
+        fetchJobs(); // Refresh to see the new draft
+      } else {
+        alert(res?.message || "Nusxalashda xato yuz berdi");
+      }
     } catch (error) {
       console.error("Error duplicating job:", error);
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleStatusChange = async (jobId, newStatus) => {
+    setActionLoading(true);
     try {
-      await updateJobStatus(jobId, newStatus);
-      fetchJobs();
-      setShowStatusModal(null);
+      const res = await apiUpdateJob(jobId, { status: newStatus });
+      if (res?.success !== false) {
+        fetchJobs();
+        setShowStatusModal(null);
+      } else {
+        alert(res?.message || "Holatni o'zgartirishda xato yuz berdi");
+      }
     } catch (error) {
       console.error("Error updating job status:", error);
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const tabs = [
     { id: "all", label: "Barcha joblar", icon: <Briefcase size={16} />, count: jobs.length },
-    { id: "active", label: "Aktiv", icon: <CheckCircle size={16} />, count: jobs.filter(j => j.status === "active").length },
+    { id: "active", label: "Aktiv", icon: <CheckCircle size={16} />, count: jobs.filter(j => j.status === "active" || j.status === "open").length },
     { id: "drafts", label: "Qoralama", icon: <Edit size={16} />, count: jobs.filter(j => j.status === "draft").length },
-    { id: "closed", label: "Yopiq", icon: <Archive size={16} />, count: jobs.filter(j => j.status === "closed").length }
+    { id: "closed", label: "Yopiq", icon: <Archive size={16} />, count: jobs.filter(j => j.status === "closed" || j.status === "completed").length }
   ];
 
-  const filteredJobs = jobs.filter(job =>
-    job.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    job.skills?.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // We now use server-side search, so filteredJobsBySearch is just jobs
+  const filteredJobsBySearch = jobs;
 
   const getStatusBadge = (status) => {
     switch(status) {
       case "active":
+      case "open":
         return <span className="mj-status-badge mj-active"><CheckCircle size={12} /> Aktiv</span>;
       case "draft":
         return <span className="mj-status-badge mj-draft"><Edit size={12} /> Qoralama</span>;
       case "closed":
+      case "completed":
         return <span className="mj-status-badge mj-closed"><Archive size={12} /> Yopiq</span>;
+      case "cancelled":
+        return <span className="mj-status-badge mj-closed" style={{ background: "#fee2e2", color: "#ef4444" }}><Archive size={12} /> Bekor qilingan</span>;
       default:
-        return null;
+        return <span className="mj-status-badge mj-draft">{status}</span>;
     }
   };
 
@@ -180,7 +169,11 @@ const MyJobs = () => {
   }
 
   return (
-    <div className="mj-page">
+    <div className={`mj-page ${isDark ? "mj-dark" : ""}`} style={{
+      backgroundColor: isDark ? "#0a0c10" : "#f4f6f9",
+      minHeight: "100vh",
+      transition: "all .3s ease"
+    }}>
       <div className="mj-container">
         {/* Header */}
         <div className="mj-header">
@@ -228,7 +221,7 @@ const MyJobs = () => {
 
         {/* Jobs List */}
         <div className="mj-list">
-          {filteredJobs.length === 0 ? (
+          {filteredJobsBySearch.length === 0 ? (
             <div className="mj-empty">
               <Briefcase size={48} strokeWidth={1} />
               <h3>Hech qanday job topilmadi</h3>
@@ -238,7 +231,7 @@ const MyJobs = () => {
               </button>
             </div>
           ) : (
-            filteredJobs.map(job => (
+            filteredJobsBySearch.map(job => (
               <div key={job.id} className="mj-card">
                 <div className="mj-card-header">
                   <div className="mj-title-section">
@@ -289,15 +282,11 @@ const MyJobs = () => {
                 <div className="mj-card-details">
                   <div className="mj-detail-item">
                     <DollarSign size={14} />
-                    <span>${job.budget_amount || job.budget || 0}</span>
+                    <span>{job.budget_max ? `$${job.budget_max}` : (job.budget_min ? `$${job.budget_min}` : "Kelishiladi")}</span>
                   </div>
                   <div className="mj-detail-item">
                     <Users size={14} />
                     <span>{job.proposals_count || 0} ta proposal</span>
-                  </div>
-                  <div className="mj-detail-item">
-                    <Eye size={14} />
-                    <span>{job.views || 0} ta ko'rish</span>
                   </div>
                   <div className="mj-detail-item">
                     <Clock size={14} />
@@ -306,11 +295,11 @@ const MyJobs = () => {
                 </div>
                 
                 <div className="mj-skills">
-                  {job.skills?.slice(0, 5).map(skill => (
+                  {job.required_skills?.slice(0, 5).map(skill => (
                     <span key={skill} className="mj-skill-tag">{skill}</span>
                   ))}
-                  {job.skills?.length > 5 && (
-                    <span className="mj-skill-tag mj-more">+{job.skills.length - 5}</span>
+                  {job.required_skills?.length > 5 && (
+                    <span className="mj-skill-tag mj-more">+{job.required_skills.length - 5}</span>
                   )}
                 </div>
                 
@@ -319,7 +308,7 @@ const MyJobs = () => {
                     <>
                       <button 
                         className="mj-footer-btn mj-primary"
-                        onClick={() => navigate(`/client/proposals/${job.id}`)}
+                        onClick={() => navigate(`/client/management`)} // Adjust route if needed
                       >
                         <Users size={14} /> Proposals ({job.proposals_count || 0})
                       </button>
@@ -371,8 +360,10 @@ const MyJobs = () => {
               <h3>Jobni o'chirish</h3>
               <p>"{showDeleteModal.title}" nomli jobni o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi.</p>
               <div className="mj-modal-actions">
-                <button className="mj-btn-cancel" onClick={() => setShowDeleteModal(null)}>Bekor qilish</button>
-                <button className="mj-btn-danger" onClick={() => handleDeleteJob(showDeleteModal.id)}>O'chirish</button>
+                <button className="mj-btn-cancel" onClick={() => setShowDeleteModal(null)} disabled={actionLoading}>Bekor qilish</button>
+                <button className="mj-btn-danger" onClick={() => handleDeleteJob(showDeleteModal.id)} disabled={actionLoading}>
+                  {actionLoading ? "O'chirilmoqda..." : "O'chirish"}
+                </button>
               </div>
             </div>
           </div>
@@ -408,7 +399,7 @@ const MyJobs = () => {
                 </button>
               </div>
               <div className="mj-modal-actions">
-                <button className="mj-btn-cancel" onClick={() => setShowStatusModal(null)}>Yopish</button>
+                <button className="mj-btn-cancel" onClick={() => setShowStatusModal(null)} disabled={actionLoading}>Yopish</button>
               </div>
             </div>
           </div>

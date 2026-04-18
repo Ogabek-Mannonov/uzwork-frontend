@@ -50,6 +50,63 @@
   min-height: 100vh;
   background: var(--mj-bg);
   font-family: var(--mj-font-family);
+  transition: background-color 0.3s ease;
+}
+
+/* ===== DARK MODE OVERRIDES ===== */
+.mj-page.mj-dark {
+  --mj-surface: #161b22;
+  --mj-bg: #0d1117;
+  --mj-bg-alt: #1a1f26;
+  --mj-text: #f0f6fc;
+  --mj-text-secondary: #c9d1d9;
+  --mj-text-tertiary: #8b949e;
+  --mj-text-muted: #484f58;
+  --mj-border: #30363d;
+  --mj-border-light: #21262d;
+  --mj-border-dark: #484f58;
+  
+  --mj-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --mj-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.mj-page.mj-dark .mj-tab-btn {
+  background: #21262d;
+  color: #c9d1d9;
+}
+
+.mj-page.mj-dark .mj-tab-btn:hover {
+  background: #30363d;
+}
+
+.mj-page.mj-dark .mj-tab-count {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mj-page.mj-dark .mj-title-section h3 {
+  color: #f0f6fc;
+}
+
+.mj-page.mj-dark .mj-skill-tag {
+  background: #21262d;
+  color: #8b949e;
+}
+
+.mj-page.mj-dark .mj-search-box input {
+  background: #0d1117;
+}
+
+.mj-page.mj-dark .mj-status-option {
+  background: #21262d;
+}
+
+.mj-page.mj-dark .mj-footer-btn.mj-outline {
+  border-color: var(--mj-blue);
+  color: var(--mj-blue);
+}
+
+.mj-page.mj-dark .mj-action-btn {
+  background: #21262d;
 }
 
 .mj-container {
