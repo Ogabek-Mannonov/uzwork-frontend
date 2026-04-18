@@ -3,28 +3,28 @@
 
 /* ===================== VARIABLES ===================== */
 :root {
-  --chat-bg: #f0f2f5;
+  --chat-bg: #f8fafc;
   --sidebar-bg: #ffffff;
-  --sidebar-border: #e8eaed;
-  --chat-area-bg: #f0f2f5;
-  --msg-sent-bg: #2563eb;
+  --sidebar-border: rgba(0, 0, 0, 0.06);
+  --chat-area-bg: #f1f3f6;
+  --msg-sent-bg: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   --msg-sent-color: #ffffff;
   --msg-recv-bg: #ffffff;
   --msg-recv-color: #1a1a1a;
   --accent: #2563eb;
   --accent-dark: #1d4ed8;
   --accent-light: #eff6ff;
-  --text-primary: #1a1a2e;
-  --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
-  --border: #e5e7eb;
-  --header-bg: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --border: rgba(0, 0, 0, 0.06);
+  --header-bg: rgba(255, 255, 255, 0.85);
   --input-bg: #ffffff;
-  --hover-bg: #f9fafb;
-  --online-color: #22c55e;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+  --hover-bg: #f1f5f9;
+  --online-color: #10b981;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -54,17 +54,21 @@
 }
 
 .chat-sidebar-header {
-  padding: 20px 20px 16px;
+  padding: 24px 20px 20px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+  background: var(--sidebar-bg);
 }
 
 .chat-sidebar-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
-  color: var(--text, #0f172a);
-  margin: 0 0 14px;
-  letter-spacing: -0.3px;
+  color: var(--text-primary);
+  margin: 0 0 16px;
+  letter-spacing: -0.025em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .chat-search-box {
@@ -78,7 +82,7 @@
   border: 1.5px solid transparent;
   border-radius: var(--radius-xl);
   font-size: 14px;
-  color: var(--text, #0f172a);
+  color: var(--text-primary);
   font-family: "Inter", sans-serif;
   transition: all 0.2s;
   box-sizing: border-box;
@@ -235,7 +239,7 @@
 .chat-item-name {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text, #0f172a);
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -258,7 +262,7 @@
 
 .chat-item-preview {
   font-size: 13px;
-  color: var(--text-2, #334155);
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -267,7 +271,7 @@
 
 .chat-item-preview.unread {
   font-weight: 600;
-  color: var(--text, #0f172a);
+  color: var(--text-primary);
 }
 
 .unread-badge {
@@ -302,9 +306,17 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: var(--chat-area-bg);
+
+  /* 1. Chat fonini Telegram uslubidagi silliq rangga o'zgartiramiz */
+  background-color: #e5e7eb !important;
+
+  /* 2. Chatga nozik naqsh (pattern) beramiz (ixtiyoriy, lekin professional ko'rinadi) */
+  background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
+  background-attachment: fixed;
+
   overflow: hidden;
   min-width: 0;
+  position: relative;
 }
 
 /* Empty State */
@@ -314,42 +326,109 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--muted, #64748b);
+  color: var(--text-muted);
   text-align: center;
   padding: 40px;
+  background: var(--chat-area-bg);
 }
 
 .chat-empty-state-icon {
-  font-size: 72px;
-  margin-bottom: 20px;
-  opacity: 0.5;
+  background: white;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 40px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 32px;
+  color: var(--accent);
+  transform: rotate(-5deg);
+  transition: transform 0.3s ease;
+}
+
+.chat-empty-state-icon:hover {
+  transform: rotate(0deg) scale(1.05);
 }
 
 .chat-empty-state h2 {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text-2, #334155);
-  margin-bottom: 8px;
+  font-size: 28px;
+  color: var(--text-primary);
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
 }
 
 .chat-empty-state p {
-  font-size: 14px;
-  color: var(--muted, #64748b);
-  max-width: 280px;
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 320px;
   line-height: 1.6;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 12px 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 /* ===================== CHAT HEADER ===================== */
+/* .chat-input-area {
+  padding: 10px 16px 20px;
+  background: transparent !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  position: relative;
+  z-index: 10;
+} */
+
+.chat-input-container {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto;
+}
+
+.chat-input-bubble {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px;
+  background: #f1f3f4 !important;
+  /* Telegram silliq kulrangi */
+  border-radius: 24px !important;
+  /* Multfilmcha emas, professional yumaloqlik */
+  padding: 8px 18px !important;
+  box-shadow: none !important;
+  border: none !important;
+  min-height: 48px !important;
+  flex: 1;
+  transition: background 0.2s ease;
+}
+
+.chat-input-bubble:focus-within {
+  /* box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12); */
+  background: #ebeef0 !important;
+  /* Salgina to'qroq kulrang */
+  /* transition: background 0.2s ease; */
+}
+
+.chat-input-bubble.recording {
+  background: #f8fafc;
+}
+
 .chat-header {
   background: var(--header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  padding: 14px 24px;
+  padding: 16px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   flex-shrink: 0;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
   z-index: 10;
 }
 
@@ -385,7 +464,7 @@
 .chat-header-name {
   font-size: 16px;
   font-weight: 700;
-  color: var(--text, #0f172a);
+  color: var(--text-primary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -479,17 +558,24 @@
 /* ===================== MESSAGES AREA ===================== */
 .chat-messages-area {
   flex: 1;
-  overflow-y: auto;
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  /* Xabarlar orasidagi masofa silliqroq bo'lishi uchun 8px yaxshi */
+
+  /* Masofalar: Telegramdagidek kengroq ko'rinish uchun */
+  padding: 20px 24px;
+
+  /* MUHIM: Fon shaffof bo'lishi shart, aks holda .chat-area'dagi pattern ko'rinmaydi */
+  background: transparent !important;
+
+  overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #d1d5db transparent;
 }
 
 .chat-messages-area::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 
 .chat-messages-area::-webkit-scrollbar-track {
@@ -497,8 +583,8 @@
 }
 
 .chat-messages-area::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
 }
 
 /* Date Separator */
@@ -569,8 +655,12 @@
 }
 
 .msg-bubble {
-  padding: 8px 12px 10px;
+  /* padding: 8px 12px 10px; */
+  padding: 10px 14px;
+  /* Sal kengroq */
   border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  /* Nozik soya */
   font-size: 14px;
   line-height: 1.55;
   word-break: break-word;
@@ -581,6 +671,7 @@
   flex-direction: column;
   align-items: stretch;
   min-width: 120px;
+  transition: transform 0.1s ease;
 }
 
 .msg-bubble:hover {
@@ -589,15 +680,17 @@
 
 .msg-bubble.sent {
   background: var(--msg-sent-bg);
-  color: var(--msg-sent-color);
   border-bottom-right-radius: 4px;
+  color: white;
+  box-shadow: 0 4px 12px -4px rgba(37, 99, 235, 0.4);
 }
 
 .msg-bubble.received {
-  background: var(--msg-recv-bg);
+  background: #ffffff;
   color: var(--msg-recv-color);
   border-bottom-left-radius: 4px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 /* First / Last in group radius tweaks */
@@ -630,11 +723,11 @@
 }
 
 .msg-bubble.sent .msg-time-inline {
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .msg-bubble.received .msg-time-inline {
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--text-muted);
 }
 
 
@@ -681,15 +774,16 @@
   padding-left: 2px;
 }
 
-/* Context menu */
+/* Context menu container */
 .msg-context-menu {
   position: absolute;
-  background: white;
-  border: 1px solid var(--border);
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  z-index: 100;
-  min-width: 160px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  z-index: 200;
+  min-width: 180px;
   overflow: hidden;
   animation: fadeInScale 0.15s ease;
 }
@@ -699,7 +793,6 @@
     opacity: 0;
     transform: scale(0.95);
   }
-
   to {
     opacity: 1;
     transform: scale(1);
@@ -707,27 +800,47 @@
 }
 
 .msg-context-item {
+  color: #1e293b !important;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 16px;
-  font-size: 13px;
+  gap: 12px;
+  padding: 10px 16px;
   font-weight: 500;
+  font-size: 14px;
   cursor: pointer;
-  color: var(--text, #0f172a);
-  transition: background 0.1s;
+  transition: background 0.2s ease;
 }
 
 .msg-context-item:hover {
-  background: var(--hover-bg);
+  background: #f1f5f9 !important;
+}
+
+.msg-context-item svg,
+.msg-context-item i {
+  color: #64748b !important;
+  transition: color 0.2s ease;
+}
+
+.msg-context-item:hover svg {
+  color: var(--accent) !important;
 }
 
 .msg-context-item.danger {
-  color: #ef4444;
+  color: #ef4444 !important;
 }
 
 .msg-context-item.danger:hover {
-  background: #fff5f5;
+  background: #fef2f2 !important;
+}
+
+.msg-context-item.danger svg {
+  color: #ef4444 !important;
+}
+
+.msg-context-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.05);
+  margin: 4px 0;
 }
 
 /* Emoji reaction row inside context menu */
@@ -969,9 +1082,11 @@
 
 /* ===================== INPUT AREA ===================== */
 .chat-input-area {
-  background: var(--input-bg);
-  border-top: 1px solid var(--border);
-  padding: 10px 20px 14px;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 12px 16px 24px !important;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -1004,8 +1119,9 @@
 
 .emoji-toggle-btn:hover,
 .emoji-toggle-btn.active {
-  background: #ebf5ff;
-  color: var(--accent, #3b82f6);
+  background: transparent;
+  color: var(--accent);
+  transform: scale(1.1);
 }
 
 .emoji-picker-container {
@@ -1056,89 +1172,178 @@
   }
 }
 
-.chat-input-wrapper {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  background: #ffffff;
-  border: 1px solid #93c5fd;
-  border-radius: 26px;
-  padding: 6px 16px;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-}
-
-.chat-input-wrapper:focus-within {
-  background: white;
-  border-color: var(--accent, #3b82f6);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.chat-input-actions-left {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  flex-shrink: 0;
-}
-
-.chat-action-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--muted, #64748b);
-  padding: 6px;
-  border-radius: 6px;
+/* Microphone error positioning */
+.mic-button-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s;
-  font-size: 17px;
 }
 
-.chat-action-btn:hover {
-  color: var(--accent);
-  background: var(--accent-light);
+.mic-error-tooltip {
+  position: absolute;
+  bottom: 65px;
+  right: 50%;
+  transform: translateX(50%);
+  background-color: #ef4444;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  z-index: 100;
+  animation: slideUpFade 0.2s ease-out forwards;
+}
+
+.mic-error-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 6px 0;
+  border-style: solid;
+  border-color: #ef4444 transparent transparent transparent;
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translate(50%, 10px); }
+  to { opacity: 1; transform: translate(50%, 0); }
+}
+
+.chat-action-circle-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  flex-shrink: 0;
+  color: white;
+  z-index: 100;
+}
+
+/* Mikrofon — yorqin ko'k */
+.chat-action-circle-btn.mic {
+  background: #2563eb;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.5);
+  color: #ffffff;
+}
+
+.chat-action-circle-btn.mic:hover {
+  background: #1d4ed8;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+  transform: scale(1.06);
+}
+
+/* Yuborish — default xira, active bo'lganda yorqin ko'k */
+.chat-action-circle-btn.send {
+  background: #c5cdd8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  color: #ffffff;
+}
+
+.chat-action-circle-btn.send.active {
+  background: #2563eb;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.5);
+}
+
+.chat-action-circle-btn.send.active:hover {
+  background: #1d4ed8;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+  transform: scale(1.06);
+}
+
+.chat-action-circle-btn:hover {
+  transform: scale(1.05);
+}
+
+.chat-action-circle-btn:active {
+  transform: scale(0.95);
+}
+
+.chat-attach-btn {
+  color: #8e99a8;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.chat-attach-btn:hover {
+  color: #64748b;
 }
 
 .chat-textarea {
   flex: 1;
-  border: none;
-  background: transparent;
-  resize: none;
-  font-size: 15px;
-  color: var(--text, #0f172a);
-  font-family: inherit;
-  line-height: 22px;
-  height: 22px;
-  max-height: 140px;
-  outline: none;
-  padding: 0;
-  margin: 7px 0;
+  border: none !important;
+  background: transparent !important;
+  resize: none !important;
+  outline: none !important;
+
+  /* Matn parametrlari */
+  font-size: 17px !important;
+  color: #1a1a1a !important;
+  line-height: 1.4 !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+
+  /* Balandlik */
+  min-height: 24px;
+  max-height: 150px;
+
+  /* Masofalar */
+  padding: 4px 0 !important;
+  margin: 4px 0 !important;
+
+  /* Skrollni yashirish */
   overflow-y: auto;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  /* Firefox */
 }
 
-.chat-textarea::placeholder {
-  color: var(--muted, #64748b);
+.chat-textarea::-webkit-scrollbar {
+  display: none;
+}
+
+.emoji-toggle-btn {
+  color: #8e99a8;
+  padding: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.emoji-toggle-btn:hover,
+.emoji-toggle-btn.active {
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.chat-send-btn.active {
+  color: var(--accent);
+  transform: scale(1.1);
 }
 
 .telegram-mic-btn {
   background: transparent;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  color: #64748b;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 0px;
-  margin-right: -4px;
+  color: #9ba3b2;
 }
 
 .telegram-mic-btn:hover {
-  color: var(--accent, #3b82f6);
-  background: #f1f5f9;
+  color: var(--accent);
+  background: var(--accent-light);
 }
 
 .chat-send-btn {
@@ -1568,9 +1773,9 @@
     display: flex;
   }
 
-  .chat-messages-area {
+  /* .chat-messages-area {
     padding: 14px 12px;
-  }
+  } */
 
   .msg-row {
     max-width: 88%;
@@ -1671,7 +1876,7 @@
 .chat-info-header h3 {
   font-size: 16px;
   font-weight: 700;
-  color: var(--text, #0f172a);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -1699,7 +1904,7 @@
 .chat-info-name {
   font-size: 20px;
   font-weight: 700;
-  color: var(--text, #0f172a);
+  color: var(--text-primary);
 }
 
 .chat-info-status {
@@ -1738,7 +1943,7 @@
 .info-val {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text, #0f172a);
+  color: var(--text-primary);
 }
 
 .info-label {
@@ -1770,10 +1975,24 @@
 /* Updated pattern chat bg */
 .chat-detail-main {
   /* Subtle pattern for Telegram-like feel */
-  background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+  /* background-image: radial-gradient(#d1d5db 1px, transparent 1px); */
+  background-image:
+    url("https://www.transparenttextures.com/patterns/cubes.png");
+  /* Juda och tekstura */
   background-size: 20px 20px;
-  background-color: var(--chat-bg);
+  /* background-color: var(--chat-bg); */
+  background-color: #e5e7eb;
+  /* Biroq to'qroq kulrang */
+  background-attachment: fixed;
 }
+
+/* .chat-header,
+.chat-input-area {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+} */
 
 .chat-sidebar-toggle-btn {
   background: #2a3441;
