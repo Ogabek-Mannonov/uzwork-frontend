@@ -10,7 +10,7 @@ import {
   uploadVoice,
 } from "../../../api/messages";
 import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/useSocket";
-import { Smile, Globe, Settings2, X } from "lucide-react";
+import { Smile, Globe, Settings2, X, MoreVertical, Copy, Trash2, Edit3, User, Phone, ArrowLeft, Send, Mic, Download, Paperclip } from "lucide-react";
 import i18n from "../../../i18n";
 import { useTranslation } from "react-i18next";
 import { translateToUzbek, translateBatchToUzbek } from "../../../api/translate_service";
@@ -200,7 +200,8 @@ function ContextMenu({ x, y, isOwn, onEdit, onDelete, onCopy, onReply, onTransla
         {i18n.t("chat.reply", "Reply")}
       </div>
       <div className="msg-context-item" onClick={onCopy}>
-        📋 {i18n.t("chat.copy", "Nusxalash")}
+        <Copy size={14} strokeWidth={2.2} style={{ marginRight: 8 }} />
+        {i18n.t("chat.copy", "Nusxalash")}
       </div>
       <div className="msg-context-item" onClick={() => { onTranslate?.(); onClose(); }}>
         <Globe size={14} strokeWidth={2.2} style={{ marginRight: 8 }} />
@@ -209,10 +210,12 @@ function ContextMenu({ x, y, isOwn, onEdit, onDelete, onCopy, onReply, onTransla
       {isOwn && (
         <>
           <div className="msg-context-item" onClick={onEdit}>
-            ✏️ {i18n.t("chat.edit", "Tahrirlash")}
+            <Edit3 size={14} strokeWidth={2.2} style={{ marginRight: 8 }} />
+            {i18n.t("chat.edit", "Tahrirlash")}
           </div>
           <div className="msg-context-item danger" onClick={onDelete}>
-            🗑️ {i18n.t("chat.delete", "O'chirish")}
+            <Trash2 size={14} strokeWidth={2.2} style={{ marginRight: 8 }} />
+            {i18n.t("chat.delete", "O'chirish")}
           </div>
         </>
       )}
@@ -423,7 +426,7 @@ function MessageBubble({
               className="file-bubble"
               style={{ color: isOwnVal ? "#fff" : "#1a1a1a", textDecoration: "none" }}
             >
-              <span className="file-icon">📎</span>
+              <span className="file-icon"><Paperclip size={20} /></span>
               <div className="file-info">
                 <div className="file-name">{msg.file_url.split("/").pop()}</div>
                 <div className="file-download">{i18n.t("chat.download", "Yuklab olish")}</div>
@@ -519,6 +522,7 @@ export default function ChatDetail() {
   const isCanceledRef = useRef(false);
 
   const [toast, setToast] = useState(null);
+  const [micError, setMicError] = useState(false);
 
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
@@ -902,6 +906,7 @@ export default function ChatDetail() {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setMicError(false);
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -933,7 +938,24 @@ export default function ChatDetail() {
         setRecordTime((prev) => prev + 1);
       }, 1000);
     } catch (err) {
-      notify(i18n.t("chat.noMicrophone", "Mikrofonga ruxsat yo'q"), "error");
+      console.error("Mic error:", err);
+
+      let micErrMsg = i18n.t("chat.micError", "Mikrofonga kirish rad etildi");
+
+      if (err.name === "NotAllowedError") {
+        // Windows tizimi mikrofonga ruxsat bermagan bo'lishi mumkin
+        micErrMsg = i18n.t(
+          "chat.micErrorSystem",
+          "Mikrofonga ruxsat yo'q. Windows sozlamalarida: Sozlamalar → Maxfiylik → Mikrofon → Brauzerga ruxsat bering"
+        );
+      } else if (err.name === "NotFoundError") {
+        micErrMsg = i18n.t("chat.micNotFound", "Mikrofon topilmadi. Qurilmangizni tekshiring");
+      } else if (err.name === "NotReadableError") {
+        micErrMsg = i18n.t("chat.micInUse", "Mikrofon boshqa dastur tomonidan ishlatilmoqda");
+      }
+
+      setMicError(micErrMsg);
+      setTimeout(() => setMicError(false), 8000);
     }
   };
 
@@ -1531,16 +1553,16 @@ export default function ChatDetail() {
             onClick={() => scrollToBottom()}
             title={i18n.t("chat.scrollDown", "Pastga")}
           >
-            ↓
+            <ArrowLeft size={20} style={{ transform: 'rotate(-90deg)' }} />
           </button>
         )}
 
         <div className="chat-input-area">
           {editingMsg && (
             <div className="edit-mode-bar">
-              <span>✏️</span>
+              <Edit3 size={16} color="var(--accent)" />
               <span>{i18n.t("chat.editing", "Tahrirlash:")} {editingMsg.content?.slice(0, 60)}{editingMsg.content?.length > 60 ? "…" : ""}</span>
-              <button className="edit-cancel-btn" onClick={() => { setEditingMsg(null); setText(""); }}>×</button>
+              <button className="edit-cancel-btn" onClick={() => { setEditingMsg(null); setText(""); }}><X size={18} /></button>
             </div>
           )}
 
@@ -1559,36 +1581,9 @@ export default function ChatDetail() {
             </div>
           )}
 
-          <div className="chat-input-wrapper">
-            <div className="chat-input-controls">
-              <button
-                className={`emoji-toggle-btn ${showEmojiPicker ? 'active' : ''}`}
-                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                title="Emojis"
-              >
-                <Smile size={24} />
-              </button>
-
-              {showEmojiPicker && (
-                <div className="emoji-picker-container" ref={pickerRef}>
-                  <Picker
-                    data={data}
-                    onEmojiSelect={handleEmojiSelect}
-                    theme="light"
-                    previewPosition="none"
-                    skinTonePosition="none"
-                    navPosition="bottom"
-                    perLine={8}
-                    emojiSize={24}
-                    emojiButtonSize={34}
-                    maxFrequentRows={1}
-                  />
-                </div>
-              )}
-            </div>
-
+          <div className="chat-input-container">
             {recording ? (
-              <div className="recording-ui">
+              <div className="chat-input-bubble recording">
                 <div className="record-pulse-dot" />
                 <span className="record-time">
                   {Math.floor(recordTime / 60)}:{(recordTime % 60).toString().padStart(2, "0")}
@@ -1599,20 +1594,36 @@ export default function ChatDetail() {
                   onClick={cancelRecording}
                   title={i18n.t("chat.cancel", "Bekor qilish")}
                 >
-                  🗑️
-                </button>
-                <button
-                  className="record-send-btn"
-                  onClick={sendRecording}
-                  title={i18n.t("chat.send", "Yuborish")}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <Trash2 size={22} />
                 </button>
               </div>
             ) : (
-              <>
+              <div className="chat-input-bubble">
+                <button
+                  className={`emoji-toggle-btn ${showEmojiPicker ? 'active' : ''}`}
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  title="Emojis"
+                >
+                  <Smile size={26} />
+                </button>
+
+                {showEmojiPicker && (
+                  <div className="emoji-picker-container" ref={pickerRef}>
+                    <Picker
+                      data={data}
+                      onEmojiSelect={handleEmojiSelect}
+                      theme="light"
+                      previewPosition="none"
+                      skinTonePosition="none"
+                      navPosition="bottom"
+                      perLine={8}
+                      emojiSize={24}
+                      emojiButtonSize={34}
+                      maxFrequentRows={1}
+                    />
+                  </div>
+                )}
+
                 <textarea
                   ref={textareaRef}
                   className="chat-textarea"
@@ -1622,34 +1633,50 @@ export default function ChatDetail() {
                   placeholder={i18n.t("chat.typeMsgPlaceholder", "Xabar yozing... ")}
                   rows={1}
                 />
-              </>
+
+                <label className="chat-attach-btn">
+                  <input
+                    type="file"
+                    style={{ display: "none" }}
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) handleSendFile(file);
+                    }}
+                  />
+                  <Paperclip size={24} />
+                </label>
+              </div>
             )}
 
             {!text.trim() && !editingMsg && !recording ? (
+              <div className="mic-button-wrapper">
+                {micError && (
+                  <div className="mic-error-tooltip">
+                    {typeof micError === "string"
+                      ? micError
+                      : i18n.t("chat.noMicrophone", "Mikrofonga ruxsat yo'q")}
+                  </div>
+                )}
+                <button
+                  className="chat-action-circle-btn mic"
+                  onClick={startRecording}
+                  disabled={sending}
+                  title={i18n.t("chat.voiceMsg", "Ovozli xabar")}
+                >
+                  <Mic size={24} />
+                </button>
+              </div>
+            ) : (
               <button
-                className="chat-action-btn telegram-mic-btn"
-                onClick={startRecording}
-                disabled={sending}
-                title={i18n.t("chat.voiceMsg", "Ovozli xabar")}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 15C13.6569 15 15 13.6569 15 12V6C15 4.34315 13.6569 3 12 3C10.3431 3 9 4.34315 9 6V12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M19 10V12C19 15.866 15.866 19 12 19M5 10V12C5 15.866 8.13401 19 12 19M12 19V22M8 22H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            ) : !recording && (
-              <button
-                className={`chat-send-btn ${text.trim() ? "active" : ""}`}
-                onClick={handleSend}
-                disabled={sending || (!text.trim() && !editingMsg)}
+                className={`chat-action-circle-btn send ${(text.trim() || editingMsg || recording) ? "active" : ""}`}
+                onClick={recording ? sendRecording : handleSend}
+                disabled={sending || (!text.trim() && !editingMsg && !recording)}
                 title={i18n.t("chat.send", "Yuborish")}
               >
                 {sending ? (
-                  <div style={{ width: 16, height: 16, border: "2px solid #fff", borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
+                  <div style={{ width: 20, height: 20, border: "2px solid #fff", borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
                 ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <Send size={24} />
                 )}
               </button>
             )}
@@ -1680,14 +1707,14 @@ export default function ChatDetail() {
 
             <div className="chat-info-section">
               <div className="chat-info-row">
-                <span className="info-icon">👤</span>
+                <span className="info-icon"><User size={20} /></span>
                 <div className="info-text">
                   <div className="info-val">@{partner?.username || "user"}</div>
                   <div className="info-label">{i18n.t("chat.username", "Username")}</div>
                 </div>
               </div>
               <div className="chat-info-row">
-                <span className="info-icon">📞</span>
+                <span className="info-icon"><Phone size={20} /></span>
                 <div className="info-text">
                   <div className="info-val">{partner?.phone || i18n.t("chat.hidden", "Yashirin")}</div>
                   <div className="info-label">{i18n.t("chat.mobile", "Mobile")}</div>

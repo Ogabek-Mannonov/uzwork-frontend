@@ -3,6 +3,7 @@ import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useNavigate, useParams, Outlet } from "react-router-dom";
 import { getChats } from "../../../api/messages";
 import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/useSocket";
+import { Search, MessageSquare, Plus, MessageCircle } from "lucide-react";
 import i18n from "../../../i18n";
 import "./chat.css";
 
@@ -262,7 +263,7 @@ export default function ChatPage() {
             )}
           </h1>
           <div className="chat-search-box">
-            <span className="chat-search-icon">🔍</span>
+            <span className="chat-search-icon"><Search size={18} strokeWidth={2.5} /></span>
             <input
               type="text"
               placeholder={i18n.t("chat.search", "Qidirish...")}
@@ -287,7 +288,7 @@ export default function ChatPage() {
             </div>
           ) : filteredChats.length === 0 ? (
             <div className="chat-list-empty">
-              <div className="chat-list-empty-icon">💬</div>
+              <div className="chat-list-empty-icon"><MessageSquare size={48} strokeWidth={1.5} style={{ opacity: 0.4 }} /></div>
               <p>{search ? i18n.t("chat.notFound", "Topilmadi") : i18n.t("chat.noChatsYet", "Hali chatlar yo'q")}</p>
             </div>
           ) : (
@@ -341,7 +342,9 @@ export default function ChatPage() {
       <main className="chat-area">
         {!activeChatId ? (
           <div className="chat-empty-state">
-            <div className="chat-empty-state-icon">💬</div>
+            <div className="chat-empty-state-icon">
+              <MessageCircle size={64} strokeWidth={1.5} />
+            </div>
             <h2>{i18n.t("chat.selectChat", "Suhbat tanlang")}</h2>
             <p>{i18n.t("chat.chooseFromLeft", "Chap tarafdan chatni tanlang yoki yangi muloqot boshlang")}</p>
           </div>
