@@ -833,9 +833,11 @@ export default function ChatDetail() {
           if (m.id !== messageId) return m;
           const existing = (m.reactions || []).find((r) => r.emoji === emoji);
           if (existing) {
-            return { ...m, reactions: m.reactions.map((r) => r.emoji === emoji ? { ...r, count: r.count + 1 } : r) };
+            // Faqat o'sha reaksiyani qoldiramiz va count oshiramiz
+            return { ...m, reactions: [{ emoji, count: existing.count + 1 }] };
           }
-          return { ...m, reactions: [...(m.reactions || []), { emoji, count: 1 }] };
+          // Yangi reaksiya qo'shilsa, eskilarni o'chirib yuboramiz
+          return { ...m, reactions: [{ emoji, count: 1 }] };
         })
       );
     };
@@ -1312,10 +1314,10 @@ export default function ChatDetail() {
 
     if (alreadyReacted) {
       // Toggle OFF — o'chirish
-      socket.emit("removeReaction", { chatId, messageId: msg.id, emoji });
+      socket.emit("removeReaction", { chatId, messageId: msg.id, emoji, userId: currentUser?.id });
       setMessages((prev) =>
         prev.map((m) => {
-          if (m.id != msg.id) return m;
+          if (m.id !== msg.id) return m;
           const updated = (m.reactions || [])
             .map((r) => r.emoji === emoji ? { ...r, count: r.count - 1 } : r)
             .filter((r) => r.count > 0);
@@ -1323,19 +1325,26 @@ export default function ChatDetail() {
         })
       );
     } else {
+      // Boshqa barcha reaksiyalarni bekor qilish (faqat 1 ta ruxsat)
+      const hasOldReactions = msg.reactions && msg.reactions.length > 0;
+      (msg.reactions || []).forEach((r) => {
+        socket.emit("removeReaction", { chatId, messageId: msg.id, emoji: r.emoji, userId: currentUser?.id });
+      });
+
       // Toggle ON — qo'shish (optimistic + pending belgilash)
       const key = `${msg.id}:${emoji}`;
       pendingReactionsRef.current.add(key);
-      socket.emit("addReaction", { chatId, messageId: msg.id, emoji, userId: currentUser?.id });
+
+      const delayAdd = hasOldReactions ? 300 : 0; // DB poygasi bo'lmasligi uchun kutamiz
+      setTimeout(() => {
+        socket.emit("addReaction", { chatId, messageId: msg.id, emoji, userId: currentUser?.id });
+      }, delayAdd);
+
       setMessages((prev) =>
         prev.map((m) => {
-          if (m.id != msg.id) return m;
-          const reacts = m.reactions || [];
-          const ex = reacts.find((r) => r.emoji === emoji);
-          if (ex) {
-            return { ...m, reactions: reacts.map((r) => r.emoji === emoji ? { ...r, count: r.count + 1 } : r) };
-          }
-          return { ...m, reactions: [...reacts, { emoji, count: 1 }] };
+          if (m.id !== msg.id) return m;
+          // Butunlay eski reaksiyalarni almashtirib faqat sani qo'yamiz
+          return { ...m, reactions: [{ emoji, count: 1 }] };
         })
       );
     }
@@ -1571,7 +1580,7 @@ export default function ChatDetail() {
                           const alreadyReacted = existing && existing.count > 0;
 
                           if (alreadyReacted) {
-                            socket.emit("removeReaction", { chatId, messageId: msgToReact.id, emoji });
+                            socket.emit("removeReaction", { chatId, messageId: msgToReact.id, emoji, userId: currentUser?.id });
                             setMessages((prev) =>
                               prev.map((m) => {
                                 if (m.id !== msgToReact.id) return m;
@@ -1582,18 +1591,23 @@ export default function ChatDetail() {
                               })
                             );
                           } else {
+                            const hasOldReactions = msgToReact.reactions && msgToReact.reactions.length > 0;
+                            (msgToReact.reactions || []).forEach((r) => {
+                              socket.emit("removeReaction", { chatId, messageId: msgToReact.id, emoji: r.emoji, userId: currentUser?.id });
+                            });
+
                             const key = `${msgToReact.id}:${emoji}`;
                             pendingReactionsRef.current.add(key);
-                            socket.emit("addReaction", { chatId, messageId: msgToReact.id, emoji, userId: currentUser?.id });
+
+                            const delayAdd = hasOldReactions ? 300 : 0;
+                            setTimeout(() => {
+                              socket.emit("addReaction", { chatId, messageId: msgToReact.id, emoji, userId: currentUser?.id });
+                            }, delayAdd);
+
                             setMessages((prev) =>
                               prev.map((m) => {
                                 if (m.id !== msgToReact.id) return m;
-                                const reacts = m.reactions || [];
-                                const ex = reacts.find((r) => r.emoji === emoji);
-                                if (ex) {
-                                  return { ...m, reactions: reacts.map((r) => r.emoji === emoji ? { ...r, count: r.count + 1 } : r) };
-                                }
-                                return { ...m, reactions: [...reacts, { emoji, count: 1 }] };
+                                return { ...m, reactions: [{ emoji, count: 1 }] };
                               })
                             );
                           }
