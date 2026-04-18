@@ -21,17 +21,19 @@ const MyJobs = () => {
   const navigate = useNavigate();
   const { isDark } = useThemeContext();
   const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const fetchJobs = useCallback(async (currentSearch = searchTerm) => {
-    setLoading(true);
+  const fetchJobs = useCallback(async (currentSearch = searchTerm, isInitial = false) => {
+    if (isInitial) setInitialLoading(true);
+    else setLoading(true);
+
     try {
-      // Backend supports status param: open | in_progress | completed | cancelled | draft | all
       let statusParam = null;
       if (activeTab === "active") statusParam = "open";
       else if (activeTab === "drafts") statusParam = "draft";
@@ -48,22 +50,23 @@ const MyJobs = () => {
     } catch (error) {
       console.error("Error fetching jobs:", error);
     } finally {
+      setInitialLoading(false);
       setLoading(false);
     }
-  }, [activeTab]);
+  }, [activeTab, searchTerm]);
 
-  // Initial fetch
-  useEffect(() => {
-    fetchJobs();
-  }, [activeTab, fetchJobs]);
-
-  // Debounced search
+  // Combined fetch logic
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchJobs(searchTerm);
-    }, 500);
+    }, activeTab === "all" && searchTerm === "" ? 0 : 300); // No delay for initial or tab switch
+    
     return () => clearTimeout(timer);
-  }, [searchTerm]);
+  }, [activeTab, searchTerm]); // Removed fetchJobs from deps to avoid re-calls
+
+  useEffect(() => {
+    fetchJobs("", true); // Actual initial fetch
+  }, []); // Only once on mount
 
   const handleDeleteJob = async (jobId) => {
     setActionLoading(true);
@@ -159,7 +162,7 @@ const MyJobs = () => {
     }
   };
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <div className="mj-loading">
         <div className="mj-spinner"></div>
@@ -217,6 +220,7 @@ const MyJobs = () => {
               </button>
             )}
           </div>
+          {loading && !initialLoading && <div className="mj-search-loading">Yangilanmoqda...</div>}
         </div>
 
         {/* Jobs List */}
