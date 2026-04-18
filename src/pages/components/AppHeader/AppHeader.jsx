@@ -459,6 +459,26 @@ function AuthHeader({ i18n, changeLanguage, user }) {
           </div>
 
           <div className="nav__right">
+            {isClient && (
+              <button
+                className="post-job-btn"
+                onClick={() => navigate("/client/postjob")}
+                style={{
+                  display: "flex", alignItems: "center", gap: "6px",
+                  padding: "7px 16px", borderRadius: "8px",
+                  background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+                  color: "#fff", border: "none", cursor: "pointer",
+                  fontSize: "13px", fontWeight: 700, whiteSpace: "nowrap",
+                  boxShadow: "0 2px 8px rgba(59,130,246,0.35)",
+                  transition: "all 0.2s",
+                }}
+                onMouseOver={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 4px 14px rgba(59,130,246,0.5)"; }}
+                onMouseOut={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 8px rgba(59,130,246,0.35)"; }}
+              >
+                <span style={{ fontSize: "16px", lineHeight: 1 }}>+</span>
+                {t("navbar.postJob")}
+              </button>
+            )}
             <button className="icon-btn icon-btn--notif" title="Notifications">
               <Bell size={16} /><span className="notif-dot" />
             </button>
