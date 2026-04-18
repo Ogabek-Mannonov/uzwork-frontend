@@ -78,6 +78,18 @@ export const uploadVoice = async (formData) => {
   }
 };
 
+/** Umumiy fayllarni (rasm, video, pdf, v.k) yuklash uchun */
+export const uploadFile = async (formData) => {
+  try {
+    const res = await api.post(`/upload`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
 /** Video qo'ng'iroq boshlash */
 export const startVideoCall = async (chatId, video_call_link) => {
   try {
