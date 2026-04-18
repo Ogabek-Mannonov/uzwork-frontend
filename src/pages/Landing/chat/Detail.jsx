@@ -11,7 +11,7 @@ import {
   uploadFile,
 } from "../../../api/messages";
 import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/useSocket";
-import { Smile, Globe, Settings2, X, MoreVertical, Copy, Trash2, Edit3, User, Phone, ArrowLeft, Send, Mic, Download, Paperclip, FileText } from "lucide-react";
+import { Smile, Globe, Settings2, X, MoreVertical, Copy, Trash2, Edit3, User, Phone, ArrowLeft, Send, Mic, Download, Paperclip, FileText, Bell, BellOff, Pin, UserPlus, Settings, ExternalLink, Search, Video, Briefcase } from "lucide-react";
 import i18n from "../../../i18n";
 import { useTranslation } from "react-i18next";
 import { translateToUzbek, translateBatchToUzbek } from "../../../api/translate_service";
@@ -27,6 +27,21 @@ function avatarSrc(url) {
   if (!url) return null;
   if (url.startsWith("http")) return url;
   return `${BACKEND}${url}`;
+}
+
+function isImgPath(url) {
+  if (!url) return false;
+  return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(url);
+}
+
+function isVideoPath(url) {
+  if (!url) return false;
+  return /\.(mp4|webm|ogg|mov|avi|mkv)$/i.test(url);
+}
+
+function isPdfPath(url) {
+  if (!url) return false;
+  return /\.pdf$/i.test(url);
 }
 
 const parseUTC = (raw) => {
@@ -132,6 +147,15 @@ function groupMessagesByDate(m) {
     currentGroup.messages.push(msg);
   });
   return groups;
+}
+
+function scrollToMessage(msgId) {
+  const el = document.querySelector(`.msg-group[data-message-id="${msgId}"]`);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add('highlight-flash');
+    setTimeout(() => el.classList.remove('highlight-flash'), 2000);
+  }
 }
 
 // ── Avatar ───────────────────────────────────────────────
@@ -531,6 +555,7 @@ function MessageBubble({
             </>
           )}
 
+          {(getMsgText(msg) || translation || (!isImage && !isVideo)) && (
             <div className="msg-time-inline">
               {(msg.reactions || []).length > 0 && (
                 <div className="msg-inline-reactions">
@@ -567,6 +592,7 @@ function MessageBubble({
                 </span>
               )}
             </div>
+          )}
 
           {/* Reactions row - Faqat media yoki long messages uchun? Yo'q, shortda inline bo'ldi, endi faqat kerak bo'lsa show qilamiz */}
           {/* Hozircha text xabarlarda ham inline bo'lgani uchun buni faqat media/doc larda caption bo'lsa ishlatishimiz mumkin */}
@@ -597,18 +623,20 @@ function MessageBubble({
 function MediaLightbox({ media, onClose }) {
   if (!media) return null;
 
-  const isVideo = media.type === 'video';
-  const url = media.url.startsWith('http') ? media.url : `${BACKEND}${media.url}`;
+  const fileUrl = media.file_url || media.url || "";
+  const isVideo = isVideoPath(fileUrl);
+  const fullUrl = avatarSrc(fileUrl);
+  const fileName = fileUrl ? fileUrl.split('/').pop() : "media";
 
   return (
     <div className="lightbox-overlay" onClick={onClose}>
       <div className="lightbox-header">
         <div className="lightbox-info">
-           <span className="lightbox-filename">{media.url.split('/').pop()}</span>
+           <span className="lightbox-filename">{fileName}</span>
         </div>
         <div className="lightbox-actions">
           <a 
-            href={url} 
+            href={fullUrl} 
             download 
             className="lightbox-btn" 
             onClick={e => e.stopPropagation()}
@@ -624,9 +652,9 @@ function MediaLightbox({ media, onClose }) {
       
       <div className="lightbox-content" onClick={e => e.stopPropagation()}>
         {isVideo ? (
-          <video src={url} controls autoPlay className="lightbox-media" />
+          <video src={fullUrl} controls autoPlay className="lightbox-media" />
         ) : (
-          <img src={url} alt="full-view" className="lightbox-media" />
+          <img src={fullUrl} alt="full-view" className="lightbox-media" />
         )}
       </div>
     </div>
@@ -758,7 +786,9 @@ export default function ChatDetail() {
 
   const [typingUser, setTypingUser] = useState(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [unreadScrollCount, setUnreadScrollCount] = useState(0);
   const [showInfo, setShowInfo] = useState(false);
+  const [emojiSidebar, setEmojiSidebar] = useState(false);
   const [presenceResolved, setPresenceResolved] = useState(false);
   const [showTranslate, setShowTranslate] = useState(true);
   const [translations, setTranslations] = useState({});
@@ -780,7 +810,10 @@ export default function ChatDetail() {
   const [toast, setToast] = useState(null);
   const [micError, setMicError] = useState(false);
 
-  // -- File/Image Preview Modal States --
+  const [isMuted, setIsMuted] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [pendingFile, setPendingFile] = useState(null);
   const [filePreviewUrl, setFilePreviewUrl] = useState(null);
   const [captionText, setCaptionText] = useState("");
@@ -796,6 +829,7 @@ export default function ChatDetail() {
 
   const observerRef = useRef(null);
   const pendingReactionsRef = useRef(new Set()); // Optimistik qo'shilganlarni kuzatish
+  const emojiHoverTimerRef = useRef(null);
 
   useEffect(() => {
     if (observerRef.current) {
@@ -967,12 +1001,44 @@ export default function ChatDetail() {
         setShowEmojiPicker(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
+    const handleEsc = (e) => {
+      if (e.key === "Escape") {
+        let handled = true;
+        if (viewingMedia) {
+          setViewingMedia(null);
+        } else if (showSearch) {
+          setShowSearch(false);
+          setSearchQuery("");
+        } else if (editingMsg) {
+          setEditingMsg(null);
+          setText("");
+        } else if (replyingTo) {
+          setReplyingTo(null);
+        } else if (emojiSidebar) {
+           setEmojiSidebar(false);
+        } else if (showInfo) {
+           setShowInfo(false);
+        } else if (onBack) {
+           onBack();
+        } else {
+           handled = false;
+        }
+
+        if (handled) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+    };
+
+    window.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("keydown", handleEsc);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("keydown", handleEsc);
       clearTimeout(typingTimerRef.current);
     };
-  }, []);
+  }, [viewingMedia, showSearch, editingMsg, replyingTo, emojiSidebar, showInfo, onBack]);
 
   const handleEmojiSelect = (emoji) => {
     if (!textareaRef.current) return;
@@ -989,7 +1055,12 @@ export default function ChatDetail() {
 
   const scrollToBottom = useCallback((behavior = "smooth") => {
     bottomRef.current?.scrollIntoView({ behavior });
-  }, []);
+    setUnreadScrollCount(0);
+    // Pastga tushganda o'qilgan deb belgilaymiz
+    if (chatId) {
+      markMessagesAsRead(chatId).then(() => reloadList?.());
+    }
+  }, [chatId, reloadList]);
 
   useEffect(() => {
     if (!loading && messages.length > 0) {
@@ -1005,8 +1076,18 @@ export default function ChatDetail() {
     const el = messagesAreaRef.current;
     if (!el) return;
     const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    const wasAtBottom = isAtBottomRef.current;
     isAtBottomRef.current = distFromBottom < 80;
     setShowScrollBtn(distFromBottom > 200);
+
+    // Reset badge if we are at bottom
+    if (distFromBottom < 80) {
+      setUnreadScrollCount(0);
+      // Agar endigina pastga tushgan bo'lsak, xabarlarni o'qilgan deb belgilaymiz
+      if (!wasAtBottom && chatId) {
+        markMessagesAsRead(chatId).then(() => reloadList?.());
+      }
+    }
   };
 
   useEffect(() => {
@@ -1525,6 +1606,8 @@ export default function ChatDetail() {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    } else if (e.key === "Escape") {
+      // Bu ierarxik yopish uchun window listener'ga o'tib ketadi
     }
   };
 
@@ -1658,9 +1741,15 @@ export default function ChatDetail() {
   const isComputedOnline = partner?.is_online === true || partner?.isOnline === true || partner?.online === true;
   const canShowOfflineStatus = presenceResolved && !isComputedOnline && !!actualLastSeen;
 
-  const filteredMessages = messages.filter(
+  const baseFilteredMessages = messages.filter(
     (msg) => !(msg.deleted_at && !isAdmin)
   );
+
+  const filteredMessages = searchQuery.trim()
+    ? baseFilteredMessages.filter(m => 
+        (m.message || m.content || "").toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : baseFilteredMessages;
 
   const grouped = groupMessagesByDate(filteredMessages);
 
@@ -1730,50 +1819,77 @@ export default function ChatDetail() {
         style={{ flex: 1, display: "flex", flexDirection: "column", height: "100%", position: "relative", minWidth: 0 }}
       >
         <div className="chat-header">
-          <div className="chat-header-left">
-            {onBack && (
-              <button className="chat-back-btn" onClick={onBack} style={{ display: "flex" }}>
-                ←
+          {showSearch ? (
+            <div className="chat-header-search-wrap">
+              <button 
+                className="chat-header-search-back" 
+                onClick={() => { setShowSearch(false); setSearchQuery(""); }}
+                title={i18n.t("chat.back", "Orqaga")}
+              >
+                <ArrowLeft size={22} />
               </button>
-            )}
-            <Avatar user={partner} size="md" />
-            <div className="chat-header-info">
-              <h2 className="chat-header-name">{partnerName}</h2>
-              <p className="chat-header-status">
-                {typingUser ? (
-                  <>
-                    <span className="chat-header-status-dot" />
-                    <span className="typing">{typingUser} {i18n.t("chat.typingFull", "yozmoqda…")}</span>
-                  </>
-                ) : isComputedOnline ? (
-                  <span className="online">{i18n.t("chat.online", "Online")}</span>
-                ) : canShowOfflineStatus ? (
-                  <span className="offline-status">{formatLastSeen(actualLastSeen)}</span>
-                ) : (
-                  <span className="offline-status"></span>
+              <div className="chat-header-search-bar">
+                <Search size={18} className="search-icon" />
+                <input 
+                  type="text" 
+                  placeholder={i18n.t("chat.searchInChat", "Xabarlarni qidirish...")}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                />
+                {searchQuery && (
+                  <button className="search-clear-btn" onClick={() => setSearchQuery("")}>
+                    <X size={16} />
+                  </button>
                 )}
-              </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="chat-header-left">
+                {onBack && (
+                  <button className="chat-back-btn" onClick={onBack} style={{ display: "flex" }}>
+                    <ArrowLeft size={22} />
+                  </button>
+                )}
+                <Avatar user={partner} size="md" />
+                <div className="chat-header-info">
+                  <h2 className="chat-header-name">{partnerName}</h2>
+                  <p className="chat-header-status">
+                    {typingUser ? (
+                      <>
+                        <span className="chat-header-status-dot" />
+                        <span className="typing">{typingUser} {i18n.t("chat.typingFull", "yozmoqda…")}</span>
+                      </>
+                    ) : isComputedOnline ? (
+                      <span className="online">{i18n.t("chat.online", "Online")}</span>
+                    ) : canShowOfflineStatus ? (
+                      <span className="offline-status">{formatLastSeen(actualLastSeen)}</span>
+                    ) : (
+                      <span className="offline-status"></span>
+                    )}
+                  </p>
+                </div>
+              </div>
 
-          <div className="chat-header-right">
-            {jobInfo?.title && (
-              <span className="chat-header-job" title={jobInfo.title}>
-                💼 {jobInfo.title}
-              </span>
-            )}
-            <button
-              className="chat-sidebar-toggle-btn"
-              onClick={() => setShowInfo(!showInfo)}
-              title={i18n.t("chat.info", "Ma'lumot")}
-              style={{ marginLeft: '12px' }}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="15" y1="3" x2="15" y2="21"></line>
-              </svg>
-            </button>
-          </div>
+              <div className="chat-header-right">
+                <button
+                  className={`chat-sidebar-toggle-btn ${showInfo ? 'active' : ''}`}
+                  onClick={() => {
+                    setShowInfo(!showInfo);
+                    setEmojiSidebar(false);
+                  }}
+                  title={i18n.t("chat.info", "Ma'lumot")}
+                  style={{ marginLeft: '12px' }}
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="15" y1="3" x2="15" y2="21"></line>
+                  </svg>
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {showTranslate && (
@@ -1935,6 +2051,11 @@ export default function ChatDetail() {
             title={i18n.t("chat.scrollDown", "Pastga")}
           >
             <ArrowLeft size={20} style={{ transform: 'rotate(-90deg)' }} />
+            {unreadScrollCount > 0 && (
+              <span className="scroll-unread-badge">
+                {unreadScrollCount}
+              </span>
+            )}
           </button>
         )}
 
@@ -1980,30 +2101,48 @@ export default function ChatDetail() {
               </div>
             ) : (
               <div className="chat-input-bubble">
-                <button
-                  className={`emoji-toggle-btn ${showEmojiPicker ? 'active' : ''}`}
-                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                  title="Emojis"
+                <div 
+                  className="emoji-popover-wrapper"
+                  onMouseEnter={() => {
+                    if (emojiHoverTimerRef.current) clearTimeout(emojiHoverTimerRef.current);
+                    if (!emojiSidebar) setShowEmojiPicker(true);
+                  }}
+                  onMouseLeave={() => {
+                    emojiHoverTimerRef.current = setTimeout(() => {
+                      setShowEmojiPicker(false);
+                    }, 400); // 400ms delay to prevent accidental closing
+                  }}
                 >
-                  <Smile size={26} />
-                </button>
+                  <button
+                    className={`emoji-toggle-btn ${emojiSidebar ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEmojiSidebar(!emojiSidebar);
+                      setShowInfo(false);
+                      setShowEmojiPicker(false);
+                    }}
+                    title="Emojis"
+                  >
+                    <Smile size={26} />
+                  </button>
 
-                {showEmojiPicker && (
-                  <div className="emoji-picker-container" ref={pickerRef}>
-                    <Picker
-                      data={data}
-                      onEmojiSelect={handleEmojiSelect}
-                      theme="light"
-                      previewPosition="none"
-                      skinTonePosition="none"
-                      navPosition="bottom"
-                      perLine={8}
-                      emojiSize={24}
-                      emojiButtonSize={34}
-                      maxFrequentRows={1}
-                    />
-                  </div>
-                )}
+                  {showEmojiPicker && !emojiSidebar && (
+                    <div className="emoji-picker-container" ref={pickerRef}>
+                      <Picker
+                        data={data}
+                        onEmojiSelect={handleEmojiSelect}
+                        theme="light"
+                        previewPosition="none"
+                        skinTonePosition="none"
+                        navPosition="bottom"
+                        perLine={8}
+                        emojiSize={24}
+                        emojiButtonSize={34}
+                        maxFrequentRows={1}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 <textarea
                   ref={textareaRef}
@@ -2067,48 +2206,244 @@ export default function ChatDetail() {
         </div>
       </div>
 
-      {showInfo && (
+      {(showInfo || emojiSidebar) && (
         <aside className="chat-info-sidebar">
-          <div className="chat-info-header">
-            <button className="chat-header-btn" onClick={() => setShowInfo(false)}>✕</button>
-            <h3>{i18n.t("chat.information", "Information")}</h3>
-          </div>
-          <div className="chat-info-body">
-            <div className="chat-info-profile">
-              <Avatar user={partner} size="lg" />
-              <div className="chat-info-name">{partnerName}</div>
-              <div className="chat-info-status">
-                {typingUser
-                  ? i18n.t("chat.typing", "yozmoqda...")
-                  : isComputedOnline
-                    ? i18n.t("chat.online", "Online")
-                    : canShowOfflineStatus
-                      ? formatLastSeen(actualLastSeen)
-                      : ""}
+          {emojiSidebar ? (
+            <>
+              <div className="chat-info-header">
+                <h3>{i18n.t("chat.stickers", "Emoji & Stickers")}</h3>
+                <button className="chat-header-btn" onClick={() => setEmojiSidebar(false)}>✕</button>
               </div>
-            </div>
+              <div className="chat-info-body emoji-picker-body">
+                <Picker
+                  data={data}
+                  onEmojiSelect={(emoji) => {
+                    setText(prev => prev + emoji.native);
+                  }}
+                  theme="light"
+                  navPosition="top"
+                  previewPosition="none"
+                  skinTonePosition="none"
+                  perLine={8}
+                  maxFrequentRows={2}
+                  emojiSize={22}
+                  emojiButtonSize={36}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="chat-info-header">
+                <h3>{i18n.t("chat.profile", "User Details")}</h3>
+                <button className="chat-header-btn" onClick={() => setShowInfo(false)}>✕</button>
+              </div>
+              
+              <div className="chat-info-body">
+                <div className="chat-info-profile">
+                  <div className="info-avatar-wrapper">
+                    <Avatar user={partner} size="xl" />
+                  </div>
+                  <div className="chat-info-name">{partnerName}</div>
+                  <div className="chat-info-status">
+                    {typingUser
+                      ? i18n.t("chat.typing", "yozmoqda...")
+                      : isComputedOnline
+                        ? i18n.t("chat.online", "Online")
+                        : canShowOfflineStatus
+                          ? formatLastSeen(actualLastSeen)
+                          : ""}
+                  </div>
+                  {jobInfo?.title && (
+                    <div className="chat-info-job-pill" title={jobInfo.title}>
+                      <Briefcase size={14} style={{ marginRight: '6px' }} />
+                      <span>{jobInfo.title}</span>
+                    </div>
+                  )}
+                </div>
 
-            <div className="chat-info-section">
-              <div className="chat-info-row">
-                <span className="info-icon"><User size={20} /></span>
-                <div className="info-text">
-                  <div className="info-val">@{partner?.username || "user"}</div>
-                  <div className="info-label">{i18n.t("chat.username", "Username")}</div>
+                <div className="chat-info-top-actions">
+                  <button 
+                    className={`info-action-btn ${isMuted ? 'active' : ''}`}
+                    onClick={() => {
+                       setIsMuted(!isMuted);
+                       notify(isMuted ? "Bildirishnomalar yoqildi" : "Xabarlar ovozsiz rejimga o'tkazildi", "success");
+                    }}
+                  >
+                    <div className="action-icon-circle">
+                      {isMuted ? <BellOff size={18} /> : <Bell size={18} />}
+                    </div>
+                    <span>{isMuted ? i18n.t("chat.unmute", "Unmute") : i18n.t("chat.notify", "Mute")}</span>
+                  </button>
+
+                  <button className="info-action-btn" onClick={() => { setShowSearch(true); setShowInfo(false); }}>
+                    <div className="action-icon-circle"><Search size={18} /></div>
+                    <span>{i18n.t("chat.search", "Search")}</span>
+                  </button>
+
+                  <button 
+                    className={`info-action-btn ${isPinned ? 'active' : ''}`}
+                    onClick={() => {
+                        setIsPinned(!isPinned);
+                        notify(isPinned ? "Chat pin-dan olindi" : "Chat pin qilindi", "success");
+                    }}
+                  >
+                    <div className="action-icon-circle"><Pin size={18} style={isPinned ? { transform: 'rotate(45deg)', color: '#3390ec' } : {}} /></div>
+                    <span>{isPinned ? i18n.t("chat.unpin", "Unpin") : i18n.t("chat.pin", "Pin")}</span>
+                  </button>
+
+                  <button className="info-action-btn" onClick={() => notify("Qo'shimcha funksiyalar tez kunda...", "info")}>
+                    <div className="action-icon-circle"><MoreVertical size={18} /></div>
+                    <span>{i18n.t("chat.more", "More")}</span>
+                  </button>
+                </div>
+
+                <div className="chat-info-divider" />
+
+                {/* Images Section */}
+                {messages.filter(m => (m.type === 'image' || m.type === 'file') && isImgPath(m.file_url)).length > 0 && (
+                  <div className="chat-info-media-section">
+                    <div className="section-header">
+                      <h4>{i18n.t("chat.images", "Images")}</h4>
+                      <button className="view-all-btn">{i18n.t("chat.viewAll", "View All")}</button>
+                    </div>
+                    <div className="media-grid">
+                      {messages
+                        .filter(m => (m.type === 'image' || m.type === 'file') && isImgPath(m.file_url))
+                        .slice(-8)
+                        .map((m, i) => (
+                          <div key={i} className="media-grid-item" onClick={() => {
+                            scrollToMessage(m.id);
+                            setViewingMedia(m);
+                          }}>
+                            <img src={avatarSrc(m.file_url)} alt="shared" />
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Videos Section */}
+                {messages.filter(m => (m.type === 'video' || m.type === 'file') && isVideoPath(m.file_url)).length > 0 && (
+                  <div className="chat-info-media-section">
+                    <div className="section-header">
+                      <h4>{i18n.t("chat.videos", "Videos")}</h4>
+                      <button className="view-all-btn">{i18n.t("chat.viewAll", "View All")}</button>
+                    </div>
+                    <div className="media-grid">
+                      {messages
+                        .filter(m => (m.type === 'video' || m.type === 'file') && isVideoPath(m.file_url))
+                        .slice(-8)
+                        .map((m, i) => (
+                          <div key={i} className="media-grid-item video-thumb" onClick={() => {
+                            scrollToMessage(m.id);
+                            setViewingMedia(m);
+                          }}>
+                            <div className="video-thumb-overlay"><Video size={16} /></div>
+                            <video 
+                              src={avatarSrc(m.file_url)} 
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              muted
+                              preload="metadata"
+                            />
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* PDFs Section */}
+                {messages.filter(m => m.type === 'file' && isPdfPath(m.file_url)).length > 0 && (
+                  <div className="chat-info-media-section">
+                    <div className="section-header">
+                      <h4>{i18n.t("chat.pdfs", "PDF Files")}</h4>
+                      <button className="view-all-btn">{i18n.t("chat.viewAll", "View All")}</button>
+                    </div>
+                    <div className="media-list">
+                      {messages
+                        .filter(m => m.type === 'file' && isPdfPath(m.file_url))
+                        .slice(-5)
+                        .map((m, i) => (
+                          <div key={i} className="media-list-item" onClick={() => scrollToMessage(m.id)}>
+                            <div className="list-item-icon pdf">
+                               <FileText size={18} />
+                            </div>
+                            <div className="list-item-info">
+                              <div className="list-item-name">{m.content || m.file_url?.split('/').pop()}</div>
+                              <div className="list-item-meta">PDF • {new Date(m.created_at).toLocaleDateString()}</div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Files Section */}
+                {messages.filter(m => m.type === 'file' && !isImgPath(m.file_url) && !isVideoPath(m.file_url) && !isPdfPath(m.file_url)).length > 0 && (
+                  <div className="chat-info-media-section">
+                    <div className="section-header">
+                      <h4>{i18n.t("chat.files", "Other Files")}</h4>
+                      <button className="view-all-btn">{i18n.t("chat.viewAll", "View All")}</button>
+                    </div>
+                    <div className="media-list">
+                      {messages
+                        .filter(m => m.type === 'file' && !isImgPath(m.file_url) && !isVideoPath(m.file_url) && !isPdfPath(m.file_url))
+                        .slice(-5)
+                        .map((m, i) => (
+                          <a key={i} href={avatarSrc(m.file_url)} target="_blank" rel="noreferrer" className="media-list-item" onClick={(e) => {
+                            e.stopPropagation();
+                            scrollToMessage(m.id);
+                          }}>
+                            <div className="list-item-icon file">
+                              <FileText size={18} />
+                            </div>
+                            <div className="list-item-info">
+                              <div className="list-item-name">{m.content || m.file_url?.split('/').pop()}</div>
+                              <div className="list-item-meta">
+                                {m.file_size ? `${(m.file_size / 1024).toFixed(1)} KB` : "Document"} • {new Date(m.created_at).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </a>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Links Section */}
+                {messages.filter(m => (m.content || '').match(/https?:\/\/[^\s]+/)).length > 0 && (
+                  <div className="chat-info-media-section">
+                    <div className="section-header">
+                      <h4>{i18n.t("chat.links", "Links")}</h4>
+                      <button className="view-all-btn">{i18n.t("chat.viewAll", "View All")}</button>
+                    </div>
+                    <div className="media-list">
+                      {messages
+                        .filter(m => (m.content || '').match(/https?:\/\/[^\s]+/))
+                        .slice(-5)
+                        .map((m, i) => {
+                          const urlMatch = m.content.match(/https?:\/\/[^\s]+/);
+                          const url = urlMatch ? urlMatch[0] : '#';
+                          return (
+                            <a key={i} href={url} target="_blank" rel="noreferrer" className="media-list-item">
+                              <div className="list-item-icon link">
+                                <ExternalLink size={18} />
+                              </div>
+                              <div className="list-item-info">
+                                <div className="list-item-name">{url}</div>
+                                <div className="list-item-meta">{new Date(m.created_at).toLocaleDateString()}</div>
+                              </div>
+                            </a>
+                          );
+                        })}
+                    </div>
+                  </div>
+                )}
+
+                <div className="chat-info-actions">
+                  <button className="chat-info-danger-btn">{i18n.t("chat.blockUser", "Block User")}</button>
                 </div>
               </div>
-              <div className="chat-info-row">
-                <span className="info-icon"><Phone size={20} /></span>
-                <div className="info-text">
-                  <div className="info-val">{partner?.phone || i18n.t("chat.hidden", "Yashirin")}</div>
-                  <div className="info-label">{i18n.t("chat.mobile", "Mobile")}</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="chat-info-actions">
-              <button className="chat-info-danger-btn">{i18n.t("chat.blockUser", "Block User")}</button>
-            </div>
-          </div>
+            </>
+          )}
         </aside>
       )}
 
