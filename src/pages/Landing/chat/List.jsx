@@ -349,7 +349,13 @@ export default function ChatPage() {
             <p>{i18n.t("chat.chooseFromLeft", "Chap tarafdan chatni tanlang yoki yangi muloqot boshlang")}</p>
           </div>
         ) : (
-          <Outlet context={{ onBack: () => setSidebarOpen(true), reloadList: loadChats }} />
+          <Outlet context={{ 
+            onBack: () => { 
+              setSidebarOpen(true); 
+              navigate("/messages"); 
+            }, 
+            reloadList: loadChats 
+          }} />
         )}
       </main>
     </div>
