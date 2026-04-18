@@ -682,5 +682,155 @@
     "successCard": "Karta muvaffaqiyatli qo'shildi!",
     "successDelete": "Karta o'chirildi",
     "errorGeneric": "Xatolik yuz berdi"
+  },
+  "clientProfile": {
+    "title": "Mening ma'lumotlarim",
+    "viewPublicProfile": "Ochiq profilda ko'rish",
+    "verifiedClient": "TASDIQLANGAN MIJOZ",
+    "premiumClient": "PREMIUM MIJOZ",
+    "edit": "Tahrirlash",
+    "fullName": "To'liq ism",
+    "companyName": "Kompaniya nomi",
+    "companyBio": "Kompaniya BIO",
+    "noBio": "Kompaniya haqida ma'lumot kiritilmagan. Ma'lumot qo'shish uchun tahrirlash tugmasini bosing.",
+    "clientRating": "MIJOZ REYTINGI",
+    "stats": {
+      "postings": "E'lonlar",
+      "spending": "Xarajatlar",
+      "rating": "Reyting",
+      "active": "Faol"
+    },
+    "nav": {
+      "settings": "SOZLAMALAR",
+      "myInfo": "Mening ma'lumotlarim",
+      "billing": "To'lovlar va hisob-kitoblar",
+      "password": "Parol va xavfsizlik",
+      "teams": "Jamoalar va a'zolar",
+      "membership": "A'zolik",
+      "notifications": "Xabarnoma sozlamalari",
+      "tax": "Soliq ma'lumotlari",
+      "services": "Bog'langan xizmatlar",
+      "appeals": "Shikoyatlarni kuzatish"
+    },
+    "billing": {
+      "title": "To'lovlar va hisob-kitoblar",
+      "paymentMethods": "To'lov usullari",
+      "addFunds": "Mablag' qo'shish",
+      "totalSpent": "Jami sarflangan",
+      "pending": "Kutilmoqda",
+      "balance": "Balans",
+      "available": "Mavjud",
+      "activeJobs": "faol ishlar",
+      "addMethod": "Usul qo'shish",
+      "noMethods": "To'lov usullari topilmadi.",
+      "remove": "O'chirish",
+      "expiry": "Amal qilish muddati",
+      "recentTransactions": "So'nggi o'tkazmalar",
+      "noTransactions": "Tranzaksiyalar topilmadi.",
+      "allTime": "Barcha vaqtlar"
+    },
+    "security": {
+      "title": "Parol va xavfsizlik",
+      "overview": "Xavfsizlik sharhi",
+      "changePassword": "Parolni o'zgartirish",
+      "passwordHint": "Parolingiz kamida 8 ta belgidan iborat bo'lishi va harflar, raqamlar hamda belgilarni o'z ichiga olishi kerak",
+      "currentPassword": "Joriy parol",
+      "newPassword": "Yangi parol",
+      "confirmPassword": "Yangi parolni tasdiqlash",
+      "passwordPlaceholder": "Joriy parolni kiriting",
+      "newPasswordPlaceholder": "Yangi parolni kiriting",
+      "confirmPasswordPlaceholder": "Yangi parolni tasdiqlang",
+      "updatePassword": "Parolni yangilash",
+      "requirements": {
+        "length": "Kamida 8 ta belgi",
+        "uppercase": "Bitta katta harf",
+        "lowercase": "Bitta kichik harf",
+        "number": "Bitta raqam",
+        "special": "Bitta maxsus belgi",
+        "match": "Parollar bir xil"
+      },
+      "twoStep": "Ikki bosqichli tasdiqlash",
+      "twoStepDesc": "Telefoningizga keladigan kodni talab qilish orqali hisobingizga qo'shimcha xavfsizlik qavatini qo'shing",
+      "biometric": "Biometrik kirish",
+      "biometricDesc": "Tez va xavfsiz kirish uchun barmoq izi yoki yuzni tanishdan foydalaning",
+      "loginNotify": "Kirish haqida bildirishnomalar",
+      "loginNotifyDesc": "Hisobingizga yangi qurilmadan kirilganda elektron pochta orqali xabar oling",
+      "passwordExpiry": "Parolning amal qilish muddati",
+      "passwordExpiryDesc": "Xavfsizlikni oshirish uchun har 90 kunda parolni o'zgartirishni talab qilish",
+      "activeSessions": "Faol seanslar",
+      "revokeAccess": "Kirishni bekor qilish",
+      "currentSession": "Joriy",
+      "lastActive": "Oxirgi faollik",
+      "securityTip": "Xavfsizlik maslahati",
+      "securityTipDesc": "Hisobingizga qo'shimcha xavfsizlik qavatini qo'shish uchun ikki bosqichli autentifikatsiyani yoqing."
+    },
+    "teams": {
+      "title": "Jamoalar va a'zolar",
+      "invite": "A'zoni taklif qilish",
+      "yourTeam": "Sizning jamoangiz",
+      "owner": "Ega",
+      "admin": "Admin",
+      "member": "A'zo"
+    },
+    "membership": {
+      "title": "A'zolik",
+      "currentBenefits": "Joriy imtiyozlar",
+      "availablePlans": "Mavjud rejalar",
+      "mostPopular": "Eng mashhur",
+      "upgrade": "Rejani yangilash",
+      "currentBenefits": "Joriy imtiyozlar",
+      "benefits": {
+        "proposals5": "Oyiga 5 tagacha ish takliflari",
+        "proposals20": "20 ta ish taklifi",
+        "proposalsUnlimited": "Cheksiz takliflar",
+        "basicVisibility": "Oddiy profil ko'rinishi",
+        "enhancedProfile": "Yaxshilangan profil",
+        "featuredProfile": "Tavsiya etilgan profil",
+        "standardSupport": "Standart qo'llab-quvvatlash",
+        "prioritySupport": "Ustuvor qo'llab-quvvatlash",
+        "premiumSupport": "Premium qo'llab-quvvatlash",
+        "analytics": "Analitika",
+        "advancedAnalytics": "Kengaytirilgan analitika",
+        "skillsAssessments": "Ko'nikmalarni baholash"
+      },
+      "free": "Bepul",
+      "active": "Faol"
+    },
+    "notifications": {
+      "title": "Xabarnoma sozlamalari",
+      "deliveryPreferences": "Yetkazib berish afzalliklari",
+      "emailNotifications": "Email bildirishnomalar",
+      "pushNotifications": "Push bildirishnomalar"
+    },
+    "placeholders": {
+      "taxTitle": "Soliq ma'lumotlari",
+      "taxComingSoon": "Soliq ma'lumotlari tez kunda",
+      "taxDesc": "Soliq hujjatlari va ma'lumotlaringiz shu yerda paydo bo'ladi",
+      "uploadDocs": "Hujjatlarni yuklash",
+      "servicesTitle": "Bog'langan xizmatlar",
+      "servicesDesc": "Bog'langan hisoblaringiz va integratsiyalarni boshqaring",
+      "connectService": "Xizmatni ulash",
+      "appealsTitle": "Shikoyatlarni kuzatish",
+      "noAppeals": "Faol shikoyatlar yo'q",
+      "appealsDesc": "Hozircha sizda hech qanday faol shikoyatlar yo'q",
+      "fileAppeal": "Shikoyat yuborish"
+    },
+    "aiCenter": {
+      "title": "AI BOSHQARUV MARKAZI",
+      "subtitle": "Maxfiylik birinchi o'rinda",
+      "manage": "Boshqarish",
+      "desc": "Sizning barcha ma'lumotlaringiz xavfsiz holatda. Privacy Guard texnologiyasi orqali ma'lumotlaringiz sun'iy intellektni o'rgatish uchun foydalanilmaydi. Shaxsiy 'Intelligence Mode' hozirda faollashtirilgan."
+    },
+    "footer": {
+      "closeAccount": "Hisobni yopish",
+      "transferOwnership": "Egalikni o'tkazish",
+      "rightsReserved": "Barcha huquqlar himoyalangan"
+    },
+    "messages": {
+      "successUpdate": "Ma'lumotlar muvaffaqiyatli saqlandi!",
+      "errorUpdate": "Ma'lumotlarni saqlashda xatolik yuz berdi",
+      "passwordSuccess": "Parol muvaffaqiyatli yangilandi!",
+      "imageSuccess": "Rasm muvaffaqiyatli yangilandi!"
+    }
   }
 }

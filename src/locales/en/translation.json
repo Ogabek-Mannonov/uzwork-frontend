@@ -682,5 +682,157 @@
     "successCard": "Card added successfully!",
     "successDelete": "Card deleted",
     "errorGeneric": "An error occurred"
+  },
+  "clientProfile": {
+    "title": "My Info",
+    "viewPublicProfile": "View Public Profile",
+    "verifiedClient": "VERIFIED CLIENT",
+    "premiumClient": "PREMIUM CLIENT",
+    "edit": "Edit",
+    "fullName": "Full Name",
+    "companyName": "Company Name",
+    "companyBio": "Company Bio",
+    "noBio": "No bio provided. Click to add one.",
+    "clientRating": "CLIENT RATING",
+    "stats": {
+      "postings": "Postings",
+      "spending": "Spending",
+      "rating": "Rating",
+      "active": "Active"
+    },
+    "nav": {
+      "settings": "SETTINGS",
+      "myInfo": "My Info",
+      "billing": "Billing & Payments",
+      "password": "Password & Security",
+      "teams": "Teams & Members",
+      "membership": "Membership",
+      "notifications": "Notification Settings",
+      "tax": "Tax Information",
+      "services": "Connected Services",
+      "appeals": "Appeals Tracker"
+    },
+    "billing": {
+      "title": "Billing & Payments",
+      "paymentMethods": "Payment Methods",
+      "addFunds": "Add Funds",
+      "totalSpent": "Total Spent",
+      "pending": "Pending",
+      "balance": "Balance",
+      "available": "Available",
+      "activeJobs": "active jobs",
+      "addMethod": "Add Method",
+      "noMethods": "No payment methods found.",
+      "remove": "Remove",
+      "expiry": "Expiry",
+      "recentTransactions": "Recent Transactions",
+      "noTransactions": "No transactions found.",
+      "allTime": "All time",
+      "expiryDate": "Expiry Date",
+      "cvc": "CVC",
+      "cardHolderName": "Card Holder Name"
+    },
+    "security": {
+      "title": "Password & Security",
+      "overview": "Security Overview",
+      "changePassword": "Change Password",
+      "passwordHint": "Your password must be at least 8 characters and contain a mix of letters, numbers, and symbols",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "passwordPlaceholder": "Enter current password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "updatePassword": "Update Password",
+      "requirements": {
+        "length": "At least 8 characters",
+        "uppercase": "One uppercase letter",
+        "lowercase": "One lowercase letter",
+        "number": "One number",
+        "special": "One special character",
+        "match": "Passwords match"
+      },
+      "twoStep": "Two-step verification",
+      "twoStepDesc": "Add an extra layer of security to your account by requiring a code from your phone",
+      "biometric": "Biometric login",
+      "biometricDesc": "Use your fingerprint or face recognition to log in quickly and securely",
+      "loginNotify": "Login notifications",
+      "loginNotifyDesc": "Get notified via email whenever a new device logs into your account",
+      "passwordExpiry": "Password expiry",
+      "passwordExpiryDesc": "Require password change every 90 days for enhanced security",
+      "activeSessions": "Active Sessions",
+      "revokeAccess": "Revoke Access",
+      "currentSession": "Current",
+      "lastActive": "Last active",
+      "securityTip": "Security Tip",
+      "securityTipDesc": "Enable two-factor authentication to add an extra layer of security to your account."
+    },
+    "teams": {
+      "title": "Teams & Members",
+      "invite": "Invite Member",
+      "yourTeam": "Your Team",
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+    },
+    "membership": {
+      "title": "Membership",
+      "currentBenefits": "Current benefits",
+      "availablePlans": "Available Plans",
+      "mostPopular": "Most Popular",
+      "upgrade": "Upgrade",
+      "benefits": {
+        "proposals5": "Up to 5 job proposals per month",
+        "proposals20": "20 job proposals",
+        "proposalsUnlimited": "Unlimited proposals",
+        "basicVisibility": "Basic profile visibility",
+        "enhancedProfile": "Enhanced profile",
+        "featuredProfile": "Featured profile",
+        "standardSupport": "Standard support",
+        "prioritySupport": "Priority support",
+        "premiumSupport": "Premium support",
+        "analytics": "Analytics",
+        "advancedAnalytics": "Advanced analytics",
+        "skillsAssessments": "Skills assessments"
+      },
+      "free": "Free",
+      "active": "Active"
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "deliveryPreferences": "Delivery Preferences",
+      "emailNotifications": "Email notifications",
+      "pushNotifications": "Push notifications"
+    },
+    "placeholders": {
+      "taxTitle": "Tax Information",
+      "taxComingSoon": "Tax Information Coming Soon",
+      "taxDesc": "Your tax documents and information will appear here",
+      "uploadDocs": "Upload Documents",
+      "servicesTitle": "Connected Services",
+      "servicesDesc": "Manage your connected accounts and integrations",
+      "connectService": "Connect Service",
+      "appealsTitle": "Appeals Tracker",
+      "noAppeals": "No Active Appeals",
+      "appealsDesc": "You don't have any active appeals at this time",
+      "fileAppeal": "File an Appeal"
+    },
+    "aiCenter": {
+      "title": "AI COMMAND CENTER",
+      "subtitle": "Privacy-First Intelligence",
+      "manage": "Manage",
+      "desc": "All your data is secure. Privacy Guard technology ensures your data is not used for training AI. Personal 'Intelligence Mode' is currently enabled."
+    },
+    "footer": {
+      "closeAccount": "Close Account",
+      "transferOwnership": "Transfer Ownership",
+      "rightsReserved": "All rights reserved"
+    },
+    "messages": {
+      "successUpdate": "Information updated successfully!",
+      "errorUpdate": "Error updating information",
+      "passwordSuccess": "Password updated successfully!",
+      "imageSuccess": "Image updated successfully!"
+    }
   }
 }

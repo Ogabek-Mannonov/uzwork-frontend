@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   User,
   Settings as SettingsIcon,
@@ -100,6 +101,7 @@ function avatarSrc(url) {
 }
 
 const Settings = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const sectionParam = searchParams.get("section") || "my-info";
   const [activeSection, setActiveSection] = useState(sectionParam);
@@ -250,17 +252,17 @@ const Settings = () => {
 
   const navSections = [
     {
-      title: "SETTINGS",
+      title: t('clientProfile.nav.settings'),
       items: [
-        { id: "my-info", label: "My Info", icon: <User size={18} />, badge: null },
-        { id: "billing", label: "Billing & Payments", icon: <CreditCard size={18} />, badge: null },
-        { id: "password", label: "Password & Security", icon: <Shield size={18} />, badge: null },
-        { id: "teams", label: "Teams & Members", icon: <Users size={18} />, badge: "2" },
-        { id: "membership", label: "Membership", icon: <Award size={18} />, badge: "Basic" },
-        { id: "notifications", label: "Notification Settings", icon: <Bell size={18} />, badge: null },
-        { id: "tax", label: "Tax Information", icon: <FileText size={18} />, badge: null },
-        { id: "services", label: "Connected Services", icon: <Link size={18} />, badge: "3" },
-        { id: "appeals", label: "Appeals Tracker", icon: <AlertTriangle size={18} />, badge: null }
+        { id: "my-info", label: t('clientProfile.nav.myInfo'), icon: <User size={18} />, badge: null },
+        { id: "billing", label: t('clientProfile.nav.billing'), icon: <CreditCard size={18} />, badge: null },
+        { id: "password", label: t('clientProfile.nav.password'), icon: <Shield size={18} />, badge: null },
+        { id: "teams", label: t('clientProfile.nav.teams'), icon: <Users size={18} />, badge: "2" },
+        { id: "membership", label: t('clientProfile.nav.membership'), icon: <Award size={18} />, badge: "Basic" },
+        { id: "notifications", label: t('clientProfile.nav.notifications'), icon: <Bell size={18} />, badge: null },
+        { id: "tax", label: t('clientProfile.nav.tax'), icon: <FileText size={18} />, badge: null },
+        { id: "services", label: t('clientProfile.nav.services'), icon: <Link size={18} />, badge: "3" },
+        { id: "appeals", label: t('clientProfile.nav.appeals'), icon: <AlertTriangle size={18} />, badge: null }
       ]
     }
   ];
@@ -839,25 +841,25 @@ const Settings = () => {
             <div className="content-section soft-fade-in" style={{ maxWidth: '1200px', margin: '0 auto' }}>
               <div className="section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
                 <h1 className="section-title" style={{ margin: 0, textTransform: 'uppercase', fontSize: '24px', lineHeight: '1', display: 'flex', alignItems: 'center', color: '#1e293b' }}>
-                  MENING MA'LUMOTLARIM
+                  {t('clientProfile.title')}
                 </h1>
                 <button 
                   className="view-profile-btn"
                   onClick={() => window.open(`/profile/me`, '_blank')}
                   style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 20px', borderRadius: '24px' }}
                 >
-                  <Eye size={16} /> Ochiq profilda ko'rish
+                  <Eye size={16} /> {t('clientProfile.viewPublicProfile')}
                 </button>
               </div>
 
               <div className="profile-card soft-fade-in stagger-1">
                 <div className="profile-cover">
                   <span className="section-badge" style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 10, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', padding: '6px 16px', borderRadius: '20px', fontWeight: '700', fontSize: '12px' }}>
-                    <ShieldCheck size={14} style={{ marginRight: '6px' }} /> TASDIQLANGAN MIJOZ
+                    <ShieldCheck size={14} style={{ marginRight: '6px' }} /> {t('clientProfile.verifiedClient')}
                   </span>
                   <img src={avatarSrc(userData.coverPhoto) || "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1400"} alt="Cover" className="cover-image" />
                   <button className="change-cover-btn" onClick={() => document.getElementById('cover-upload-input').click()}>
-                    <Camera size={15} /> Tahrirlash
+                    <Camera size={15} /> {t('clientProfile.edit')}
                   </button>
                   <input type="file" id="cover-upload-input" style={{ display: 'none' }} accept="image/*" onChange={(e) => handleImageUpload(e, 'cover')} />
                 </div>
@@ -904,7 +906,7 @@ const Settings = () => {
 
                     <div className="profile-badges-row" style={{ marginTop: '60px' }}>
                       <span className="profile-badge-item profile-badge-membership">
-                        <Award size={14} /> PREMIUM MIJOZ
+                        <Award size={14} /> {t('clientProfile.premiumClient')}
                       </span>
                     </div>
                   </div>
@@ -935,7 +937,7 @@ const Settings = () => {
                       <>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
                           <div>
-                            <span className="lux-label" style={{ display: 'block', marginBottom: '6px', fontSize: '11px', fontWeight: '700', color: '#64748b', letterSpacing: '1px' }}>KOMPANIYA NOMI</span>
+                            <span className="lux-label" style={{ display: 'block', marginBottom: '6px', fontSize: '11px', fontWeight: '700', color: '#64748b', letterSpacing: '1px' }}>{t('clientProfile.companyName')}</span>
                             <div style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b' }}>{userData.company || userData.fullName}</div>
                           </div>
                           <button className="tahrirlash-btn" onClick={() => handleSectionEdit('bio', { company: userData.company, bio: userData.bio })}>
@@ -943,9 +945,9 @@ const Settings = () => {
                           </button>
                         </div>
                         <div>
-                          <span className="lux-label" style={{ display: 'block', marginBottom: '8px', fontSize: '11px', fontWeight: '700', color: '#64748b', letterSpacing: '1px' }}>KOMPANIYA BIO</span>
+                          <span className="lux-label" style={{ display: 'block', marginBottom: '8px', fontSize: '11px', fontWeight: '700', color: '#64748b', letterSpacing: '1px' }}>{t('clientProfile.companyBio')}</span>
                           <div className="profile-bio-text">
-                            {userData.bio || "Kompaniya haqida ma'lumot kiritilmagan. Ma'lumot qo'shish uchun tahrirlash tugmasini bosing."}
+                            {userData.bio || t('clientProfile.noBio')}
                           </div>
                         </div>
                       </>
@@ -956,7 +958,7 @@ const Settings = () => {
                         <MapPin size={16} color="var(--blue)" /> {userData.location || "O'zbekiston"}
                       </span>
                       <span className="profile-meta-item">
-                        <Star size={16} color="#f59e0b" fill="#f59e0b" /> {userData.rating || "5.0"} MIJOZ REYTINGI
+                        <Star size={16} color="#f59e0b" fill="#f59e0b" /> {userData.rating || "5.0"} {t('clientProfile.clientRating')}
                       </span>
                       <span className="profile-meta-item" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => handleSectionEdit('contact', { phone: userData.phone, location: userData.location, timezone: userData.timezone })}>
                         <Phone size={16} color="var(--blue)" /> {userData.phone || "+998 -- --- -- --"}
@@ -986,19 +988,19 @@ const Settings = () => {
                   <div className="unified-stats-grid soft-fade-in stagger-3">
                     <div className="unified-stat-card">
                       <span className="unified-stat-value">{userData.completedJobs || 0}</span>
-                      <span className="unified-stat-label">E'lonlar</span>
+                      <span className="unified-stat-label">{t('clientProfile.stats.postings')}</span>
                     </div>
                     <div className="unified-stat-card">
                       <span className="unified-stat-value">${(userData.totalSpent / 1000).toFixed(1)}k</span>
-                      <span className="unified-stat-label">Xarajatlar</span>
+                      <span className="unified-stat-label">{t('clientProfile.stats.spending')}</span>
                     </div>
                     <div className="unified-stat-card">
                       <span className="unified-stat-value">{userData.rating || "5.0"}</span>
-                      <span className="unified-stat-label">Reyting</span>
+                      <span className="unified-stat-label">{t('clientProfile.stats.rating')}</span>
                     </div>
                     <div className="unified-stat-card">
                       <span className="unified-stat-value">{userData.activeJobs || 0}</span>
-                      <span className="unified-stat-label">Aktiv</span>
+                      <span className="unified-stat-label">{t('clientProfile.stats.active')}</span>
                     </div>
                   </div>
                 </div>
@@ -1038,11 +1040,11 @@ const Settings = () => {
                       <Zap size={22} color="white" />
                     </div>
                     <div>
-                      <h3 style={{ fontSize: '18px', fontWeight: '800', margin: 0, color: '#1e293b', letterSpacing: '-0.3px' }}>
-                        AI COMMAND CENTER
+                    <h3 style={{ fontSize: '18px', fontWeight: '800', margin: 0, color: '#1e293b', letterSpacing: '-0.3px' }}>
+                        {t('clientProfile.aiCenter.title')}
                       </h3>
                       <span style={{ fontSize: '11px', color: 'var(--blue)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                        Privacy-First Intelligence
+                        {t('clientProfile.aiCenter.subtitle')}
                       </span>
                     </div>
                   </div>
@@ -1055,7 +1057,7 @@ const Settings = () => {
                     border: '1px solid #e2e8f0',
                     boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
                   }}>
-                    Boshqarish
+                    {t('clientProfile.aiCenter.manage')}
                   </button>
                 </div>
                 
@@ -1068,56 +1070,11 @@ const Settings = () => {
                   position: 'relative',
                   zIndex: 2
                 }}>
-                  Sizning barcha ma'lumotlaringiz xavfsiz holatda. <strong style={{color: '#1e293b'}}>Privacy Guard</strong> texnologiyasi orqali ma'lumotlaringiz sun'iy intellektni o'rgatish uchun foydalanilmaydi. Shaxsiy "Intelligence Mode" hozirda faollashtirilgan.
+                  {t('clientProfile.aiCenter.desc')}
                 </p>
               </div>
 
-              {/* ELITE ACTIONS FOOTER */}
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column',
-                alignItems: 'center', 
-                gap: '24px', 
-                marginTop: '64px', 
-                paddingBottom: '80px',
-                borderTop: '1px solid #f1f5f9',
-                paddingTop: '40px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-                  <button className="footer-action-link" style={{ 
-                    background: 'none', 
-                    border: 'none', 
-                    color: '#94a3b8', 
-                    fontSize: '13px', 
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}>
-                    <XCircle size={14} /> Hisobni yopish
-                  </button>
-                  <div style={{ width: '4px', height: '4px', background: '#cbd5e1', borderRadius: '50%' }} />
-                  <button className="footer-action-link" style={{ 
-                    background: 'none', 
-                    border: 'none', 
-                    color: '#94a3b8', 
-                    fontSize: '13px', 
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}>
-                    <Share2 size={14} /> Egalikni o'tkazish
-                  </button>
-                </div>
-                <p style={{ color: '#cbd5e1', fontSize: '12px', fontWeight: '500' }}>
-                  UzWork © 2024 • Barcha huquqlar himoyalangan
-                </p>
-              </div>
+
             </div>
           )}
 
@@ -1126,15 +1083,15 @@ const Settings = () => {
             <div className="content-section">
               <div className="section-header">
                 <div className="header-left">
-                  <h1 className="section-title">Billing & Payments</h1>
+                  <h1 className="section-title">{t('clientProfile.billing.title')}</h1>
                   <span className="section-badge">
                     <CreditCard size={14} />
-                    Payment Methods
+                    {t('clientProfile.billing.paymentMethods')}
                   </span>
                 </div>
                 <button className="btn-primary" onClick={() => handleUserMenuClick("Add funds")}>
                   <Plus size={16} />
-                  Add Funds
+                  {t('clientProfile.billing.addFunds')}
                 </button>
               </div>
               
@@ -1142,35 +1099,35 @@ const Settings = () => {
                 <div className="summary-card gradient">
                   <div className="summary-icon"><DollarSign size={24} /></div>
                   <div className="summary-content">
-                    <h3>Total Spent</h3>
+                    <h3>{t('clientProfile.billing.totalSpent')}</h3>
                     <p className="summary-value">${userData.totalSpent.toLocaleString()}</p>
-                    <span className="summary-period">All time</span>
+                    <span className="summary-period">{t('clientProfile.billing.allTime')}</span>
                   </div>
                 </div>
                 <div className="summary-card">
                   <div className="summary-icon"><Clock size={24} /></div>
                   <div className="summary-content">
-                    <h3>Pending</h3>
+                    <h3>{t('clientProfile.billing.pending')}</h3>
                     <p className="summary-value">${userData.pendingAmount.toLocaleString()}</p>
-                    <span className="summary-period">{userData.activeJobs} active jobs</span>
+                    <span className="summary-period">{userData.activeJobs} {t('clientProfile.billing.activeJobs')}</span>
                   </div>
                 </div>
                 <div className="summary-card">
                   <div className="summary-icon"><DollarSign size={24} /></div>
                   <div className="summary-content">
-                    <h3>Balance</h3>
+                    <h3>{t('clientProfile.billing.balance')}</h3>
                     <p className="summary-value">${userData.availableBalance.toLocaleString()}</p>
-                    <span className="summary-period">Available</span>
+                    <span className="summary-period">{t('clientProfile.billing.available')}</span>
                   </div>
                 </div>
               </div>
               
               <div className="payment-methods">
                 <div className="section-subheader">
-                  <h2>Payment Methods</h2>
+                  <h2>{t('clientProfile.billing.paymentMethods')}</h2>
                   <button className="btn-outline" onClick={handleAddBillingMethod}>
                     <Plus size={16} />
-                    Add Method
+                    {t('clientProfile.billing.addMethod')}
                   </button>
                 </div>
                 
@@ -1196,16 +1153,17 @@ const Settings = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="empty-state">No payment methods found.</div>
+                    <div className="empty-state">{t('clientProfile.billing.noMethods')}</div>
                   )}
                 </div>
               </div>
               
               <div className="recent-transactions">
                 <div className="section-subheader">
-                  <h2>Recent Transactions</h2>
-                  <button className="btn-link" onClick={() => fetchSectionData('billing')}>Refresh</button>
+                  <h2>{t('clientProfile.billing.recentTransactions')}</h2>
+                  <button className="btn-link" onClick={() => fetchSectionData('billing')}>{t('common.retry')}</button>
                 </div>
+ Riverside content in Client.jsx:
                 
                 <div className="transactions-list">
                   {transactions.length > 0 ? (
@@ -1221,7 +1179,7 @@ const Settings = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="empty-state">No transactions found.</div>
+                    <div className="empty-state">{t('clientProfile.billing.noTransactions')}</div>
                   )}
                 </div>
               </div>
@@ -1233,10 +1191,10 @@ const Settings = () => {
             <div className="content-section">
               <div className="section-header">
                 <div className="header-left">
-                  <h1 className="section-title">Password & Security</h1>
+                  <h1 className="section-title">{t('clientProfile.security.title')}</h1>
                   <span className="section-badge">
                     <Shield size={14} />
-                    Security Overview
+                    {t('clientProfile.security.overview')}
                   </span>
                 </div>
               </div>
@@ -1245,14 +1203,14 @@ const Settings = () => {
                 <div className="card-header">
                   <div className="header-icon"><Lock size={24} /></div>
                   <div className="header-info">
-                    <h2>Change Password</h2>
-                    <p>Your password must be at least 8 characters and contain a mix of letters, numbers, and symbols</p>
+                    <h2>{t('clientProfile.security.changePassword')}</h2>
+                    <p>{t('clientProfile.security.passwordHint')}</p>
                   </div>
                 </div>
 
                 <form onSubmit={handleUpdatePassword} className="password-form">
                   <div className="form-group">
-                    <label>Current Password</label>
+                    <label>{t('clientProfile.security.currentPassword')}</label>
                     <div className="password-input-wrapper">
                       <input
                         type={showCurrentPassword ? "text" : "password"}
@@ -1290,27 +1248,25 @@ const Settings = () => {
                           <div className="strength-fill" style={{ width: `${passwordStrength.percentage}%`, backgroundColor: passwordStrength.color }} />
                         </div>
                         <span className="strength-label" style={{ color: passwordStrength.color }}>
-                          {passwordStrength.label} Password
+                          {passwordStrength.label === 'Weak' ? t('findWork.drawer.experienceLevel_entry') : passwordStrength.label} {t('clientProfile.security.updatePassword').split(' ')[0]}
                         </span>
                       </div>
                     )}
 
                     <div className="password-requirements">
-                      {passwordStrengthChecks.map(check => (
                         <div key={check.id} className={`requirement ${passwordValidations[check.id] ? "valid" : ""}`}>
                           {passwordValidations[check.id] ? <CheckCircle size={14} className="valid-icon" /> : <div className="dot" />}
-                          <span>{check.label}</span>
+                          <span>{t(`clientProfile.security.requirements.${check.id}`)}</span>
                         </div>
-                      ))}
                       <div className={`requirement ${passwordValidations.match ? "valid" : ""}`}>
                         {passwordValidations.match ? <CheckCircle size={14} className="valid-icon" /> : <div className="dot" />}
-                        <span>Passwords match</span>
+                        <span>{t('clientProfile.security.requirements.match')}</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="form-group">
-                    <label>Confirm New Password</label>
+                    <label>{t('clientProfile.security.confirmPassword')}</label>
                     <div className="password-input-wrapper">
                       <input
                         type={showConfirmPassword ? "text" : "password"}
@@ -1328,9 +1284,9 @@ const Settings = () => {
 
                   <button type="submit" className="update-password-btn" disabled={isLoading}>
                     {isLoading ? (
-                  <><RefreshCw size={18} className="spinning" />Updating...</>
+                  <><RefreshCw size={18} className="spinning" />{t('common.saving')}</>
                     ) : (
-                      <><Save size={18} />Update Password</>
+                      <><Save size={18} />{t('clientProfile.security.updatePassword')}</>
                     )}
                   </button>
                 </form>
@@ -1363,17 +1319,17 @@ const Settings = () => {
                 <div className="security-tip-card">
                   <AlertTriangle size={20} />
                   <div className="tip-content">
-                    <h4>Security Tip</h4>
-                    <p>Enable two-factor authentication to add an extra layer of security to your account.</p>
+                    <h4>{t('clientProfile.security.securityTip')}</h4>
+                    <p>{t('clientProfile.security.securityTipDesc')}</p>
                   </div>
                 </div>
 
               <div className="sessions-card">
                 <div className="sessions-header">
-                  <h2>Active Sessions</h2>
+                  <h2>{t('clientProfile.security.activeSessions')}</h2>
                   <button className="refresh-sessions" onClick={() => handleUserMenuClick("Refresh sessions")}>
                     <RefreshCw size={16} />
-                    Refresh
+                    {t('common.retry')}
                   </button>
                 </div>
 
@@ -1395,17 +1351,15 @@ const Settings = () => {
                         </div>
                       </div>
                       
-                      {!session.current && (
                         <button className="revoke-btn" onClick={() => handleRevokeSession(session.id)}>
-                          Revoke Access
+                          {t('clientProfile.security.revokeAccess')}
                         </button>
-                      )}
                     </div>
                   ))}
                 </div>
 
                 <div className="sessions-footer">
-                  <p>You can revoke access for any session you don't recognize. This will immediately sign out that device.</p>
+                  <p>{t('clientProfile.security.passwordExpiryDesc')}</p>
                 </div>
               </div>
             </div>
@@ -1415,10 +1369,10 @@ const Settings = () => {
           {activeSection === "teams" && (
             <div className="content-section">
               <div className="section-header">
-                <h1 className="section-title">Teams & Members</h1>
+                <h1 className="section-title">{t('clientProfile.teams.title')}</h1>
                 <button className="btn-primary" onClick={() => handleUserMenuClick("Invite member")}>
                   <Plus size={16} />
-                  Invite Member
+                  {t('clientProfile.teams.invite')}
                 </button>
               </div>
               
@@ -1426,32 +1380,32 @@ const Settings = () => {
                 <div className="team-card">
                   <div className="team-header">
                     <Users size={24} />
-                    <h2>Your Team</h2>
+                    <h2>{t('clientProfile.teams.yourTeam')}</h2>
                   </div>
                   <div className="team-members">
                     <div className="member-item">
                       <img src={userData.profilePicture} alt={userData.name} className="member-avatar" />
                       <div className="member-info">
                         <h3>{userData.fullName}</h3>
-                        <p>Owner • {userData.email}</p>
+                        <p>{t('clientProfile.teams.owner')} • {userData.email}</p>
                       </div>
-                      <span className="owner-badge">Owner</span>
+                      <span className="owner-badge">{t('clientProfile.teams.owner')}</span>
                     </div>
                     <div className="member-item">
                       <div className="member-avatar-placeholder">JD</div>
                       <div className="member-info">
                         <h3>John Doe</h3>
-                        <p>Admin • john@example.com</p>
+                        <p>{t('clientProfile.teams.admin')} • john@example.com</p>
                       </div>
-                      <span className="role-badge">Admin</span>
+                      <span className="role-badge">{t('clientProfile.teams.admin')}</span>
                     </div>
                     <div className="member-item">
                       <div className="member-avatar-placeholder">JS</div>
                       <div className="member-info">
                         <h3>Jane Smith</h3>
-                        <p>Member • jane@example.com</p>
+                        <p>{t('clientProfile.teams.member')} • jane@example.com</p>
                       </div>
-                      <span className="role-badge">Member</span>
+                      <span className="role-badge">{t('clientProfile.teams.member')}</span>
                     </div>
                   </div>
                 </div>
@@ -1463,54 +1417,55 @@ const Settings = () => {
           {activeSection === "membership" && (
             <div className="content-section">
               <div className="section-header">
-                <h1 className="section-title">Membership</h1>
+                <h1 className="section-title">{t('clientProfile.membership.title')}</h1>
               </div>
               
               <div className="membership-card current">
                 <div className="membership-header">
                   <Award size={32} />
                   <div>
-                    <h2>Basic Membership</h2>
-                    <p>Free • Active</p>
+                    <h2>{t('clientProfile.membership.free')} Membership</h2>
+ Riverside content in Client.jsx:
+                    <p>{t('clientProfile.membership.free')} • {t('clientProfile.membership.active')}</p>
                   </div>
                 </div>
                 <div className="membership-features">
-                  <h3>Current benefits:</h3>
+                  <h3>{t('clientProfile.membership.currentBenefits')}:</h3>
                   <ul>
-                    <li><CheckCircle size={16} /> Up to 5 job proposals per month</li>
-                    <li><CheckCircle size={16} /> Basic profile visibility</li>
-                    <li><CheckCircle size={16} /> Standard support</li>
+                    <li><CheckCircle size={16} /> {t('clientProfile.membership.benefits.proposals5')}</li>
+                    <li><CheckCircle size={16} /> {t('clientProfile.membership.benefits.basicVisibility')}</li>
+                    <li><CheckCircle size={16} /> {t('clientProfile.membership.benefits.standardSupport')}</li>
                   </ul>
                 </div>
               </div>
               
               <div className="membership-plans">
-                <h2>Available Plans</h2>
+                <h2>{t('clientProfile.membership.availablePlans')}</h2>
                 <div className="plans-grid">
                   <div className="plan-card">
                     <h3>Plus</h3>
                     <p className="plan-price">$14.99<span>/month</span></p>
                     <ul>
-                      <li><Check size={16} /> 20 job proposals</li>
-                      <li><Check size={16} /> Enhanced profile</li>
-                      <li><Check size={16} /> Priority support</li>
-                      <li><Check size={16} /> Analytics</li>
+                      <li><Check size={16} /> {t('clientProfile.membership.benefits.proposals20')}</li>
+                      <li><Check size={16} /> {t('clientProfile.membership.benefits.enhancedProfile')}</li>
+                      <li><Check size={16} /> {t('clientProfile.membership.benefits.prioritySupport')}</li>
+                      <li><Check size={16} /> {t('clientProfile.membership.benefits.analytics')}</li>
                     </ul>
-                    <button className="btn-outline" onClick={() => handleUserMenuClick("Upgrade to Plus")}>Upgrade</button>
+                    <button className="btn-outline" onClick={() => handleUserMenuClick("Upgrade to Plus")}>{t('clientProfile.membership.upgrade')}</button>
                   </div>
                   
                   <div className="plan-card popular">
-                    <div className="popular-badge">Most Popular</div>
+                    <div className="popular-badge">{t('clientProfile.membership.mostPopular')}</div>
                     <h3>Professional</h3>
                     <p className="plan-price">$29.99<span>/month</span></p>
                     <ul>
-                      <li><Check size={16} /> Unlimited proposals</li>
-                      <li><Check size={16} /> Featured profile</li>
-                      <li><Check size={16} /> Premium support</li>
-                      <li><Check size={16} /> Advanced analytics</li>
-                      <li><Check size={16} /> Skill assessments</li>
+                      <li><Check size={16} /> {t('clientProfile.membership.benefits.proposalsUnlimited')}</li>
+                      <li><Check size={16} /> {t('clientProfile.membership.benefits.featuredProfile')}</li>
+                      <li><Check size={16} /> {t('clientProfile.membership.benefits.premiumSupport')}</li>
+                      <li><Check size={16} /> {t('clientProfile.membership.benefits.advancedAnalytics')}</li>
+                      <li><Check size={16} /> {t('clientProfile.membership.benefits.skillsAssessments')}</li>
                     </ul>
-                    <button className="btn-primary" onClick={() => handleUserMenuClick("Upgrade to Professional")}>Upgrade</button>
+                    <button className="btn-primary" onClick={() => handleUserMenuClick("Upgrade to Professional")}>{t('clientProfile.membership.upgrade')}</button>
                   </div>
                 </div>
               </div>
@@ -1521,7 +1476,7 @@ const Settings = () => {
           {activeSection === "notifications" && (
             <div className="content-section">
               <div className="section-header">
-                <h1 className="section-title">Notification Settings</h1>
+                <h1 className="section-title">{t('clientProfile.notifications.title')}</h1>
               </div>
               
               <div className="notifications-grid">
@@ -1554,15 +1509,15 @@ const Settings = () => {
               </div>
               
               <div className="delivery-preferences">
-                <h2>Delivery Preferences</h2>
+                <h2>{t('clientProfile.notifications.deliveryPreferences')}</h2>
                 <div className="preferences-options">
                   <label className="preference-option">
                     <input type="checkbox" defaultChecked onChange={() => handleToggleNotification(0, 'all_email')} />
-                    <span>Email notifications</span>
+                    <span>{t('clientProfile.notifications.emailNotifications')}</span>
                   </label>
                   <label className="preference-option">
                     <input type="checkbox" defaultChecked onChange={() => handleToggleNotification(0, 'all_push')} />
-                    <span>Push notifications</span>
+                    <span>{t('clientProfile.notifications.pushNotifications')}</span>
                   </label>
                 </div>
               </div>
@@ -1574,14 +1529,14 @@ const Settings = () => {
             <div className="modal-overlay">
               <div className="modal-content card-modal">
                 <div className="modal-header">
-                  <h2>Add Payment Method</h2>
+                  <h2>{t('clientProfile.billing.addMethod')}</h2>
                   <button className="close-modal" onClick={() => setShowAddCardModal(false)}>
                     <X size={20} />
                   </button>
                 </div>
                 <form onSubmit={submitNewCard} className="add-card-form">
                   <div className="form-group">
-                    <label>Card Number</label>
+                    <label>{t('wallet.cardNumberPlaceholder')}</label>
                     <input 
                       type="text" 
                       placeholder="0000 0000 0000 0000" 
@@ -1593,7 +1548,7 @@ const Settings = () => {
                   </div>
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Expiry Date</label>
+                      <label>{t('clientProfile.billing.expiryDate')}</label>
                       <input 
                         type="text" 
                         placeholder="MM/YY" 
@@ -1604,7 +1559,7 @@ const Settings = () => {
                       />
                     </div>
                     <div className="form-group">
-                      <label>CVC</label>
+                      <label>{t('clientProfile.billing.cvc')}</label>
                       <input 
                         type="text" 
                         placeholder="***" 
@@ -1616,7 +1571,7 @@ const Settings = () => {
                     </div>
                   </div>
                   <div className="form-group">
-                    <label>Card Holder Name</label>
+                    <label>{t('clientProfile.billing.cardHolderName')}</label>
                     <input 
                       type="text" 
                       placeholder="John Doe" 
@@ -1627,7 +1582,7 @@ const Settings = () => {
                   </div>
                   <button type="submit" className="btn-primary w-full" disabled={isLoading}>
                     {isLoading ? <RefreshCw size={18} className="spinning" /> : <Save size={18} />}
-                    Add Payment Method
+                    {t('clientProfile.billing.addMethod')}
                   </button>
                 </form>
               </div>
@@ -1637,14 +1592,14 @@ const Settings = () => {
           {/* TAX INFORMATION SECTION */}
           {activeSection === "tax" && (
             <div className="content-section">
-              <h1 className="section-title">Tax Information</h1>
+              <h1 className="section-title">{t('clientProfile.placeholders.taxTitle')}</h1>
               <div className="placeholder-card">
                 <FileText size={48} />
-                <h2>Tax Information Coming Soon</h2>
-                <p>Your tax documents and information will appear here</p>
+                <h2>{t('clientProfile.placeholders.taxComingSoon')}</h2>
+                <p>{t('clientProfile.placeholders.taxDesc')}</p>
                 <button className="btn-primary" onClick={() => handleUserMenuClick("Upload tax documents")}>
                   <Upload size={16} />
-                  Upload Documents
+                  {t('clientProfile.placeholders.uploadDocs')}
                 </button>
               </div>
             </div>
@@ -1653,14 +1608,14 @@ const Settings = () => {
           {/* CONNECTED SERVICES SECTION */}
           {activeSection === "services" && (
             <div className="content-section">
-              <h1 className="section-title">Connected Services</h1>
+              <h1 className="section-title">{t('clientProfile.placeholders.servicesTitle')}</h1>
               <div className="placeholder-card">
                 <Link size={48} />
-                <h2>Connected Services</h2>
-                <p>Manage your connected accounts and integrations</p>
+                <h2>{t('clientProfile.placeholders.servicesTitle')}</h2>
+                <p>{t('clientProfile.placeholders.servicesDesc')}</p>
                 <button className="btn-primary" onClick={() => handleUserMenuClick("Connect new service")}>
                   <Plus size={16} />
-                  Connect Service
+                  {t('clientProfile.placeholders.connectService')}
                 </button>
               </div>
             </div>
@@ -1669,14 +1624,14 @@ const Settings = () => {
           {/* APPEALS TRACKER SECTION */}
           {activeSection === "appeals" && (
             <div className="content-section">
-              <h1 className="section-title">Appeals Tracker</h1>
+              <h1 className="section-title">{t('clientProfile.placeholders.appealsTitle')}</h1>
               <div className="placeholder-card">
                 <AlertTriangle size={48} />
-                <h2>No Active Appeals</h2>
-                <p>You don't have any active appeals at this time</p>
+                <h2>{t('clientProfile.placeholders.noAppeals')}</h2>
+                <p>{t('clientProfile.placeholders.appealsDesc')}</p>
                 <button className="btn-outline" onClick={() => handleUserMenuClick("File appeal")}>
                   <FileText size={16} />
-                  File an Appeal
+                  {t('clientProfile.placeholders.fileAppeal')}
                 </button>
               </div>
             </div>
