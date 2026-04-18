@@ -14,19 +14,20 @@
   --light-hover: #f1f5f9;
   --light-active: #e6f7e6;
   
-  /* Dark Mode */
-  --dark-bg: #0f172a;
-  --dark-surface: #1e293b;
-  --dark-card: #1e293b;
-  --dark-card-alt: #334155;
-  --dark-border: #334155;
-  --dark-border-light: #1e293b;
-  --dark-border-dark: #475569;
-  --dark-text: #f8fafc;
-  --dark-text-secondary: #cbd5e1;
-  --dark-text-tertiary: #94a3b8;
-  --dark-hover: #2d3748;
-  --dark-active: #2d3748;
+  /* Dark Mode - Landing Page Aesthetic (Glassmorphism) */
+  --dark-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%);
+  --dark-surface: rgba(255, 255, 255, 0.03);
+  --dark-card: rgba(255, 255, 255, 0.06);
+  --dark-card-alt: rgba(255, 255, 255, 0.09);
+  --dark-border: rgba(255, 255, 255, 0.12);
+  --dark-border-light: rgba(255, 255, 255, 0.05);
+  --dark-border-dark: rgba(255, 255, 255, 0.2);
+  --dark-text: #ffffff;
+  --dark-text-secondary: rgba(255, 255, 255, 0.85);
+  --dark-text-tertiary: rgba(255, 255, 255, 0.65);
+  --dark-hover: rgba(255, 255, 255, 0.1);
+  --dark-active: rgba(255, 255, 255, 0.15);
+  --glass-blur: blur(24px);
   
   /* Blue Colors */
   --blue: #3b82f6;
@@ -112,6 +113,7 @@ body.light-mode {
 
 body.dark-mode {
   background: var(--dark-bg);
+  background-attachment: fixed;
   color: var(--dark-text);
 }
 
@@ -147,7 +149,9 @@ body.dark-mode {
 .dark .settings-header {
   background: var(--dark-surface);
   border-color: var(--dark-border);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .header-container {
@@ -603,6 +607,8 @@ body.dark-mode {
 .dark .user-dropdown {
   background: var(--dark-surface);
   border-color: var(--dark-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .dropdown-header {
@@ -737,6 +743,8 @@ body.dark-mode {
 .dark .settings-sidebar {
   background: var(--dark-surface);
   border-color: var(--dark-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .cl-sidebar-header {
@@ -1940,6 +1948,56 @@ body.dark-mode {
   letter-spacing: 1px;
   color: #94a3b8;
   font-weight: 700;
+}
+
+.dark .unified-stat-card {
+  background: var(--dark-card);
+  border-color: var(--dark-border);
+}
+
+.dark .unified-stat-card:hover {
+  background: var(--dark-hover);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.dark .unified-stat-value {
+  color: #ffffff;
+}
+
+.ai-banner-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+}
+
+.dark .ai-banner-card {
+  background: var(--dark-card);
+  border-color: var(--dark-border) !important;
+}
+
+.ai-banner-title {
+  color: #1e293b;
+}
+
+.dark .ai-banner-title {
+  color: #ffffff;
+}
+
+.ai-banner-text {
+  color: #475569;
+}
+
+.dark .ai-banner-text {
+  color: var(--dark-text-secondary) !important;
+}
+
+.ai-banner-btn {
+  background: white;
+  color: var(--blue);
+}
+
+.dark .ai-banner-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Bento Identity Styles */
@@ -4406,4 +4464,50 @@ input:checked + .slider:before {
     transform: translateY(0) scale(1);
   }
 }
+/* ===== GUARANTEED DARK MODE OVERRIDES FOR CLIENT PROFILE ===== */
+body.dark-mode .content-section,
+body.dark-mode .profile-card,
+body.dark-mode .profile-content,
+.dark .content-section,
+.dark .profile-card,
+.dark .profile-content {
+  background: #0f172a !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+
+body.dark-mode .profile-bio-section,
+.dark .profile-bio-section {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+body.dark-mode .profile-fullname,
+body.dark-mode .profile-company-name,
+body.dark-mode .lux-label,
+.dark .profile-fullname,
+.dark .profile-company-name,
+.dark .lux-label,
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3 {
+  color: #ffffff !important;
+}
+
+body.dark-mode .profile-bio-text,
+.dark .profile-bio-text {
+  background: #1e293b !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode .profile-meta-row,
+.dark .profile-meta-row {
+  background: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode .profile-meta-item,
+.dark .profile-meta-item {
+  color: rgba(255, 255, 255, 0.8) !important;
 }

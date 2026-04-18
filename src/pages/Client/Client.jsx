@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useThemeContext } from "../components/Theme/ThemeContext";
 import {
   User,
   Settings as SettingsIcon,
@@ -113,7 +114,8 @@ const Settings = () => {
       setActiveSection(sectionParam);
     }
   }, [sectionParam]);
-  const [darkMode, setDarkMode] = useState(false);
+  const { isDark } = useThemeContext();
+  const darkMode = isDark;
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -122,14 +124,6 @@ const Settings = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [notifications, setNotifications] = useState(3);
   const [showUserMenu, setShowUserMenu] = useState(false);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-  }, [darkMode]);
 
   useEffect(() => {
     if (message.text) {
@@ -840,16 +834,10 @@ const Settings = () => {
           {activeSection === "my-info" && (
             <div className="content-section soft-fade-in" style={{ maxWidth: '1200px', margin: '0 auto' }}>
               <div className="section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-                <h1 className="section-title" style={{ margin: 0, textTransform: 'uppercase', fontSize: '24px', lineHeight: '1', display: 'flex', alignItems: 'center', color: '#1e293b' }}>
+                <h1 className="section-title" style={{ margin: 0, textTransform: 'uppercase', fontSize: '24px', lineHeight: '1', display: 'flex', alignItems: 'center' }}>
                   {t('clientProfile.title')}
                 </h1>
-                <button 
-                  className="view-profile-btn"
-                  onClick={() => window.open(`/profile/me`, '_blank')}
-                  style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 20px', borderRadius: '24px' }}
-                >
-                  <Eye size={16} /> {t('clientProfile.viewPublicProfile')}
-                </button>
+
               </div>
 
               <div className="profile-card soft-fade-in stagger-1">
@@ -895,7 +883,7 @@ const Settings = () => {
                         <div className="section-edit-trigger" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px' }} onClick={() => handleSectionEdit('name', { fullName: userData.fullName })}>
                           <div>
                             <h2 className="profile-fullname">{userData.fullName || "Mijoz Ismi"}</h2>
-                            <p style={{ color: '#64748b', margin: 0, fontSize: '16px' }}>{userData.email}</p>
+                            <p className="profile-email-meta" style={{ margin: 0, fontSize: '16px' }}>{userData.email}</p>
                           </div>
                           <button className="tahrirlash-btn">
                             <Edit size={14} />
@@ -911,7 +899,7 @@ const Settings = () => {
                     </div>
                   </div>
 
-                  <div className="profile-bio-section soft-fade-in stagger-2">
+                  <div className="profile-bio-section soft-fade-in stagger-2" style={darkMode ? { background: 'transparent', boxShadow: 'none', border: 'none' } : {}}>
                     {editingSection === 'bio' ? (
                       <div className="inline-edit-container">
                         <input 
@@ -937,30 +925,30 @@ const Settings = () => {
                       <>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
                           <div>
-                            <span className="lux-label" style={{ display: 'block', marginBottom: '6px', fontSize: '11px', fontWeight: '700', color: '#64748b', letterSpacing: '1px' }}>{t('clientProfile.companyName')}</span>
-                            <div style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b' }}>{userData.company || userData.fullName}</div>
+                            <span className="lux-label" style={{ display: 'block', marginBottom: '6px', fontSize: '11px', fontWeight: '700', letterSpacing: '1px', color: darkMode ? '#ffffff' : '' }}>{t('clientProfile.companyName')}</span>
+                            <div className="profile-company-name" style={{ fontSize: '20px', fontWeight: '700', color: darkMode ? '#ffffff' : '' }}>{userData.company || userData.fullName}</div>
                           </div>
                           <button className="tahrirlash-btn" onClick={() => handleSectionEdit('bio', { company: userData.company, bio: userData.bio })}>
                             <Edit size={14} />
                           </button>
                         </div>
                         <div>
-                          <span className="lux-label" style={{ display: 'block', marginBottom: '8px', fontSize: '11px', fontWeight: '700', color: '#64748b', letterSpacing: '1px' }}>{t('clientProfile.companyBio')}</span>
-                          <div className="profile-bio-text">
+                          <span className="lux-label" style={{ display: 'block', marginBottom: '8px', fontSize: '11px', fontWeight: '700', letterSpacing: '1px', color: darkMode ? '#ffffff' : '' }}>{t('clientProfile.companyBio')}</span>
+                          <div className="profile-bio-text" style={darkMode ? { background: '#1e293b', color: 'rgba(255, 255, 255, 0.8)', borderColor: 'rgba(255, 255, 255, 0.1)' } : {}}>
                             {userData.bio || t('clientProfile.noBio')}
                           </div>
                         </div>
                       </>
                     )}
 
-                    <div className="profile-meta-row">
-                      <span className="profile-meta-item">
+                    <div className="profile-meta-row" style={darkMode ? { background: '#1e293b', borderColor: 'rgba(255, 255, 255, 0.1)' } : {}}>
+                      <span className="profile-meta-item" style={darkMode ? { color: 'rgba(255, 255, 255, 0.8)' } : {}}>
                         <MapPin size={16} color="var(--blue)" /> {userData.location || "O'zbekiston"}
                       </span>
-                      <span className="profile-meta-item">
+                      <span className="profile-meta-item" style={darkMode ? { color: 'rgba(255, 255, 255, 0.8)' } : {}}>
                         <Star size={16} color="#f59e0b" fill="#f59e0b" /> {userData.rating || "5.0"} {t('clientProfile.clientRating')}
                       </span>
-                      <span className="profile-meta-item" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => handleSectionEdit('contact', { phone: userData.phone, location: userData.location, timezone: userData.timezone })}>
+                      <span className="profile-meta-item" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: darkMode ? 'rgba(255, 255, 255, 0.8)' : '' }} onClick={() => handleSectionEdit('contact', { phone: userData.phone, location: userData.location, timezone: userData.timezone })}>
                         <Phone size={16} color="var(--blue)" /> {userData.phone || "+998 -- --- -- --"}
                         <button className="tahrirlash-btn small">
                           <Edit size={12} />
@@ -979,7 +967,7 @@ const Settings = () => {
                           </div>
                         </div>
                       )}
-                      <span className="profile-meta-item">
+                      <span className="profile-meta-item" style={darkMode ? { color: 'rgba(255, 255, 255, 0.8)' } : {}}>
                         <Clock size={16} color="var(--blue)" /> {userData.timezone || "Tashkent (UTC+5)"}
                       </span>
                     </div>
@@ -1007,9 +995,9 @@ const Settings = () => {
               </div>
 
               {/* AI COMMAND CENTER - REIMAGINED */}
-              <div className="profile-card soft-fade-in stagger-4" style={{ 
+              {/* AI COMMAND CENTER - REIMAGINED */}
+              <div className="profile-card ai-banner-card soft-fade-in stagger-4" style={{ 
                 padding: '32px', 
-                background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)', 
                 border: '1px dashed rgba(59, 130, 246, 0.4)',
                 position: 'relative',
                 overflow: 'hidden'
@@ -1040,7 +1028,7 @@ const Settings = () => {
                       <Zap size={22} color="white" />
                     </div>
                     <div>
-                    <h3 style={{ fontSize: '18px', fontWeight: '800', margin: 0, color: '#1e293b', letterSpacing: '-0.3px' }}>
+                    <h3 className="ai-banner-title" style={{ fontSize: '18px', fontWeight: '800', margin: 0, letterSpacing: '-0.3px' }}>
                         {t('clientProfile.aiCenter.title')}
                       </h3>
                       <span style={{ fontSize: '11px', color: 'var(--blue)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>
@@ -1048,12 +1036,10 @@ const Settings = () => {
                       </span>
                     </div>
                   </div>
-                  <button className="lux-btn-primary" style={{ 
+                  <button className="lux-btn-primary ai-banner-btn" style={{ 
                     padding: '8px 24px', 
                     fontSize: '13px', 
                     borderRadius: '12px',
-                    background: 'white',
-                    color: 'var(--blue)',
                     border: '1px solid #e2e8f0',
                     boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
                   }}>
@@ -1061,8 +1047,7 @@ const Settings = () => {
                   </button>
                 </div>
                 
-                <p style={{ 
-                  color: '#475569', 
+                <p className="ai-banner-text" style={{ 
                   fontSize: '15px', 
                   lineHeight: '1.7', 
                   margin: 0, 

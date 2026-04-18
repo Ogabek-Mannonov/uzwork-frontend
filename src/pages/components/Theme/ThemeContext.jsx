@@ -14,12 +14,12 @@ export const ThemeProvider = ({ children }) => {
     const root = document.documentElement;
     if (t === "dark") {
       root.setAttribute("data-theme", "dark");
-      document.body.classList.add("dark-mode");
-      document.body.classList.remove("light-mode");
+      document.body.classList.add("dark-mode", "dark");
+      document.body.classList.remove("light-mode", "light");
     } else {
       root.setAttribute("data-theme", "light");
-      document.body.classList.remove("dark-mode");
-      document.body.classList.add("light-mode");
+      document.body.classList.remove("dark-mode", "dark");
+      document.body.classList.add("light-mode", "light");
     }
   };
 
