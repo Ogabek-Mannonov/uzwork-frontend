@@ -4,8 +4,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Sun, Moon, Menu, X, ChevronDown, Globe,
   Bell, HelpCircle, Settings, User, Search, Check,
-  FileText, CreditCard, Shield, Award, AlertTriangle, LogOut,
-  RefreshCw, Users
+  RefreshCw, Users, Briefcase, Plus, Star
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useThemeContext } from "../Theme/ThemeContext";
@@ -424,11 +423,55 @@ function AuthHeader({ i18n, changeLanguage, user }) {
             <span className="nav__brand">uzwork</span>
             <span className="nav__divider" />
             <nav className="nav__menu">
-              {links.map(l => (
-                <NavLink key={l.to} to={l.to} className={({ isActive }) => "nav__link" + (isActive ? " is-active" : "")}>
-                  {l.label}
-                </NavLink>
-              ))}
+              {isClient ? (
+                <>
+                  <Link to="/client/talent" className="nav__link">
+                    {t("navbar.findTalent")}
+                  </Link>
+
+                  {/* My Jobs Dropdown */}
+                  <div className="nav__item-with-dropdown">
+                    <Link to="/client/my-jobs" className="nav__link">
+                      {t("navbar.myJobs")}
+                      <ChevronDown size={14} className="nav__chevron" />
+                    </Link>
+                    <div className="nav__dropdown">
+                      <Link to="/client/my-jobs" className="dropdown__link">
+                        <Briefcase size={16} />
+                        <span>{t("navbar.myJobs")}</span>
+                      </Link>
+                      <Link to="/client/management" className="dropdown__link">
+                        <Users size={16} />
+                        <span>{t("navbar.proposals")}</span>
+                      </Link>
+                      <Link to="/client/talent" className="dropdown__link">
+                        <Star size={16} />
+                        <span>{t("navbar.saved")}</span>
+                      </Link>
+                    </div>
+                  </div>
+
+                  <Link to="/client/management" className="nav__link">
+                    {t("navbar.contracts")}
+                  </Link>
+
+                  <Link to="/messages" className="nav__link">
+                    {t("navbar.messages")}
+                  </Link>
+                </>
+              ) : (
+                [
+                  { to: "/find-work", label: t("navbar.findWork") },
+                  { to: "/my-jobs",   label: t("navbar.myJobs") },
+                  { to: "/proposals", label: t("navbar.proposals") },
+                  { to: "/reports",   label: t("navbar.reports") },
+                  { to: "/messages",  label: t("navbar.messages") },
+                ].map(l => (
+                  <NavLink key={l.to} to={l.to} className={({ isActive }) => "nav__link" + (isActive ? " is-active" : "")}>
+                    {l.label}
+                  </NavLink>
+                ))
+              )}
             </nav>
           </div>
 

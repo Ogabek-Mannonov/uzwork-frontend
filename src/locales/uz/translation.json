@@ -7,22 +7,25 @@
     "nations": {"uz": "O'zbekiston","tashkent": "Toshkent","samarkand": "Samarqand","bukhara": "Buxoro","kz": "Qozog'iston","kg": "Qirg'iziston","remote": "Masofadan (Istalgan joy)"},
     "englishLevels": {"any": "Istalgan daraja","basic": "Boshlang'ich","conversational": "So'zlashuvchi","fluent": "Erkin","native": "Ona tili"}
   },
-  "navbar": {
-    "findWork": "Ish izlash",
-    "savedJobs": "Saqlangan ishlar",
-    "proposals": "Mening takliflarim",
-    "hireFreelancers": "Freelancer yollash",
-    "myJobs": "Mening ishlarim",
-    "postJob": "Ish e'lon qilish",
-    "reports": "Hisobotlar",
-    "messages": "Xabarlar",
-    "findTalent": "Mutaxassis topish",
-    "searchJobs": "Ishlar",
-    "searchTalent": "Mutaxassislar",
-    "searchProjects": "Loyihalar",
-    "login": "Kirish",
-    "signup": "Ro'yxatdan o'tish"
-  },
+    "navbar": {
+      "findWork": "Ish izlash",
+      "savedJobs": "Saqlangan ishlar",
+      "proposals": "Takliflar",
+      "hireFreelancers": "Freelancer yollash",
+      "myJobs": "Mening ishlarim",
+      "contracts": "Kontraktlar",
+      "postJob": "Ish e'lon qilish",
+      "reports": "Hisobotlar",
+      "messages": "Xabarlar",
+      "findTalent": "Mutaxassis topish",
+      "searchJobs": "Ishlar",
+      "searchTalent": "Mutaxassislar",
+      "searchProjects": "Loyihalar",
+      "login": "Kirish",
+      "signup": "Ro'yxatdan o'tish",
+      "billing": "To'lovlar",
+      "saved": "Saqlanganlar"
+    },
   "header": {
     "hireTalent": "Mutaxassis yollash",
     "findWork": "Ish topish",
@@ -710,7 +713,8 @@
       "notifications": "Xabarnoma sozlamalari",
       "tax": "Soliq ma'lumotlari",
       "services": "Bog'langan xizmatlar",
-      "appeals": "Shikoyatlarni kuzatish"
+      "appeals": "Shikoyatlarni kuzatish",
+      "saved": "Saqlanganlar"
     },
     "billing": {
       "title": "To'lovlar va hisob-kitoblar",

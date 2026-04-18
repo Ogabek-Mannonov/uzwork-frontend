@@ -10,9 +10,10 @@
   "navbar": {
     "findWork": "Найти работу",
     "savedJobs": "Сохранённые работы",
-    "proposals": "Мои предложения",
+    "proposals": "Предложения",
     "hireFreelancers": "Нанять фрилансера",
     "myJobs": "Мои работы",
+    "contracts": "Контракты",
     "postJob": "Разместить работу",
     "reports": "Отчёты",
     "messages": "Сообщения",
@@ -21,7 +22,9 @@
     "searchTalent": "Таланты",
     "searchProjects": "Проекты",
     "login": "Войти",
-    "signup": "Регистрация"
+    "signup": "Регистрация",
+    "billing": "Платежи",
+    "saved": "Сохраненные"
   },
   "header": {
     "hireTalent": "Нанять эксперта",

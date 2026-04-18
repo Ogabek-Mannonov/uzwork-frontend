@@ -10,7 +10,7 @@
   "navbar": {
     "findWork": "Find Work",
     "savedJobs": "Saved Jobs",
-    "proposals": "My Proposals",
+    "proposals": "Proposals",
     "hireFreelancers": "Hire Freelancers",
     "myJobs": "My Jobs",
     "postJob": "Post a Job",
@@ -21,7 +21,10 @@
     "searchTalent": "Talent",
     "searchProjects": "Projects",
     "login": "Log In",
-    "signup": "Sign Up"
+    "signup": "Sign Up",
+    "billing": "Payments",
+    "saved": "Saved Talent",
+    "contracts": "Contracts"
   },
   "header": {
     "hireTalent": "Hire Talent",
