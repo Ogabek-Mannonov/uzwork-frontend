@@ -27,6 +27,34 @@ const SUGGESTED_SKILLS = {
   marketing:   ["Social Media", "Email Marketing", "Google Ads", "SEO", "Content Strategy"],
 };
 
+const COMMON_SKILLS = [
+  // Development
+  "React", "Node.js", "TypeScript", "PostgreSQL", "Docker", "AWS", "GraphQL", "Python", "REST API", "MongoDB",
+  "JavaScript", "HTML5", "CSS3", "Next.js", "Vue.js", "Angular", "PHP", "Laravel", "MySQL", "Redis",
+  "Flutter", "React Native", "Swift", "Kotlin", "Java", "C#", "C++", "Unity", "Unreal Engine",
+  "Go", "Rust", "Ruby on Rails", "Django", "Flask", "Spring Boot", "ASP.NET", "Kubernetes", "Azure", "Google Cloud",
+  
+  // Design
+  "Figma", "UI/UX Design", "Prototyping", "Adobe XD", "Webflow", "Sketch", "Design Systems",
+  "Photoshop", "Illustrator", "Indesign", "After Effects", "Premiere Pro", "3D Modeling", "Blender",
+  "Motion Graphics", "Logo Design", "Branding", "Typography", "Color Theory", "Vector Art",
+  
+  // Marketing & Writing
+  "Social Media Marketing", "Email Marketing", "Google Ads", "Facebook Ads", "Instagram Marketing", 
+  "SEO", "SEM", "Content Strategy", "Growth Hacking", "Affiliate Marketing",
+  "SEO Writing", "Copywriting", "Blog Posts", "Technical Writing", "Proofreading", "Translation", 
+  "Transcription", "Creative Writing", "Grant Writing", "Ghostwriting",
+  
+  // Data & AI
+  "Machine Learning", "Data Science", "Artificial Intelligence", "Natural Language Processing", "Computer Vision",
+  "Data Analysis", "Big Data", "Pandas", "NumPy", "TensorFlow", "PyTorch", "Tableau", "Power BI",
+  
+  // Business & Other
+  "Project Management", "Agile", "Scrum", "Product Management", "QA Testing", "Cyber Security",
+  "Data Entry", "Virtual Assistant", "Customer Support", "Sales", "Business Analysis", "Financial Modeling",
+  "Blockchain", "Solidity", "Web3", "Smart Contracts", "Crypto", "Toptal", "Upwork Skills"
+].sort();
+
 const CATEGORIES = [
   "Web Development", "Mobile Development", "Design & Creative",
   "Writing & Translation", "IT & Networking", "Data Science & AI",
@@ -220,12 +248,14 @@ const PjStep1 = ({ form, setForm, errors }) => {
 const PjStep2 = ({ form, setForm, errors }) => {
   const [input, setInput] = useState("");
   const [activeCat, setActiveCat] = useState("development");
+  const [showSuggest, setShowSuggest] = useState(false);
 
   const addSkill = useCallback((sk) => {
     const s = sk.trim();
     if (!s || form.skills.includes(s) || form.skills.length >= 15) return;
     setForm(p => ({ ...p, skills: [...p.skills, s] }));
     setInput("");
+    setShowSuggest(false);
   }, [form.skills, setForm]);
 
   const removeSkill = useCallback((sk) => {
@@ -233,6 +263,13 @@ const PjStep2 = ({ form, setForm, errors }) => {
   }, [setForm]);
 
   const suggested = SUGGESTED_SKILLS[activeCat] || [];
+
+  const filtered = input.trim().length > 0 
+    ? COMMON_SKILLS.filter(s => 
+        s.toLowerCase().includes(input.toLowerCase()) && 
+        !form.skills.includes(s)
+      ).slice(0, 10)
+    : [];
 
   return (
     <div className="pj-card-body">
@@ -242,14 +279,43 @@ const PjStep2 = ({ form, setForm, errors }) => {
           <span className="pj-label-tip">{form.skills.length}/15</span>
         </label>
 
-        <div className="pj-skill-input-row">
-          <input
-            className={`pj-input ${errors.skills ? "error" : ""}`}
-            placeholder="Type a skill and press Enter or Add..."
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addSkill(input))}
-          />
+        <div className="pj-skill-input-row" style={{ position: "relative" }}>
+          <div className="pj-skill-input-container">
+            <input
+              className={`pj-input ${errors.skills ? "error" : ""}`}
+              placeholder="Type a skill and press Enter or Add..."
+              value={input}
+              onChange={e => {
+                setInput(e.target.value);
+                setShowSuggest(true);
+              }}
+              onFocus={() => setShowSuggest(true)}
+              onBlur={() => setTimeout(() => setShowSuggest(false), 200)}
+              onKeyDown={e => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addSkill(input);
+                }
+              }}
+            />
+            {showSuggest && filtered.length > 0 && (
+              <div className="pj-suggest-dropdown">
+                {filtered.map(s => (
+                  <div 
+                    key={s} 
+                    className="pj-suggest-item"
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // Prevent input onBlur from firing before this
+                      addSkill(s);
+                    }}
+                  >
+                    <div className="pj-suggest-item-icon">{s[0].toUpperCase()}</div>
+                    {s}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <button className="pj-skill-add" onClick={() => addSkill(input)}>
             <Plus size={14} /> Add
           </button>
@@ -675,11 +741,12 @@ const PjStepSidebar = ({ step, form }) => {
 const PostJob = () => {
   const navigate = useNavigate();
 
-  const [step,    setStep]    = useState(1);
-  const [form,    setForm]    = useState(INITIAL);
-  const [errors,  setErrors]  = useState({});
-  const [toast,   setToast]   = useState(null);
-  const [success, setSuccess] = useState(false);
+  const [step,       setStep]      = useState(1);
+  const [form,       setForm]      = useState(INITIAL);
+  const [errors,     setErrors]    = useState({});
+  const [toast,      setToast]     = useState(null);
+  const [success,    setSuccess]   = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const notify = useCallback((msg, type = "success") => {
     setToast({ msg, type });
@@ -737,30 +804,69 @@ const PostJob = () => {
     if (num < step) { setStep(num); setErrors({}); }
   };
 
-  const handleSaveDraft = () => {
-    notify("Draft saved! You can continue later from My Jobs.");
+  /* ── Build payload ── */
+  const buildPayload = (status = "active") => {
+    const payload = {
+      title:            form.title,
+      description:      form.description,
+      category:         form.category,
+      required_skills:  form.skills,              // Backend expects required_skills
+      experience_level: form.experience,
+      budget_type:      form.budgetType,          // fixed | range | hourly
+      job_type:         form.jobType,             // fixed | hourly
+      duration:         form.duration,
+      scope:            form.scope,
+      visibility:       form.visibility,
+      freelancers_needed: form.freelancers === "1" ? 1 : 2,
+      currency:         "USD",                    // Explicitly send currency
+      status,
+    };
+
+    if (form.budgetType === "fixed") {
+      // Backend checks: if (budget_min == null || budget_max == null)
+      payload.budget_min = Number(form.budgetFixed) || 0;
+      payload.budget_max = Number(form.budgetFixed) || 0;
+    } else if (form.budgetType === "range") {
+      payload.budget_min = Number(form.budgetMin) || 0;
+      payload.budget_max = Number(form.budgetMax) || 0;
+    } else if (form.budgetType === "hourly") {
+      // For hourly, we still send budget_min/max as the rate
+      payload.budget_min = Number(form.hourlyMin) || 0;
+      payload.budget_max = Number(form.hourlyMax) || 0;
+      // Optional: some backends might specifically look for hourly_rate_min/max
+      payload.hourly_rate_min = Number(form.hourlyMin) || 0;
+      payload.hourly_rate_max = Number(form.hourlyMax) || 0;
+    }
+
+    return payload;
+  };
+
+  const handleSaveDraft = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const res = await createJob(buildPayload("draft"));
+      if (res?.success === false) {
+        notify(res?.message || "Xatolik yuz berdi", "error");
+      } else {
+        notify("Qoralama saqlandi! My Jobs bo'limida davom etishingiz mumkin.");
+      }
+    } catch (err) {
+      notify("Xatolik yuz berdi. Qayta urinib ko'ring.", "error");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handlePublish = async () => {
+    if (submitting) return;
     if (!validate(step)) {
-      notify("Please review all fields before publishing.", "error");
+      notify("Iltimos barcha maydonlarni to'ldiring.", "error");
       return;
     }
-    
+    setSubmitting(true);
     try {
-      const res = await createJob({
-        title: form.title,
-        description: form.description,
-        category: form.category,
-        skills: form.skills,
-        budget_type: form.jobType,
-        budget_amount: form.budgetType === "fixed" ? Number(form.budgetFixed) : null,
-        hourly_rate_min: form.budgetType === "hourly" ? Number(form.hourlyMin) : null,
-        hourly_rate_max: form.budgetType === "hourly" ? Number(form.hourlyMax) : null,
-        experience_level: form.experience,
-        status: "active"
-      });
-
+      const res = await createJob(buildPayload("active"));
       if (res?.success === false) {
         notify(res?.message || "Xatolik yuz berdi", "error");
       } else {
@@ -769,6 +875,8 @@ const PostJob = () => {
     } catch (error) {
       console.error(error);
       notify("Xatolik yuz berdi. Iltimos qayta urinib ko'ring.", "error");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -794,9 +902,9 @@ const PostJob = () => {
             You'll start receiving proposals shortly.
           </p>
           <div className="pj-success-actions">
-            <button className="pj-success-btn-primary" onClick={() => navigate("/client/jobs")}>
+            <button className="pj-success-btn-primary" onClick={() => navigate("/client/my-jobs")}>
               <Briefcase size={16} style={{ display: "inline", marginRight: 6 }} />
-              View My Jobs
+              Mening ishlarim
             </button>
             <button className="pj-success-btn-secondary" onClick={() => { setSuccess(false); setForm(INITIAL); setStep(1); }}>
               Post Another Job
@@ -826,8 +934,13 @@ const PostJob = () => {
           </div>
         </div>
         <div className="pj-header-right">
-          <button className="pj-save-draft" onClick={handleSaveDraft}>
-            Save as Draft
+          <button
+            className="pj-save-draft"
+            onClick={handleSaveDraft}
+            disabled={submitting}
+            style={{ opacity: submitting ? 0.6 : 1 }}
+          >
+            {submitting ? "Saqlanmoqda..." : "Qoralama sifatida saqlash"}
           </button>
         </div>
       </header>
@@ -882,8 +995,13 @@ const PostJob = () => {
                   Next Step <ChevronRight size={16} />
                 </button>
               ) : (
-                <button className="pj-btn-publish" onClick={handlePublish}>
-                  <Rocket size={16} /> Publish Job
+                <button
+                  className="pj-btn-publish"
+                  onClick={handlePublish}
+                  disabled={submitting}
+                  style={{ opacity: submitting ? 0.7 : 1 }}
+                >
+                  <Rocket size={16} /> {submitting ? "Yuborilmoqda..." : "Ish e'lonini joylash"}
                 </button>
               )}
             </div>
