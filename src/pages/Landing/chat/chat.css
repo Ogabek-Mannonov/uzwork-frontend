@@ -2,7 +2,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
 /* ===================== VARIABLES ===================== */
-:root {
+.chat-wrapper,
+.chat-detail-wrapper {
   --chat-bg: #f8fafc;
   --sidebar-bg: #ffffff;
   --sidebar-border: rgba(0, 0, 0, 0.06);
@@ -14,7 +15,8 @@
   --accent: #2563eb;
   --accent-dark: #1d4ed8;
   --accent-light: #eff6ff;
-  --text-primary: #1e293b;
+  --chat-text-primary: #1e293b; /* Using distinct namespace to avoid conflict */
+  --text-primary: #1e293b; 
   --text-secondary: #475569;
   --text-muted: #64748b;
   --border: rgba(0, 0, 0, 0.06);
