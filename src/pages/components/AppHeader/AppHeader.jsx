@@ -459,10 +459,6 @@ function AuthHeader({ i18n, changeLanguage, user }) {
           </div>
 
           <div className="nav__right">
-            <LangSwitcher i18n={i18n} changeLanguage={changeLanguage} />
-            <button className="icon-btn" onClick={toggle} aria-label="Toggle theme">
-              {isDark ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
             <button className="icon-btn icon-btn--notif" title="Notifications">
               <Bell size={16} /><span className="notif-dot" />
             </button>
@@ -478,16 +474,58 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                 <div className="profile-dropdown-menu" style={{
                   position: "absolute", top: "calc(100% + 10px)", right: 0,
                   background: "var(--surface, #fff)", border: "1px solid var(--border, #e2e8f0)",
-                  borderRadius: "12px", width: "240px", zIndex: 1000,
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.1)", padding: "8px"
+                  borderRadius: "12px", width: "260px", zIndex: 1000,
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.12)", padding: "8px"
                 }}>
+                  {/* ── User title ── */}
                   <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border, #e2e8f0)", marginBottom: "8px" }}>
                     <span style={{ fontWeight: 600, fontSize: "14px", display: "block", color: "var(--text)" }}>
                       {isClient ? "Mijoz sozlamalari" : "Sozlamalar"}
                     </span>
                   </div>
+
+                  {/* ── Language switcher row ── */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "6px 12px 10px", borderBottom: "1px solid var(--border, #e2e8f0)", marginBottom: "8px" }}>
+                    <Globe size={14} style={{ color: "var(--text-secondary, #64748b)", flexShrink: 0 }} />
+                    {[
+                      { code: "uz", flag: "🇺🇿", label: "UZ" },
+                      { code: "ru", flag: "🇷🇺", label: "RU" },
+                      { code: "en", flag: "🇬🇧", label: "EN" },
+                    ].map(l => (
+                      <button key={l.code} onClick={() => { i18n.changeLanguage(l.code); localStorage.setItem("appLanguage", l.code); }} style={{
+                        flex: 1, padding: "5px 4px", border: "1px solid var(--border, #e2e8f0)", borderRadius: "6px", cursor: "pointer",
+                        fontSize: "12px", fontWeight: 700, transition: "all 0.15s",
+                        background: i18n.language.startsWith(l.code) ? "var(--blue, #3b82f6)" : "transparent",
+                        color: i18n.language.startsWith(l.code) ? "#fff" : "var(--text, #1e293b)",
+                      }}>{l.flag} {l.label}</button>
+                    ))}
+                  </div>
+
+                  {/* ── Night mode toggle row ── */}
+                  <button onClick={toggle} style={{
+                    display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left",
+                    padding: "9px 12px", marginBottom: "8px", background: isDark ? "rgba(59,130,246,0.1)" : "var(--bg, #f8fafc)",
+                    border: "1px solid var(--border, #e2e8f0)", borderRadius: "8px", cursor: "pointer",
+                    fontSize: "14px", color: "var(--text, #1e293b)", transition: "all 0.2s", fontWeight: 500,
+                  }} onMouseOver={e => e.currentTarget.style.borderColor = "#3b82f6"} onMouseOut={e => e.currentTarget.style.borderColor = "var(--border, #e2e8f0)"}>
+                    <span style={{ display: "flex", alignItems: "center", color: isDark ? "#f59e0b" : "#64748b" }}>
+                      {isDark ? <Sun size={15} /> : <Moon size={15} />}
+                    </span>
+                    {isDark ? "Kunduzgi rejim" : "Tungi rejim"}
+                    <span style={{
+                      marginLeft: "auto", width: "32px", height: "18px", borderRadius: "9px",
+                      background: isDark ? "#3b82f6" : "#cbd5e1", position: "relative", transition: "background 0.2s", flexShrink: 0
+                    }}>
+                      <span style={{
+                        position: "absolute", top: "2px", left: isDark ? "16px" : "2px",
+                        width: "14px", height: "14px", borderRadius: "50%", background: "#fff",
+                        transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)"
+                      }} />
+                    </span>
+                  </button>
+
+                  {/* ── Menu items ── */}
                   {isClient ? (
-                    // CLIENT MENU ITEMS
                     [
                       { id: "my-info", label: "Mening ma'lumotlarim", icon: <User size={14} /> },
                       { id: "billing", label: "To'lovlar va hisob-kitob", icon: <CreditCard size={14} /> },
@@ -499,9 +537,9 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                       { id: "appeals", label: "Shikoyatlar markazi", icon: <AlertTriangle size={14} /> }
                     ].map(item => (
                       <button key={item.id} onClick={() => handleProfileNav(item.id)} style={{
-                        display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "10px 12px",
+                        display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "9px 12px",
                         background: "none", border: "none", borderRadius: "6px", cursor: "pointer",
-                        fontSize: "14px", color: "var(--text, #1e293b)", textDecoration: "none", transition: "0.2s"
+                        fontSize: "14px", color: "var(--text, #1e293b)", transition: "0.2s"
                       }} onMouseOver={e => e.currentTarget.style.background = "var(--bg, #f1f5f9)"}
                          onMouseOut={e => e.currentTarget.style.background = "none"}>
                         <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary, #64748b)' }}>{item.icon}</span>
@@ -509,7 +547,6 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                       </button>
                     ))
                   ) : (
-                    // FREELANCER MENU ITEMS
                     [
                       { id: "my-info", label: "Mening ma'lumotlarim", icon: <User size={14} /> },
                       { id: "cv-upload", label: "CV Yuklash", icon: <FileText size={14} /> },
@@ -520,9 +557,9 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                       { id: "appeals", label: "Shikoyatlar markazi", icon: <AlertTriangle size={14} /> }
                     ].map(item => (
                       <button key={item.id} onClick={() => handleProfileNav(item.id)} style={{
-                        display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "10px 12px",
+                        display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "9px 12px",
                         background: "none", border: "none", borderRadius: "6px", cursor: "pointer",
-                        fontSize: "14px", color: "var(--text, #1e293b)", textDecoration: "none", transition: "0.2s"
+                        fontSize: "14px", color: "var(--text, #1e293b)", transition: "0.2s"
                       }} onMouseOver={e => e.currentTarget.style.background = "var(--bg, #f1f5f9)"}
                          onMouseOut={e => e.currentTarget.style.background = "none"}>
                         <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary, #64748b)' }}>{item.icon}</span>
