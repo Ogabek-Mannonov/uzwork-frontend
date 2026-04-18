@@ -8,9 +8,10 @@ import {
   editMessage,
   deleteMessage,
   uploadVoice,
+  uploadFile,
 } from "../../../api/messages";
 import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/useSocket";
-import { Smile, Globe, Settings2, X, MoreVertical, Copy, Trash2, Edit3, User, Phone, ArrowLeft, Send, Mic, Download, Paperclip } from "lucide-react";
+import { Smile, Globe, Settings2, X, MoreVertical, Copy, Trash2, Edit3, User, Phone, ArrowLeft, Send, Mic, Download, Paperclip, FileText } from "lucide-react";
 import i18n from "../../../i18n";
 import { useTranslation } from "react-i18next";
 import { translateToUzbek, translateBatchToUzbek } from "../../../api/translate_service";
@@ -353,11 +354,15 @@ function MessageBubble({
   translation,
   allTranslations,
   onReactChip,
+  onMediaClick,
 }) {
   const isDeleted = !!msg.deleted_at;
   const isImage = msg.type === "image";
-  const isFile = msg.type === "file";
+  const isVideo = msg.type === "video" || (msg.type === "file" && msg.file_url && /\.(mp4|webm|ogg|mov)$/i.test(msg.file_url));
   const isVoice = msg.type === "voice";
+  // If it's technically a file type but recognized as video, we don't render it as a generic file link
+  const isFile = msg.type === "file" && !isVideo;
+  const isPdf = isFile && msg.file_url && msg.file_url.toLowerCase().endsWith(".pdf");
 
   const isOwnVal = String(msg.sender_id) === String(currentUser?.id);
   const senderUser = isOwnVal ? currentUser : partner;
@@ -395,7 +400,7 @@ function MessageBubble({
         )}
 
         <div
-          className={`msg-bubble ${isOwnVal ? "sent" : "received"} ${isFirst ? "first" : ""} ${isLast ? "last" : ""}`}
+          className={`msg-bubble ${isOwnVal ? "sent" : "received"} ${isFirst ? "first" : ""} ${isLast ? "last" : ""} ${(!getMsgText(msg) && !translation && (isImage || isVideo)) ? "is-media-only" : ""}`}
           onContextMenu={(e) => {
             e.preventDefault();
             onContextMenu(e, msg);
@@ -408,65 +413,164 @@ function MessageBubble({
                 {allTranslations?.[repliedMsg.id] || repliedPreview}
               </div>
             </div>
-          )
-          /* {repliedMsg && (
-            <div className={`msg-reply-preview ${isOwnVal ? "sent" : "received"}`}>
-              <div className="msg-reply-sender">{repliedSenderName}</div>
-              <div className="msg-reply-text">{repliedPreview}</div>
-            </div>
-          )} */}
+          )}
 
           {isDeleted ? (
             <span className="msg-deleted">🚫 {i18n.t("chat.msgDeleted", "Xabar o'chirildi")}</span>
-          ) : isImage && msg.file_url ? (
-            <a href={avatarSrc(msg.file_url)} target="_blank" rel="noreferrer">
-              <img src={avatarSrc(msg.file_url)} alt="rasm" className="img-bubble" />
-            </a>
-          ) : isFile && msg.file_url ? (
-            <a href={avatarSrc(msg.file_url)} target="_blank" rel="noreferrer"
-              className="file-bubble"
-              style={{ color: isOwnVal ? "#fff" : "#1a1a1a", textDecoration: "none" }}
-            >
-              <span className="file-icon"><Paperclip size={20} /></span>
-              <div className="file-info">
-                <div className="file-name">{msg.file_url.split("/").pop()}</div>
-                <div className="file-download">{i18n.t("chat.download", "Yuklab olish")}</div>
-              </div>
-            </a>
-          ) : isVoice && msg.file_url ? (
-            <CustomAudioPlayer src={avatarSrc(msg.file_url)} isOwn={isOwnVal} />
           ) : (
-            <span
-              /* key o'zgarganda React elementni qayta chizadi va animatsiya ishga tushadi */
-              key={translation ? "translated" : "original"}
-              className="msg-text-content animated-translation"
-            >
-              {translation ? translation : getMsgText(msg)}
-            </span>
+            <>
+              {(isImage || isVideo) && msg.file_url && (
+                <div className="media-container" onClick={() => onMediaClick?.({ type: isImage ? 'image' : 'video', url: msg.file_url })}>
+                  {isImage ? (
+                    <img src={avatarSrc(msg.file_url)} alt="rasm" className="img-bubble" />
+                  ) : (
+                    <div className="video-wrapper">
+                      <video src={avatarSrc(msg.file_url)} className="video-bubble" />
+                      <div className="video-play-overlay">
+                        <div className="play-icon-circle">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {!getMsgText(msg) && !translation && (
+                    <div className="msg-time-floating">
+                      {(msg.reactions || []).length > 0 && (
+                        <div className="msg-floating-reactions">
+                          {(msg.reactions || []).map((r, i) => (
+                            <span 
+                              key={i} 
+                              className="floating-reaction-item"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onReactChip?.(msg, r.emoji);
+                              }}
+                              title={`${r.count} reactions`}
+                            >
+                              {r.emoji}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <span className="floating-time-text">{formatMsgTime(msg.created_at)}</span>
+                      {isOwnVal && (
+                        <span className={`msg-read-icon ${msg.is_read ? "read" : "sent"}`}>
+                          {msg.is_read ? (
+                            <svg width="15" height="11" viewBox="0 0 16 11" fill="none">
+                              <path d="M1 6L4.5 9.5L10.5 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M5 6L8.5 9.5L14.5 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          ) : (
+                            <svg width="11" height="10" viewBox="0 0 12 10" fill="none">
+                              <path d="M1 5.5L4.5 9L11 1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {isFile && msg.file_url && (
+                <div className="file-message-container">
+                  <div className={`file-icon-box ${isPdf ? "pdf-style" : ""}`}>
+                    {isPdf ? (
+                      <div className="pdf-preview-placeholder">
+                        <div className="pdf-page-skeleton">
+                          <div className="skeleton-line title" />
+                          <div className="skeleton-line" />
+                          <div className="skeleton-line" />
+                          <div className="skeleton-line short" />
+                        </div>
+                        <div className="pdf-tag">PDF</div>
+                      </div>
+                    ) : (
+                      <div className="file-icon-square">
+                        <FileText size={28} color="#fff" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="file-details">
+                    <div className="file-name-row">
+                      <span className="file-name-text">
+                        {msg.content || msg.file_url.split("/").pop()}
+                      </span>
+                    </div>
+                    <div className="file-meta-row">
+                      <span className="file-size-text">
+                        {msg.file_size ? `${(msg.file_size / 1024).toFixed(1)} KB` : "Document"}
+                      </span>
+                    </div>
+                    <a 
+                      href={avatarSrc(msg.file_url)} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="file-action-link"
+                    >
+                      {isPdf ? i18n.t("chat.openWith", "OTKRIT S POMOSHYU") : i18n.t("chat.downloadAction", "YUKLAB OLISH")}
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {isVoice && msg.file_url && (
+                <CustomAudioPlayer src={avatarSrc(msg.file_url)} isOwn={isOwnVal} />
+              )}
+
+              {(getMsgText(msg) || (!isImage && !isVideo && !isFile && !isVoice)) && (
+                <span
+                  key={translation ? "translated" : "original"}
+                  className="msg-text-content animated-translation"
+                  style={{ display: "block", marginTop: (isImage || isVideo || isFile) ? 8 : 0 }}
+                >
+                  {translation ? translation : getMsgText(msg)}
+                </span>
+              )}
+            </>
           )}
 
-          <div className="msg-time-inline">
-            {msg.is_edited && (
-              <span className="msg-edited">{i18n.t("chat.edited", "tahrirlangan")}</span>
-            )}
-            <span>{formatMsgTime(msg.created_at)}</span>
-            {isOwnVal && (
-              <span className={`msg-read-icon ${msg.is_read ? "read" : "sent"}`}>
-                {msg.is_read ? (
-                  <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
-                    <path d="M1 6L4.5 9.5L10.5 1.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M5 6L8.5 9.5L14.5 1.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ) : (
-                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-                    <path d="M1 5.5L4.5 9L11 1" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                )}
-              </span>
-            )}
-          </div>
+            <div className="msg-time-inline">
+              {(msg.reactions || []).length > 0 && (
+                <div className="msg-inline-reactions">
+                  {msg.reactions.map((r, i) => (
+                    <span 
+                      key={i} 
+                      className="inline-reaction-item"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onReactChip?.(msg, r.emoji);
+                      }}
+                    >
+                      {r.emoji}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {msg.is_edited && (
+                <span className="msg-edited">{i18n.t("chat.edited", "tahrirlangan")}</span>
+              )}
+              <span className="inline-time-text">{formatMsgTime(msg.created_at)}</span>
+              {isOwnVal && (
+                <span className={`msg-read-icon ${msg.is_read ? "read" : "sent"}`}>
+                  {msg.is_read ? (
+                    <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
+                      <path d="M1 6L4.5 9.5L10.5 1.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M5 6L8.5 9.5L14.5 1.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                      <path d="M1 5.5L4.5 9L11 1" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </span>
+              )}
+            </div>
 
-          {msg.reactions && msg.reactions.length > 0 && (
+          {/* Reactions row - Faqat media yoki long messages uchun? Yo'q, shortda inline bo'ldi, endi faqat kerak bo'lsa show qilamiz */}
+          {/* Hozircha text xabarlarda ham inline bo'lgani uchun buni faqat media/doc larda caption bo'lsa ishlatishimiz mumkin */}
+          {msg.reactions && msg.reactions.length > 0 && (isImage || isVideo || isFile || isVoice) && getMsgText(msg) && (
             <div className="msg-reactions">
               {msg.reactions.map((r, i) => (
                 <span
@@ -483,6 +587,146 @@ function MessageBubble({
               ))}
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Media Lightbox (Full Screen View) ──────────────────
+function MediaLightbox({ media, onClose }) {
+  if (!media) return null;
+
+  const isVideo = media.type === 'video';
+  const url = media.url.startsWith('http') ? media.url : `${BACKEND}${media.url}`;
+
+  return (
+    <div className="lightbox-overlay" onClick={onClose}>
+      <div className="lightbox-header">
+        <div className="lightbox-info">
+           <span className="lightbox-filename">{media.url.split('/').pop()}</span>
+        </div>
+        <div className="lightbox-actions">
+          <a 
+            href={url} 
+            download 
+            className="lightbox-btn" 
+            onClick={e => e.stopPropagation()}
+            title={i18n.t("chat.download", "Yuklab olish")}
+          >
+            <Download size={22} />
+          </a>
+          <button className="lightbox-btn" onClick={onClose}>
+            <X size={24} />
+          </button>
+        </div>
+      </div>
+      
+      <div className="lightbox-content" onClick={e => e.stopPropagation()}>
+        {isVideo ? (
+          <video src={url} controls autoPlay className="lightbox-media" />
+        ) : (
+          <img src={url} alt="full-view" className="lightbox-media" />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FilePreviewModal({
+  file,
+  previewUrl,
+  onCancel,
+  onSend,
+  caption,
+  onCaptionChange,
+  isCompress,
+  onCompressToggle
+}) {
+  const isImage = file?.type.startsWith("image/");
+  const isVideo = file?.type.startsWith("video/");
+
+  return (
+    <div className="file-preview-overlay">
+      <div className="file-preview-modal glassmorphism">
+        <div className="file-preview-header">
+          <h3>{isImage ? i18n.t("chat.sendImage", "Отправить изображение") : i18n.t("chat.sendFile", "Отправить файл")}</h3>
+          <div className="file-preview-header-actions">
+            <button className="icon-btn"><MoreVertical size={20} /></button>
+            <button className="icon-btn" onClick={onCancel}><X size={20} /></button>
+          </div>
+        </div>
+
+        <div className="file-preview-content">
+          {isImage ? (
+            <div className="preview-image-container">
+              <img src={previewUrl} alt="preview" />
+              <div className="preview-actions-overlay">
+                <button className="preview-overlay-btn" onClick={onCancel} title={i18n.t("chat.delete", "O'chirish")}>
+                  <Trash2 size={20} />
+                </button>
+              </div>
+            </div>
+          ) : isVideo ? (
+            <video src={previewUrl} controls className="preview-video" />
+          ) : (
+            <div className="preview-generic-file">
+              <div className="file-icon-square large">
+                <FileText size={48} color="#fff" />
+              </div>
+              <div className="preview-file-info">
+                <span className="preview-file-name">{file?.name}</span>
+                <span className="preview-file-size">
+                  {file?.size ? `${(file?.size / 1024).toFixed(1)} KB` : ""}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="file-preview-options">
+          {isImage && (
+            <label className="compress-toggle">
+              <input 
+                type="checkbox" 
+                checked={isCompress} 
+                onChange={onCompressToggle} 
+              />
+              <span className="checkbox-custom"></span>
+              <span className="compress-text">{i18n.t("chat.compressImage", "Сжать изображение")}</span>
+            </label>
+          )}
+
+          <div className="caption-input-wrapper">
+            <input
+              type="text"
+              className="caption-input"
+              value={caption}
+              onChange={(e) => onCaptionChange(e.target.value)}
+              placeholder={i18n.t("chat.captionPlaceholder", "Подпись")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") onSend();
+              }}
+            />
+            <button className="caption-emoji-btn" onClick={(e) => {
+              e.stopPropagation();
+              // Emoji picker toggle logic
+            }}>
+              <Smile size={20} />
+            </button>
+          </div>
+        </div>
+
+        <div className="file-preview-footer">
+          <button className="footer-btn secondary" onClick={() => {
+            onCancel();
+            document.getElementById("chat-file-input")?.click();
+          }}>
+            {i18n.t("chat.addMore", "ДОБАВИТЬ")}
+          </button>
+          <div style={{ flex: 1 }}></div>
+          <button className="footer-btn text" onClick={onCancel}>{i18n.t("chat.cancel", "BEKOR QILISH")}</button>
+          <button className="footer-btn primary" onClick={onSend}>{i18n.t("chat.send", "YUBORISH")}</button>
         </div>
       </div>
     </div>
@@ -510,6 +754,7 @@ export default function ChatDetail() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const pickerRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const [viewingMedia, setViewingMedia] = useState(null);
 
   const [typingUser, setTypingUser] = useState(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -534,6 +779,12 @@ export default function ChatDetail() {
 
   const [toast, setToast] = useState(null);
   const [micError, setMicError] = useState(false);
+
+  // -- File/Image Preview Modal States --
+  const [pendingFile, setPendingFile] = useState(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState(null);
+  const [captionText, setCaptionText] = useState("");
+  const [isCompressMode, setIsCompressMode] = useState(true);
 
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
@@ -998,6 +1249,75 @@ export default function ChatDetail() {
     clearInterval(recordIntervalRef.current);
   };
 
+  // Fayl yuborish logikasi (MB limit va type aniqlash bilan)
+  const handleSendFile = (file) => {
+    const MAX_SIZE_MB = 50; 
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      notify(i18n.t("chat.fileTooLarge", `Fayl hajmi ${MAX_SIZE_MB}MB dan oshmasligi kerak`), "error");
+      return;
+    }
+
+    const preview = URL.createObjectURL(file);
+    setPendingFile(file);
+    setFilePreviewUrl(preview);
+    setCaptionText("");
+  };
+
+  const handleFinalSendFile = async () => {
+    if (!pendingFile) return;
+    
+    setSending(true);
+    const formData = new FormData();
+    formData.append("file", pendingFile);
+    
+    // Clear preview immediately to close modal
+    const fileToUpload = pendingFile;
+    const currentCaption = captionText;
+    setPendingFile(null);
+    setFilePreviewUrl(null);
+    setCaptionText("");
+
+    const uploadRes = await uploadFile(formData);
+    if (!uploadRes?.success) {
+      setSending(false);
+      notify(uploadRes?.message || i18n.t("chat.fileUploadFail", "Fayl yuklanmadi"), "error");
+      return;
+    }
+
+    const file_url = uploadRes.data?.url || uploadRes.url;
+    let type = "file";
+    if (fileToUpload.type.startsWith("image/")) type = "image";
+    // Backend `messages_type_check` enumida "video" bo'lmagani uchun "file" orqali yuboramiz.
+
+    const localReplyId = replyingTo?.id || null;
+    setReplyingTo(null);
+
+    const res = await sendMessage({
+      chat_id: chatId,
+      type,
+      file_url,
+      message_text: currentCaption, // Include caption
+      reply_to_id: localReplyId || undefined
+    });
+    
+    setSending(false);
+
+    if (res?.success === false) {
+      notify(res.message || i18n.t("chat.sendFail", "Xabar yuborilmadi"), "error");
+    } else {
+      const newMsg = res?.data?.message || res?.data || res?.message_obj;
+      if (newMsg && localReplyId) {
+        setMessages(prev => {
+          if (prev.find(m => String(m.id) === String(newMsg.id))) {
+            return prev.map(m => String(m.id) === String(newMsg.id) ? { ...newMsg, reply_to_id: localReplyId } : m);
+          }
+          return [...prev, { ...newMsg, reply_to_id: localReplyId }];
+        });
+      }
+      reloadList?.();
+    }
+  };
+
   const handleSendVoice = async (blob) => {
     setSending(true);
     const formData = new FormData();
@@ -1100,34 +1420,6 @@ export default function ChatDetail() {
 
     runTranslation();
   }, [messages, isAutoTranslateOn, targetLang]);
-
-  // const handleTranslateChat = async () => {
-  //   if (isTranslating) return;
-  //   setIsTranslating(true);
-  //   const newTranslations = { ...translations };
-
-  //   try {
-  //     const textMessages = messages.filter(
-  //       (m) => !m.deleted_at && (m.type === "text" || !m.type)
-  //     );
-
-  //     for (const msg of textMessages) {
-  //       const textToTranslate = getMsgText(msg);
-
-  //       if (textToTranslate && !translations[msg.id]) {
-  //         try {
-  //           const translated = await translateToUzbek(textToTranslate, targetLang);
-  //           newTranslations[msg.id] = translated;
-  //           setTranslations({ ...newTranslations });
-  //         } catch (err) {
-  //           console.error("Translation error for msg", msg.id, err);
-  //         }
-  //       }
-  //     }
-  //   } finally {
-  //     setIsTranslating(false);
-  //   }
-  // };
 
   const handleTranslateSingleMessage = async (msg) => {
     console.log("Translating single message:", msg);
@@ -1572,6 +1864,7 @@ export default function ChatDetail() {
                         allMessages={filteredMessages}
                         translation={translations[msg.id]}
                         allTranslations={translations}
+                        onMediaClick={setViewingMedia}
                         onReactChip={(msgToReact, emoji) => {
                           // This simulates the reaction logic originally in handleReact 
                           // but directly triggers via bubble click bypassing ContextMenu
@@ -1724,11 +2017,13 @@ export default function ChatDetail() {
 
                 <label className="chat-attach-btn">
                   <input
+                    id="chat-file-input"
                     type="file"
                     style={{ display: "none" }}
                     onChange={(e) => {
                       const file = e.target.files[0];
                       if (file) handleSendFile(file);
+                      e.target.value = ""; // Bir xil faylni qayta tanlash uchun reset
                     }}
                   />
                   <Paperclip size={24} />
@@ -1834,6 +2129,29 @@ export default function ChatDetail() {
 
       {toast && (
         <div className={`chat-toast ${toast.type || ""}`}>{toast.msg}</div>
+      )}
+
+      {pendingFile && (
+        <FilePreviewModal
+          file={pendingFile}
+          previewUrl={filePreviewUrl}
+          caption={captionText}
+          onCaptionChange={setCaptionText}
+          isCompress={isCompressMode}
+          onCompressToggle={() => setIsCompressMode(!isCompressMode)}
+          onCancel={() => {
+            setPendingFile(null);
+            setFilePreviewUrl(null);
+          }}
+          onSend={handleFinalSendFile}
+        />
+      )}
+      
+      {viewingMedia && (
+        <MediaLightbox 
+          media={viewingMedia} 
+          onClose={() => setViewingMedia(null)} 
+        />
       )}
     </div>
   );
