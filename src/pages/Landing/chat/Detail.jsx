@@ -352,6 +352,7 @@ function MessageBubble({
   allMessages,
   translation,
   allTranslations,
+  onReactChip,
 }) {
   const isDeleted = !!msg.deleted_at;
   const isImage = msg.type === "image";
@@ -468,7 +469,17 @@ function MessageBubble({
           {msg.reactions && msg.reactions.length > 0 && (
             <div className="msg-reactions">
               {msg.reactions.map((r, i) => (
-                <span key={i} className="msg-reaction-chip">{r.emoji} {r.count > 1 ? r.count : ""}</span>
+                <span
+                  key={i}
+                  className="msg-reaction-chip"
+                  title={r.count > 1 ? `${r.count} ta` : ""}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReactChip?.(msg, r.emoji);
+                  }}
+                >
+                  {r.emoji} {r.count > 1 ? r.count : ""}
+                </span>
               ))}
             </div>
           )}
@@ -533,6 +544,7 @@ export default function ChatDetail() {
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
   const observerRef = useRef(null);
+  const pendingReactionsRef = useRef(new Set()); // Optimistik qo'shilganlarni kuzatish
 
   useEffect(() => {
     if (observerRef.current) {
@@ -808,7 +820,14 @@ export default function ChatDetail() {
       setMessages((prev) => prev.map((m) => ({ ...m, is_read: true })));
     };
 
-    const onReactionAdded = ({ messageId, emoji }) => {
+    const onReactionAdded = ({ messageId, emoji, userId }) => {
+      // Agar biz o'zimiz optimistik qo'shgan bo'lsak, socket echo'ni o'tkazib yuboramiz
+      const key = `${messageId}:${emoji}`;
+      if (pendingReactionsRef.current.has(key)) {
+        pendingReactionsRef.current.delete(key);
+        return;
+      }
+
       setMessages((prev) =>
         prev.map((m) => {
           if (m.id !== messageId) return m;
@@ -1287,19 +1306,39 @@ export default function ChatDetail() {
     if (!msg) return;
 
     const socket = getSocket();
-    socket.emit("addReaction", { chatId, messageId: msg.id, emoji });
+    const reactions = msg.reactions || [];
+    const existing = reactions.find((r) => r.emoji === emoji);
+    const alreadyReacted = existing && existing.count > 0;
 
-    setMessages((prev) =>
-      prev.map((m) => {
-        if (m.id != msg.id) return m;
-        const reactions = m.reactions || [];
-        const existing = reactions.find((r) => r.emoji === emoji);
-        if (existing) {
-          return { ...m, reactions: reactions.map((r) => r.emoji === emoji ? { ...r, count: r.count + 1 } : r) };
-        }
-        return { ...m, reactions: [...reactions, { emoji, count: 1 }] };
-      })
-    );
+    if (alreadyReacted) {
+      // Toggle OFF — o'chirish
+      socket.emit("removeReaction", { chatId, messageId: msg.id, emoji });
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id != msg.id) return m;
+          const updated = (m.reactions || [])
+            .map((r) => r.emoji === emoji ? { ...r, count: r.count - 1 } : r)
+            .filter((r) => r.count > 0);
+          return { ...m, reactions: updated };
+        })
+      );
+    } else {
+      // Toggle ON — qo'shish (optimistic + pending belgilash)
+      const key = `${msg.id}:${emoji}`;
+      pendingReactionsRef.current.add(key);
+      socket.emit("addReaction", { chatId, messageId: msg.id, emoji, userId: currentUser?.id });
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id != msg.id) return m;
+          const reacts = m.reactions || [];
+          const ex = reacts.find((r) => r.emoji === emoji);
+          if (ex) {
+            return { ...m, reactions: reacts.map((r) => r.emoji === emoji ? { ...r, count: r.count + 1 } : r) };
+          }
+          return { ...m, reactions: [...reacts, { emoji, count: 1 }] };
+        })
+      );
+    }
     setContextMenu(null);
   };
 
@@ -1524,6 +1563,41 @@ export default function ChatDetail() {
                         allMessages={filteredMessages}
                         translation={translations[msg.id]}
                         allTranslations={translations}
+                        onReactChip={(msgToReact, emoji) => {
+                          // This simulates the reaction logic originally in handleReact 
+                          // but directly triggers via bubble click bypassing ContextMenu
+                          const socket = getSocket();
+                          const existing = (msgToReact.reactions || []).find((r) => r.emoji === emoji);
+                          const alreadyReacted = existing && existing.count > 0;
+
+                          if (alreadyReacted) {
+                            socket.emit("removeReaction", { chatId, messageId: msgToReact.id, emoji });
+                            setMessages((prev) =>
+                              prev.map((m) => {
+                                if (m.id !== msgToReact.id) return m;
+                                const updated = (m.reactions || [])
+                                  .map((r) => r.emoji === emoji ? { ...r, count: r.count - 1 } : r)
+                                  .filter((r) => r.count > 0);
+                                return { ...m, reactions: updated };
+                              })
+                            );
+                          } else {
+                            const key = `${msgToReact.id}:${emoji}`;
+                            pendingReactionsRef.current.add(key);
+                            socket.emit("addReaction", { chatId, messageId: msgToReact.id, emoji, userId: currentUser?.id });
+                            setMessages((prev) =>
+                              prev.map((m) => {
+                                if (m.id !== msgToReact.id) return m;
+                                const reacts = m.reactions || [];
+                                const ex = reacts.find((r) => r.emoji === emoji);
+                                if (ex) {
+                                  return { ...m, reactions: reacts.map((r) => r.emoji === emoji ? { ...r, count: r.count + 1 } : r) };
+                                }
+                                return { ...m, reactions: [...reacts, { emoji, count: 1 }] };
+                              })
+                            );
+                          }
+                        }}
                       />
                     </div>
                   );
