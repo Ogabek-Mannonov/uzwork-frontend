@@ -1,6 +1,6 @@
 // src/pages/Client/Landing.jsx
 import { useState, useCallback, useEffect } from "react";
-import { useNavigate, NavLink, useParams } from "react-router-dom";
+import { useNavigate, NavLink, useParams, useLocation } from "react-router-dom";
 import {
   Bookmark, Share2, Edit, XCircle, Users, DollarSign,
   Clock, Globe, Star, CheckCircle, AlertCircle, MessageSquare,
@@ -182,6 +182,7 @@ const EditPanel = ({ job, onSave, onCancel }) => {
 const Landing = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("active");
@@ -214,6 +215,17 @@ const Landing = () => {
     fetchData();
     return () => { active = false; };
   }, [id]);
+
+  // Handle Tab sync from URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get("tab");
+    if (tabParam && ["overview", "proposals", "invites", "edit"].includes(tabParam)) {
+      setTab(tabParam);
+      if (tabParam === "proposals") setStep("proposals");
+      if (tabParam === "invites") setStep("invite");
+    }
+  }, [location.search]);
 
   const handleSaveJob = async (form) => {
     notify("Saving...", "info");

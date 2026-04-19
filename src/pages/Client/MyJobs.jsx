@@ -312,7 +312,7 @@ const MyJobs = () => {
                     <>
                       <button 
                         className="mj-footer-btn mj-primary"
-                        onClick={() => navigate(`/client/management`)} // Adjust route if needed
+                        onClick={() => navigate(`/client/job/${job.id}?tab=proposals`)} // Navigate to job proposals tab
                       >
                         <Users size={14} /> Proposals ({job.proposals_count || 0})
                       </button>
