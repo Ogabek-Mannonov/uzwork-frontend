@@ -58,6 +58,7 @@ import BillingPayments from "./pages/Client/Payments.jsx";
 import ContractManagement from "./pages/Client/ContractManegment.jsx";
 import SecuritySettings from "./pages/Client/Security.jsx";
 import Escrow from "./pages/Client/Escrow.jsx";
+import Proposals from "./pages/Client/Proposals.jsx";
 
 function App() {
   return (
@@ -115,6 +116,7 @@ function App() {
             <Route path="/client/talent" element={<FindTalent />} />
             <Route path="/client/postjob" element={<PostJob />} />
             <Route path="/client/my-jobs" element={<MyJobs />} />
+            <Route path="/client/proposals" element={<Proposals />} />
             <Route path="/client/payments" element={<BillingPayments />} />  
             <Route path="/client/management" element={<ContractManagement />} />
             <Route path="/client/security" element={<SecuritySettings />} />

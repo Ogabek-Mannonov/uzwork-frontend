@@ -4,7 +4,8 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Sun, Moon, Menu, X, ChevronDown, Globe,
   Bell, HelpCircle, Settings, User, Search, Check,
-  RefreshCw, Users, Briefcase, Plus, Star
+  RefreshCw, Users, Briefcase, Plus, Star,
+  CreditCard, Shield, Award, FileText, AlertTriangle, LogOut
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useThemeContext } from "../Theme/ThemeContext";
@@ -349,7 +350,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
       return [
         { to: "/client/talent", label: t("navbar.findTalent") },
         { to: "/client/my-jobs", label: t("navbar.myJobs") },
-        { to: "/proposals",     label: t("navbar.proposals") },
+        { to: "/client/proposals", label: t("navbar.proposals") },
         { to: "/messages",      label: t("navbar.messages") },
       ];
     }
@@ -440,7 +441,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                         <Briefcase size={16} />
                         <span>{t("navbar.myJobs")}</span>
                       </Link>
-                      <Link to="/client/management" className="dropdown__link">
+                      <Link to="/client/proposals" className="dropdown__link">
                         <Users size={16} />
                         <span>{t("navbar.proposals")}</span>
                       </Link>
