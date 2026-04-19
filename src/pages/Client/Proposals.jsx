@@ -5,18 +5,29 @@ import {
   Users, Search, Filter, MessageSquare, Star, 
   CheckCircle, Clock, Briefcase, ArrowLeft,
   ChevronDown, ExternalLink, MoreVertical,
-  XCircle, UserCheck, AlertCircle
+  XCircle, UserCheck, AlertCircle, MapPin
 } from "lucide-react";
 import { getMyJobs } from "../../api/jobs";
 import { 
   getProposals, 
+  getProjectProposals,
   updateProposal, 
   rejectProposal,
   acceptProposal 
 } from "../../api/proposals";
+import { getUserProfile } from "../../api/common";
 import { useThemeContext } from "../components/Theme/ThemeContext";
 import { useTranslation } from "react-i18next";
 import "./css/proposals.css";
+
+const BACKEND = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
+
+function avatarSrc(url) {
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+  return `${BACKEND}${cleanUrl}`;
+}
 
 // --- Toast Component ---
 const Toast = ({ msg, type, onClose }) => {
@@ -26,6 +37,30 @@ const Toast = ({ msg, type, onClose }) => {
       {type === "error" ? <AlertCircle size={18} /> : <CheckCircle size={18} />}
       <span>{msg}</span>
       <button onClick={onClose}><XCircle size={14} /></button>
+    </div>
+  );
+};
+
+// --- Confirmation Modal Component ---
+const ConfirmationModal = ({ isOpen, title, desc, onConfirm, onCancel, isLoading }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="cp-modal-overlay">
+      <div className="cp-modal">
+        <div className="cp-modal-icon red">
+          <AlertCircle size={32} />
+        </div>
+        <h2>{title}</h2>
+        <p>{desc}</p>
+        <div className="cp-modal-actions">
+          <button className="cp-modal-cancel" onClick={onCancel} disabled={isLoading}>
+            Bekor qilish
+          </button>
+          <button className="cp-modal-confirm" onClick={onConfirm} disabled={isLoading}>
+            {isLoading ? "Bajarilmoqda..." : "Tasdiqlash"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
@@ -43,6 +78,7 @@ const Proposals = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [actionLoading, setActionLoading] = useState(null);
   const [toast, setToast] = useState(null);
+  const [modal, setModal] = useState({ isOpen: false, data: null });
 
   const notify = (msg, type = "success") => {
     setToast({ msg, type });
@@ -59,27 +95,53 @@ const Proposals = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [jobsRes, propsRes] = await Promise.all([
-        getMyJobs({ limit: 100 }),
-        getProposals({ limit: 200 })
-      ]);
-
-      // Robust mapping for Jobs
+      const jobsRes = await getMyJobs({ limit: 100 });
+      
       const jobsList = 
         Array.isArray(jobsRes?.projects) ? jobsRes.projects :
         Array.isArray(jobsRes?.data?.projects) ? jobsRes.data.projects :
         Array.isArray(jobsRes?.data) ? jobsRes.data :
         Array.isArray(jobsRes) ? jobsRes : [];
 
-      // Robust mapping for Proposals
-      const propsList = 
-        Array.isArray(propsRes?.proposals) ? propsRes.proposals :
-        Array.isArray(propsRes?.data?.proposals) ? propsRes.data.proposals :
-        Array.isArray(propsRes?.data) ? propsRes.data :
-        Array.isArray(propsRes) ? propsRes : [];
+      // Fetch proposals for each job in parallel to get rich data
+      const propsResponses = await Promise.all(
+        jobsList.map(job => getProjectProposals(job.id, { limit: 50 }))
+      );
+
+      const allProposals = [];
+      propsResponses.forEach(res => {
+        const list = 
+          Array.isArray(res?.proposals) ? res.proposals :
+          Array.isArray(res?.data?.proposals) ? res.data.proposals :
+          Array.isArray(res?.data) ? res.data :
+          Array.isArray(res) ? res : [];
+        allProposals.push(...list);
+      });
 
       setJobs(jobsList);
-      setProposals(propsList);
+
+      // --- Enrichment: Fetch missing freelancer details ---
+      const enrichedProposals = await Promise.all(allProposals.map(async (p) => {
+        const flId = p.freelancer_id || p.user_id;
+        if (flId && !p.freelancer_name) {
+          try {
+            const profileRes = await getUserProfile(flId);
+            const u = profileRes?.data?.user || profileRes?.user;
+            const prof = profileRes?.data?.profile || profileRes?.profile;
+            if (u) {
+              return {
+                ...p,
+                freelancer_name: `${u.first_name || ""} ${u.last_name || ""}`.trim() || u.username || u.name,
+                freelancer_avatar: prof?.avatar_url || u.avatar_url,
+                freelancer_title: prof?.title || u.title
+              };
+            }
+          } catch (e) { console.error("Enrichment error:", e); }
+        }
+        return p;
+      }));
+
+      setProposals(enrichedProposals);
     } catch (error) {
       console.error("Error fetching proposals data:", error);
     } finally {
@@ -111,7 +173,6 @@ const Proposals = () => {
   };
 
   const handleReject = async (proposalId) => {
-    if (!window.confirm("Haqiqatdan ham ushbu taklifni rad etmoqchimisiz?")) return;
     setActionLoading(proposalId);
     try {
       const res = await rejectProposal(proposalId);
@@ -125,7 +186,15 @@ const Proposals = () => {
       notify("Xatolik yuz berdi", "error");
     } finally {
       setActionLoading(null);
+      setModal({ isOpen: false, data: null });
     }
+  };
+
+  const openRejectModal = (proposalId) => {
+    setModal({
+      isOpen: true,
+      data: proposalId
+    });
   };
 
   const handleHire = (jobId, proposalId) => {
@@ -280,24 +349,55 @@ const Proposals = () => {
                   <div key={proposal.id} className="cp-card">
                     <div className="cp-card-top">
                       <img 
-                        src={proposal.freelancer_avatar || `https://ui-avatars.com/api/?name=${proposal.freelancer_name || "F"}&background=random`} 
+                        src={avatarSrc(proposal.freelancer_avatar || proposal.user_avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(proposal.freelancer_name || "F")}&background=random`} 
                         alt="" 
                         className="cp-avatar"
+                        onClick={() => navigate(`/profile/${proposal.freelancer_id || proposal.user_id}`)}
+                        style={{ cursor: "pointer" }}
                       />
                       <div className="cp-info">
-                        <h3>{proposal.freelancer_name || "Freelancer"}</h3>
+                        <h3 onClick={() => navigate(`/profile/${proposal.freelancer_id || proposal.user_id}`)} style={{ cursor: "pointer" }}>
+                          {proposal.freelancer_name || 
+                           proposal.user_name || 
+                           proposal.full_name ||
+                           (proposal.freelancer?.user?.first_name ? `${proposal.freelancer.user.first_name} ${proposal.freelancer.user.last_name || ""}` : "") ||
+                           (proposal.freelancer?.first_name ? `${proposal.freelancer.first_name} ${proposal.freelancer.last_name || ""}` : "") ||
+                           (proposal.user?.first_name ? `${proposal.user.first_name} ${proposal.user.last_name || ""}` : "") ||
+                           (proposal.first_name ? `${proposal.first_name} ${proposal.last_name || ""}` : "") ||
+                           `Frelanser #${String(proposal.freelancer_id || proposal.user_id || proposal.id).slice(0, 6)}`}
+                        </h3>
                         <div className="cp-title">
-                          <CheckCircle size={12} color="#10b981" />
-                          Top Rated Specialst
+                          {proposal.freelancer_title || 
+                           proposal.freelancer?.title || 
+                           proposal.freelancer?.user?.title ||
+                           "Top Rated Specialist"}
                         </div>
-                        <div className="cp-rating">
-                          <Star size={12} fill="#f59e0b" />
-                          4.9 (24 ta sharh)
+                        <div className="cp-meta-row">
+                          <div className="cp-rating">
+                            <Star size={12} fill="#f59e0b" />
+                            {proposal.freelancer_rating || "4.9"} ({proposal.freelancer_reviews_count || "24"} ta sharh)
+                          </div>
+                          {proposal.freelancer_location && (
+                            <div className="cp-location">
+                              <MapPin size={12} /> {proposal.freelancer_location}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="cp-price">
                         <span>${proposal.proposed_price || proposal.budget_amount || 0}</span>
                         <span>{proposal.payment_type || "FIXED"}</span>
+                      </div>
+                    </div>
+
+                    <div className="cp-details-row">
+                      <div className="cp-detail-item">
+                        <Clock size={14} />
+                        <span>{proposal.proposed_duration || "Kiritilmagan"}</span>
+                      </div>
+                      <div className="cp-detail-item">
+                        <CheckCircle size={14} color="#10b981" />
+                        <span>{t("publicProfile.verified")}</span>
                       </div>
                     </div>
 
@@ -333,7 +433,7 @@ const Proposals = () => {
                         <button 
                           className="cp-star-btn" 
                           style={{ color: "#ef4444" }} 
-                          onClick={() => handleReject(proposal.id)}
+                          onClick={() => openRejectModal(proposal.id)}
                           title="Rad etish"
                         >
                           <XCircle size={18} />
@@ -347,6 +447,15 @@ const Proposals = () => {
           ))
         )}
         <Toast msg={toast?.msg} type={toast?.type} onClose={() => setToast(null)} />
+        
+        <ConfirmationModal 
+          isOpen={modal.isOpen}
+          title="Taklifni rad etish"
+          desc="Haqiqatdan ham ushbu taklifni rad etmoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi."
+          isLoading={actionLoading === modal.data}
+          onConfirm={() => handleReject(modal.data)}
+          onCancel={() => setModal({ isOpen: false, data: null })}
+        />
       </div>
     </div>
   );
