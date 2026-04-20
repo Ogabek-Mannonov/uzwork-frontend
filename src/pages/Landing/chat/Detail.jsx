@@ -91,11 +91,21 @@ function formatDateLabel(dateStr) {
   if (msgDate.getTime() === today.getTime()) return i18n.t("chat.today", "Bugun");
   if (msgDate.getTime() === yesterday.getTime()) return i18n.t("chat.yesterday", "Kecha");
 
-  return d.toLocaleDateString(i18n.language === 'uz' ? "uz-UZ" : (i18n.language === 'ru' ? "ru-RU" : "en-US"), {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const months = {
+    uz: ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"],
+    ru: ["Января", "Февраля", "Марта", "Апреля", "Мая", "Июня", "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"],
+    en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+  };
+
+  const lang = i18n.language || 'uz';
+  const monthList = months[lang] || months.en;
+  const day = d.getDate();
+  const month = monthList[d.getMonth()];
+  const year = d.getFullYear();
+
+  if (lang === 'uz') return `${day}-${month}, ${year}-yil`;
+  if (lang === 'ru') return `${day} ${month} ${year} г.`;
+  return `${month} ${day}, ${year}`;
 }
 
 function formatLastSeen(dateStr) {
@@ -452,7 +462,7 @@ function MessageBubble({
                       <video src={avatarSrc(msg.file_url)} className="video-bubble" />
                       <div className="video-play-overlay">
                         <div className="play-icon-circle">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z" /></svg>
                         </div>
                       </div>
                     </div>
@@ -462,19 +472,25 @@ function MessageBubble({
                     <div className="msg-time-floating">
                       {(msg.reactions || []).length > 0 && (
                         <div className="msg-floating-reactions">
-                          {(msg.reactions || []).map((r, i) => (
-                            <span 
-                              key={i} 
-                              className="floating-reaction-item"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onReactChip?.(msg, r.emoji);
-                              }}
-                              title={`${r.count} reactions`}
-                            >
-                              {r.emoji}
-                            </span>
-                          ))}
+                          {(msg.reactions || []).map((r, i) => {
+                            const hasMyReaction = r.user_ids && r.user_ids.map(String).includes(String(currentUser?.id));
+                            return (
+                              <span
+                                key={i}
+                                className={`floating-reaction-item ${hasMyReaction ? "mine" : ""}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onReactChip?.(msg, r.emoji);
+                                }}
+                                title={r.user_ids ? `${r.user_ids.length} reactions` : ""}
+                              >
+                                <span className="reaction-emoji">{r.emoji}</span>
+                                {(r.count > 1 || (r.user_ids && r.user_ids.length > 1)) && (
+                                  <span className="reaction-count">{r.user_ids ? r.user_ids.length : r.count}</span>
+                                )}
+                              </span>
+                            );
+                          })}
                         </div>
                       )}
                       <span className="floating-time-text">{formatMsgTime(msg.created_at)}</span>
@@ -527,9 +543,9 @@ function MessageBubble({
                         {msg.file_size ? `${(msg.file_size / 1024).toFixed(1)} KB` : "Document"}
                       </span>
                     </div>
-                    <a 
-                      href={avatarSrc(msg.file_url)} 
-                      target="_blank" 
+                    <a
+                      href={avatarSrc(msg.file_url)}
+                      target="_blank"
                       rel="noreferrer"
                       className="file-action-link"
                     >
@@ -559,18 +575,25 @@ function MessageBubble({
             <div className="msg-time-inline">
               {(msg.reactions || []).length > 0 && (
                 <div className="msg-inline-reactions">
-                  {msg.reactions.map((r, i) => (
-                    <span 
-                      key={i} 
-                      className="inline-reaction-item"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onReactChip?.(msg, r.emoji);
-                      }}
-                    >
-                      {r.emoji}
-                    </span>
-                  ))}
+                  {msg.reactions.map((r, i) => {
+                    const hasMyReaction = r.user_ids && r.user_ids.map(String).includes(String(currentUser?.id));
+                    return (
+                      <span
+                        key={i}
+                        className={`inline-reaction-item ${hasMyReaction ? "mine" : ""}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onReactChip?.(msg, r.emoji);
+                        }}
+                        title={r.user_ids ? `${r.user_ids.length} reactions` : ""}
+                      >
+                        <span className="reaction-emoji">{r.emoji}</span>
+                        {(r.count > 1 || (r.user_ids && r.user_ids.length > 1)) && (
+                          <span className="reaction-count">{r.user_ids ? r.user_ids.length : r.count}</span>
+                        )}
+                      </span>
+                    );
+                  })}
                 </div>
               )}
               {msg.is_edited && (
@@ -632,13 +655,13 @@ function MediaLightbox({ media, onClose }) {
     <div className="lightbox-overlay" onClick={onClose}>
       <div className="lightbox-header">
         <div className="lightbox-info">
-           <span className="lightbox-filename">{fileName}</span>
+          <span className="lightbox-filename">{fileName}</span>
         </div>
         <div className="lightbox-actions">
-          <a 
-            href={fullUrl} 
-            download 
-            className="lightbox-btn" 
+          <a
+            href={fullUrl}
+            download
+            className="lightbox-btn"
             onClick={e => e.stopPropagation()}
             title={i18n.t("chat.download", "Yuklab olish")}
           >
@@ -649,7 +672,7 @@ function MediaLightbox({ media, onClose }) {
           </button>
         </div>
       </div>
-      
+
       <div className="lightbox-content" onClick={e => e.stopPropagation()}>
         {isVideo ? (
           <video src={fullUrl} controls autoPlay className="lightbox-media" />
@@ -715,10 +738,10 @@ function FilePreviewModal({
         <div className="file-preview-options">
           {isImage && (
             <label className="compress-toggle">
-              <input 
-                type="checkbox" 
-                checked={isCompress} 
-                onChange={onCompressToggle} 
+              <input
+                type="checkbox"
+                checked={isCompress}
+                onChange={onCompressToggle}
               />
               <span className="checkbox-custom"></span>
               <span className="compress-text">{i18n.t("chat.compressImage", "Сжать изображение")}</span>
@@ -797,7 +820,7 @@ export default function ChatDetail() {
   const [visibleMessageIds, setVisibleMessageIds] = useState(new Set());
   const translatingIdsRef = useRef(new Set());
   const processedIdsRef = useRef(new Set());
-  const [targetLang, setTargetLang] = useState("uz");
+  const [targetLang, setTargetLang] = useState(localStorage.getItem("chat_target_lang") || "uz");
   const [showTranslateSettings, setShowTranslateSettings] = useState(false);
 
   const [recording, setRecording] = useState(false);
@@ -823,7 +846,7 @@ export default function ChatDetail() {
   const textareaRef = useRef(null);
   const messagesAreaRef = useRef(null);
   const typingTimerRef = useRef(null);
-  const isAtBottomRef = useRef(true);
+  const isAtBottomRef = useRef(false); // Boshlanishida false, scroll'dan so'ng true bo'ladi
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -870,12 +893,28 @@ export default function ChatDetail() {
     };
   }, [messages]);
 
+  // ── Xabarlarni o'qilganlik mantiqi (IntersectionObserver asosida) ──
+  useEffect(() => {
+    if (!chatId || !document.hasFocus() || messages.length === 0) return;
+
+    const unreadPartnerMsgIds = messages
+      .filter(m => String(m.sender_id) !== String(currentUser?.id) && !m.is_read)
+      .map(m => String(m.id));
+
+    if (unreadPartnerMsgIds.length === 0) return;
+
+    const hasVisibleUnread = unreadPartnerMsgIds.some(id => visibleMessageIds.has(id));
+
+    if (hasVisibleUnread) {
+      markMessagesAsRead(chatId).then(() => reloadList?.());
+    }
+  }, [visibleMessageIds, chatId, messages, currentUser?.id]);
+
   // Real-time avto-tarjima (Prefetching va Priority tizimi bilan)
   useEffect(() => {
     if (!isAutoTranslateOn) return;
 
     const runTranslation = async () => {
-      // 1. Hali tarjima qilinmagan va o'zimiz yozmagan barcha xabarlarni topamiz
       const allUntranslated = messages.filter(
         (m) =>
           !m.deleted_at &&
@@ -883,32 +922,23 @@ export default function ChatDetail() {
           String(m.sender_id) !== String(currentUser?.id) &&
           !translations[m.id] &&
           !translatingIdsRef.current.has(m.id) &&
-          !processedIdsRef.current.has(m.id) // <--- Xato bo'lganlarni qayta jo'natmaslik uchun
+          !processedIdsRef.current.has(m.id)
       );
 
-      // Agar hamma narsa tarjima bo'lib bo'lgan bo'lsa, to'xtaymiz
       if (allUntranslated.length === 0) {
         setIsTranslating(false);
         return;
       }
 
-      // 2. Ko'rinib turgan xabarlarni 1-navbatga (VIP) chiqaramiz
       const visibleUntranslated = allUntranslated.filter(m => visibleMessageIds.has(String(m.id)));
-
-      // 3. Ekranda ko'rinmayotgan xabarlarni eng yangisidan eskisiga qarab taxlaymiz 
-      // (chunki user odatda tepaga, ya'ni yaqin tarixga skroll qiladi)
       const hiddenUntranslated = allUntranslated.filter(m => !visibleMessageIds.has(String(m.id)));
       hiddenUntranslated.reverse();
 
-      // Ikkalasini birlashtiramiz (Oldin ko'rinadiganlar, keyin fondagilar)
       const prioritizedMessages = [...visibleUntranslated, ...hiddenUntranslated];
-
-      // 4. Bittada maksimal 30 ta xabarni olib, "qutiga" solamiz (Batch)
       const chunk = prioritizedMessages.slice(0, 30);
 
       if (chunk.length === 0) return;
 
-      // Statusni "band" qilib belgilaymiz
       chunk.forEach(m => translatingIdsRef.current.add(m.id));
       setIsTranslating(true);
 
@@ -919,7 +949,6 @@ export default function ChatDetail() {
 
       try {
         if (batchPayload.length > 0) {
-          // Bitta API so'rovda 30 ta xabarni tarjima qilamiz
           const newTranslationsMap = await translateBatchToUzbek(batchPayload, targetLang);
 
           if (Object.keys(newTranslationsMap).length > 0) {
@@ -934,18 +963,13 @@ export default function ChatDetail() {
       } finally {
         chunk.forEach(m => {
           translatingIdsRef.current.delete(m.id);
-          processedIdsRef.current.add(m.id); // Bir marta urindik, qayta urinmaymiz
+          processedIdsRef.current.add(m.id);
         });
-
-        // E'tibor bering: setIsTranslating(false) ni bu yerda chaqirmaymiz, 
-        // chunki dependencydagi `translations` o'zgargani uchun useEffect 
-        // o'zi qaytadan ishga tushib, keyingi 30 tani tarjima qilishni boshlaydi.
       }
     };
 
     runTranslation();
   }, [messages, isAutoTranslateOn, targetLang, visibleMessageIds, translations]);
-  // ↑ translations ni qo'shdik, shu sababli biri tugasa, ikkinchisi avtomatik boshlanadi
 
   const notify = useCallback((msg, type = "success") => {
     setToast({ msg, type });
@@ -991,6 +1015,13 @@ export default function ChatDetail() {
   }, [chatId]);
 
   useEffect(() => {
+    const handleWindowFocus = () => { };
+
+    window.addEventListener("focus", handleWindowFocus);
+    return () => window.removeEventListener("focus", handleWindowFocus);
+  }, [chatId, reloadList]);
+
+  useEffect(() => {
     const handleClickOutside = (e) => {
       if (
         pickerRef.current &&
@@ -1015,13 +1046,13 @@ export default function ChatDetail() {
         } else if (replyingTo) {
           setReplyingTo(null);
         } else if (emojiSidebar) {
-           setEmojiSidebar(false);
+          setEmojiSidebar(false);
         } else if (showInfo) {
-           setShowInfo(false);
+          setShowInfo(false);
         } else if (onBack) {
-           onBack();
+          onBack();
         } else {
-           handled = false;
+          handled = false;
         }
 
         if (handled) {
@@ -1056,11 +1087,7 @@ export default function ChatDetail() {
   const scrollToBottom = useCallback((behavior = "smooth") => {
     bottomRef.current?.scrollIntoView({ behavior });
     setUnreadScrollCount(0);
-    // Pastga tushganda o'qilgan deb belgilaymiz
-    if (chatId) {
-      markMessagesAsRead(chatId).then(() => reloadList?.());
-    }
-  }, [chatId, reloadList]);
+  }, []);
 
   useEffect(() => {
     if (!loading && messages.length > 0) {
@@ -1083,12 +1110,25 @@ export default function ChatDetail() {
     // Reset badge if we are at bottom
     if (distFromBottom < 80) {
       setUnreadScrollCount(0);
-      // Agar endigina pastga tushgan bo'lsak, xabarlarni o'qilgan deb belgilaymiz
-      if (!wasAtBottom && chatId) {
-        markMessagesAsRead(chatId).then(() => reloadList?.());
-      }
     }
   };
+
+  const handleReactionUpdate = useCallback((data) => {
+    const messageId = data.messageId || data.message_id || data.id || data.mid;
+    const reactions = data.reactions;
+    const userId = data.userId || data.user_id;
+
+    // Agar reaksiyani o'zimiz qo'ygan bo'lsak, socket xabarini o'tkazib yuboramiz
+    if (String(userId) === String(currentUser?.id)) return;
+
+    setMessages((prev) =>
+      prev.map((m) =>
+        String(m.id) === String(messageId) 
+          ? { ...m, reactions: reactions } 
+          : m
+      )
+    );
+  }, [currentUser?.id]);
 
   useEffect(() => {
     if (!chatId) return;
@@ -1100,6 +1140,9 @@ export default function ChatDetail() {
 
     const onNew = (msg) => {
       if (String(msg.chat_id) !== String(chatId)) return;
+
+      const isOurMessage = String(msg.sender_id) === String(currentUser?.id);
+
       setMessages((prev) => {
         const exists = prev.some(m =>
           String(m.id) === String(msg.id) ||
@@ -1110,12 +1153,10 @@ export default function ChatDetail() {
         return [...prev, msg];
       });
 
-      if (String(msg.sender_id) !== String(currentUser?.id)) {
-        markMessagesAsRead(chatId).then(() => reloadList?.());
-      }
-
       if (isAtBottomRef.current) {
-        scrollToBottom();
+        scrollToBottom("smooth");
+      } else if (!isOurMessage) {
+        setUnreadScrollCount((prev) => prev + 1);
       }
     };
 
@@ -1152,35 +1193,15 @@ export default function ChatDetail() {
       setMessages((prev) => prev.map((m) => ({ ...m, is_read: true })));
     };
 
-    const onReactionAdded = ({ messageId, emoji, userId }) => {
-      // Agar biz o'zimiz optimistik qo'shgan bo'lsak, socket echo'ni o'tkazib yuboramiz
-      const key = `${messageId}:${emoji}`;
-      if (pendingReactionsRef.current.has(key)) {
-        pendingReactionsRef.current.delete(key);
-        return;
-      }
-
-      setMessages((prev) =>
-        prev.map((m) => {
-          if (m.id !== messageId) return m;
-          const existing = (m.reactions || []).find((r) => r.emoji === emoji);
-          if (existing) {
-            // Faqat o'sha reaksiyani qoldiramiz va count oshiramiz
-            return { ...m, reactions: [{ emoji, count: existing.count + 1 }] };
-          }
-          // Yangi reaksiya qo'shilsa, eskilarni o'chirib yuboramiz
-          return { ...m, reactions: [{ emoji, count: 1 }] };
-        })
-      );
-    };
+    const reactionEvents = ["reactionAdded", "reactionRemoved", "reactionDeleted", "reactionUpdate"];
 
     socket.off("newMessage", onNew);
     socket.off("messageEdited", onEdited);
     socket.off("messageDeleted", onDeleted);
     socket.off("userTyping", onTyping);
     socket.off("userStoppedTyping", onStopTyping);
+    reactionEvents.forEach(ev => socket.off(ev));
     socket.off("messagesRead", onRead);
-    socket.off("reactionAdded", onReactionAdded);
 
     socket.on("newMessage", onNew);
     socket.on("messageEdited", onEdited);
@@ -1188,9 +1209,7 @@ export default function ChatDetail() {
     socket.on("userTyping", onTyping);
     socket.on("userStoppedTyping", onStopTyping);
     socket.on("messagesRead", onRead);
-    socket.on("reactionAdded", onReactionAdded);
-
-    markMessagesAsRead(chatId).then(() => reloadList?.());
+    reactionEvents.forEach(ev => socket.on(ev, handleReactionUpdate));
 
     return () => {
       socket.off("newMessage", onNew);
@@ -1199,10 +1218,10 @@ export default function ChatDetail() {
       socket.off("userTyping", onTyping);
       socket.off("userStoppedTyping", onStopTyping);
       socket.off("messagesRead", onRead);
-      socket.off("reactionAdded", onReactionAdded);
+      reactionEvents.forEach(ev => socket.off(ev));
       readyCleanup?.();
     };
-  }, [chatId, currentUser?.id]);
+  }, [chatId, currentUser?.id, handleReactionUpdate]);
 
   useEffect(() => {
     const socket = getSocket();
@@ -1332,7 +1351,7 @@ export default function ChatDetail() {
 
   // Fayl yuborish logikasi (MB limit va type aniqlash bilan)
   const handleSendFile = (file) => {
-    const MAX_SIZE_MB = 50; 
+    const MAX_SIZE_MB = 50;
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
       notify(i18n.t("chat.fileTooLarge", `Fayl hajmi ${MAX_SIZE_MB}MB dan oshmasligi kerak`), "error");
       return;
@@ -1346,11 +1365,11 @@ export default function ChatDetail() {
 
   const handleFinalSendFile = async () => {
     if (!pendingFile) return;
-    
+
     setSending(true);
     const formData = new FormData();
     formData.append("file", pendingFile);
-    
+
     // Clear preview immediately to close modal
     const fileToUpload = pendingFile;
     const currentCaption = captionText;
@@ -1380,7 +1399,7 @@ export default function ChatDetail() {
       message_text: currentCaption, // Include caption
       reply_to_id: localReplyId || undefined
     });
-    
+
     setSending(false);
 
     if (res?.success === false) {
@@ -1584,15 +1603,21 @@ export default function ChatDetail() {
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
         notify(res.message || i18n.t("chat.sendFail", "Xabar yuborilmadi"), "error");
         setText(content);
-      } else if (res?.data || res?.message_obj) {
         const newMsg = res?.data?.message || res?.data || res?.message_obj;
-        setMessages((prev) => {
-          const exists = prev.some(m => String(m.id) === String(newMsg.id));
-          if (exists) {
-            return prev.filter(m => m.id !== tempId);
-          }
-          return prev.map(m => (m.id === tempId ? { ...newMsg, reply_to_id: replyId || undefined } : m));
-        });
+
+        if (newMsg) {
+          // KAFOLAT: O'zimiz hozirgina yuborgan xabar doim 1 ta ptichka bo'lishi shart!
+          newMsg.is_read = false;
+
+          setMessages((prev) => {
+            const exists = prev.some(m => String(m.id) === String(newMsg.id));
+            if (exists) {
+              return prev.filter(m => m.id !== tempId);
+            }
+            return prev.map(m => (m.id === tempId ? { ...newMsg, reply_to_id: replyId || undefined } : m));
+          });
+        }
+        scrollToBottom("smooth", false); // O'zimiz yuborganda API ga so'rov ketmaydi
         reloadList?.();
       }
     } catch (err) {
@@ -1628,7 +1653,11 @@ export default function ChatDetail() {
 
   const handleEdit = () => {
     const msg = contextMenu?.msg;
-    if (!msg || msg.type !== "text") { notify(i18n.t("chat.onlyTextCanBeEdited", "Faqat matn xabarlarni tahrirlash mumkin"), "error"); setContextMenu(null); return; }
+    if (!msg || msg.type !== "text") { 
+      notify(i18n.t("chat.onlyTextCanBeEdited", "Faqat matn xabarlarni tahrirlash mumkin"), "error"); 
+      setContextMenu(null); 
+      return; 
+    }
     setEditingMsg(msg);
     setText(msg.content || "");
     setContextMenu(null);
@@ -1678,51 +1707,59 @@ export default function ChatDetail() {
     }, 150);
   };
 
-  const handleReact = (emoji) => {
-    const msg = contextMenu?.msg;
-    if (!msg) return;
-
+  const toggleReaction = (msg, emoji) => {
+    if (!msg || !emoji || !currentUser?.id) return;
     const socket = getSocket();
     const reactions = msg.reactions || [];
-    const existing = reactions.find((r) => r.emoji === emoji);
-    const alreadyReacted = existing && existing.count > 0;
+    const myId = String(currentUser.id);
+    
+    // Foydalanuvchi ushbu emojiga reaksiya bildirganmi?
+    const existingEntry = reactions.find((r) => r.emoji === emoji);
+    const hasMyReaction = existingEntry && 
+                          existingEntry.user_ids && 
+                          existingEntry.user_ids.map(String).includes(myId);
 
-    if (alreadyReacted) {
-      // Toggle OFF — o'chirish
-      socket.emit("removeReaction", { chatId, messageId: msg.id, emoji, userId: currentUser?.id });
-      setMessages((prev) =>
-        prev.map((m) => {
-          if (m.id !== msg.id) return m;
-          const updated = (m.reactions || [])
-            .map((r) => r.emoji === emoji ? { ...r, count: r.count - 1 } : r)
-            .filter((r) => r.count > 0);
-          return { ...m, reactions: updated };
-        })
-      );
+    const payload = { chatId, messageId: msg.id, emoji, userId: currentUser.id };
+
+    // Yangilash mantiqi (Optimistik)
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (String(m.id) !== String(msg.id)) return m;
+        
+        // Telegram kabi: Foydalanuvchining boshqa barcha reaksiyalarini o'chirib chiqamiz
+        let baseReactions = (m.reactions || []).map(r => {
+           const newIds = (r.user_ids || []).filter(id => String(id) !== myId);
+           return { ...r, user_ids: newIds, count: newIds.length };
+        }).filter(r => r.count > 0);
+
+        if (hasMyReaction) {
+          // Shunchaki o'chirildi (baseReactions allaqachon mening ID-imni o'chirib bo'ldi)
+          return { ...m, reactions: baseReactions };
+        } else {
+          // Yangi emojini qo'shish
+          const idx = baseReactions.findIndex(r => r.emoji === emoji);
+          if (idx !== -1) {
+            const r = baseReactions[idx];
+            const newIds = [...new Set([...(r.user_ids || []), currentUser.id])];
+            baseReactions[idx] = { ...r, user_ids: newIds, count: newIds.length };
+          } else {
+            baseReactions.push({ emoji, user_ids: [currentUser.id], count: 1 });
+          }
+          return { ...m, reactions: baseReactions };
+        }
+      })
+    );
+
+    // Socket orqali serverga yuborish
+    if (hasMyReaction) {
+      socket.emit("removeReaction", payload);
     } else {
-      // Boshqa barcha reaksiyalarni bekor qilish (faqat 1 ta ruxsat)
-      const hasOldReactions = msg.reactions && msg.reactions.length > 0;
-      (msg.reactions || []).forEach((r) => {
-        socket.emit("removeReaction", { chatId, messageId: msg.id, emoji: r.emoji, userId: currentUser?.id });
-      });
-
-      // Toggle ON — qo'shish (optimistic + pending belgilash)
-      const key = `${msg.id}:${emoji}`;
-      pendingReactionsRef.current.add(key);
-
-      const delayAdd = hasOldReactions ? 300 : 0; // DB poygasi bo'lmasligi uchun kutamiz
-      setTimeout(() => {
-        socket.emit("addReaction", { chatId, messageId: msg.id, emoji, userId: currentUser?.id });
-      }, delayAdd);
-
-      setMessages((prev) =>
-        prev.map((m) => {
-          if (m.id !== msg.id) return m;
-          // Butunlay eski reaksiyalarni almashtirib faqat sani qo'yamiz
-          return { ...m, reactions: [{ emoji, count: 1 }] };
-        })
-      );
+      socket.emit("addReaction", payload);
     }
+  };
+
+  const handleReact = (emoji) => {
+    toggleReaction(contextMenu?.msg, emoji);
     setContextMenu(null);
   };
 
@@ -1746,9 +1783,9 @@ export default function ChatDetail() {
   );
 
   const filteredMessages = searchQuery.trim()
-    ? baseFilteredMessages.filter(m => 
-        (m.message || m.content || "").toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    ? baseFilteredMessages.filter(m =>
+      (m.message || m.content || "").toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : baseFilteredMessages;
 
   const grouped = groupMessagesByDate(filteredMessages);
@@ -1821,8 +1858,8 @@ export default function ChatDetail() {
         <div className="chat-header">
           {showSearch ? (
             <div className="chat-header-search-wrap">
-              <button 
-                className="chat-header-search-back" 
+              <button
+                className="chat-header-search-back"
                 onClick={() => { setShowSearch(false); setSearchQuery(""); }}
                 title={i18n.t("chat.back", "Orqaga")}
               >
@@ -1830,8 +1867,8 @@ export default function ChatDetail() {
               </button>
               <div className="chat-header-search-bar">
                 <Search size={18} className="search-icon" />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder={i18n.t("chat.searchInChat", "Xabarlarni qidirish...")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -1901,6 +1938,7 @@ export default function ChatDetail() {
             onToggleSettings={() => setShowTranslateSettings(!showTranslateSettings)}
             onSelectLang={(lang) => {
               setTargetLang(lang);
+              localStorage.setItem("chat_target_lang", lang);
               setShowTranslateSettings(false);
               setTranslations({});
               // Til o'zgarganda tarjimalar tozalanadi, useEffect esa darhol yangi tilga o'giradi
@@ -1981,46 +2019,7 @@ export default function ChatDetail() {
                         translation={translations[msg.id]}
                         allTranslations={translations}
                         onMediaClick={setViewingMedia}
-                        onReactChip={(msgToReact, emoji) => {
-                          // This simulates the reaction logic originally in handleReact 
-                          // but directly triggers via bubble click bypassing ContextMenu
-                          const socket = getSocket();
-                          const existing = (msgToReact.reactions || []).find((r) => r.emoji === emoji);
-                          const alreadyReacted = existing && existing.count > 0;
-
-                          if (alreadyReacted) {
-                            socket.emit("removeReaction", { chatId, messageId: msgToReact.id, emoji, userId: currentUser?.id });
-                            setMessages((prev) =>
-                              prev.map((m) => {
-                                if (m.id !== msgToReact.id) return m;
-                                const updated = (m.reactions || [])
-                                  .map((r) => r.emoji === emoji ? { ...r, count: r.count - 1 } : r)
-                                  .filter((r) => r.count > 0);
-                                return { ...m, reactions: updated };
-                              })
-                            );
-                          } else {
-                            const hasOldReactions = msgToReact.reactions && msgToReact.reactions.length > 0;
-                            (msgToReact.reactions || []).forEach((r) => {
-                              socket.emit("removeReaction", { chatId, messageId: msgToReact.id, emoji: r.emoji, userId: currentUser?.id });
-                            });
-
-                            const key = `${msgToReact.id}:${emoji}`;
-                            pendingReactionsRef.current.add(key);
-
-                            const delayAdd = hasOldReactions ? 300 : 0;
-                            setTimeout(() => {
-                              socket.emit("addReaction", { chatId, messageId: msgToReact.id, emoji, userId: currentUser?.id });
-                            }, delayAdd);
-
-                            setMessages((prev) =>
-                              prev.map((m) => {
-                                if (m.id !== msgToReact.id) return m;
-                                return { ...m, reactions: [{ emoji, count: 1 }] };
-                              })
-                            );
-                          }
-                        }}
+                        onReactChip={(msgToReact, emoji) => toggleReaction(msgToReact, emoji)}
                       />
                     </div>
                   );
@@ -2047,7 +2046,7 @@ export default function ChatDetail() {
         {showScrollBtn && (
           <button
             className="scroll-to-bottom"
-            onClick={() => scrollToBottom()}
+            onClick={() => scrollToBottom("smooth", true)}
             title={i18n.t("chat.scrollDown", "Pastga")}
           >
             <ArrowLeft size={20} style={{ transform: 'rotate(-90deg)' }} />
@@ -2101,7 +2100,7 @@ export default function ChatDetail() {
               </div>
             ) : (
               <div className="chat-input-bubble">
-                <div 
+                <div
                   className="emoji-popover-wrapper"
                   onMouseEnter={() => {
                     if (emojiHoverTimerRef.current) clearTimeout(emojiHoverTimerRef.current);
@@ -2237,7 +2236,7 @@ export default function ChatDetail() {
                 <h3>{i18n.t("chat.profile", "User Details")}</h3>
                 <button className="chat-header-btn" onClick={() => setShowInfo(false)}>✕</button>
               </div>
-              
+
               <div className="chat-info-body">
                 <div className="chat-info-profile">
                   <div className="info-avatar-wrapper">
@@ -2262,11 +2261,11 @@ export default function ChatDetail() {
                 </div>
 
                 <div className="chat-info-top-actions">
-                  <button 
+                  <button
                     className={`info-action-btn ${isMuted ? 'active' : ''}`}
                     onClick={() => {
-                       setIsMuted(!isMuted);
-                       notify(isMuted ? "Bildirishnomalar yoqildi" : "Xabarlar ovozsiz rejimga o'tkazildi", "success");
+                      setIsMuted(!isMuted);
+                      notify(isMuted ? "Bildirishnomalar yoqildi" : "Xabarlar ovozsiz rejimga o'tkazildi", "success");
                     }}
                   >
                     <div className="action-icon-circle">
@@ -2280,11 +2279,11 @@ export default function ChatDetail() {
                     <span>{i18n.t("chat.search", "Search")}</span>
                   </button>
 
-                  <button 
+                  <button
                     className={`info-action-btn ${isPinned ? 'active' : ''}`}
                     onClick={() => {
-                        setIsPinned(!isPinned);
-                        notify(isPinned ? "Chat pin-dan olindi" : "Chat pin qilindi", "success");
+                      setIsPinned(!isPinned);
+                      notify(isPinned ? "Chat pin-dan olindi" : "Chat pin qilindi", "success");
                     }}
                   >
                     <div className="action-icon-circle"><Pin size={18} style={isPinned ? { transform: 'rotate(45deg)', color: '#3390ec' } : {}} /></div>
@@ -2339,8 +2338,8 @@ export default function ChatDetail() {
                             setViewingMedia(m);
                           }}>
                             <div className="video-thumb-overlay"><Video size={16} /></div>
-                            <video 
-                              src={avatarSrc(m.file_url)} 
+                            <video
+                              src={avatarSrc(m.file_url)}
                               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                               muted
                               preload="metadata"
@@ -2365,7 +2364,7 @@ export default function ChatDetail() {
                         .map((m, i) => (
                           <div key={i} className="media-list-item" onClick={() => scrollToMessage(m.id)}>
                             <div className="list-item-icon pdf">
-                               <FileText size={18} />
+                              <FileText size={18} />
                             </div>
                             <div className="list-item-info">
                               <div className="list-item-name">{m.content || m.file_url?.split('/').pop()}</div>
@@ -2481,11 +2480,11 @@ export default function ChatDetail() {
           onSend={handleFinalSendFile}
         />
       )}
-      
+
       {viewingMedia && (
-        <MediaLightbox 
-          media={viewingMedia} 
-          onClose={() => setViewingMedia(null)} 
+        <MediaLightbox
+          media={viewingMedia}
+          onClose={() => setViewingMedia(null)}
         />
       )}
     </div>
@@ -2562,11 +2561,6 @@ function TranslateBar({
               </div>
             )}
           </div>
-          {!isTranslating && (
-            <button className="translate-settings-btn" onClick={(e) => { e.stopPropagation(); onClose?.(); }}>
-              <X size={16} strokeWidth={2.2} />
-            </button>
-          )}
         </div>
       </div>
     </div>
