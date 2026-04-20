@@ -1,0 +1,141 @@
+# UzWork Chat - Reaksiyalar (Reaction) Tizimi Logikasi
+
+Ushbu hujjat chatdagi reaksiyalar qanday ishlashi, optimistik yangilanish va real-vaqtda sinxronizatsiya mantiqini tushuntiradi.
+
+## 1. Universal Socket Handler (handleReactionUpdate)
+Bu funksiya socketdan kelayotgan barcha reaksiya hodisalarini qabul qiladi va UI'ni yangilaydi.
+
+```javascript
+const handleReactionUpdate = (data, eventName = "") => {
+  // 1. Xabar ID'sini aniqlash (backend har xil nomda yuborishi mumkin)
+  const mid = data.messageId || data.message_id || data.id || data.mid;
+  if (!mid) return;
+
+  // 2. O'zimiz qo'ygan reaksiyani socket'dan qayta ishlamaymiz 
+  // Chunki u allaqachon optimistik tarzda UI'da ko'ringan
+  if (String(data.userId || data.user_id) === String(currentUser?.id)) return;
+
+  setMessages((prev) =>
+    prev.map((m) => {
+      if (String(m.id) !== String(mid)) return m;
+
+      // 3. Agar backend butun reaksiyalar massivini yuborsa (eng xavfsiz yo'l)
+      if (data.reactions && Array.isArray(data.reactions)) {
+        return { ...m, reactions: data.reactions };
+      }
+
+      // 4. Bitta reaksiya qo'shilgani/o'chirilgani haqida ma'lumot
+      const emoji = data.emoji || data.reaction;
+      if (!emoji) return m;
+
+      const currentReactions = m.reactions || [];
+      
+      // O'chirish harakatini hodisa nomi yoki type'dan aniqlaymiz
+      const isRemoval = (eventName && (eventName.toLowerCase().includes('remove') || eventName.toLowerCase().includes('delete'))) || 
+                        data.type === 'remove' || data.action === 'remove' || data.isRemoved;
+
+      let updated;
+      if (isRemoval) {
+        // Miqdorini kamaytiramiz va 0 bo'lsa o'chirib tashlaymiz
+        updated = currentReactions
+          .map(r => r.emoji === emoji ? { ...r, count: Math.max(0, r.count - 1) } : r)
+          .filter(r => r.count > 0);
+      } else {
+        // Qo'shamiz yoki mavjud bo'lsa count'ni oshiramiz
+        const existing = currentReactions.find(r => r.emoji === emoji);
+        if (existing) {
+          updated = currentReactions.map(r => r.emoji === emoji ? { ...r, count: (data.count || r.count + 1) } : r);
+        } else {
+          updated = [...currentReactions, { emoji, count: data.count || 1 }];
+        }
+      }
+      return { ...m, reactions: updated };
+    })
+  );
+};
+```
+
+## 2. Reaksiya berish mantiqi (toggleReaction)
+Foydalanuvchi emoji ustiga bosganda ishlaydi. Optimistik UI va Socket Emit'larni o'z ichiga oladi.
+
+```javascript
+const toggleReaction = (msg, emoji) => {
+  if (!msg || !emoji) return;
+  const socket = getSocket();
+  const reactions = msg.reactions || [];
+  const existing = reactions.find((r) => r.emoji === emoji);
+  const alreadyReacted = existing && existing.count > 0;
+
+  // Backend har xil formatlarni tushunishi uchun kengaytirilgan payload
+  const payload = {
+    chatId,
+    chat_id: chatId,
+    messageId: msg.id,
+    message_id: msg.id,
+    emoji: emoji,
+    reaction: emoji,
+    userId: currentUser?.id,
+    user_id: currentUser?.id
+  };
+
+  if (alreadyReacted) {
+    // REAKSIYANI QAYTARIB OLISH (Removal)
+    socket.emit("removeReaction", payload);
+    socket.emit("remove_reaction", payload);
+    socket.emit("deleteReaction", payload);
+
+    // UI'ni darhol (optimistik) yangilash
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (String(m.id) !== String(msg.id)) return m;
+        const updated = (m.reactions || [])
+          .map((r) => r.emoji === emoji ? { ...r, count: Math.max(0, r.count - 1) } : r)
+          .filter((r) => r.count > 0);
+        return { ...m, reactions: updated };
+      })
+    );
+  } else {
+    // YANGI REAKSIYA QO'SHISH (Addition)
+    // Telegram kabi: bitta foydalanuvchi faqat 1 ta reaksiya qoldirishi mumkin
+    (msg.reactions || []).forEach((r) => {
+      socket.emit("removeReaction", { ...payload, emoji: r.emoji, reaction: r.emoji });
+    });
+
+    socket.emit("addReaction", payload);
+    socket.emit("add_reaction", payload);
+
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (String(m.id) !== String(msg.id)) return m;
+        return { ...m, reactions: [{ emoji, count: 1 }] };
+      })
+    );
+  }
+};
+```
+
+## 3. Socket Listenerlarni ulash
+useEffect ichida barcha ehtimoliy hodisa nomlarini tinglaymiz.
+
+```javascript
+const reactionEvents = [
+  "reactionAdded", "reactionRemoved", "reactionDeleted", "reactionUpdate",
+  "messageReaction", "reaction", "onReaction", "message_reaction",
+  "reaction_added", "reaction_removed", "reaction-removed", "message_update"
+];
+
+// Bog'lash (Mount)
+reactionEvents.forEach(ev => socket.on(ev, (data) => handleReactionUpdate(data, ev)));
+
+// Tozalash (Unmount)
+reactionEvents.forEach(ev => socket.off(ev));
+```
+
+## 4. UI integratsiyasi
+Komponentlar ichida qanday ishlatiladi:
+
+1. **Context Menu orqali**:
+   `<ContextMenu ... onReact={(emoji) => toggleReaction(contextMenu?.msg, emoji)} />`
+
+2. **Emoji Chip ustiga bosganda**:
+   `<MessageBubble ... onReactChip={(msgToReact, emoji) => toggleReaction(msgToReact, emoji)} />`

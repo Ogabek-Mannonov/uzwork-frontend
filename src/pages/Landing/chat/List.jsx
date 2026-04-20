@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useNavigate, useParams, Outlet } from "react-router-dom";
 import { getChats } from "../../../api/messages";
 import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/useSocket";
-import { Search, MessageSquare, Plus, MessageCircle } from "lucide-react";
+import { Search, MessageSquare, Plus, MessageCircle, Pin, PinOff, Bell, BellOff, Volume2, VolumeX, Trash2 } from "lucide-react";
 import i18n from "../../../i18n";
 import "./chat.css";
 
@@ -45,10 +45,22 @@ function formatTime(dateStr) {
   const diffDays = Math.floor(diffMs / 86400000);
 
   if (diffMins < 1) return i18n.t("chat.now", "Hozir");
-  if (diffMins < 60) return `${diffMins}${i18n.t("chat.min", "m")}`;
-  if (diffHours < 24) return `${diffHours}${i18n.t("chat.hour", "s")}`;
-  if (diffDays < 7) return `${diffDays}${i18n.t("chat.day", "k")}`;
-  return d.toLocaleDateString(i18n.language === 'uz' ? "uz-UZ" : (i18n.language === 'ru' ? "ru-RU" : "en-US"), { month: "short", day: "numeric" });
+  if (diffMins < 60) return `${diffMins} m.`;
+  if (diffHours < 24) return `${diffHours} s.`;
+  if (diffDays < 7) {
+    const dayLabel = i18n.language === 'uz' ? 'kun' : (i18n.language === 'ru' ? 'д.' : 'd');
+    return `${diffDays} ${dayLabel}`;
+  }
+
+  const months = {
+    uz: ["Yan", "Fev", "Mar", "Apr", "May", "Iyun", "Iyul", "Avg", "Sen", "Okt", "Noy", "Dek"],
+    ru: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"],
+    en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  };
+
+  const lang = i18n.language || 'uz';
+  const monthList = months[lang] || months.en;
+  return `${d.getDate()} ${monthList[d.getMonth()]}`;
 }
 
 function Avatar({ user, size = "md" }) {
@@ -74,6 +86,41 @@ function Avatar({ user, size = "md" }) {
   );
 }
 
+// ── Chat Context Menu ─────────────────────────────────────
+function ChatContextMenu({ x, y, chat, isPinned, isMuted, onPin, onMute, onClose }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) onClose();
+    };
+    document.addEventListener("mousedown", handler, true);
+    return () => document.removeEventListener("mousedown", handler, true);
+  }, [onClose]);
+
+  const style = { position: "fixed", top: y, left: x, zIndex: 1000 };
+  if (x + 180 > window.innerWidth) style.left = x - 180;
+  if (y + 160 > window.innerHeight) style.top = y - 160;
+
+  return (
+    <div ref={ref} className="msg-context-menu" style={style}>
+      <div className="msg-context-item" onClick={(e) => { e.stopPropagation(); onPin(!isPinned); onClose(); }}>
+        {isPinned ? <PinOff size={16} style={{ marginRight: 10 }} /> : <Pin size={16} style={{ marginRight: 10 }} />}
+        {isPinned ? i18n.t("chat.unpin", "Pin-dan olish") : i18n.t("chat.pin", "Pin qilish")}
+      </div>
+      <div className="msg-context-item" onClick={(e) => { e.stopPropagation(); onMute(!isMuted); onClose(); }}>
+        {isMuted ? <Bell size={16} style={{ marginRight: 10 }} /> : <BellOff size={16} style={{ marginRight: 10 }} />}
+        {isMuted ? i18n.t("chat.unmute", "Ovozni yoqish") : i18n.t("chat.mute", "Ovozsiz qilish")}
+      </div>
+      <div className="msg-context-divider" />
+      <div className="msg-context-item danger" onClick={(e) => { e.stopPropagation(); onClose(); }}>
+        <Trash2 size={16} style={{ marginRight: 10 }} />
+        {i18n.t("chat.deleteChat", "Chatni o'chirish")}
+      </div>
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -83,8 +130,26 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
+  const [contextMenu, setContextMenu] = useState(null);
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const [pinnedChats, setPinnedChats] = useState(() => {
+    const saved = localStorage.getItem(`pinned_chats_${currentUser?.id}`);
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [mutedChats, setMutedChats] = useState(() => {
+    const saved = localStorage.getItem(`muted_chats_${currentUser?.id}`);
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem(`pinned_chats_${currentUser?.id}`, JSON.stringify(pinnedChats));
+  }, [pinnedChats, currentUser?.id]);
+
+  useEffect(() => {
+    localStorage.setItem(`muted_chats_${currentUser?.id}`, JSON.stringify(mutedChats));
+  }, [mutedChats, currentUser?.id]);
 
   // ── load chats ─────────
   const loadChats = useCallback(async () => {
@@ -231,12 +296,26 @@ export default function ChatPage() {
   };
 
   const filteredChats = useMemo(() => {
-    return chats.filter((c) => {
+    let list = chats.filter((c) => {
       if (!search) return true;
       const name = getPartnerName(c).toLowerCase();
       return name.includes(search.toLowerCase());
     });
-  }, [chats, search, i18n.language]);
+
+    // Pinned chatlarni tepaga chiqaramiz
+    return list.sort((a, b) => {
+      const aId = a.chat_id || a.id;
+      const bId = b.chat_id || b.id;
+      const aPinned = pinnedChats.includes(String(aId));
+      const bPinned = pinnedChats.includes(String(bId));
+      if (aPinned && !bPinned) return -1;
+      if (!aPinned && bPinned) return 1;
+      // Agar ikkalasi ham pin bo'lsa yoki bo'lmasa, vaqt bo'yicha
+      const aTime = parseUTC(a.last_message?.created_at || a.created_at || 0);
+      const bTime = parseUTC(b.last_message?.created_at || b.created_at || 0);
+      return bTime - aTime;
+    });
+  }, [chats, search, i18n.language, pinnedChats]);
 
   const totalUnread = chats.reduce((sum, c) => sum + (c.unread_count || 0), 0);
 
@@ -253,14 +332,6 @@ export default function ChatPage() {
         <div className="chat-sidebar-header">
           <h1 className="chat-sidebar-title">
             {i18n.t("chat.messages", "Xabarlar")}
-            {totalUnread > 0 && (
-              <span
-                className="unread-badge"
-                style={{ display: "inline-flex", marginLeft: 10, width: "auto", borderRadius: 12, padding: "0 8px" }}
-              >
-                {totalUnread}
-              </span>
-            )}
           </h1>
           <div className="chat-search-box">
             <span className="chat-search-icon"><Search size={18} strokeWidth={2.5} /></span>
@@ -298,42 +369,53 @@ export default function ChatPage() {
                 const type = getChatType(chat);
                 const isActive = String(cid) === String(activeChatId);
                 const hasUnread = chat.unread_count > 0;
+                const isPinned = pinnedChats.includes(String(cid));
+                const isMuted = mutedChats.includes(String(cid));
 
-              return (
-                <div
-                  key={cid}
-                  className={`chat-item ${isActive ? "active" : ""}`}
-                  onClick={() => openChat(cid)}
-                >
-                  <div className="chat-item-avatar">
-                    <Avatar user={partner} size="md" />
-                  </div>
-
-                  <div className="chat-item-info">
-                    <div className="chat-item-top">
-                      <span className="chat-item-name">{getPartnerName(chat)}</span>
-                      <span className="chat-item-time">
-                        {formatTime(chat.last_message_at || chat.chat_created_at)}
-                      </span>
+                return (
+                  <div
+                    key={cid}
+                    className={`chat-item ${isActive ? "active" : ""} ${isPinned ? "pinned" : ""}`}
+                    onClick={() => openChat(cid)}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      setContextMenu({ x: e.clientX, y: e.clientY, chat });
+                    }}
+                  >
+                    <div className="chat-item-avatar">
+                      <Avatar user={partner} size="md" />
+                      <span className={`status-dot ${partner?.is_online ? 'online' : 'offline'}`} />
                     </div>
-                    <div className="chat-item-bottom">
-                      <span className={`chat-item-preview ${hasUnread ? "unread" : ""}`}>
-                        {chat.last_message_content
-                          ? chat.last_message_content.slice(0, 38) +
-                            (chat.last_message_content.length > 38 ? "…" : "")
-                          : i18n.t("chat.noMessagesOut", "Xabar yo'q")}
-                      </span>
-                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                        {type && <span className="chat-item-badge">{type}</span>}
-                        {hasUnread && (
-                          <span className="unread-badge">{chat.unread_count}</span>
-                        )}
+
+                    <div className="chat-item-info">
+                      <div className="chat-item-top">
+                        <span className="chat-item-name">
+                          {getPartnerName(chat)}
+                          {isMuted && <BellOff size={12} className="muted-icon" style={{ marginLeft: 6, opacity: 0.5 }} />}
+                        </span>
+                        <span className="chat-item-time">
+                          {formatTime(chat.last_message_at || chat.chat_created_at || chat.last_message?.created_at || chat.created_at)}
+                        </span>
+                      </div>
+                      <div className="chat-item-bottom">
+                        <span className={`chat-item-preview ${hasUnread ? "unread" : ""}`}>
+                          {chat.last_message_content || chat.last_message?.message_text || chat.last_message?.content ? (
+                            (chat.last_message_content || chat.last_message?.message_text || chat.last_message?.content).slice(0, 38) +
+                            ((chat.last_message_content || chat.last_message?.message_text || chat.last_message?.content).length > 38 ? "…" : "")
+                          ) : i18n.t("chat.noMessagesOut", "Xabar yo'q")}
+                        </span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          {isPinned && <Pin size={12} className="pinned-icon" style={{ opacity: 0.6 }} />}
+                          {type && <span className="chat-item-badge">{type}</span>}
+                          {hasUnread && (
+                            <span className={`unread-badge ${isMuted ? 'muted' : ''}`}>{chat.unread_count}</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })
+                );
+              })
           )}
         </div>
       </aside>
@@ -358,6 +440,25 @@ export default function ChatPage() {
           }} />
         )}
       </main>
+
+      {contextMenu && (
+        <ChatContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          chat={contextMenu.chat}
+          isPinned={pinnedChats.includes(String(contextMenu.chat.chat_id || contextMenu.chat.id))}
+          isMuted={mutedChats.includes(String(contextMenu.chat.chat_id || contextMenu.chat.id))}
+          onPin={(pin) => {
+            const cid = String(contextMenu.chat.chat_id || contextMenu.chat.id);
+            setPinnedChats(prev => pin ? [...prev, cid] : prev.filter(id => id !== cid));
+          }}
+          onMute={(mute) => {
+            const cid = String(contextMenu.chat.chat_id || contextMenu.chat.id);
+            setMutedChats(prev => mute ? [...prev, cid] : prev.filter(id => id !== cid));
+          }}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 }

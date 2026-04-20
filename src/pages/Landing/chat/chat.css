@@ -216,15 +216,31 @@
   font-size: 15px;
 }
 
-.online-dot {
+.status-dot {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 12px;
-  height: 12px;
-  background: var(--online-color);
-  border: 2px solid white;
+  bottom: -1px;
+  right: -1px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
+  border: 2px solid white;
+  transition: all 0.3s ease;
+  z-index: 5;
+  box-sizing: border-box;
+}
+
+.status-dot.online {
+  background: #3390ec; /* Telegram Blue */
+  box-shadow: 0 1px 3px rgba(51, 144, 236, 0.3);
+}
+
+.status-dot.offline {
+  background: #7b7b7b; /* Grey for offline */
+}
+
+/* Dark mode border */
+[data-theme='dark'] .status-dot {
+  border-color: #212121;
 }
 
 .chat-item-info {
@@ -278,7 +294,7 @@
 }
 
 .unread-badge {
-  background: var(--accent);
+  background: #3390ec; /* Telegram blue */
   color: white;
   border-radius: 50%;
   min-width: 20px;
@@ -291,6 +307,12 @@
   padding: 0 4px;
   flex-shrink: 0;
   margin-left: 8px;
+  transition: all 0.2s ease;
+}
+
+.unread-badge.muted {
+  background: #b1b1b1; /* Muted gray like Telegram */
+  color: #fff;
 }
 
 .chat-item-badge {
@@ -741,13 +763,45 @@
   font-size: 15px;
   cursor: pointer;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
-  transition: transform 0.2s;
+  transition: transform 0.2s, background 0.2s;
   display: flex;
   align-items: center;
+  gap: 2px;
+  padding: 1px 5px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .inline-reaction-item:hover {
-  transform: scale(1.25);
+  transform: scale(1.15);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.inline-reaction-item.mine {
+  background: #3b82f6; /* Moviyroq */
+  color: white;
+  border-color: #2563eb;
+}
+.inline-reaction-item.mine .reaction-count {
+  color: white;
+}
+
+.msg-bubble.sent .inline-reaction-item,
+.msg-bubble.sent .floating-reaction-item {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.msg-bubble.sent .inline-reaction-item.mine,
+.msg-bubble.sent .floating-reaction-item.mine {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.reaction-count {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.9;
 }
 
 .inline-time-text {

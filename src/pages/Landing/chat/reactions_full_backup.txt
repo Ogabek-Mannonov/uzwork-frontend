@@ -1,0 +1,210 @@
+# REACTION SYSTEM FULL BACKUP - UZWORK PROJECT
+# Date: 2026-04-20
+
+## 1. SQL DATABASE SCHEMA
+# Run this in your PostgreSQL console if the 'reactions' column doesn't exist.
+# The column must be JSONB to support user_ids array and counts.
+
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS reactions JSONB DEFAULT '[]';
+
+# ---------------------------------------------------------
+
+## 2. BACKEND (server.js - Socket.io)
+# Place these listeners inside your io.on("connection", (socket) => { ... }) block.
+
+  socket.on("removeReaction", async ({ chatId, messageId, emoji, userId }) => {
+    const uid = userId; 
+    console.log(`[socket] removeReaction: msg=${messageId}, user=${uid}`);
+    if (!chatId || !messageId || !emoji || !uid) return;
+
+    try {
+      const selectRes = await pool.query("SELECT reactions FROM messages WHERE id = $1", [messageId]);
+      if (selectRes.rows.length === 0) return;
+
+      let reactions = selectRes.rows[0].reactions || [];
+      if (!Array.isArray(reactions)) reactions = [];
+
+      // Foydalanuvchi ID sini o'chirish (String/Int/UUID support)
+      reactions = reactions.map(r => {
+        if (r.emoji === emoji) {
+          const newIds = (r.user_ids || []).filter(id => String(id) !== String(uid));
+          return { ...r, user_ids: newIds, count: newIds.length };
+        }
+        return r;
+      }).filter(r => r.count > 0);
+
+      const updateRes = await pool.query(
+        "UPDATE messages SET reactions = $1 WHERE id = $2 RETURNING reactions",
+        [reactions, messageId]
+      );
+
+      const newReactions = updateRes.rows[0].reactions;
+      io.to(chatId).emit("reactionUpdate", { messageId, reactions: newReactions, userId: uid });
+    } catch (err) {
+      console.error("❌ socket removeReaction error:", err.message);
+    }
+  });
+
+  socket.on("addReaction", async ({ chatId, messageId, emoji, userId }) => {
+    const uid = userId;
+    console.log(`[socket] addReaction: msg=${messageId}, user=${uid}`);
+    if (!chatId || !messageId || !emoji || !uid) return;
+
+    try {
+      const selectRes = await pool.query("SELECT reactions FROM messages WHERE id = $1", [messageId]);
+      if (selectRes.rows.length === 0) return;
+
+      let reactions = selectRes.rows[0].reactions || [];
+      if (!Array.isArray(reactions)) reactions = [];
+
+      // Telegram mantiqi: Bitta userda faqat bitta reaksiya! (Eskisini o'chiramiz)
+      reactions = reactions.map(r => {
+        const newIds = (r.user_ids || []).filter(id => String(id) !== String(uid));
+        return { ...r, user_ids: newIds, count: newIds.length };
+      }).filter(r => r.count > 0);
+
+      // Yangi emojini qo'shish
+      const existingIdx = reactions.findIndex(r => r.emoji === emoji);
+      if (existingIdx !== -1) {
+        const r = reactions[existingIdx];
+        const uids = r.user_ids || [];
+        if (!uids.map(String).includes(String(uid))) {
+          const newIds = [...uids, uid];
+          reactions[existingIdx] = { ...r, user_ids: newIds, count: newIds.length };
+        }
+      } else {
+        reactions.push({ emoji, user_ids: [uid], count: 1 });
+      }
+
+      const updateRes = await pool.query(
+        "UPDATE messages SET reactions = $1 WHERE id = $2 RETURNING reactions",
+        [reactions, messageId]
+      );
+
+      const newReactions = updateRes.rows[0].reactions;
+      io.to(chatId).emit("reactionUpdate", { messageId, reactions: newReactions, userId: uid });
+    } catch (err) {
+      console.error("❌ socket addReaction error:", err.message);
+    }
+  });
+
+# ---------------------------------------------------------
+
+## 3. FRONTEND (Detail.jsx - React State & Logic)
+
+// A. Real-time Listener (Inside useEffect)
+const handleReactionUpdate = (data, eventName = "") => {
+  const mid = data.messageId || data.message_id || data.id || data.mid;
+  if (!mid) return;
+
+  // O'zimizdan kelgan socket xabarini ignore qilamiz (Optimistik allaqachon tayyor)
+  if (String(data.userId || data.user_id) === String(currentUser?.id)) return;
+
+  setMessages((prev) =>
+    prev.map((m) => {
+      if (String(m.id) !== String(mid)) return m;
+      if (data.reactions && Array.isArray(data.reactions)) {
+        const formatted = data.reactions.map(r => ({
+          ...r,
+          count: r.user_ids ? r.user_ids.length : (r.count || 0)
+        }));
+        return { ...m, reactions: formatted };
+      }
+      return m;
+    })
+  );
+};
+
+// B. Toggle Function (Optimistic UI)
+const toggleReaction = (msg, emoji) => {
+  if (!msg || !emoji || !currentUser?.id) return;
+  const socket = getSocket();
+  const reactions = msg.reactions || [];
+  const myId = String(currentUser.id);
+  
+  const existingEntry = reactions.find((r) => r.emoji === emoji);
+  const hasMyReaction = existingEntry && 
+                        existingEntry.user_ids && 
+                        existingEntry.user_ids.map(String).includes(myId);
+
+  const payload = { chatId, messageId: msg.id, emoji, userId: currentUser.id };
+
+  // 1. Optimistik yangilanish
+  setMessages((prev) =>
+    prev.map((m) => {
+      if (String(m.id) !== String(msg.id)) return m;
+      
+      // Avval mening hamma eski reaksiyalarni massivdan olib tashlaymiz
+      let baseReactions = (m.reactions || []).map(r => {
+         const newIds = (r.user_ids || []).filter(id => String(id) !== myId);
+         return { ...r, user_ids: newIds, count: newIds.length };
+      }).filter(r => r.count > 0);
+
+      if (hasMyReaction) {
+        return { ...m, reactions: baseReactions }; // Faqat o'chirildi
+      } else {
+        // Yangi emojini massivga qo'shamiz
+        const idx = baseReactions.findIndex(r => r.emoji === emoji);
+        if (idx !== -1) {
+          const r = baseReactions[idx];
+          const newIds = [...new Set([...(r.user_ids || []), currentUser.id])];
+          baseReactions[idx] = { ...r, user_ids: newIds, count: newIds.length };
+        } else {
+          baseReactions.push({ emoji, user_ids: [currentUser.id], count: 1 });
+        }
+        return { ...m, reactions: baseReactions };
+      }
+    })
+  );
+
+  // 2. Socket orqali serverni yangilash
+  if (hasMyReaction) {
+    socket.emit("removeReaction", payload);
+  } else {
+    socket.emit("addReaction", payload);
+  }
+};
+
+# ---------------------------------------------------------
+
+## 4. UI STYLES (chat.css)
+
+.msg-inline-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.inline-reaction-item {
+  display: flex;
+  align-items: center;
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 2px 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  user-select: none;
+}
+
+.inline-reaction-item:hover {
+  background: #e2e8f0;
+}
+
+.inline-reaction-item.mine {
+  background: #e0f2fe;
+  border-color: #7dd3fc;
+}
+
+.reaction-count {
+  margin-left: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.inline-reaction-item.mine .reaction-count {
+  color: #0369a1;
+}
