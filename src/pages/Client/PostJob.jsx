@@ -1,6 +1,7 @@
 // src/pages/Client/PostJob/PostJob.jsx
-import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useCallback, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   ChevronLeft, ChevronRight, Check, X, Plus,
   Lightbulb, Briefcase, Clock, DollarSign,
@@ -8,16 +9,16 @@ import {
   Rocket, ArrowLeft, Eye,
 } from "lucide-react";
 import "../Client/css/post.css";
-import { createJob } from "../../api/jobs";
+import { createJob, getJobById, updateJob } from "../../api/jobs";
 
 /* ================================================================
    CONSTANTS
    ================================================================ */
 const STEPS = [
-  { id: 1, label: "Job Details",  sub: "Title & description" },
-  { id: 2, label: "Skills",       sub: "Required skills"     },
-  { id: 3, label: "Budget",       sub: "Price & duration"    },
-  { id: 4, label: "Review",       sub: "Preview & publish"   },
+  { id: 1, key: "details" },
+  { id: 2, key: "skills"  },
+  { id: 3, key: "budget"  },
+  { id: 4, key: "review"  },
 ];
 
 const SUGGESTED_SKILLS = {
@@ -28,28 +29,19 @@ const SUGGESTED_SKILLS = {
 };
 
 const COMMON_SKILLS = [
-  // Development
   "React", "Node.js", "TypeScript", "PostgreSQL", "Docker", "AWS", "GraphQL", "Python", "REST API", "MongoDB",
   "JavaScript", "HTML5", "CSS3", "Next.js", "Vue.js", "Angular", "PHP", "Laravel", "MySQL", "Redis",
   "Flutter", "React Native", "Swift", "Kotlin", "Java", "C#", "C++", "Unity", "Unreal Engine",
   "Go", "Rust", "Ruby on Rails", "Django", "Flask", "Spring Boot", "ASP.NET", "Kubernetes", "Azure", "Google Cloud",
-  
-  // Design
   "Figma", "UI/UX Design", "Prototyping", "Adobe XD", "Webflow", "Sketch", "Design Systems",
   "Photoshop", "Illustrator", "Indesign", "After Effects", "Premiere Pro", "3D Modeling", "Blender",
   "Motion Graphics", "Logo Design", "Branding", "Typography", "Color Theory", "Vector Art",
-  
-  // Marketing & Writing
   "Social Media Marketing", "Email Marketing", "Google Ads", "Facebook Ads", "Instagram Marketing", 
   "SEO", "SEM", "Content Strategy", "Growth Hacking", "Affiliate Marketing",
   "SEO Writing", "Copywriting", "Blog Posts", "Technical Writing", "Proofreading", "Translation", 
   "Transcription", "Creative Writing", "Grant Writing", "Ghostwriting",
-  
-  // Data & AI
   "Machine Learning", "Data Science", "Artificial Intelligence", "Natural Language Processing", "Computer Vision",
   "Data Analysis", "Big Data", "Pandas", "NumPy", "TensorFlow", "PyTorch", "Tableau", "Power BI",
-  
-  // Business & Other
   "Project Management", "Agile", "Scrum", "Product Management", "QA Testing", "Cyber Security",
   "Data Entry", "Virtual Assistant", "Customer Support", "Sales", "Business Analysis", "Financial Modeling",
   "Blockchain", "Solidity", "Web3", "Smart Contracts", "Crypto", "Toptal", "Upwork Skills"
@@ -62,49 +54,24 @@ const CATEGORIES = [
 ];
 
 const EXP_LEVELS = [
-  { id: "entry",    name: "Entry Level",    desc: "Looking for someone new to this field; willing to provide guidance and mentorship." },
-  { id: "mid",      name: "Intermediate",   desc: "Looking for substantial experience in this field. Has previous work to show." },
-  { id: "expert",   name: "Expert",         desc: "Looking for comprehensive and deep expertise in this field." },
+  { id: "entry"  },
+  { id: "mid"    },
+  { id: "expert" },
 ];
 
 const DURATION_OPTIONS = [
-  { id: "less1",   icon: "⚡", name: "Quick",    sub: "< 1 month"  },
-  { id: "1to3",    icon: "📅", name: "Short",    sub: "1–3 months" },
-  { id: "3to6",    icon: "🗓️", name: "Medium",  sub: "3–6 months" },
-  { id: "6plus",   icon: "🏗️", name: "Long",    sub: "6+ months"  },
-  { id: "ongoing", icon: "♾️", name: "Ongoing", sub: "Recurring"  },
+  { id: "less1"   },
+  { id: "1to3"    },
+  { id: "3to6"    },
+  { id: "6plus"   },
+  { id: "ongoing" },
 ];
 
 const SCOPE_OPTIONS = [
-  { id: "small",  icon: "🎯", name: "Small",  sub: "Simple task" },
-  { id: "medium", icon: "🚀", name: "Medium", sub: "Moderate"    },
-  { id: "large",  icon: "🏢", name: "Large",  sub: "Complex"     },
+  { id: "small"  },
+  { id: "medium" },
+  { id: "large"  },
 ];
-
-const STEP_TIPS = {
-  1: [
-    "A clear, specific title attracts more relevant proposals.",
-    "Describe exactly what deliverables you expect.",
-    "Mention the tech stack or tools if applicable.",
-    "Include the purpose and goals of the project.",
-  ],
-  2: [
-    "Add 5–10 skills for the best matching results.",
-    "Use industry-standard terms (e.g. 'React' not 'ReactJS').",
-    "Sort skills by importance — put must-haves first.",
-  ],
-  3: [
-    "Competitive budgets attract higher-quality proposals.",
-    "Fixed price works best for well-defined scopes.",
-    "Hourly is better for ongoing or evolving work.",
-    "Be honest about timeline — rushed jobs cost more.",
-  ],
-  4: [
-    "Double-check your budget before publishing.",
-    "You can edit the job post at any time after publishing.",
-    "Jobs with complete details get 3× more proposals.",
-  ],
-};
 
 /* ================================================================
    INITIAL FORM STATE
@@ -145,19 +112,19 @@ const PjToast = ({ msg, type, onClose }) => msg ? (
    STEP 1 — Job Details
    ================================================================ */
 const PjStep1 = ({ form, setForm, errors }) => {
+  const { t } = useTranslation();
   const charLimit = 5000;
 
   return (
     <div className="pj-card-body">
-
       <div className="pj-form-group">
         <label className="pj-label">
-          Job Title <span className="pj-label-req">*</span>
+          {t('postJob.step1.jobTitle')} <span className="pj-label-req">*</span>
           <span className="pj-label-tip">{form.title.length}/100</span>
         </label>
         <input
           className={`pj-input ${errors.title ? "error" : ""}`}
-          placeholder="e.g., Full-Stack Developer for E-commerce Platform"
+          placeholder={t('postJob.step1.titlePlaceholder')}
           value={form.title}
           maxLength={100}
           onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
@@ -167,34 +134,34 @@ const PjStep1 = ({ form, setForm, errors }) => {
 
       <div className="pj-form-group">
         <label className="pj-label">
-          Category <span className="pj-label-req">*</span>
+          {t('postJob.step1.category')} <span className="pj-label-req">*</span>
         </label>
         <select
           className={`pj-select ${errors.category ? "error" : ""}`}
           value={form.category}
           onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
         >
-          <option value="">Select a category...</option>
-          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+          <option value="">{t('postJob.step1.selectCategory')}</option>
+          {CATEGORIES.map(c => <option key={c} value={c}>{t(`postJob.categories.${c}`)}</option>)}
         </select>
         {errors.category && <div className="pj-error-msg"><AlertCircle size={13} />{errors.category}</div>}
       </div>
 
       <div className="pj-form-group">
-        <label className="pj-label">Job Type <span className="pj-label-req">*</span></label>
+        <label className="pj-label">{t('postJob.step1.jobType')} <span className="pj-label-req">*</span></label>
         <div className="pj-type-grid">
           {[
-            { id: "fixed",  icon: "📦", name: "Fixed Price",  desc: "Pay a set price for the entire project when complete." },
-            { id: "hourly", icon: "⏱️", name: "Hourly Rate",  desc: "Pay per hour worked. Great for ongoing or evolving tasks." },
-          ].map(t => (
+            { id: "fixed",  icon: "📦" },
+            { id: "hourly", icon: "⏱️" },
+          ].map(t_obj => (
             <div
-              key={t.id}
-              className={`pj-type-card ${form.jobType === t.id ? "selected" : ""}`}
-              onClick={() => setForm(p => ({ ...p, jobType: t.id }))}
+              key={t_obj.id}
+              className={`pj-type-card ${form.jobType === t_obj.id ? "selected" : ""}`}
+              onClick={() => setForm(p => ({ ...p, jobType: t_obj.id }))}
             >
-              <span className="pj-type-icon">{t.icon}</span>
-              <div className="pj-type-name">{t.name}</div>
-              <div className="pj-type-desc">{t.desc}</div>
+              <span className="pj-type-icon">{t_obj.icon}</span>
+              <div className="pj-type-name">{t(`postJob.step1.${t_obj.id}Type.name`)}</div>
+              <div className="pj-type-desc">{t(`postJob.step1.${t_obj.id}Type.desc`)}</div>
               <div className="pj-type-check"><Check size={11} /></div>
             </div>
           ))}
@@ -203,12 +170,12 @@ const PjStep1 = ({ form, setForm, errors }) => {
 
       <div className="pj-form-group">
         <label className="pj-label">
-          Job Description <span className="pj-label-req">*</span>
+          {t('postJob.step1.description')} <span className="pj-label-req">*</span>
           <span className="pj-label-tip">{form.description.length}/{charLimit}</span>
         </label>
         <textarea
           className={`pj-textarea ${errors.description ? "error" : ""}`}
-          placeholder="Describe your project in detail. Include:&#10;• What you need done&#10;• The goals and deliverables&#10;• Any specific requirements or constraints&#10;• Preferred tech stack or tools"
+          placeholder={t('postJob.step1.descPlaceholder')}
           value={form.description}
           maxLength={charLimit}
           rows={8}
@@ -218,7 +185,7 @@ const PjStep1 = ({ form, setForm, errors }) => {
       </div>
 
       <div className="pj-form-group">
-        <label className="pj-label">Experience Level <span className="pj-label-req">*</span></label>
+        <label className="pj-label">{t('postJob.step1.experience')} <span className="pj-label-req">*</span></label>
         <div className="pj-exp-grid">
           {EXP_LEVELS.map(e => (
             <div
@@ -230,8 +197,8 @@ const PjStep1 = ({ form, setForm, errors }) => {
                 <div className="pj-exp-radio-dot" />
               </div>
               <div className="pj-exp-info">
-                <div className="pj-exp-name">{e.name}</div>
-                <div className="pj-exp-desc">{e.desc}</div>
+                <div className="pj-exp-name">{t(`postJob.step1.exp.${e.id}.name`)}</div>
+                <div className="pj-exp-desc">{t(`postJob.step1.exp.${e.id}.desc`)}</div>
               </div>
             </div>
           ))}
@@ -246,6 +213,7 @@ const PjStep1 = ({ form, setForm, errors }) => {
    STEP 2 — Skills
    ================================================================ */
 const PjStep2 = ({ form, setForm, errors }) => {
+  const { t } = useTranslation();
   const [input, setInput] = useState("");
   const [activeCat, setActiveCat] = useState("development");
   const [showSuggest, setShowSuggest] = useState(false);
@@ -275,7 +243,7 @@ const PjStep2 = ({ form, setForm, errors }) => {
     <div className="pj-card-body">
       <div className="pj-form-group">
         <label className="pj-label">
-          Required Skills <span className="pj-label-req">*</span>
+          {t('postJob.step2.requiredSkills')} <span className="pj-label-req">*</span>
           <span className="pj-label-tip">{form.skills.length}/15</span>
         </label>
 
@@ -283,7 +251,7 @@ const PjStep2 = ({ form, setForm, errors }) => {
           <div className="pj-skill-input-container">
             <input
               className={`pj-input ${errors.skills ? "error" : ""}`}
-              placeholder="Type a skill and press Enter or Add..."
+              placeholder={t('postJob.step2.skillsPlaceholder')}
               value={input}
               onChange={e => {
                 setInput(e.target.value);
@@ -305,7 +273,7 @@ const PjStep2 = ({ form, setForm, errors }) => {
                     key={s} 
                     className="pj-suggest-item"
                     onMouseDown={(e) => {
-                      e.preventDefault(); // Prevent input onBlur from firing before this
+                      e.preventDefault();
                       addSkill(s);
                     }}
                   >
@@ -317,7 +285,7 @@ const PjStep2 = ({ form, setForm, errors }) => {
             )}
           </div>
           <button className="pj-skill-add" onClick={() => addSkill(input)}>
-            <Plus size={14} /> Add
+            <Plus size={14} /> {t('postJob.step2.add')}
           </button>
         </div>
         {errors.skills && <div className="pj-error-msg"><AlertCircle size={13} />{errors.skills}</div>}
@@ -355,7 +323,7 @@ const PjStep2 = ({ form, setForm, errors }) => {
           ))}
         </div>
 
-        <div className="pj-suggest-label">Suggested skills</div>
+        <div className="pj-suggest-label">{t('postJob.step2.suggested')}</div>
         <div className="pj-suggest-tags">
           {suggested
             .filter(s => !form.skills.includes(s))
@@ -370,20 +338,20 @@ const PjStep2 = ({ form, setForm, errors }) => {
       <div className="pj-divider" />
 
       <div className="pj-form-group">
-        <label className="pj-label">Number of Freelancers Needed</label>
+        <label className="pj-label">{t('postJob.step2.freelancersCount')}</label>
         <div className="pj-type-grid">
           {[
-            { id: "1",  icon: "👤", name: "1 Freelancer", desc: "Single person for the job" },
-            { id: "2+", icon: "👥", name: "2+ Freelancers", desc: "Multiple people for larger scope" },
-          ].map(t => (
+            { id: "1",  icon: "👤" },
+            { id: "2+", icon: "👥" },
+          ].map(t_obj => (
             <div
-              key={t.id}
-              className={`pj-type-card ${form.freelancers === t.id ? "selected" : ""}`}
-              onClick={() => setForm(p => ({ ...p, freelancers: t.id }))}
+              key={t_obj.id}
+              className={`pj-type-card ${form.freelancers === t_obj.id ? "selected" : ""}`}
+              onClick={() => setForm(p => ({ ...p, freelancers: t_obj.id }))}
             >
-              <span className="pj-type-icon">{t.icon}</span>
-              <div className="pj-type-name">{t.name}</div>
-              <div className="pj-type-desc">{t.desc}</div>
+              <span className="pj-type-icon">{t_obj.icon}</span>
+              <div className="pj-type-name">{t(`postJob.step2.count.${t_obj.id === "1" ? "1" : "2plus"}.name`)}</div>
+              <div className="pj-type-desc">{t(`postJob.step2.count.${t_obj.id === "1" ? "1" : "2plus"}.desc`)}</div>
               <div className="pj-type-check"><Check size={11} /></div>
             </div>
           ))}
@@ -397,25 +365,25 @@ const PjStep2 = ({ form, setForm, errors }) => {
    STEP 3 — Budget & Timeline
    ================================================================ */
 const PjStep3 = ({ form, setForm, errors }) => {
+  const { t } = useTranslation();
   return (
     <div className="pj-card-body">
-
       <div className="pj-form-group">
-        <label className="pj-label">Payment Structure <span className="pj-label-req">*</span></label>
+        <label className="pj-label">{t('postJob.step3.paymentStructure')} <span className="pj-label-req">*</span></label>
         <div className="pj-budget-type-grid">
           {[
-            { id: "fixed",  icon: "📦", name: "Fixed Price",  desc: "Set total price" },
-            { id: "range",  icon: "↔️", name: "Price Range",  desc: "Min–Max budget"  },
-            { id: "hourly", icon: "⏱️", name: "Hourly Rate",  desc: "Pay per hour"   },
-          ].map(t => (
+            { id: "fixed",  icon: "📦" },
+            { id: "range",  icon: "↔️" },
+            { id: "hourly", icon: "⏱️" },
+          ].map(t_obj => (
             <div
-              key={t.id}
-              className={`pj-budget-type ${form.budgetType === t.id ? "selected" : ""}`}
-              onClick={() => setForm(p => ({ ...p, budgetType: t.id }))}
+              key={t_obj.id}
+              className={`pj-budget-type ${form.budgetType === t_obj.id ? "selected" : ""}`}
+              onClick={() => setForm(p => ({ ...p, budgetType: t_obj.id }))}
             >
-              <div className="pj-budget-type-icon">{t.icon}</div>
-              <div className="pj-budget-type-name">{t.name}</div>
-              <div className="pj-budget-type-desc">{t.desc}</div>
+              <div className="pj-budget-type-icon">{t_obj.icon}</div>
+              <div className="pj-budget-type-name">{t(`postJob.step3.types.${t_obj.id}.name`)}</div>
+              <div className="pj-budget-type-desc">{t(`postJob.step3.types.${t_obj.id}.desc`)}</div>
             </div>
           ))}
         </div>
@@ -423,7 +391,7 @@ const PjStep3 = ({ form, setForm, errors }) => {
 
       {form.budgetType === "fixed" && (
         <div className="pj-form-group">
-          <label className="pj-label">Budget <span className="pj-label-req">*</span></label>
+          <label className="pj-label">{t('postJob.step3.budget')} <span className="pj-label-req">*</span></label>
           <div className="pj-budget-input-wrap">
             <span className="pj-budget-prefix">$</span>
             <input
@@ -441,14 +409,14 @@ const PjStep3 = ({ form, setForm, errors }) => {
 
       {form.budgetType === "range" && (
         <div className="pj-form-group">
-          <label className="pj-label">Budget Range <span className="pj-label-req">*</span></label>
+          <label className="pj-label">{t('postJob.step3.budgetRange')} <span className="pj-label-req">*</span></label>
           <div className="pj-range-row">
             <div className="pj-budget-input-wrap">
               <span className="pj-budget-prefix">$</span>
               <input
                 className={`pj-input ${errors.budget ? "error" : ""}`}
                 type="number"
-                placeholder="Min"
+                placeholder={t('postJob.step3.min')}
                 value={form.budgetMin}
                 onChange={e => setForm(p => ({ ...p, budgetMin: e.target.value }))}
               />
@@ -459,7 +427,7 @@ const PjStep3 = ({ form, setForm, errors }) => {
               <input
                 className={`pj-input ${errors.budget ? "error" : ""}`}
                 type="number"
-                placeholder="Max"
+                placeholder={t('postJob.step3.max')}
                 value={form.budgetMax}
                 onChange={e => setForm(p => ({ ...p, budgetMax: e.target.value }))}
               />
@@ -471,14 +439,14 @@ const PjStep3 = ({ form, setForm, errors }) => {
 
       {form.budgetType === "hourly" && (
         <div className="pj-form-group">
-          <label className="pj-label">Hourly Rate Range <span className="pj-label-req">*</span></label>
+          <label className="pj-label">{t('postJob.step3.hourlyRange')} <span className="pj-label-req">*</span></label>
           <div className="pj-range-row">
             <div className="pj-budget-input-wrap">
               <span className="pj-budget-prefix">$</span>
               <input
                 className={`pj-input ${errors.budget ? "error" : ""}`}
                 type="number"
-                placeholder="Min/hr"
+                placeholder={t('postJob.step3.minHr')}
                 value={form.hourlyMin}
                 onChange={e => setForm(p => ({ ...p, hourlyMin: e.target.value }))}
               />
@@ -490,7 +458,7 @@ const PjStep3 = ({ form, setForm, errors }) => {
               <input
                 className={`pj-input ${errors.budget ? "error" : ""}`}
                 type="number"
-                placeholder="Max/hr"
+                placeholder={t('postJob.step3.maxHr')}
                 value={form.hourlyMax}
                 onChange={e => setForm(p => ({ ...p, hourlyMax: e.target.value }))}
               />
@@ -504,7 +472,7 @@ const PjStep3 = ({ form, setForm, errors }) => {
       <div className="pj-divider" />
 
       <div className="pj-form-group">
-        <label className="pj-label">Project Duration <span className="pj-label-req">*</span></label>
+        <label className="pj-label">{t('postJob.step3.duration')} <span className="pj-label-req">*</span></label>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {DURATION_OPTIONS.map(d => (
             <div
@@ -521,10 +489,10 @@ const PjStep3 = ({ form, setForm, errors }) => {
                 flexShrink: 0,
               }}
             >
-              <span style={{ fontSize: 16 }}>{d.icon}</span>
+              <span style={{ fontSize: 16 }}>{t(`postJob.step3.durations.${d.id}.icon`)}</span>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--pj-text)" }}>{d.name}</div>
-                <div style={{ fontSize: 11, color: "var(--pj-text-3)" }}>{d.sub}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--pj-text)" }}>{t(`postJob.step3.durations.${d.id}.name`)}</div>
+                <div style={{ fontSize: 11, color: "var(--pj-text-3)" }}>{t(`postJob.step3.durations.${d.id}.sub`)}</div>
               </div>
             </div>
           ))}
@@ -533,7 +501,7 @@ const PjStep3 = ({ form, setForm, errors }) => {
       </div>
 
       <div className="pj-form-group">
-        <label className="pj-label">Project Scope</label>
+        <label className="pj-label">{t('postJob.step3.scope')}</label>
         <div className="pj-scope-grid">
           {SCOPE_OPTIONS.map(s => (
             <div
@@ -541,9 +509,9 @@ const PjStep3 = ({ form, setForm, errors }) => {
               className={`pj-scope-item ${form.scope === s.id ? "selected" : ""}`}
               onClick={() => setForm(p => ({ ...p, scope: s.id }))}
             >
-              <div className="pj-scope-icon">{s.icon}</div>
-              <div className="pj-scope-name">{s.name}</div>
-              <div className="pj-scope-sub">{s.sub}</div>
+              <div className="pj-scope-icon">{t(`postJob.step3.scopes.${s.id}.icon`)}</div>
+              <div className="pj-scope-name">{t(`postJob.step3.scopes.${s.id}.name`)}</div>
+              <div className="pj-scope-sub">{t(`postJob.step3.scopes.${s.id}.sub`)}</div>
             </div>
           ))}
         </div>
@@ -552,11 +520,11 @@ const PjStep3 = ({ form, setForm, errors }) => {
       <div className="pj-divider" />
 
       <div className="pj-form-group">
-        <label className="pj-label">Visibility</label>
+        <label className="pj-label">{t('postJob.step3.visibility')}</label>
         <div className="pj-type-grid">
           {[
-            { id: "public",  icon: "🌍", name: "Public",  desc: "Visible to all freelancers" },
-            { id: "private", icon: "🔒", name: "Private", desc: "Invite only — by your choice" },
+            { id: "public",  icon: "🌍" },
+            { id: "private", icon: "🔒" },
           ].map(v => (
             <div
               key={v.id}
@@ -564,8 +532,8 @@ const PjStep3 = ({ form, setForm, errors }) => {
               onClick={() => setForm(p => ({ ...p, visibility: v.id }))}
             >
               <span className="pj-type-icon">{v.icon}</span>
-              <div className="pj-type-name">{v.name}</div>
-              <div className="pj-type-desc">{v.desc}</div>
+              <div className="pj-type-name">{t(`postJob.step3.vis.${v.id}.name`)}</div>
+              <div className="pj-type-desc">{t(`postJob.step3.vis.${v.id}.desc`)}</div>
               <div className="pj-type-check"><Check size={11} /></div>
             </div>
           ))}
@@ -579,18 +547,19 @@ const PjStep3 = ({ form, setForm, errors }) => {
    STEP 4 — Review & Publish
    ================================================================ */
 const PjStep4 = ({ form }) => {
+  const { t } = useTranslation();
   const getBudgetStr = () => {
-    if (form.budgetType === "fixed")  return `$${form.budgetFixed} USD (Fixed Price)`;
+    if (form.budgetType === "fixed")  return `$${form.budgetFixed} USD (${t('postJob.step3.types.fixed.name')})`;
     if (form.budgetType === "range")  return `$${form.budgetMin} – $${form.budgetMax} USD`;
     if (form.budgetType === "hourly") return `$${form.hourlyMin} – $${form.hourlyMax}/hr`;
     return "—";
   };
 
   const getDurationStr = () =>
-    DURATION_OPTIONS.find(d => d.id === form.duration)?.name || "—";
+    t(`postJob.step3.durations.${form.duration}.name`) || "—";
 
   const getExpStr = () =>
-    EXP_LEVELS.find(e => e.id === form.experience)?.name || "—";
+    t(`postJob.step1.exp.${form.experience}.name`) || "—";
 
   return (
     <div className="pj-card-body">
@@ -601,31 +570,31 @@ const PjStep4 = ({ form }) => {
         marginBottom: 24,
         border: "1px solid var(--pj-border-2)",
       }}>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".8px", textTransform: "uppercase", color: "var(--pj-text-4)", marginBottom: 6 }}>Job Title</div>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".8px", textTransform: "uppercase", color: "var(--pj-text-4)", marginBottom: 6 }}>{t('postJob.step1.jobTitle')}</div>
         <div style={{ fontSize: 18, fontWeight: 800, color: "var(--pj-text)", fontFamily: "var(--pj-font-head)", lineHeight: 1.3 }}>
           {form.title || "—"}
         </div>
         {form.category && (
           <div style={{ marginTop: 6, display: "flex", gap: 6 }}>
             <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", background: "var(--pj-blue-soft)", color: "var(--pj-blue)", borderRadius: "var(--pj-radius-full)", border: "1px solid var(--pj-blue-border)" }}>
-              {form.category}
+              {t(`postJob.categories.${form.category}`)}
             </span>
             <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", background: "var(--pj-green-soft)", color: "var(--pj-green)", borderRadius: "var(--pj-radius-full)", border: "1px solid var(--pj-green-border)" }}>
-              {form.jobType === "fixed" ? "Fixed Price" : "Hourly"}
+              {form.jobType === "fixed" ? t('postJob.step3.types.fixed.name') : t('postJob.step3.types.hourly.name')}
             </span>
           </div>
         )}
       </div>
 
       <div className="pj-preview-section">
-        <div className="pj-preview-section-title">Job Details</div>
+        <div className="pj-preview-section-title">{t('postJob.step4.detailsTitle')}</div>
         {[
-          { key: "Experience Level", val: getExpStr() },
-          { key: "Budget",           val: getBudgetStr() },
-          { key: "Duration",         val: getDurationStr() },
-          { key: "Freelancers",      val: form.freelancers === "1" ? "1 freelancer" : "2+ freelancers" },
-          { key: "Visibility",       val: form.visibility === "public" ? "🌍 Public" : "🔒 Private" },
-          { key: "Scope",            val: SCOPE_OPTIONS.find(s => s.id === form.scope)?.name || "Not specified" },
+          { key: t('postJob.step1.experience'), val: getExpStr() },
+          { key: t('postJob.step3.budget'),           val: getBudgetStr() },
+          { key: t('postJob.step3.duration'),         val: getDurationStr() },
+          { key: t('postJob.step2.freelancersCount'),      val: form.freelancers === "1" ? t('postJob.step2.count.1.name') : t('postJob.step2.count.2plus.name') },
+          { key: t('postJob.step3.visibility'),       val: form.visibility === "public" ? `🌍 ${t('postJob.step3.vis.public.name')}` : `🔒 ${t('postJob.step3.vis.private.name')}` },
+          { key: t('postJob.step3.scope'),            val: t(`postJob.step3.scopes.${form.scope}.name`) || t('postJob.step4.notSpecified') },
         ].map(r => (
           <div key={r.key} className="pj-preview-row">
             <span className="pj-preview-row-key">{r.key}</span>
@@ -635,7 +604,7 @@ const PjStep4 = ({ form }) => {
       </div>
 
       <div className="pj-preview-section">
-        <div className="pj-preview-section-title">Required Skills ({form.skills.length})</div>
+        <div className="pj-preview-section-title">{t('postJob.step4.skillsTitle')} ({form.skills.length})</div>
         {form.skills.length > 0 ? (
           <div className="pj-skills-wrap">
             {form.skills.map(sk => (
@@ -643,14 +612,14 @@ const PjStep4 = ({ form }) => {
             ))}
           </div>
         ) : (
-          <div style={{ fontSize: 13, color: "var(--pj-text-4)" }}>No skills added</div>
+          <div style={{ fontSize: 13, color: "var(--pj-text-4)" }}>{t('postJob.step4.noSkills')}</div>
         )}
       </div>
 
       <div className="pj-preview-section">
-        <div className="pj-preview-section-title">Description</div>
+        <div className="pj-preview-section-title">{t('postJob.step4.descriptionTitle')}</div>
         <div style={{ fontSize: 14, color: "var(--pj-text-2)", lineHeight: 1.75, whiteSpace: "pre-wrap" }}>
-          {form.description || <span style={{ color: "var(--pj-text-4)" }}>No description provided</span>}
+          {form.description || <span style={{ color: "var(--pj-text-4)" }}>{t('postJob.step4.noDesc')}</span>}
         </div>
       </div>
 
@@ -665,10 +634,10 @@ const PjStep4 = ({ form }) => {
         <span style={{ fontSize: 20, flexShrink: 0 }}>🔒</span>
         <div>
           <div style={{ fontSize: 13, fontWeight: 700, color: "var(--pj-text)", marginBottom: 3 }}>
-            Escrow Protection
+            {t('postJob.step4.escrowTitle')}
           </div>
           <div style={{ fontSize: 12.5, color: "var(--pj-text-3)", lineHeight: 1.55 }}>
-            Your payment is held securely in escrow until you approve the final work. You only pay when you're satisfied.
+            {t('postJob.step4.escrowDesc')}
           </div>
         </div>
       </div>
@@ -680,15 +649,16 @@ const PjStep4 = ({ form }) => {
    SIDEBAR CONTENT
    ================================================================ */
 const PjStepSidebar = ({ step, form }) => {
+  const { t } = useTranslation();
   const progress = ((step - 1) / (STEPS.length - 1)) * 100;
-  const tips = STEP_TIPS[step] || [];
+  const tips = t(`postJob.tips.${step}`, { returnObjects: true }) || [];
   const skillCount = form?.skills?.length || 0;
 
   return (
     <div className="pj-sidebar">
       <div className="pj-progress-card">
         <div className="pj-progress-title">
-          Progress
+          {t('postJob.sidebar.progress')}
           <span className="pj-progress-pct">{Math.round(((step - 1) / STEPS.length) * 100)}%</span>
         </div>
         <div className="pj-progress-bar-outer">
@@ -700,7 +670,7 @@ const PjStepSidebar = ({ step, form }) => {
               <div className="pj-progress-step-icon">
                 {step > s.id ? <Check size={10} /> : s.id}
               </div>
-              {s.label}
+              {t(`postJob.steps.${s.key}.label`)}
             </div>
           ))}
         </div>
@@ -709,7 +679,7 @@ const PjStepSidebar = ({ step, form }) => {
       <div className="pj-tips-card">
         <div className="pj-tips-head">
           <div className="pj-tips-head-icon"><Lightbulb size={15} /></div>
-          <h3>Tips for Step {step}</h3>
+          <h3>{t('postJob.sidebar.tips', { step })}</h3>
         </div>
         <div className="pj-tips-body">
           {tips.map((t, i) => (
@@ -722,13 +692,13 @@ const PjStepSidebar = ({ step, form }) => {
       </div>
 
       <div className="pj-example-card">
-        <h3><Star size={13} /> Your Progress</h3>
+        <h3><Star size={13} /> {t('postJob.sidebar.yourProgress')}</h3>
         <ul className="pj-example-list">
-          <li>Skills added: {skillCount}/15</li>
-          {form?.title && <li>Title: {form.title.length}/100 chars</li>}
-          {form?.description && <li>Description: {form.description.length}/5000 chars</li>}
-          <li>Jobs with 5+ skills receive 3× more proposals</li>
-          <li>Clear descriptions get 60% faster responses</li>
+          <li>{t('postJob.sidebar.skillsAdded')}: {skillCount}/15</li>
+          {form?.title && <li>{t('postJob.sidebar.titleChars')}: {form.title.length}/100</li>}
+          {form?.description && <li>{t('postJob.sidebar.descChars')}: {form.description.length}/5000</li>}
+          <li>{t('postJob.sidebar.skills3x')}</li>
+          <li>{t('postJob.sidebar.desc60pt')}</li>
         </ul>
       </div>
     </div>
@@ -739,7 +709,10 @@ const PjStepSidebar = ({ step, form }) => {
    MAIN COMPONENT
    ================================================================ */
 const PostJob = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get("edit");
 
   const [step,       setStep]      = useState(1);
   const [form,       setForm]      = useState(INITIAL);
@@ -748,6 +721,32 @@ const PostJob = () => {
   const [success,    setSuccess]   = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (editId) {
+      getJobById(editId).then(res => {
+        const data = res?.data?.project || res?.project || res?.data;
+        if (data) setForm({
+          title: data.title || "",
+          category: data.category || "",
+          description: data.description || "",
+          jobType: data.job_type || "fixed",
+          experience: data.experience_level || "mid",
+          skills: Array.isArray(data.required_skills) ? data.required_skills : [],
+          budgetType: data.budget_type || "fixed",
+          budgetFixed: data.budget_amount || data.budget_max || "",
+          budgetMin: data.budget_min || "",
+          budgetMax: data.budget_max || "",
+          hourlyMin: data.hourly_rate_min || "",
+          hourlyMax: data.hourly_rate_max || "",
+          duration: data.project_duration || data.duration || "1to3",
+          scope: data.scope || "medium",
+          freelancers: data.freelancers_needed?.toString() || "1",
+          visibility: data.visibility || "public",
+        });
+      });
+    }
+  }, [editId]);
+
   const notify = useCallback((msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
@@ -755,34 +754,30 @@ const PostJob = () => {
 
   const validate = useCallback((currentStep) => {
     const e = {};
-
     if (currentStep === 1) {
-      if (!form.title.trim())            e.title       = "Job title is required";
-      else if (form.title.length < 10)   e.title       = "Title must be at least 10 characters";
-      if (!form.category)                e.category    = "Please select a category";
-      if (!form.description.trim())      e.description = "Description is required";
-      else if (form.description.length < 50) e.description = "Description must be at least 50 characters";
-      if (!form.experience)              e.experience  = "Please select an experience level";
+      if (!form.title.trim())            e.title       = t('postJob.errors.titleReq');
+      else if (form.title.length < 10)   e.title       = t('postJob.errors.titleShort');
+      if (!form.category)                e.category    = t('postJob.errors.categoryReq');
+      if (!form.description.trim())      e.description = t('postJob.errors.descReq');
+      else if (form.description.length < 50) e.description = t('postJob.errors.descShort');
+      if (!form.experience)              e.experience  = t('postJob.errors.expReq');
     }
-
     if (currentStep === 2) {
-      if (form.skills.length === 0)      e.skills = "Add at least one skill";
+      if (form.skills.length === 0)      e.skills = t('postJob.errors.skillsReq');
     }
-
     if (currentStep === 3) {
-      if (form.budgetType === "fixed"  && !form.budgetFixed)             e.budget   = "Please enter a budget";
-      if (form.budgetType === "range"  && (!form.budgetMin || !form.budgetMax)) e.budget = "Please enter min and max budget";
-      if (form.budgetType === "hourly" && (!form.hourlyMin || !form.hourlyMax)) e.budget = "Please enter hourly rate range";
-      if (!form.duration)              e.duration = "Please select a project duration";
+      if (form.budgetType === "fixed"  && !form.budgetFixed)             e.budget   = t('postJob.errors.budgetReq');
+      if (form.budgetType === "range"  && (!form.budgetMin || !form.budgetMax)) e.budget = t('postJob.errors.budgetRangeReq');
+      if (form.budgetType === "hourly" && (!form.hourlyMin || !form.hourlyMax)) e.budget = t('postJob.errors.hourlyReq');
+      if (!form.duration)              e.duration = t('postJob.errors.durationReq');
     }
-
     setErrors(e);
     return Object.keys(e).length === 0;
-  }, [form]);
+  }, [form, t]);
 
   const handleNext = () => {
     if (!validate(step)) {
-      notify("Please fill in all required fields.", "error");
+      notify(t('postJob.errors.fillAll'), "error");
       return;
     }
     setErrors({});
@@ -804,40 +799,34 @@ const PostJob = () => {
     if (num < step) { setStep(num); setErrors({}); }
   };
 
-  /* ── Build payload ── */
   const buildPayload = (status = "active") => {
     const payload = {
       title:            form.title,
       description:      form.description,
       category:         form.category,
-      required_skills:  form.skills,              // Backend expects required_skills
+      required_skills:  form.skills,
       experience_level: form.experience,
-      budget_type:      form.budgetType,          // fixed | range | hourly
-      job_type:         form.jobType,             // fixed | hourly
+      budget_type:      form.budgetType,
+      job_type:         form.jobType,
       duration:         form.duration,
       scope:            form.scope,
       visibility:       form.visibility,
       freelancers_needed: form.freelancers === "1" ? 1 : 2,
-      currency:         "USD",                    // Explicitly send currency
+      currency:         "USD",
       status,
     };
-
     if (form.budgetType === "fixed") {
-      // Backend checks: if (budget_min == null || budget_max == null)
       payload.budget_min = Number(form.budgetFixed) || 0;
       payload.budget_max = Number(form.budgetFixed) || 0;
     } else if (form.budgetType === "range") {
       payload.budget_min = Number(form.budgetMin) || 0;
       payload.budget_max = Number(form.budgetMax) || 0;
     } else if (form.budgetType === "hourly") {
-      // For hourly, we still send budget_min/max as the rate
       payload.budget_min = Number(form.hourlyMin) || 0;
       payload.budget_max = Number(form.hourlyMax) || 0;
-      // Optional: some backends might specifically look for hourly_rate_min/max
       payload.hourly_rate_min = Number(form.hourlyMin) || 0;
       payload.hourly_rate_max = Number(form.hourlyMax) || 0;
     }
-
     return payload;
   };
 
@@ -845,14 +834,16 @@ const PostJob = () => {
     if (submitting) return;
     setSubmitting(true);
     try {
-      const res = await createJob(buildPayload("draft"));
+      const res = editId 
+        ? await updateJob(editId, buildPayload("draft"))
+        : await createJob(buildPayload("draft"));
       if (res?.success === false) {
-        notify(res?.message || "Xatolik yuz berdi", "error");
+        notify(res?.message || t('postJob.errors.general'), "error");
       } else {
-        notify("Qoralama saqlandi! My Jobs bo'limida davom etishingiz mumkin.");
+        notify(editId ? t('postJob.errors.updated') : t('postJob.errors.draftSaved'));
       }
     } catch (err) {
-      notify("Xatolik yuz berdi. Qayta urinib ko'ring.", "error");
+      notify(t('postJob.errors.general'), "error");
     } finally {
       setSubmitting(false);
     }
@@ -861,30 +852,31 @@ const PostJob = () => {
   const handlePublish = async () => {
     if (submitting) return;
     if (!validate(step)) {
-      notify("Iltimos barcha maydonlarni to'ldiring.", "error");
+      notify(t('postJob.errors.fillAll'), "error");
       return;
     }
     setSubmitting(true);
     try {
-      const res = await createJob(buildPayload("active"));
+      const res = editId 
+        ? await updateJob(editId, buildPayload("active"))
+        : await createJob(buildPayload("active"));
       if (res?.success === false) {
-        notify(res?.message || "Xatolik yuz berdi", "error");
+        notify(res?.message || t('postJob.errors.general'), "error");
       } else {
         setSuccess(true);
       }
     } catch (error) {
-      console.error(error);
-      notify("Xatolik yuz berdi. Iltimos qayta urinib ko'ring.", "error");
+      notify(t('postJob.errors.general'), "error");
     } finally {
       setSubmitting(false);
     }
   };
 
   const STEP_META = {
-    1: { badge: "Step 1 of 4",  title: "Tell us about your job",           desc: "Start with a clear title, category and detailed description." },
-    2: { badge: "Step 2 of 4",  title: "What skills are required?",        desc: "Add the key skills a freelancer needs to complete your job." },
-    3: { badge: "Step 3 of 4",  title: "Set your budget & timeline",       desc: "Define how much you'll pay and how long the project will take." },
-    4: { badge: "Step 4 of 4",  title: "Review your job post",             desc: "Make sure everything looks good before publishing." },
+    1: { badge: t('postJob.header.step', { current: 1, total: 4 }),  title: t('postJob.step1.title'),           desc: t('postJob.step1.desc') },
+    2: { badge: t('postJob.header.step', { current: 2, total: 4 }),  title: t('postJob.step2.title'),           desc: t('postJob.step2.desc') },
+    3: { badge: t('postJob.header.step', { current: 3, total: 4 }),  title: t('postJob.step3.title'),           desc: t('postJob.step3.desc') },
+    4: { badge: t('postJob.header.step', { current: 4, total: 4 }),  title: t('postJob.step4.title'),           desc: t('postJob.step4.desc') },
   };
 
   const meta = STEP_META[step];
@@ -896,21 +888,18 @@ const PostJob = () => {
           <div className="pj-success-icon">
             <Rocket size={36} />
           </div>
-          <h1>Job Posted Successfully! 🎉</h1>
-          <p>
-            Your job <strong>"{form.title}"</strong> is now live and visible to freelancers.
-            You'll start receiving proposals shortly.
-          </p>
+          <h1>{t('postJob.success.title')}</h1>
+          <p>{t('postJob.success.desc', { title: form.title })}</p>
           <div className="pj-success-actions">
             <button className="pj-success-btn-primary" onClick={() => navigate("/client/my-jobs")}>
               <Briefcase size={16} style={{ display: "inline", marginRight: 6 }} />
-              Mening ishlarim
+              {t('postJob.success.myJobs')}
             </button>
             <button className="pj-success-btn-secondary" onClick={() => { setSuccess(false); setForm(INITIAL); setStep(1); }}>
-              Post Another Job
+              {t('postJob.success.postAnother')}
             </button>
             <button className="pj-success-btn-secondary" onClick={() => navigate("/client/find")}>
-              Browse Talent
+              {t('postJob.success.browseTalent')}
             </button>
           </div>
         </div>
@@ -920,16 +909,15 @@ const PostJob = () => {
 
   return (
     <div className="pj-page">
-
       <header className="pj-header">
         <div className="pj-header-left">
           <button className="pj-back-btn" onClick={() => navigate(-1)}>
-            <ArrowLeft size={14} /> Back
+            <ArrowLeft size={14} /> {t('postJob.header.back')}
           </button>
           <div>
-            <div className="pj-header-title">Post a Job</div>
+            <div className="pj-header-title">{editId ? t('postJob.header.edit') : t('postJob.header.post')}</div>
             <div className="pj-header-sub">
-              {step < STEPS.length ? `Step ${step} of ${STEPS.length}` : "Review & Publish"}
+              {step < STEPS.length ? t('postJob.header.step', { current: step, total: STEPS.length }) : t('postJob.header.review')}
             </div>
           </div>
         </div>
@@ -940,7 +928,7 @@ const PostJob = () => {
             disabled={submitting}
             style={{ opacity: submitting ? 0.6 : 1 }}
           >
-            {submitting ? "Saqlanmoqda..." : "Qoralama sifatida saqlash"}
+            {submitting ? t('postJob.header.saving') : t('postJob.header.saveDraft')}
           </button>
         </div>
       </header>
@@ -957,8 +945,8 @@ const PostJob = () => {
                 {step > s.id ? <Check size={14} /> : s.id}
               </div>
               <div className="pj-step-info">
-                <span className="pj-step-label">{s.label}</span>
-                <span className="pj-step-sub">{s.sub}</span>
+                <span className="pj-step-label">{t(`postJob.steps.${s.key}.label`)}</span>
+                <span className="pj-step-sub">{t(`postJob.steps.${s.key}.sub`)}</span>
               </div>
             </div>
           ))}
@@ -969,9 +957,7 @@ const PostJob = () => {
         <div>
           <div className="pj-card" key={step}>
             <div className="pj-card-head">
-              <div className="pj-card-step-badge">
-                {meta.badge}
-              </div>
+              <div className="pj-card-step-badge">{meta.badge}</div>
               <h1 className="pj-card-title">{meta.title}</h1>
               <p className="pj-card-desc">{meta.desc}</p>
             </div>
@@ -987,12 +973,12 @@ const PostJob = () => {
                 onClick={handleBack}
                 style={{ visibility: step === 1 ? "hidden" : "visible" }}
               >
-                <ChevronLeft size={16} /> Previous
+                <ChevronLeft size={16} /> {t('postJob.nav.previous')}
               </button>
 
               {step < STEPS.length ? (
                 <button className="pj-btn-next" onClick={handleNext}>
-                  Next Step <ChevronRight size={16} />
+                  {t('postJob.nav.next')} <ChevronRight size={16} />
                 </button>
               ) : (
                 <button
@@ -1001,13 +987,12 @@ const PostJob = () => {
                   disabled={submitting}
                   style={{ opacity: submitting ? 0.7 : 1 }}
                 >
-                  <Rocket size={16} /> {submitting ? "Yuborilmoqda..." : "Ish e'lonini joylash"}
+                  <Rocket size={16} /> {submitting ? t('postJob.nav.updating') : editId ? t('postJob.nav.update') : t('postJob.nav.publish')}
                 </button>
               )}
             </div>
           </div>
         </div>
-
         <PjStepSidebar step={step} form={form} />
       </div>
 

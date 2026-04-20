@@ -946,5 +946,178 @@
     "errorDelete": "O'chirishda xatolik yuz berdi",
     "errorCopy": "Nusxalashda xatolik yuz berdi",
     "errorStatusUpdate": "Holatni yangilashda xatolik yuz berdi"
+  },
+  "postJob": {
+    "header": {
+      "post": "Ish e'lonini joylash",
+      "edit": "Ishni tahrirlash",
+      "back": "Orqaga",
+      "step": "{{current}}-qadam ({{total}} dan)",
+      "review": "Ko'rib chiqish va nashr etish",
+      "saveDraft": "Qoralama sifatida saqlash",
+      "saving": "Saqlanmoqda..."
+    },
+    "steps": {
+      "details": { "label": "Ish tafsilotlari", "sub": "Sarlavha va tavsif" },
+      "skills": { "label": "Ko'nikmalar", "sub": "Zarur ko'nikmalar" },
+      "budget": { "label": "Byudjet", "sub": "Narx va davomiylik" },
+      "review": { "label": "Tekshirish", "sub": "Tekshirish va nashr etish" }
+    },
+    "step1": {
+      "title": "Ishingiz haqida gapirib bering",
+      "desc": "Aniq sarlavha, kategoriya va batafsil tavsifdan boshlang.",
+      "jobTitle": "Ish sarlavhasi",
+      "titlePlaceholder": "Masalan: E-tijorat platformasi uchun Full-Stack dasturchi",
+      "category": "Kategoriya",
+      "selectCategory": "Kategoriyani tanlang...",
+      "jobType": "Ish turi",
+      "fixedType": { "name": "Ruxsat etilgan narx", "desc": "Ish tugagach, butun loyiha uchun belgilangan narxni to'lang." },
+      "hourlyType": { "name": "Soatbay to'lov", "desc": "Ishlagan soatiga qarab to'lang. Davomiy ishlar uchun juda mos." },
+      "description": "Ish tavsifi",
+      "descPlaceholder": "Loyihangizni batafsil tavsiflang. Quyidagilarni kiriting:\n• Nima qilinishi kerak\n• Maqsadlar va natijalar\n• Maxsus talablar yoki cheklovlar\n• Afzal texnologiyalar",
+      "experience": "Tajriba darajasi",
+      "exp": {
+        "entry": { "name": "Boshlang'ich", "desc": "Ushbu sohada yangi bo'lgan, yo'l-yo'riq va ustozlikka muhtoj odamni qidiryapman." },
+        "mid": { "name": "O'rta", "desc": "Ushbu sohada katta tajribaga ega bo'lgan odamni qidiryapman. Avvalgi ishlarini ko'rsata oladigan." },
+        "expert": { "name": "Ekspert", "desc": "Ushbu sohada chuqur va keng ko'lamli tajribaga ega bo'lgan odamni qidiryapman." }
+      }
+    },
+    "step2": {
+      "title": "Qanday ko'nikmalar talab qilinadi?",
+      "desc": "Freelancer ishingizni bajarishi uchun kerak bo'lgan asosiy ko'nikmalarni qo'shing.",
+      "requiredSkills": "Zarur ko'nikmalar",
+      "skillsPlaceholder": "Ko'nikmani yozing va Enter yoki Qo'shish tugmasini bosing...",
+      "add": "Qo'shish",
+      "suggested": "Tavsiya etilgan ko'nikmalar",
+      "freelancersCount": "Kerakli freelancerlar soni",
+      "count": {
+        "1": { "name": "1 Freelancer", "desc": "Ish uchun bir kishi" },
+        "2plus": { "name": "2+ Freelancerlar", "desc": "Kattaroq ishlar uchun bir nechta odam" }
+      }
+    },
+    "step3": {
+      "title": "Byudjet va muddatni belgilang",
+      "desc": "Qancha to'lashingizni va loyiha qancha davom etishini belgilang.",
+      "paymentStructure": "To'lov tuzilmasi",
+      "budget": "Byudjet",
+      "budgetRange": "Byudjet oralig'i",
+      "hourlyRange": "Soatbay tarif oralig'i",
+      "types": {
+        "fixed": { "name": "Ruxsat etilgan narx", "desc": "Umumiy narxni belgilang" },
+        "range": { "name": "Narx oralig'i", "desc": "Min–Max byudjet" },
+        "hourly": { "name": "Soatbay tarif", "desc": "Soatiga to'lash" }
+      },
+      "min": "Min",
+      "max": "Max",
+      "minHr": "Min/soat",
+      "maxHr": "Max/soat",
+      "duration": "Loyiha davomiyligi",
+      "durations": {
+        "less1": { "icon": "⚡", "name": "Tezkor", "sub": "1 oydan kam" },
+        "1to3": { "icon": "📅", "name": "Qisqa", "sub": "1–3 oy" },
+        "3to6": { "icon": "🗓️", "name": "O'rtacha", "sub": "3–6 oy" },
+        "6plus": { "icon": "🏗️", "name": "Uzoq", "sub": "6 oydan ko'p" },
+        "ongoing": { "icon": "♾️", "name": "Davomiy", "sub": "Takroriy" }
+      },
+      "scope": "Loyiha ko'lami",
+      "scopes": {
+        "small": { "icon": "🎯", "name": "Kichik", "sub": "Oddiy vazifa" },
+        "medium": { "icon": "🚀", "name": "O'rtacha", "sub": "Mo'tadil" },
+        "large": { "icon": "🏢", "name": "Katta", "sub": "Murakkab" }
+      },
+      "visibility": "Ko'rinish",
+      "vis": {
+        "public": { "icon": "🌍", "name": "Ommaviy", "desc": "Barcha freelancerlar ko'rishi mumkin" },
+        "private": { "icon": "🔒", "name": "Maxfiy", "desc": "Faqat taklif qilinganlar" }
+      }
+    },
+    "step4": {
+      "title": "Ish e'lonini ko'rib chiqing",
+      "desc": "Nashr qilishdan oldin hamma narsa to'g'riligiga ishonch hosil qiling.",
+      "detailsTitle": "Ish tafsilotlari",
+      "skillsTitle": "Zarur ko'nikmalar",
+      "descriptionTitle": "Tavsif",
+      "escrowTitle": "Escrow himoyasi",
+      "escrowDesc": "Sizning to'lovingiz ish yakunlanib, siz uni tasdiqlamaguningizcha xavfsiz escrow'da saqlanadi. Faqat ish sizni qoniqtirgandagina to'lov qilasiz.",
+      "notSpecified": "Belgilanmagan",
+      "noSkills": "Ko'nikmalar qo'shilmagan",
+      "noDesc": "Tavsif berilmagan"
+    },
+    "categories": {
+      "Web Development": "Veb dasturlash",
+      "Mobile Development": "Mobil dasturlash",
+      "Design & Creative": "Dizayn va kreativ",
+      "Writing & Translation": "Yozish va tarjima",
+      "IT & Networking": "IT va tarmoq",
+      "Data Science & AI": "Ma'lumotlar fanlari va AI",
+      "Marketing": "Marketing",
+      "Business Consulting": "Biznes konsalting",
+      "Video & Animation": "Video va animatsiya"
+    },
+    "sidebar": {
+      "progress": "Jarayon",
+      "tips": "{{step}}-qadam uchun maslahatlar",
+      "yourProgress": "Sizning natijangiz",
+      "skillsAdded": "Qo'shilgan ko'nikmalar",
+      "titleChars": "Sarlavha",
+      "descChars": "Tavsif",
+      "skills3x": "5+ ko'nikmaga ega ishlarga 3 baravar ko'p takliflar keladi",
+      "desc60pt": "Aniq tavsiflar 60% tezroq javob oladi"
+    },
+    "nav": {
+      "previous": "Oldingi",
+      "next": "Keyingi qadam",
+      "publish": "Ish e'lonini joylash",
+      "updating": "Yangilanmoqda...",
+      "update": "Yangilash"
+    },
+    "success": {
+      "title": "Ish e'loni muvaffaqiyatli joylandi! 🎉",
+      "desc": "\"{{title}}\" ishingiz endi jonli efirda va freelancerlar ko'rishi mumkin. Tez orada takliflarni qabul qila boshlaysiz.",
+      "myJobs": "Mening ishlarim",
+      "postAnother": "Yana bir ish e'lon qilish",
+      "browseTalent": "Freelancerlarni qidirish"
+    },
+    "errors": {
+      "fillAll": "Iltimos barcha maydonlarni to'ldiring.",
+      "titleReq": "Ish sarlavhasi majburiy",
+      "titleShort": "Sarlavha kamida 10 ta belgidan iborat bo'lishi kerak",
+      "categoryReq": "Iltimos kategoriyani tanlang",
+      "descReq": "Tavsif majburiy",
+      "descShort": "Tavsif kamida 50 ta belgidan iborat bo'lishi kerak",
+      "expReq": "Iltimos tajriba darajasini tanlang",
+      "skillsReq": "Kamida bitta ko'nikma qo'shing",
+      "budgetReq": "Iltimos byudjetni kiriting",
+      "budgetRangeReq": "Iltimos minimal va maksimal byudjetni kiriting",
+      "hourlyReq": "Iltimos soatbay tarif oralig'ini kiriting",
+      "durationReq": "Iltimos loyiha davomiyligini tanlang",
+      "general": "Xatolik yuz berdi. Iltimos qayta urinib ko'ring.",
+      "draftSaved": "Qoralama saqlandi! My Jobs bo'limida davom etishingiz mumkin.",
+      "updated": "Loyiha muvaffaqiyatli yangilandi! 🎉"
+    },
+    "tips": {
+      "1": [
+        "Aniq va aniq sarlavha ko'proq tegishli takliflarni jalb qiladi.",
+        "Qanday natijalarni kutayotganingizni aniq tasvirlab bering.",
+        "Agar mavjud bo'lsa, texnologiyalar yoki asboblarni eslatib o'ting.",
+        "Loyihaning maqsadi va vazifalarini kiriting."
+      ],
+      "2": [
+        "Eng yaxshi mos keladigan natijalar uchun 5-10 ta ko'nikma qo'shing.",
+        "Sohadagi standart atamalardan foydalaning (masalan, 'ReactJS' emas, 'React').",
+        "Ko'nikmalarni muhimligiga qarab tartiblang — eng asosiylarini birinchi qo'ying."
+      ],
+      "3": [
+        "Raqobatbardosh byudjetlar yuqori sifatli takliflarni jalb qiladi.",
+        "Ruxsat etilgan narx aniq belgilangan ishlar uchun yaxshi ishlaydi.",
+        "Soatbay to'lov davomiy yoki o'zgaruvchan ishlar uchun yaxshiroq.",
+        "Muddat borasida halol bo'ling — shoshilinch ishlar qimmatroq turadi."
+      ],
+      "4": [
+        "Nashr qilishdan oldin byudjetingizni yana bir bor tekshiring.",
+        "Ish e'lonini nashr qilgandan keyin istalgan vaqtda tahrirlashingiz mumkin.",
+        "To'liq ma'lumotga ega ishlar 3 baravar ko'p takliflar oladi."
+      ]
+    }
   }
 }
