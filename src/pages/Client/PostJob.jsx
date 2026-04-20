@@ -6,10 +6,11 @@ import {
   ChevronLeft, ChevronRight, Check, X, Plus,
   Lightbulb, Briefcase, Clock, DollarSign,
   FileText, Star, AlertCircle, CheckCircle,
-  Rocket, ArrowLeft, Eye,
+  Rocket, ArrowLeft, Eye, Paperclip, File
 } from "lucide-react";
 import "../Client/css/post.css";
 import { createJob, getJobById, updateJob } from "../../api/jobs";
+import { uploadFile } from "../../api/common";
 
 /* ================================================================
    CONSTANTS
@@ -77,22 +78,23 @@ const SCOPE_OPTIONS = [
    INITIAL FORM STATE
    ================================================================ */
 const INITIAL = {
-  title:       "",
-  category:    "",
+  title: "",
+  category: "",
   description: "",
-  jobType:     "fixed",
-  experience:  "",
-  skills:      [],
-  budgetType:  "fixed",
+  attachments: [],
+  jobType: "fixed",
+  experience: "mid",
+  skills: [],
+  budgetType: "fixed",
   budgetFixed: "",
-  budgetMin:   "",
-  budgetMax:   "",
-  hourlyMin:   "",
-  hourlyMax:   "",
-  duration:    "",
-  scope:       "",
+  budgetMin: "",
+  budgetMax: "",
+  hourlyMin: "",
+  hourlyMax: "",
+  duration: "1to3",
+  scope: "medium",
   freelancers: "1",
-  visibility:  "public",
+  visibility: "public",
 };
 
 /* ================================================================
@@ -108,80 +110,149 @@ const PjToast = ({ msg, type, onClose }) => msg ? (
   </div>
 ) : null;
 
+
 /* ================================================================
    STEP 1 — Job Details
    ================================================================ */
 const PjStep1 = ({ form, setForm, errors }) => {
   const { t } = useTranslation();
-  const charLimit = 5000;
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    setUploading(true);
+    try {
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await uploadFile(formData);
+        if (res?.success) {
+          setForm(prev => ({
+            ...prev,
+            attachments: [...prev.attachments, {
+              url: res.data.url,
+              name: file.name,
+              size: file.size,
+              type: file.type
+            }]
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("Upload failed", err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeFile = (index) => {
+    setForm(prev => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, i) => i !== index)
+    }));
+  };
 
   return (
     <div className="pj-card-body">
       <div className="pj-form-group">
-        <label className="pj-label">
-          {t('postJob.step1.jobTitle')} <span className="pj-label-req">*</span>
-          <span className="pj-label-tip">{form.title.length}/100</span>
-        </label>
+        <label className="pj-label">{t('postJob.step1.jobTitle')} <span className="pj-label-req">*</span></label>
         <input
           className={`pj-input ${errors.title ? "error" : ""}`}
-          placeholder={t('postJob.step1.titlePlaceholder')}
           value={form.title}
-          maxLength={100}
           onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
+          placeholder={t('postJob.step1.titlePlaceholder')}
+          maxLength={100}
         />
         {errors.title && <div className="pj-error-msg"><AlertCircle size={13} />{errors.title}</div>}
       </div>
 
-      <div className="pj-form-group">
-        <label className="pj-label">
-          {t('postJob.step1.category')} <span className="pj-label-req">*</span>
-        </label>
-        <select
-          className={`pj-select ${errors.category ? "error" : ""}`}
-          value={form.category}
-          onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
-        >
-          <option value="">{t('postJob.step1.selectCategory')}</option>
-          {CATEGORIES.map(c => <option key={c} value={c}>{t(`postJob.categories.${c}`)}</option>)}
-        </select>
-        {errors.category && <div className="pj-error-msg"><AlertCircle size={13} />{errors.category}</div>}
-      </div>
+      <div className="pj-row">
+        <div className="pj-form-group half">
+          <label className="pj-label">{t('postJob.step1.category')} <span className="pj-label-req">*</span></label>
+          <select
+            className={`pj-select ${errors.category ? "error" : ""}`}
+            value={form.category}
+            onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
+          >
+            <option value="">{t('postJob.step1.selectCategory')}</option>
+            {CATEGORIES.map(c => (
+              <option key={c} value={c}>{t(`postJob.categories.${c}`)}</option>
+            ))}
+          </select>
+          {errors.category && <div className="pj-error-msg"><AlertCircle size={13} />{errors.category}</div>}
+        </div>
 
-      <div className="pj-form-group">
-        <label className="pj-label">{t('postJob.step1.jobType')} <span className="pj-label-req">*</span></label>
-        <div className="pj-type-grid">
-          {[
-            { id: "fixed",  icon: "📦" },
-            { id: "hourly", icon: "⏱️" },
-          ].map(t_obj => (
-            <div
-              key={t_obj.id}
-              className={`pj-type-card ${form.jobType === t_obj.id ? "selected" : ""}`}
-              onClick={() => setForm(p => ({ ...p, jobType: t_obj.id }))}
+        <div className="pj-form-group half">
+          <label className="pj-label">{t('postJob.step1.jobType')} <span className="pj-label-req">*</span></label>
+          <div className="pj-type-switch">
+            <button
+              className={`pj-type-btn ${form.jobType === "fixed" ? "active" : ""}`}
+              onClick={() => setForm(p => ({ ...p, jobType: "fixed" }))}
             >
-              <span className="pj-type-icon">{t_obj.icon}</span>
-              <div className="pj-type-name">{t(`postJob.step1.${t_obj.id}Type.name`)}</div>
-              <div className="pj-type-desc">{t(`postJob.step1.${t_obj.id}Type.desc`)}</div>
-              <div className="pj-type-check"><Check size={11} /></div>
-            </div>
-          ))}
+              {t('postJob.step1.fixedType.name')}
+            </button>
+            <button
+              className={`pj-type-btn ${form.jobType === "hourly" ? "active" : ""}`}
+              onClick={() => setForm(p => ({ ...p, jobType: "hourly" }))}
+            >
+              {t('postJob.step1.hourlyType.name')}
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="pj-form-group">
-        <label className="pj-label">
-          {t('postJob.step1.description')} <span className="pj-label-req">*</span>
-          <span className="pj-label-tip">{form.description.length}/{charLimit}</span>
-        </label>
+        <label className="pj-label">{t('postJob.step1.description')} <span className="pj-label-req">*</span></label>
         <textarea
           className={`pj-textarea ${errors.description ? "error" : ""}`}
-          placeholder={t('postJob.step1.descPlaceholder')}
           value={form.description}
-          maxLength={charLimit}
-          rows={8}
           onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+          placeholder={t('postJob.step1.descPlaceholder')}
+          maxLength={5000}
         />
-        {errors.description && <div className="pj-error-msg"><AlertCircle size={13} />{errors.description}</div>}
+        <div className="pj-textarea-foot">
+          {errors.description ? (
+            <div className="pj-error-msg"><AlertCircle size={13} />{errors.description}</div>
+          ) : <span />}
+          <span className="pj-char-count">{form.description.length}/5000</span>
+        </div>
+      </div>
+
+      <div className="pj-form-group">
+        <label className="pj-label">{t('postJob.step1.attachments')}</label>
+        <div className="pj-upload-zone">
+          <input
+            type="file"
+            id="pj-file-input"
+            multiple
+            hidden
+            onChange={handleFileChange}
+            accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+          />
+          <label htmlFor="pj-file-input" className={`pj-upload-label ${uploading ? "uploading" : ""}`}>
+            <Paperclip size={18} />
+            <span>{uploading ? t('postJob.header.saving') : t('postJob.step1.upload')}</span>
+          </label>
+          <div className="pj-upload-info">
+            {t('postJob.step1.maxSize')} • {t('postJob.step1.docType')}
+          </div>
+        </div>
+
+        {form.attachments.length > 0 && (
+          <div className="pj-file-list">
+            {form.attachments.map((file, idx) => (
+              <div key={idx} className="pj-file-item">
+                <File size={16} />
+                <span className="pj-file-name" title={file.name}>{file.name}</span>
+                <button className="pj-file-remove" onClick={() => removeFile(idx)}>
+                  <Check size={12} style={{ transform: "rotate(45deg)" }} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="pj-form-group">
@@ -205,6 +276,8 @@ const PjStep1 = ({ form, setForm, errors }) => {
         </div>
         {errors.experience && <div className="pj-error-msg" style={{ marginTop: 8 }}><AlertCircle size={13} />{errors.experience}</div>}
       </div>
+
+      <div className="pj-divider" />
     </div>
   );
 };
@@ -361,9 +434,6 @@ const PjStep2 = ({ form, setForm, errors }) => {
   );
 };
 
-/* ================================================================
-   STEP 3 — Budget & Timeline
-   ================================================================ */
 const PjStep3 = ({ form, setForm, errors }) => {
   const { t } = useTranslation();
   return (
@@ -595,6 +665,7 @@ const PjStep4 = ({ form }) => {
           { key: t('postJob.step2.freelancersCount'),      val: form.freelancers === "1" ? t('postJob.step2.count.1.name') : t('postJob.step2.count.2plus.name') },
           { key: t('postJob.step3.visibility'),       val: form.visibility === "public" ? `🌍 ${t('postJob.step3.vis.public.name')}` : `🔒 ${t('postJob.step3.vis.private.name')}` },
           { key: t('postJob.step3.scope'),            val: t(`postJob.step3.scopes.${form.scope}.name`) || t('postJob.step4.notSpecified') },
+          { key: t('postJob.step1.attachments'),      val: form.attachments.length > 0 ? `${form.attachments.length} ${t('postJob.sidebar.skillsAdded').toLowerCase()}` : "—" },
         ].map(r => (
           <div key={r.key} className="pj-preview-row">
             <span className="pj-preview-row-key">{r.key}</span>
@@ -814,6 +885,7 @@ const PostJob = () => {
       freelancers_needed: form.freelancers === "1" ? 1 : 2,
       currency:         "USD",
       status,
+      attachments:      form.attachments,
     };
     if (form.budgetType === "fixed") {
       payload.budget_min = Number(form.budgetFixed) || 0;

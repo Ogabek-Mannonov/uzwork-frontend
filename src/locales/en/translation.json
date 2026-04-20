@@ -964,6 +964,17 @@
       "budget": { "label": "Budget", "sub": "Price & duration" },
       "review": { "label": "Review", "sub": "Preview & publish" }
     },
+    "categories": {
+      "Web Development": "Web Development",
+      "Mobile Development": "Mobile Development",
+      "Design & Creative": "Design & Creative",
+      "Writing & Translation": "Writing & Translation",
+      "IT & Networking": "IT & Networking",
+      "Data Science & AI": "Data Science & AI",
+      "Marketing": "Marketing",
+      "Business Consulting": "Business Consulting",
+      "Video & Animation": "Video & Animation"
+    },
     "step1": {
       "title": "Tell us about your job",
       "desc": "Start with a clear title, category and detailed description.",
@@ -976,6 +987,10 @@
       "hourlyType": { "name": "Hourly Rate", "desc": "Pay per hour worked. Great for ongoing or evolving tasks." },
       "description": "Job Description",
       "descPlaceholder": "Describe your project in detail. Include:\n• What you need done\n• The goals and deliverables\n• Any specific requirements or constraints\n• Preferred tech stack or tools",
+      "attachments": "Attach Documents",
+      "upload": "Upload file",
+      "maxSize": "Max size: 10MB",
+      "docType": "Formats: PDF, DOCX, PNG, JPG",
       "experience": "Experience Level",
       "exp": {
         "entry": { "name": "Entry Level", "desc": "Looking for someone new to this field; willing to provide guidance and mentorship." },

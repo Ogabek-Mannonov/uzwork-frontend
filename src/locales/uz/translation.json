@@ -963,6 +963,17 @@
       "budget": { "label": "Byudjet", "sub": "Narx va davomiylik" },
       "review": { "label": "Tekshirish", "sub": "Tekshirish va nashr etish" }
     },
+    "categories": {
+      "Web Development": "Veb dasturlash",
+      "Mobile Development": "Mobil dasturlash",
+      "Design & Creative": "Dizayn va kreativ",
+      "Writing & Translation": "Yozish va tarjima",
+      "IT & Networking": "IT va tarmoqlar",
+      "Data Science & AI": "Ma'lumotlar fani va AI",
+      "Marketing": "Marketing va savdo",
+      "Business Consulting": "Biznes konsalting",
+      "Video & Animation": "Video va animatsiya"
+    },
     "step1": {
       "title": "Ishingiz haqida gapirib bering",
       "desc": "Aniq sarlavha, kategoriya va batafsil tavsifdan boshlang.",
@@ -975,6 +986,10 @@
       "hourlyType": { "name": "Soatbay to'lov", "desc": "Ishlagan soatiga qarab to'lang. Davomiy ishlar uchun juda mos." },
       "description": "Ish tavsifi",
       "descPlaceholder": "Loyihangizni batafsil tavsiflang. Quyidagilarni kiriting:\n• Nima qilinishi kerak\n• Maqsadlar va natijalar\n• Maxsus talablar yoki cheklovlar\n• Afzal texnologiyalar",
+      "attachments": "Hujjatlar biriktirish",
+      "upload": "Fayl yuklash",
+      "maxSize": "Maksimal hajm: 10MB",
+      "docType": "Formatlar: PDF, DOCX, PNG, JPG",
       "experience": "Tajriba darajasi",
       "exp": {
         "entry": { "name": "Boshlang'ich", "desc": "Ushbu sohada yangi bo'lgan, yo'l-yo'riq va ustozlikka muhtoj odamni qidiryapman." },
