@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Bell, Briefcase, DollarSign, MoreHorizontal, CheckCircle, Info, AlertTriangle, AlertCircle } from 'lucide-react';
+import { Bell, Briefcase, DollarSign, MoreHorizontal, CheckCircle, Info, AlertTriangle, AlertCircle, UserCheck, UserX, Lock, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../../../api/common';
 import { getSocket, onSocketReady } from '../../../hooks/useSocket';
@@ -23,14 +23,43 @@ const NotificationDropdown = () => {
     }
   }, []);
 
+  // Notification sound (using a clean public URL)
+  const playSound = useCallback(() => {
+    try {
+      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+      audio.volume = 0.5;
+      audio.play();
+    } catch (e) {
+      console.warn("Sound play failed:", e);
+    }
+  }, []);
+
+  const showBrowserNotification = useCallback((notif) => {
+    if (Notification.permission === "granted") {
+      new Notification(notif.title || "UzWork", {
+        body: notif.message,
+        icon: "/logo192.png" // Use project logo if available
+      });
+    }
+  }, []);
+
   useEffect(() => {
     fetchNotifications();
+
+    // Request browser notification permission
+    if (Notification.permission === "default") {
+      Notification.requestPermission();
+    }
 
     // Socket real-time updates
     const cleanup = onSocketReady((socket) => {
       const handleNewNotification = (notif) => {
         setNotifications(prev => [notif, ...prev].slice(0, 30));
         setUnreadCount(prev => prev + 1);
+        
+        // Browser alert & sound
+        playSound();
+        showBrowserNotification(notif);
       };
 
       socket.on('newNotification', handleNewNotification);
@@ -38,7 +67,7 @@ const NotificationDropdown = () => {
     });
 
     return () => cleanup?.();
-  }, [fetchNotifications]);
+  }, [fetchNotifications, playSound, showBrowserNotification]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -70,6 +99,13 @@ const NotificationDropdown = () => {
 
   const getIcon = (type) => {
     switch (type) {
+      case 'proposal_received': return { icon: <Briefcase size={18} />, color: 'purple' };
+      case 'proposal_accepted': return { icon: <UserCheck size={18} />, color: 'green' };
+      case 'proposal_rejected': return { icon: <UserX size={18} />, color: 'red' };
+      case 'payment_received': return { icon: <ArrowDownLeft size={18} />, color: 'green' };
+      case 'payment_sent': return { icon: <ArrowUpRight size={18} />, color: 'blue' };
+      case 'withdrawal_request': return { icon: <DollarSign size={18} />, color: 'orange' };
+      case 'escrow_hold': return { icon: <Lock size={18} />, color: 'purple' };
       case 'payment': return { icon: <DollarSign size={18} />, color: 'green' };
       case 'project': 
       case 'job': return { icon: <Briefcase size={18} />, color: 'purple' };
