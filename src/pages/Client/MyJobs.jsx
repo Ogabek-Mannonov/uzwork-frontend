@@ -343,7 +343,7 @@ const MyJobs = () => {
                 </div>
                 
                 <div className="mj-card-footer">
-                  {(job.status === "active" || job.status === "open" || job.status === "in_progress") && (
+                  {(job.status === "active" || job.status === "open") && (
                     <>
                       <button 
                         className="mj-footer-btn mj-primary"
