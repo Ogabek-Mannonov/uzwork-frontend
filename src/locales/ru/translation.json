@@ -831,5 +831,55 @@
       "passwordSuccess": "Пароль успешно изменен!",
       "imageSuccess": "Изображение успешно обновлено!"
     }
+  },
+  "contracts": {
+    "title": "Управление контрактами",
+    "subtitle": "Отслеживайте все проекты и этапы работы в одном месте",
+    "back": "Назад",
+    "newContract": "Новый контракт",
+    "stats": {
+      "active": "Активный контракт",
+      "total": "Общая сумма",
+      "paid": "Оплачено",
+      "escrow": "В Escrow"
+    },
+    "tabs": {
+      "active": "Активные контракты",
+      "ended": "Завершенные"
+    },
+    "searchPlaceholder": "Поиск по контракту или фрилансеру...",
+    "card": {
+      "projectTitle": "Заголовок проекта",
+      "viewDetails": "Подробнее",
+      "profile": "Профиль",
+      "chat": "Чат",
+      "ongoing": "В процессе",
+      "noContracts": "Контракты не найдены",
+      "noContractsSub": "У вас пока нет {{status}} контрактов.",
+      "statusActive": "активных",
+      "statusEnded": "завершенных"
+    },
+    "modal": {
+      "details": "Детали проекта",
+      "loading": "Загрузка...",
+      "freelancerInfo": "Информация о фрилансере",
+      "viewProfile": "Посмотреть профиль",
+      "goToChat": "Перейти в чат",
+      "contractInfo": "Информация о контракте",
+      "startDate": "Дата начала:",
+      "totalAmount": "Общая сумма:",
+      "status": "Статус:",
+      "milestones": "Этапы работы (Milestones)",
+      "milestonesEmpty": "Этапы не установлены.",
+      "paid": "Оплачено",
+      "submitted": "Отправлено",
+      "pending": "Ожидается",
+      "close": "Закрыть"
+    },
+    "status": {
+      "active": "Активен",
+      "completed": "Завершен",
+      "cancelled": "Отменен"
+    }
   }
 }

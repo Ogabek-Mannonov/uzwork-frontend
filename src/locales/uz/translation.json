@@ -836,5 +836,55 @@
       "passwordSuccess": "Parol muvaffaqiyatli yangilandi!",
       "imageSuccess": "Rasm muvaffaqiyatli yangilandi!"
     }
+  },
+  "contracts": {
+    "title": "Kontraktlar boshqaruvi",
+    "subtitle": "Barcha loyihalar va ish bosqichlarini bir joyda kuzatib boring",
+    "back": "Orqaga qaytish",
+    "newContract": "Yangi kontrakt",
+    "stats": {
+      "active": "Aktiv kontrakt",
+      "total": "Umumiy summa",
+      "paid": "To'langan",
+      "escrow": "Escrowda"
+    },
+    "tabs": {
+      "active": "Aktiv kontraktlar",
+      "ended": "Tugatilganlar"
+    },
+    "searchPlaceholder": "Kontrakt yoki freelancer bo'yicha qidirish...",
+    "card": {
+      "projectTitle": "Loyiha sarlavhasi",
+      "viewDetails": "Batafsil",
+      "profile": "Profil",
+      "chat": "Chat",
+      "ongoing": "Davom etmoqda",
+      "noContracts": "Hech qanday kontrakt topilmadi",
+      "noContractsSub": "Hozircha sizda {{status}} kontraktlar mavjud emas.",
+      "statusActive": "faol",
+      "statusEnded": "yakunlangan"
+    },
+    "modal": {
+      "details": "Loyiha tafsilotlari",
+      "loading": "Yuklanmoqda...",
+      "freelancerInfo": "Freelancer ma'lumotlari",
+      "viewProfile": "Profilni ko'rish",
+      "goToChat": "Chatga o'tish",
+      "contractInfo": "Kontrakt ma'lumotlari",
+      "startDate": "Boshlangan sana:",
+      "totalAmount": "Umumiy summa:",
+      "status": "Status:",
+      "milestones": "Ish bosqichlari (Milestones)",
+      "milestonesEmpty": "Bosqichlar belgilanmagan.",
+      "paid": "To'langan",
+      "submitted": "Yuborilgan",
+      "pending": "Kutilmoqda",
+      "close": "Yopish"
+    },
+    "status": {
+      "active": "Aktiv",
+      "completed": "Tugatilgan",
+      "cancelled": "Bekor qilingan"
+    }
   }
 }

@@ -8,6 +8,7 @@ import {
   Plus, Edit, Trash2, Flag, HelpCircle, Upload,
   Save, UserCheck, Handshake, FileSignature
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { getMyContracts, getContractById } from "../../api/contracts";
 import "./css/contractmanegment.css";
 
@@ -21,6 +22,7 @@ function avatarSrc(url) {
 }
 
 const ContractManagement = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("active");
   const [contracts, setContracts] = useState([]);
@@ -89,7 +91,7 @@ const ContractManagement = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    return new Date(dateString).toLocaleDateString('uz-UZ', {
+    return new Date(dateString).toLocaleDateString(i18n.language === 'uz' ? 'uz-UZ' : i18n.language === 'ru' ? 'ru-RU' : 'en-US', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
@@ -99,11 +101,11 @@ const ContractManagement = () => {
   const getStatusBadge = (status) => {
     switch(status) {
       case "active":
-        return <span className="cm-status-badge cm-active"><CheckCircle size={12} /> Aktiv</span>;
+        return <span className="cm-status-badge cm-active"><CheckCircle size={12} /> {t('contracts.status.active')}</span>;
       case "completed":
-        return <span className="cm-status-badge cm-ended"><CheckCircle size={12} /> Tugatilgan</span>;
+        return <span className="cm-status-badge cm-ended"><CheckCircle size={12} /> {t('contracts.status.completed')}</span>;
       case "cancelled":
-        return <span className="cm-status-badge cm-ended" style={{ background: "#fee2e2", color: "#ef4444" }}><X size={12} /> Bekor qilingan</span>;
+        return <span className="cm-status-badge cm-ended" style={{ background: "#fee2e2", color: "#ef4444" }}><X size={12} /> {t('contracts.status.cancelled')}</span>;
       default:
         return <span className="cm-status-badge">{status}</span>;
     }
@@ -114,7 +116,7 @@ const ContractManagement = () => {
       <div className="cm-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
           <div className="loader"></div>
-          <p style={{ marginTop: 20, color: '#666' }}>Yuklanmoqda...</p>
+          <p style={{ marginTop: 20, color: '#666' }}>{t('contracts.modal.loading')}</p>
         </div>
       </div>
     );
@@ -126,15 +128,15 @@ const ContractManagement = () => {
         {/* Header */}
         <div className="cm-header">
           <div className="cm-header-info">
-            <h1>Kontraktlar boshqaruvi</h1>
-            <p>Barcha loyihalar va ish bosqichlarini bir joyda kuzatib boring</p>
+            <h1>{t('contracts.title')}</h1>
+            <p>{t('contracts.subtitle')}</p>
           </div>
           <div className="cm-header-actions" style={{ display: 'flex', gap: '12px' }}>
             <button className="cm-back-btn" onClick={() => navigate(-1)}>
-              <ArrowLeft size={18} /> Orqaga qaytish
+              <ArrowLeft size={18} /> {t('contracts.back')}
             </button>
             <button className="cm-create-btn" onClick={() => navigate("/client/talent")}>
-              <Plus size={18} /> Yangi kontrakt
+              <Plus size={18} /> {t('contracts.newContract')}
             </button>
           </div>
         </div>
@@ -147,7 +149,7 @@ const ContractManagement = () => {
             </div>
             <div className="cm-stat-info">
               <span className="cm-stat-value">{stats.active}</span>
-              <span className="cm-stat-label">Aktiv kontrakt</span>
+              <span className="cm-stat-label">{t('contracts.stats.active')}</span>
             </div>
           </div>
           <div className="cm-stat-card">
@@ -156,7 +158,7 @@ const ContractManagement = () => {
             </div>
             <div className="cm-stat-info">
               <span className="cm-stat-value">${stats.total.toLocaleString()}</span>
-              <span className="cm-stat-label">Umumiy summa</span>
+              <span className="cm-stat-label">{t('contracts.stats.total')}</span>
             </div>
           </div>
           <div className="cm-stat-card">
@@ -165,7 +167,7 @@ const ContractManagement = () => {
             </div>
             <div className="cm-stat-info">
               <span className="cm-stat-value">${stats.paid.toLocaleString()}</span>
-              <span className="cm-stat-label">To'langan</span>
+              <span className="cm-stat-label">{t('contracts.stats.paid')}</span>
             </div>
           </div>
           <div className="cm-stat-card">
@@ -174,7 +176,7 @@ const ContractManagement = () => {
             </div>
             <div className="cm-stat-info">
               <span className="cm-stat-value">${stats.escrow.toLocaleString()}</span>
-              <span className="cm-stat-label">Escrowda</span>
+              <span className="cm-stat-label">{t('contracts.stats.escrow')}</span>
             </div>
           </div>
         </div>
@@ -185,13 +187,13 @@ const ContractManagement = () => {
             className={`cm-tab-btn ${activeTab === "active" ? "cm-active" : ""}`}
             onClick={() => setActiveTab("active")}
           >
-            <FileText size={16} /> Aktiv kontraktlar
+            <FileText size={16} /> {t('contracts.tabs.active')}
           </button>
           <button
             className={`cm-tab-btn ${activeTab === "ended" ? "cm-active" : ""}`}
             onClick={() => setActiveTab("ended")}
           >
-            <Flag size={16} /> Tugatilganlar
+            <Flag size={16} /> {t('contracts.tabs.ended')}
           </button>
         </div>
 
@@ -201,7 +203,7 @@ const ContractManagement = () => {
             <Search size={18} />
             <input
               type="text"
-              placeholder="Kontrakt yoki freelancer bo'yicha qidirish..."
+              placeholder={t('contracts.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -219,7 +221,7 @@ const ContractManagement = () => {
             <div key={contract.id} className="cm-contract-item">
               <div className="cm-contract-header">
                 <div className="cm-contract-title">
-                  <h3>{contract.job_title || "Loyiha sarlavhasi"}</h3>
+                  <h3>{contract.job_title || t('contracts.card.projectTitle')}</h3>
                   {getStatusBadge(contract.status)}
                 </div>
                 <div className="cm-contract-actions">
@@ -227,7 +229,7 @@ const ContractManagement = () => {
                     className="cm-action-btn cm-view"
                     onClick={() => handleViewDetails(contract)}
                   >
-                    <Eye size={16} /> Batafsil
+                    <Eye size={16} /> {t('contracts.card.viewDetails')}
                   </button>
                 </div>
               </div>
@@ -269,13 +271,13 @@ const ContractManagement = () => {
                         className="cm-btn-secondary cm-btn-sm" 
                         onClick={() => navigate(`/freelancers/${contract.freelancer_id}`)}
                       >
-                        <Users size={12} /> Profil
+                        <Users size={12} /> {t('contracts.card.profile')}
                       </button>
                       <button 
                         className="cm-btn-primary cm-btn-sm" 
                         onClick={() => navigate(`/messages/${contract.id}`)}
                       >
-                        <MessageSquare size={12} /> Chat
+                        <MessageSquare size={12} /> {t('contracts.card.chat')}
                       </button>
                     </div>
                   </div>
@@ -287,7 +289,7 @@ const ContractManagement = () => {
                   </div>
                   <div className="cm-detail">
                     <Clock size={14} />
-                    <span>Davom etmoqda</span>
+                    <span>{t('contracts.card.ongoing')}</span>
                   </div>
                   <div className="cm-detail">
                     <Calendar size={14} />
@@ -301,8 +303,8 @@ const ContractManagement = () => {
           {filteredContracts.length === 0 && (
             <div className="cm-empty-state">
               <FileText size={48} strokeWidth={1} />
-              <h3>Hech qanday kontrakt topilmadi</h3>
-              <p>Hozircha sizda {activeTab === "active" ? "faol" : "yakunlangan"} kontraktlar mavjud emas.</p>
+              <h3>{t('contracts.card.noContracts')}</h3>
+              <p>{t('contracts.card.noContractsSub', { status: activeTab === 'active' ? t('contracts.card.statusActive') : t('contracts.card.statusEnded') })}</p>
             </div>
           )}
         </div>
@@ -313,7 +315,7 @@ const ContractManagement = () => {
             <div className="cm-modal-content cm-detail-modal" onClick={e => e.stopPropagation()}>
               <div className="cm-modal-header">
                 <div className="header-info">
-                  <h2>{selectedContract.contract?.job_title || selectedContract.job_title || "Loyiha tafsilotlari"}</h2>
+                  <h2>{selectedContract.contract?.job_title || selectedContract.job_title || t('contracts.modal.details')}</h2>
                   <p className="cm-contract-id">ID: #{selectedContract.contract?.id || selectedContract.id}</p>
                 </div>
                 <button className="cm-close-modal" onClick={() => setIsModalOpen(false)}>
@@ -324,7 +326,7 @@ const ContractManagement = () => {
               {detailsLoading ? (
                 <div className="modal-loader-wrap">
                   <div className="loader"></div>
-                  <p>Yuklanmoqda...</p>
+                  <p>{t('contracts.modal.loading')}</p>
                 </div>
               ) : (
                 <div className="cm-modal-body">
@@ -334,7 +336,7 @@ const ContractManagement = () => {
                       <div className="cm-info-section">
                         <div className="section-header">
                           <Users size={18} />
-                          <h3>Freelancer ma'lumotlari</h3>
+                          <h3>{t('contracts.modal.freelancerInfo')}</h3>
                         </div>
                         <div className="cm-freelancer-card-alt">
                           {selectedContract.contract?.freelancer_avatar_url ? (
@@ -362,13 +364,13 @@ const ContractManagement = () => {
                                 className="cm-btn-secondary cm-btn-sm" 
                                 onClick={() => navigate(`/freelancers/${selectedContract.contract?.freelancer_id}`)}
                               >
-                                <Users size={14} /> Profilni ko'rish
+                                <Users size={14} /> {t('contracts.modal.viewProfile')}
                               </button>
                               <button 
                                 className="cm-btn-primary cm-btn-sm" 
                                 onClick={() => navigate(`/messages/${selectedContract.contract?.id || selectedContract.id}`)}
                               >
-                                <MessageSquare size={14} /> Chatga o'tish
+                                <MessageSquare size={14} /> {t('contracts.modal.goToChat')}
                               </button>
                             </div>
                           </div>
@@ -378,19 +380,19 @@ const ContractManagement = () => {
                       <div className="cm-info-section">
                         <div className="section-header">
                           <FileText size={18} />
-                          <h3>Kontrakt ma'lumotlari</h3>
+                          <h3>{t('contracts.modal.contractInfo')}</h3>
                         </div>
                         <div className="cm-info-list">
                           <div className="info-item">
-                            <span className="label">Boshlangan sana:</span>
+                            <span className="label">{t('contracts.modal.startDate')}</span>
                             <span className="value">{formatDate(selectedContract.contract?.created_at)}</span>
                           </div>
                           <div className="info-item">
-                            <span className="label">Umumiy summa:</span>
+                            <span className="label">{t('contracts.modal.totalAmount')}</span>
                             <span className="value-price">${Number(selectedContract.contract?.total_amount).toLocaleString()}</span>
                           </div>
                           <div className="info-item">
-                            <span className="label">Status:</span>
+                            <span className="label">{t('contracts.modal.status')}</span>
                             <span className="value">{getStatusBadge(selectedContract.contract?.status)}</span>
                           </div>
                         </div>
@@ -402,7 +404,7 @@ const ContractManagement = () => {
                       <div className="cm-info-section">
                         <div className="section-header">
                           <TrendingUp size={18} />
-                          <h3>Ish bosqichlari (Milestones)</h3>
+                          <h3>{t('contracts.modal.milestones')}</h3>
                         </div>
                         <div className="cm-milestones-list-alt">
                           {selectedContract.milestones?.length > 0 ? (
@@ -416,14 +418,14 @@ const ContractManagement = () => {
                                   </div>
                                   <div className="milestone-b">
                                     <span className={`status-pill ${m.status}`}>
-                                      {m.status === 'released' ? 'To\'langan' : m.status === 'submitted' ? 'Yuborilgan' : 'Kutilmoqda'}
+                                      {m.status === 'released' ? t('contracts.modal.paid') : m.status === 'submitted' ? t('contracts.modal.submitted') : t('contracts.modal.pending')}
                                     </span>
                                   </div>
                                 </div>
                               </div>
                             ))
                           ) : (
-                            <p className="no-data">Bosqichlar belgilanmagan.</p>
+                            <p className="no-data">{t('contracts.modal.milestonesEmpty')}</p>
                           )}
                         </div>
                       </div>
@@ -433,7 +435,7 @@ const ContractManagement = () => {
               )}
               
               <div className="cm-modal-footer">
-                <button className="cm-primary-btn" onClick={() => setIsModalOpen(false)}>Yopish</button>
+                <button className="cm-primary-btn" onClick={() => setIsModalOpen(false)}>{t('contracts.modal.close')}</button>
               </div>
             </div>
           </div>

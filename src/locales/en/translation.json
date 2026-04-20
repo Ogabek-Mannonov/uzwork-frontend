@@ -837,5 +837,55 @@
       "passwordSuccess": "Password updated successfully!",
       "imageSuccess": "Image updated successfully!"
     }
+  },
+  "contracts": {
+    "title": "Contract Management",
+    "subtitle": "Track all your projects and work milestones in one place",
+    "back": "Go Back",
+    "newContract": "New Contract",
+    "stats": {
+      "active": "Active Contract",
+      "total": "Total Amount",
+      "paid": "Paid",
+      "escrow": "In Escrow"
+    },
+    "tabs": {
+      "active": "Active Contracts",
+      "ended": "Ended"
+    },
+    "searchPlaceholder": "Search by contract or freelancer...",
+    "card": {
+      "projectTitle": "Project Title",
+      "viewDetails": "Details",
+      "profile": "Profile",
+      "chat": "Chat",
+      "ongoing": "Ongoing",
+      "noContracts": "No contracts found",
+      "noContractsSub": "You don't have any {{status}} contracts yet.",
+      "statusActive": "active",
+      "statusEnded": "ended"
+    },
+    "modal": {
+      "details": "Project Details",
+      "loading": "Loading...",
+      "freelancerInfo": "Freelancer Information",
+      "viewProfile": "View Profile",
+      "goToChat": "Go to Chat",
+      "contractInfo": "Contract Information",
+      "startDate": "Start Date:",
+      "totalAmount": "Total Amount:",
+      "status": "Status:",
+      "milestones": "Work Milestones",
+      "milestonesEmpty": "No milestones defined.",
+      "paid": "Paid",
+      "submitted": "Submitted",
+      "pending": "Pending",
+      "close": "Close"
+    },
+    "status": {
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
   }
 }
