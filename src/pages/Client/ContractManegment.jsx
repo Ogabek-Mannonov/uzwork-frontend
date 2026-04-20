@@ -1,5 +1,4 @@
-// src/pages/Client/ContractManagement.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, FileText, Users, Clock, DollarSign,
@@ -9,95 +8,83 @@ import {
   Plus, Edit, Trash2, Flag, HelpCircle, Upload,
   Save, UserCheck, Handshake, FileSignature
 } from "lucide-react";
-import "../Client/css/contractmanegment.css";
+import { getMyContracts, getContractById } from "../../api/contracts";
+import "./css/contractmanegment.css";
 
-// Mock data (same as before)
-const MOCK_CONTRACTS = [/* same */];
-const MOCK_FREELANCERS = [/* same */];
-const MOCK_JOBS = [/* same */];
+const BACKEND = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
+
+function avatarSrc(url) {
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+  return `${BACKEND}${cleanUrl}`;
+}
 
 const ContractManagement = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("active");
+  const [contracts, setContracts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedContract, setSelectedContract] = useState(null);
-  const [showDetails, setShowDetails] = useState(false);
-  const [showEndModal, setShowEndModal] = useState(null);
-  const [showReviewModal, setShowReviewModal] = useState(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-  const [endReason, setEndReason] = useState("");
-  const [review, setReview] = useState({
-    rating: 5,
-    comment: "",
-    communication: 5,
-    quality: 5,
-    deadline: 5
+  
+  const loadContracts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await getMyContracts();
+      let list = [];
+      if (Array.isArray(res)) list = res;
+      else if (Array.isArray(res?.data)) list = res.data;
+      else if (Array.isArray(res?.contracts)) list = res.contracts;
+      else if (Array.isArray(res?.data?.contracts)) list = res.data.contracts;
+      
+      setContracts(list);
+    } catch (err) {
+      console.error("Error loading contracts:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadContracts();
+  }, [loadContracts]);
+
+  const handleViewDetails = async (contract) => {
+    setSelectedContract(contract);
+    setIsModalOpen(true);
+    setDetailsLoading(true);
+    try {
+      const res = await getContractById(contract.id);
+      const fullData = res?.data || res;
+      if (fullData) {
+        setSelectedContract(fullData);
+      }
+    } catch (err) {
+      console.error("Error loading contract details:", err);
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
+  const filteredContracts = contracts.filter(c => {
+    const statusMatch = activeTab === "active" ? c.status === "active" : c.status !== "active";
+    const searchMatch = 
+      (c.job_title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (c.freelancer_first_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (c.freelancer_last_name || "").toLowerCase().includes(searchTerm.toLowerCase());
+    return statusMatch && searchMatch;
   });
 
-  const [newContract, setNewContract] = useState({
-    jobId: "",
-    freelancerId: "",
-    startDate: "",
-    endDate: "",
-    amount: "",
-    paymentTerms: "fixed",
-    milestones: [{ title: "", amount: "", dueDate: "" }]
-  });
-
-  // Helper functions (same)
-  const filteredContracts = MOCK_CONTRACTS.filter(contract => {
-    if (activeTab === "active") return contract.status === "active";
-    if (activeTab === "ended") return contract.status === "ended";
-    return true;
-  }).filter(contract =>
-    contract.job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contract.freelancer.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const showToast = (message) => {
-    setToastMessage(message);
-    setShowSuccessToast(true);
-    setTimeout(() => setShowSuccessToast(false), 3000);
-  };
-
-  const handleCreateContract = () => {
-    if (!newContract.jobId || !newContract.freelancerId || !newContract.startDate || !newContract.endDate || !newContract.amount) {
-      showToast("Iltimos, barcha majburiy maydonlarni to'ldiring!");
-      return;
-    }
-    showToast("Kontrakt muvaffaqiyatli yaratildi!");
-    setShowCreateModal(false);
-    setNewContract({
-      jobId: "",
-      freelancerId: "",
-      startDate: "",
-      endDate: "",
-      amount: "",
-      paymentTerms: "fixed",
-      milestones: [{ title: "", amount: "", dueDate: "" }]
-    });
-  };
-
-  const handleEndContract = () => {
-    if (!endReason) {
-      showToast("Iltimos, tugatish sababini tanlang!");
-      return;
-    }
-    showToast("Kontrakt muvaffaqiyatli tugatildi!");
-    setShowEndModal(null);
-    setEndReason("");
-  };
-
-  const handleSubmitReview = () => {
-    if (!review.comment.trim()) {
-      showToast("Iltimos, fikringizni yozing!");
-      return;
-    }
-    showToast("Review muvaffaqiyatli qoldirildi!");
-    setShowReviewModal(null);
-    setReview({ rating: 5, comment: "", communication: 5, quality: 5, deadline: 5 });
+  const stats = {
+    active: contracts.filter(c => c.status === "active").length,
+    total: contracts.reduce((sum, c) => sum + (Number(c.total_amount) || 0), 0),
+    paid: contracts.reduce((sum, c) => sum + (Number(c.paid_amount) || 0), 0),
+    escrow: contracts.reduce((sum, c) => sum + ((Number(c.total_amount) || 0) - (Number(c.paid_amount) || 0)), 0),
   };
 
   const formatDate = (dateString) => {
@@ -113,42 +100,43 @@ const ContractManagement = () => {
     switch(status) {
       case "active":
         return <span className="cm-status-badge cm-active"><CheckCircle size={12} /> Aktiv</span>;
-      case "ended":
-        return <span className="cm-status-badge cm-ended"><Flag size={12} /> Tugatilgan</span>;
+      case "completed":
+        return <span className="cm-status-badge cm-ended"><CheckCircle size={12} /> Tugatilgan</span>;
+      case "cancelled":
+        return <span className="cm-status-badge cm-ended" style={{ background: "#fee2e2", color: "#ef4444" }}><X size={12} /> Bekor qilingan</span>;
       default:
         return <span className="cm-status-badge">{status}</span>;
     }
   };
 
-  const getMilestoneStatus = (status) => {
-    switch(status) {
-      case "completed":
-        return <span className="cm-milestone-status cm-completed"><CheckCircle size={10} /> Bajarilgan</span>;
-      case "in_progress":
-        return <span className="cm-milestone-status cm-progress"><Clock size={10} /> Davom etmoqda</span>;
-      case "pending":
-        return <span className="cm-milestone-status cm-pending"><AlertCircle size={10} /> Kutilmoqda</span>;
-      default:
-        return null;
-    }
-  };
+  if (loading) {
+    return (
+      <div className="cm-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="loader"></div>
+          <p style={{ marginTop: 20, color: '#666' }}>Yuklanmoqda...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="cm-page">
       <div className="cm-container">
         {/* Header */}
         <div className="cm-header">
-          <button className="cm-back-btn" onClick={() => navigate(-1)}>
-            <ArrowLeft size={18} />
-            <span>Orqaga</span>
-          </button>
-          <div>
-            <h1>Kontraktlar</h1>
-            <p>Kontraktlarni boshqaring, yarating va yakunlang</p>
+          <div className="cm-header-info">
+            <h1>Kontraktlar boshqaruvi</h1>
+            <p>Barcha loyihalar va ish bosqichlarini bir joyda kuzatib boring</p>
           </div>
-          <button className="cm-create-btn" onClick={() => setShowCreateModal(true)}>
-            <Plus size={18} /> Yangi kontrakt
-          </button>
+          <div className="cm-header-actions" style={{ display: 'flex', gap: '12px' }}>
+            <button className="cm-back-btn" onClick={() => navigate(-1)}>
+              <ArrowLeft size={18} /> Orqaga qaytish
+            </button>
+            <button className="cm-create-btn" onClick={() => navigate("/client/talent")}>
+              <Plus size={18} /> Yangi kontrakt
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -158,7 +146,7 @@ const ContractManagement = () => {
               <FileText size={20} />
             </div>
             <div className="cm-stat-info">
-              <span className="cm-stat-value">{MOCK_CONTRACTS.filter(c => c.status === "active").length}</span>
+              <span className="cm-stat-value">{stats.active}</span>
               <span className="cm-stat-label">Aktiv kontrakt</span>
             </div>
           </div>
@@ -167,7 +155,7 @@ const ContractManagement = () => {
               <DollarSign size={20} />
             </div>
             <div className="cm-stat-info">
-              <span className="cm-stat-value">${MOCK_CONTRACTS.reduce((s, c) => s + c.amount, 0).toLocaleString()}</span>
+              <span className="cm-stat-value">${stats.total.toLocaleString()}</span>
               <span className="cm-stat-label">Umumiy summa</span>
             </div>
           </div>
@@ -176,7 +164,7 @@ const ContractManagement = () => {
               <CheckCircle size={20} />
             </div>
             <div className="cm-stat-info">
-              <span className="cm-stat-value">${MOCK_CONTRACTS.reduce((s, c) => s + c.paidAmount, 0).toLocaleString()}</span>
+              <span className="cm-stat-value">${stats.paid.toLocaleString()}</span>
               <span className="cm-stat-label">To'langan</span>
             </div>
           </div>
@@ -185,7 +173,7 @@ const ContractManagement = () => {
               <Shield size={20} />
             </div>
             <div className="cm-stat-info">
-              <span className="cm-stat-value">${MOCK_CONTRACTS.reduce((s, c) => s + c.escrowAmount, 0).toLocaleString()}</span>
+              <span className="cm-stat-value">${stats.escrow.toLocaleString()}</span>
               <span className="cm-stat-label">Escrowda</span>
             </div>
           </div>
@@ -195,13 +183,13 @@ const ContractManagement = () => {
         <div className="cm-tabs">
           <button
             className={`cm-tab-btn ${activeTab === "active" ? "cm-active" : ""}`}
-            onClick={() => { setActiveTab("active"); setShowDetails(false); }}
+            onClick={() => setActiveTab("active")}
           >
             <FileText size={16} /> Aktiv kontraktlar
           </button>
           <button
             className={`cm-tab-btn ${activeTab === "ended" ? "cm-active" : ""}`}
-            onClick={() => { setActiveTab("ended"); setShowDetails(false); }}
+            onClick={() => setActiveTab("ended")}
           >
             <Flag size={16} /> Tugatilganlar
           </button>
@@ -226,399 +214,226 @@ const ContractManagement = () => {
         </div>
 
         {/* Contracts List */}
-        {!showDetails && (
-          <div className="cm-contracts-list">
-            {filteredContracts.map(contract => (
-              <div key={contract.id} className="cm-contract-item">
-                <div className="cm-contract-header">
-                  <div className="cm-contract-title">
-                    <h3>{contract.job.title}</h3>
-                    {getStatusBadge(contract.status)}
-                  </div>
-                  <div className="cm-contract-actions">
-                    <button 
-                      className="cm-action-btn cm-view"
-                      onClick={() => { setSelectedContract(contract); setShowDetails(true); }}
+        <div className="cm-contracts-list">
+          {filteredContracts.map(contract => (
+            <div key={contract.id} className="cm-contract-item">
+              <div className="cm-contract-header">
+                <div className="cm-contract-title">
+                  <h3>{contract.job_title || "Loyiha sarlavhasi"}</h3>
+                  {getStatusBadge(contract.status)}
+                </div>
+                <div className="cm-contract-actions">
+                  <button 
+                    className="cm-action-btn cm-view"
+                    onClick={() => handleViewDetails(contract)}
+                  >
+                    <Eye size={16} /> Batafsil
+                  </button>
+                </div>
+              </div>
+
+              <div className="cm-contract-body">
+                <div className="cm-freelancer-info">
+                  <div className="cm-avatar-wrapper" 
+                    style={{ position: 'relative', cursor: 'pointer' }}
+                    onClick={() => navigate(`/freelancers/${contract.freelancer_id}`)}
+                  >
+                    {contract.freelancer_avatar_url ? (
+                      <img 
+                        src={avatarSrc(contract.freelancer_avatar_url)} 
+                        alt="Freelancer" 
+                        className="cm-avatar-img" 
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div 
+                      className="cm-avatar-placeholder" 
+                      style={{ display: contract.freelancer_avatar_url ? 'none' : 'flex' }}
                     >
-                      <Eye size={16} /> Batafsil
-                    </button>
-                  </div>
-                </div>
-
-                <div className="cm-contract-body">
-                  <div className="cm-freelancer-info">
-                    <img src={contract.freelancer.avatar} alt="" className="cm-freelancer-avatar-sm" />
-                    <div>
-                      <div className="cm-freelancer-name">{contract.freelancer.name}</div>
-                      <div className="cm-freelancer-title">{contract.freelancer.title}</div>
+                      {contract.freelancer_first_name?.[0] || <Users size={16} />}
                     </div>
                   </div>
-                  <div className="cm-contract-details">
-                    <div className="cm-detail">
-                      <DollarSign size={14} />
-                      <span>${contract.amount.toLocaleString()}</span>
+                  <div>
+                    <div 
+                      className="cm-freelancer-name" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => navigate(`/freelancers/${contract.freelancer_id}`)}
+                    >
+                      {`${contract.freelancer_first_name || ""} ${contract.freelancer_last_name || ""}`.trim() || "Freelancer Partner"}
                     </div>
-                    <div className="cm-detail">
-                      <Clock size={14} />
-                      <span>{contract.progress}%</span>
-                    </div>
-                    <div className="cm-detail">
-                      <Calendar size={14} />
-                      <span>{formatDate(contract.startDate)}</span>
-                    </div>
-                  </div>
-                  <div className="cm-progress-bar">
-                    <div className="cm-progress-fill" style={{ width: `${contract.progress}%` }}></div>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {filteredContracts.length === 0 && (
-              <div className="cm-empty-state">
-                <FileText size={48} strokeWidth={1} />
-                <h3>Hech qanday kontrakt topilmadi</h3>
-                <p>Yangi kontrakt yaratish uchun yuqoridagi tugmani bosing</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Contract Details View */}
-        {showDetails && selectedContract && (
-          <div className="cm-details-view">
-            <button className="cm-back-to-list" onClick={() => setShowDetails(false)}>
-              <ArrowLeft size={16} /> Kontraktlar ro'yxatiga
-            </button>
-
-            <div className="cm-details-card">
-              <div className="cm-details-header">
-                <div>
-                  <h2>{selectedContract.job.title}</h2>
-                  <p className="cm-contract-id">ID: {selectedContract.id}</p>
-                </div>
-                <div className="cm-details-actions">
-                  {selectedContract.status === "active" && (
-                    <>
+                    <div className="cm-freelancer-actions">
                       <button 
-                        className="cm-end-contract-btn"
-                        onClick={() => setShowEndModal(selectedContract)}
+                        className="cm-btn-secondary cm-btn-sm" 
+                        onClick={() => navigate(`/freelancers/${contract.freelancer_id}`)}
                       >
-                        <Flag size={16} /> Kontraktni tugatish
+                        <Users size={12} /> Profil
                       </button>
                       <button 
-                        className="cm-review-btn"
-                        onClick={() => setShowReviewModal(selectedContract)}
+                        className="cm-btn-primary cm-btn-sm" 
+                        onClick={() => navigate(`/messages/${contract.id}`)}
                       >
-                        <Star size={16} /> Review qoldirish
+                        <MessageSquare size={12} /> Chat
                       </button>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <div className="cm-details-grid">
-                {/* Left Column */}
-                <div className="cm-details-left">
-                  {/* Freelancer Info */}
-                  <div className="cm-info-section">
-                    <h3>Freelancer ma'lumotlari</h3>
-                    <div className="cm-freelancer-card">
-                      <img src={selectedContract.freelancer.avatar} alt="" className="cm-freelancer-avatar-lg" />
-                      <div className="cm-freelancer-details">
-                        <h4>{selectedContract.freelancer.name}</h4>
-                        <p>{selectedContract.freelancer.title}</p>
-                        <div className="cm-rating">
-                          <Star size={14} fill="#f59e0b" color="#f59e0b" />
-                          <span>{selectedContract.freelancer.rating}</span>
-                        </div>
-                        <div className="cm-contact-info">
-                          <span>✉️ {selectedContract.freelancer.email}</span>
-                          <span>📞 {selectedContract.freelancer.phone}</span>
-                        </div>
-                        <button className="cm-message-btn">
-                          <MessageSquare size={14} /> Xabar yozish
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Contract Info */}
-                  <div className="cm-info-section">
-                    <h3>Kontrakt ma'lumotlari</h3>
-                    <div className="cm-info-grid">
-                      <div className="cm-info-item">
-                        <span className="cm-label">Boshlanish sanasi:</span>
-                        <span className="cm-value">{formatDate(selectedContract.startDate)}</span>
-                      </div>
-                      <div className="cm-info-item">
-                        <span className="cm-label">Tugash sanasi:</span>
-                        <span className="cm-value">{formatDate(selectedContract.endDate)}</span>
-                      </div>
-                      <div className="cm-info-item">
-                        <span className="cm-label">Umumiy summa:</span>
-                        <span className="cm-value">${selectedContract.amount.toLocaleString()}</span>
-                      </div>
-                      <div className="cm-info-item">
-                        <span className="cm-label">To'langan:</span>
-                        <span className="cm-value cm-paid">${selectedContract.paidAmount.toLocaleString()}</span>
-                      </div>
-                      <div className="cm-info-item">
-                        <span className="cm-label">To'lov shartlari:</span>
-                        <span className="cm-value">{selectedContract.paymentTerms}</span>
-                      </div>
-                      <div className="cm-info-item">
-                        <span className="cm-label">Escrowda:</span>
-                        <span className="cm-value">${selectedContract.escrowAmount.toLocaleString()}</span>
-                      </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Right Column - Milestones */}
-                <div className="cm-details-right">
-                  <div className="cm-info-section">
-                    <h3>Milestones</h3>
-                    <div className="cm-milestones-list">
-                      {selectedContract.milestones.map(milestone => (
-                        <div key={milestone.id} className="cm-milestone-item">
-                          <div className="cm-milestone-header">
-                            <span className="cm-milestone-title">{milestone.title}</span>
-                            <span className="cm-milestone-amount">${milestone.amount}</span>
-                          </div>
-                          <div className="cm-milestone-meta">
-                            {getMilestoneStatus(milestone.status)}
-                            <span className="cm-due-date">
-                              <Calendar size={10} /> Muddat: {formatDate(milestone.dueDate)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                <div className="cm-contract-details">
+                  <div className="cm-detail">
+                    <DollarSign size={14} />
+                    <span>${Number(contract.total_amount).toLocaleString()}</span>
                   </div>
-
-                  {/* Progress */}
-                  <div className="cm-info-section">
-                    <h3>Loyiha progressi</h3>
-                    <div className="cm-progress-large">
-                      <div className="cm-progress-bar-large">
-                        <div className="cm-progress-fill-large" style={{ width: `${selectedContract.progress}%` }}></div>
-                      </div>
-                      <div className="cm-progress-percent">{selectedContract.progress}%</div>
-                    </div>
-                    <div className="cm-last-activity">
-                      <Clock size={14} /> Oxirgi aktivlik: {selectedContract.lastActivity}
-                    </div>
+                  <div className="cm-detail">
+                    <Clock size={14} />
+                    <span>Davom etmoqda</span>
+                  </div>
+                  <div className="cm-detail">
+                    <Calendar size={14} />
+                    <span>{formatDate(contract.created_at)}</span>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          ))}
 
-        {/* Create Contract Modal */}
-        {showCreateModal && (
-          <div className="cm-modal-overlay" onClick={() => setShowCreateModal(false)}>
-            <div className="cm-modal-content cm-create-modal" onClick={e => e.stopPropagation()}>
+          {filteredContracts.length === 0 && (
+            <div className="cm-empty-state">
+              <FileText size={48} strokeWidth={1} />
+              <h3>Hech qanday kontrakt topilmadi</h3>
+              <p>Hozircha sizda {activeTab === "active" ? "faol" : "yakunlangan"} kontraktlar mavjud emas.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Contract Details Modal */}
+        {isModalOpen && selectedContract && (
+          <div className="cm-modal-overlay" onClick={() => setIsModalOpen(false)}>
+            <div className="cm-modal-content cm-detail-modal" onClick={e => e.stopPropagation()}>
               <div className="cm-modal-header">
-                <h3>Yangi kontrakt yaratish</h3>
-                <button className="cm-close-modal" onClick={() => setShowCreateModal(false)}>
+                <div className="header-info">
+                  <h2>{selectedContract.contract?.job_title || selectedContract.job_title || "Loyiha tafsilotlari"}</h2>
+                  <p className="cm-contract-id">ID: #{selectedContract.contract?.id || selectedContract.id}</p>
+                </div>
+                <button className="cm-close-modal" onClick={() => setIsModalOpen(false)}>
                   <X size={20} />
                 </button>
               </div>
-              <div className="cm-modal-body">
-                <div className="cm-form-group">
-                  <label>Job tanlash *</label>
-                  <select 
-                    value={newContract.jobId}
-                    onChange={(e) => setNewContract({...newContract, jobId: e.target.value})}
-                  >
-                    <option value="">Job tanlang</option>
-                    {MOCK_JOBS.map(job => (
-                      <option key={job.id} value={job.id}>{job.title} - {job.budget}</option>
-                    ))}
-                  </select>
-                </div>
 
-                <div className="cm-form-group">
-                  <label>Freelancer tanlash *</label>
-                  <select 
-                    value={newContract.freelancerId}
-                    onChange={(e) => setNewContract({...newContract, freelancerId: e.target.value})}
-                  >
-                    <option value="">Freelancer tanlang</option>
-                    {MOCK_FREELANCERS.map(f => (
-                      <option key={f.id} value={f.id}>{f.name} - {f.title}</option>
-                    ))}
-                  </select>
+              {detailsLoading ? (
+                <div className="modal-loader-wrap">
+                  <div className="loader"></div>
+                  <p>Yuklanmoqda...</p>
                 </div>
+              ) : (
+                <div className="cm-modal-body">
+                  <div className="cm-details-grid">
+                    {/* Left Column */}
+                    <div className="cm-details-left">
+                      <div className="cm-info-section">
+                        <div className="section-header">
+                          <Users size={18} />
+                          <h3>Freelancer ma'lumotlari</h3>
+                        </div>
+                        <div className="cm-freelancer-card-alt">
+                          {selectedContract.contract?.freelancer_avatar_url ? (
+                            <img 
+                              src={avatarSrc(selectedContract.contract?.freelancer_avatar_url)} 
+                              alt="Freelancer" 
+                              className="cm-avatar-lg-img" 
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div 
+                            className="cm-avatar-lg-placeholder"
+                            style={{ display: selectedContract.contract?.freelancer_avatar_url ? 'none' : 'flex' }}
+                          >
+                            {selectedContract.contract?.freelancer_first_name?.[0] || <Users size={24} />}
+                          </div>
+                          <div className="cm-freelancer-details">
+                            <h4>{`${selectedContract.contract?.freelancer_first_name || ""} ${selectedContract.contract?.freelancer_last_name || ""}`}</h4>
+                            <p className="cm-freelancer-email">{selectedContract.contract?.freelancer_email}</p>
+                            <div className="cm-freelancer-actions">
+                              <button 
+                                className="cm-btn-secondary cm-btn-sm" 
+                                onClick={() => navigate(`/freelancers/${selectedContract.contract?.freelancer_id}`)}
+                              >
+                                <Users size={14} /> Profilni ko'rish
+                              </button>
+                              <button 
+                                className="cm-btn-primary cm-btn-sm" 
+                                onClick={() => navigate(`/messages/${selectedContract.contract?.id || selectedContract.id}`)}
+                              >
+                                <MessageSquare size={14} /> Chatga o'tish
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
-                <div className="cm-form-row">
-                  <div className="cm-form-group">
-                    <label>Boshlanish sanasi *</label>
-                    <input 
-                      type="date" 
-                      value={newContract.startDate}
-                      onChange={(e) => setNewContract({...newContract, startDate: e.target.value})}
-                    />
+                      <div className="cm-info-section">
+                        <div className="section-header">
+                          <FileText size={18} />
+                          <h3>Kontrakt ma'lumotlari</h3>
+                        </div>
+                        <div className="cm-info-list">
+                          <div className="info-item">
+                            <span className="label">Boshlangan sana:</span>
+                            <span className="value">{formatDate(selectedContract.contract?.created_at)}</span>
+                          </div>
+                          <div className="info-item">
+                            <span className="label">Umumiy summa:</span>
+                            <span className="value-price">${Number(selectedContract.contract?.total_amount).toLocaleString()}</span>
+                          </div>
+                          <div className="info-item">
+                            <span className="label">Status:</span>
+                            <span className="value">{getStatusBadge(selectedContract.contract?.status)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column - Milestones */}
+                    <div className="cm-details-right">
+                      <div className="cm-info-section">
+                        <div className="section-header">
+                          <TrendingUp size={18} />
+                          <h3>Ish bosqichlari (Milestones)</h3>
+                        </div>
+                        <div className="cm-milestones-list-alt">
+                          {selectedContract.milestones?.length > 0 ? (
+                            selectedContract.milestones.map((m, idx) => (
+                              <div key={m.id} className="cm-milestone-card">
+                                <div className="milestone-idx">#{idx + 1}</div>
+                                <div className="milestone-content">
+                                  <div className="milestone-h">
+                                    <span className="title">{m.title}</span>
+                                    <span className="amount">${m.amount}</span>
+                                  </div>
+                                  <div className="milestone-b">
+                                    <span className={`status-pill ${m.status}`}>
+                                      {m.status === 'released' ? 'To\'langan' : m.status === 'submitted' ? 'Yuborilgan' : 'Kutilmoqda'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="no-data">Bosqichlar belgilanmagan.</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="cm-form-group">
-                    <label>Tugash sanasi *</label>
-                    <input 
-                      type="date" 
-                      value={newContract.endDate}
-                      onChange={(e) => setNewContract({...newContract, endDate: e.target.value})}
-                    />
-                  </div>
                 </div>
-
-                <div className="cm-form-group">
-                  <label>Kontrakt summasi ($) *</label>
-                  <input 
-                    type="number" 
-                    placeholder="Masalan: 5000"
-                    value={newContract.amount}
-                    onChange={(e) => setNewContract({...newContract, amount: e.target.value})}
-                  />
-                </div>
-
-                <div className="cm-form-group">
-                  <label>To'lov shartlari</label>
-                  <select 
-                    value={newContract.paymentTerms}
-                    onChange={(e) => setNewContract({...newContract, paymentTerms: e.target.value})}
-                  >
-                    <option value="fixed">Fixlangan to'lov</option>
-                    <option value="milestone">Milestone bo'yicha</option>
-                    <option value="hourly">Soatbay to'lov</option>
-                  </select>
-                </div>
-              </div>
-              <div className="cm-modal-footer">
-                <button className="cm-cancel-btn" onClick={() => setShowCreateModal(false)}>
-                  Bekor qilish
-                </button>
-                <button className="cm-submit-btn" onClick={handleCreateContract}>
-                  <Save size={16} /> Yaratish
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* End Contract Modal */}
-        {showEndModal && (
-          <div className="cm-modal-overlay" onClick={() => setShowEndModal(null)}>
-            <div className="cm-modal-content" onClick={e => e.stopPropagation()}>
-              <div className="cm-modal-icon cm-warning">
-                <Flag size={28} />
-              </div>
-              <h3 className="cm-modal-title">Kontraktni tugatish</h3>
-              <p className="cm-modal-text">"{showEndModal.job.title}" kontraktini tugatmoqchimisiz?</p>
+              )}
               
-              <div className="cm-form-group">
-                <label>Tugatish sababi *</label>
-                <select value={endReason} onChange={(e) => setEndReason(e.target.value)}>
-                  <option value="">Sababni tanlang</option>
-                  <option value="completed">Loyiha muvaffaqiyatli tugadi</option>
-                  <option value="cancelled">Loyiha bekor qilindi</option>
-                  <option value="dispute">Kelishmovchilik</option>
-                  <option value="other">Boshqa sabab</option>
-                </select>
-              </div>
-
-              <div className="cm-form-group">
-                <label>Izoh (ixtiyoriy)</label>
-                <textarea rows={3} placeholder="Qo'shimcha ma'lumot..."></textarea>
-              </div>
-
-              <div className="cm-modal-actions">
-                <button className="cm-cancel-btn" onClick={() => setShowEndModal(null)}>
-                  Bekor qilish
-                </button>
-                <button className="cm-confirm-btn cm-danger" onClick={handleEndContract}>
-                  Kontraktni tugatish
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Leave Review Modal */}
-        {showReviewModal && (
-          <div className="cm-modal-overlay" onClick={() => setShowReviewModal(null)}>
-            <div className="cm-modal-content" onClick={e => e.stopPropagation()}>
-              <div className="cm-modal-icon cm-review">
-                <Star size={28} />
-              </div>
-              <h3 className="cm-modal-title">Review qoldirish</h3>
-              <p className="cm-modal-text">"{showReviewModal.freelancer.name}" freelancer haqida fikringiz</p>
-
-              <div className="cm-rating-section">
-                <label>Umumiy reyting</label>
-                <div className="cm-stars">
-                  {[1,2,3,4,5].map(star => (
-                    <button 
-                      key={star}
-                      className="cm-star-btn"
-                      onClick={() => setReview({...review, rating: star})}
-                    >
-                      <Star size={24} fill={review.rating >= star ? "#f59e0b" : "none"} color="#f59e0b" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="cm-rating-details">
-                <div className="cm-rating-item">
-                  <span>Muloqot</span>
-                  <div className="cm-rating-stars">
-                    {[1,2,3,4,5].map(star => (
-                      <button key={star} onClick={() => setReview({...review, communication: star})}>
-                        <Star size={16} fill={review.communication >= star ? "#f59e0b" : "none"} color="#f59e0b" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="cm-rating-item">
-                  <span>Sifat</span>
-                  <div className="cm-rating-stars">
-                    {[1,2,3,4,5].map(star => (
-                      <button key={star} onClick={() => setReview({...review, quality: star})}>
-                        <Star size={16} fill={review.quality >= star ? "#f59e0b" : "none"} color="#f59e0b" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="cm-rating-item">
-                  <span>Muddat</span>
-                  <div className="cm-rating-stars">
-                    {[1,2,3,4,5].map(star => (
-                      <button key={star} onClick={() => setReview({...review, deadline: star})}>
-                        <Star size={16} fill={review.deadline >= star ? "#f59e0b" : "none"} color="#f59e0b" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="cm-form-group">
-                <label>Izoh *</label>
-                <textarea 
-                  rows={4} 
-                  placeholder="Freelancer haqida fikringizni yozing..."
-                  value={review.comment}
-                  onChange={(e) => setReview({...review, comment: e.target.value})}
-                />
-              </div>
-
-              <div className="cm-modal-actions">
-                <button className="cm-cancel-btn" onClick={() => setShowReviewModal(null)}>
-                  Bekor qilish
-                </button>
-                <button className="cm-confirm-btn" onClick={handleSubmitReview}>
-                  <Send size={16} /> Yuborish
-                </button>
+              <div className="cm-modal-footer">
+                <button className="cm-primary-btn" onClick={() => setIsModalOpen(false)}>Yopish</button>
               </div>
             </div>
           </div>

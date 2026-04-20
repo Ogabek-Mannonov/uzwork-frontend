@@ -1,0 +1,263 @@
+/* src/pages/Landing/contracts/contracts.css */
+.contracts-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  min-height: 80vh;
+}
+
+.contracts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.contracts-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+}
+
+.contracts-tabs {
+  display: flex;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  width: fit-content;
+}
+
+.contracts-tab {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.contracts-tab.active {
+  background: #fff;
+  color: #14a800;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.contracts-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.contract-card {
+  background: #fff;
+  border: 1px solid #edeef0;
+  border-radius: 16px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.contract-card:hover {
+  border-color: #14a800;
+  box-shadow: 0 12px 24px rgba(20, 168, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.contract-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.contract-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.contract-status {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: capitalize;
+}
+
+.status-active { background: #e6f7e6; color: #14a800; }
+.status-completed { background: #e8f4fd; color: #2563eb; }
+.status-cancelled { background: #ffeef0; color: #dc2626; }
+.status-disputed { background: #fff3e0; color: #f57c00; }
+
+.contract-meta {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.meta-item svg {
+  color: #999;
+}
+
+.contract-price {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+
+.contract-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #f0f1f2;
+}
+
+/* Detail Page */
+.contract-detail-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #14a800;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 24px;
+  transition: opacity 0.2s;
+}
+
+.back-link:hover {
+  opacity: 0.8;
+}
+
+.contract-panel {
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid #edeef0;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.panel-header {
+  padding: 32px;
+  background: linear-gradient(to right, #ffffff, #f8f9fa);
+  border-bottom: 1px solid #edeef0;
+}
+
+.panel-body {
+  padding: 32px;
+}
+
+.milestones-section {
+  margin-top: 40px;
+}
+
+.milestone-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #fdfdfd;
+  border: 1px solid #f0f1f2;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.milestone-info h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.milestone-info span {
+  font-size: 13px;
+  color: #666;
+}
+
+.milestone-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-primary {
+  background: #14a800;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover { background: #118d00; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid #e0e0e0;
+  color: #1a1a1a;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-outline:hover { border-color: #14a800; color: #14a800; }
+
+.btn-danger {
+  background: transparent;
+  border: 1px solid #ff4d4f;
+  color: #ff4d4f;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-danger:hover { background: #fff1f0; }
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #999;
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+/* Dark Mode support */
+.dark-mode-contracts .contract-card { background: #1a1d21; border-color: #2d3139; }
+.dark-mode-contracts .contract-title { color: #fff; }
+.dark-mode-contracts .panel-header { background: #1a1d21; border-color: #2d3139; }
+.dark-mode-contracts .panel-body { background: #1a1d21; }
+.dark-mode-contracts .milestone-item { background: #262a30; border-color: #2d3139; }
+.dark-mode-contracts h1, .dark-mode-contracts h2, .dark-mode-contracts h3, .dark-mode-contracts h4 { color: #fff; }

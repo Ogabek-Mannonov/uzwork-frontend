@@ -42,13 +42,14 @@ const Toast = ({ msg, type, onClose }) => {
 };
 
 // --- Confirmation Modal Component ---
-const ConfirmationModal = ({ isOpen, title, desc, onConfirm, onCancel, isLoading }) => {
+const ConfirmationModal = ({ isOpen, type, title, desc, onConfirm, onCancel, isLoading }) => {
   if (!isOpen) return null;
+  const isReject = type === "reject";
   return (
     <div className="cp-modal-overlay">
       <div className="cp-modal">
-        <div className="cp-modal-icon red">
-          <AlertCircle size={32} />
+        <div className={`cp-modal-icon ${isReject ? "red" : "blue"}`}>
+          {isReject ? <AlertCircle size={32} /> : <UserCheck size={32} />}
         </div>
         <h2>{title}</h2>
         <p>{desc}</p>
@@ -56,7 +57,7 @@ const ConfirmationModal = ({ isOpen, title, desc, onConfirm, onCancel, isLoading
           <button className="cp-modal-cancel" onClick={onCancel} disabled={isLoading}>
             Bekor qilish
           </button>
-          <button className="cp-modal-confirm" onClick={onConfirm} disabled={isLoading}>
+          <button className={`cp-modal-confirm ${isReject ? "red" : ""}`} onClick={onConfirm} disabled={isLoading}>
             {isLoading ? "Bajarilmoqda..." : "Tasdiqlash"}
           </button>
         </div>
@@ -78,7 +79,7 @@ const Proposals = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [actionLoading, setActionLoading] = useState(null);
   const [toast, setToast] = useState(null);
-  const [modal, setModal] = useState({ isOpen: false, data: null });
+  const [modal, setModal] = useState({ isOpen: false, type: null, data: null });
 
   const notify = (msg, type = "success") => {
     setToast({ msg, type });
@@ -172,34 +173,86 @@ const Proposals = () => {
     }
   };
 
-  const handleReject = async (proposalId) => {
-    setActionLoading(proposalId);
+  const executeAction = async () => {
+    const { type, data: modalData } = modal;
+    if (!modalData) return;
+
+    setActionLoading(modalData);
     try {
-      const res = await rejectProposal(proposalId);
+      if (type === "success") {
+        navigate(`/contracts/${modalData}`);
+        setModal({ isOpen: false, type: null, data: null });
+        return;
+      }
+
+      const res = type === "reject" ? await rejectProposal(modalData) : await acceptProposal(modalData);
+      
       if (res?.success !== false) {
-        setProposals(prev => prev.map(p => p.id === proposalId ? { ...p, status: "rejected" } : p));
-        notify("Taklif rad etildi va arxivga olindi");
+        if (type === "reject") {
+          setProposals(prev => prev.map(p => p.id === modalData ? { ...p, status: "rejected" } : p));
+          notify("Taklif rad etildi va arxivga olindi");
+        } else {
+          // Success acceptance
+          setProposals(prev => prev.map(p => {
+             if (p.id === modalData) return { ...p, status: "accepted" };
+             // If other proposals for the same job were automatically rejected
+             if (p.job_id === res.data?.proposal?.job_id && p.id !== modalData) return { ...p, status: "rejected" };
+             return p;
+          }));
+          notify("Tabriklaymiz! Freelancer muvaffaqiyatli yollangan.");
+          
+          // Custom modal for redirect instead of window.confirm
+          if (res.data?.contract?.id) {
+            setModal({ 
+              isOpen: true, 
+              type: "success", 
+              data: res.data.contract.id 
+            });
+          }
+        }
       } else {
-        notify(res?.message || "Rad etishda xato", "error");
+        // Error handling
+        const isBalanceError = res?.message?.toLowerCase().includes("balans") || res?.message?.toLowerCase().includes("balance");
+        if (isBalanceError) {
+          notify(
+            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+              <span>{res.message}</span>
+              <button 
+                onClick={() => navigate("/client/payments")}
+                style={{ background: "white", color: "#ef4444", border: "none", borderRadius: "4px", padding: "2px 8px", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}
+              >
+                Balansni to'ldirish
+              </button>
+            </div>, 
+            "error"
+          );
+        } else {
+          notify(res?.message || "Xatolik yuz berdi", "error");
+        }
       }
     } catch (err) {
-      notify("Xatolik yuz berdi", "error");
+      notify("Server bilan bog'lanishda xato", "error");
     } finally {
       setActionLoading(null);
-      setModal({ isOpen: false, data: null });
+      if (!modal.isOpen || modal.type !== "success") {
+         // Only close if not opening the success modal
+         if (modal.type !== "hire") {
+           setModal({ isOpen: false, type: null, data: null });
+         }
+      }
     }
   };
 
-  const openRejectModal = (proposalId) => {
+  const openModal = (type, proposalId) => {
     setModal({
       isOpen: true,
+      type,
       data: proposalId
     });
   };
 
   const handleHire = (jobId, proposalId) => {
-    // Navigate to job dashboard directly showing the hire flow
-    navigate(`/client/job/${jobId}?tab=proposals&hire=${proposalId}`);
+    openModal("hire", proposalId);
   };
 
   const filteredProposals = useMemo(() => {
@@ -367,7 +420,7 @@ const Proposals = () => {
                            `Frelanser #${String(proposal.freelancer_id || proposal.user_id || proposal.id).slice(0, 6)}`}
                         </h3>
                         <div className="cp-title">
-                          {proposal.freelancer_title || 
+                           {proposal.freelancer_title || 
                            proposal.freelancer?.title || 
                            proposal.freelancer?.user?.title ||
                            "Top Rated Specialist"}
@@ -429,11 +482,11 @@ const Proposals = () => {
                       <button className="cp-btn-hire" onClick={() => handleHire(group.job.id, proposal.id)}>
                         Yollash
                       </button>
-                      {activeTab !== "archived" && (
+                      {activeTab !== "archived" && proposal.status !== "accepted" && (
                         <button 
                           className="cp-star-btn" 
                           style={{ color: "#ef4444" }} 
-                          onClick={() => openRejectModal(proposal.id)}
+                          onClick={() => openModal("reject", proposal.id)}
                           title="Rad etish"
                         >
                           <XCircle size={18} />
@@ -450,11 +503,19 @@ const Proposals = () => {
         
         <ConfirmationModal 
           isOpen={modal.isOpen}
-          title="Taklifni rad etish"
-          desc="Haqiqatdan ham ushbu taklifni rad etmoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi."
-          isLoading={actionLoading === modal.data}
-          onConfirm={() => handleReject(modal.data)}
-          onCancel={() => setModal({ isOpen: false, data: null })}
+          type={modal.type}
+          title={
+            modal.type === "reject" ? "Taklifni rad etish" : 
+            modal.type === "success" ? "Muvaffaqiyatli!" : "Mutaxassisni yollash"
+          }
+          desc={
+            modal.type === "reject" ? "Haqiqatdan ham ushbu taklifni rad etmoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi." :
+            modal.type === "success" ? "Freelancer yollash muvaffaqiyatli yakunlandi. Kontrakt sahifasiga o'tishni xohlaysizmi?" :
+            "Haqiqatdan ham ushbu mutaxassisni loyihaga yollamoqchimisiz? Balansingizdan loyiha summasi escrow uchun band qilinadi."
+          }
+          isLoading={actionLoading === modal.data && modal.type !== "success"}
+          onConfirm={executeAction}
+          onCancel={() => setModal({ isOpen: false, type: null, data: null })}
         />
       </div>
     </div>
