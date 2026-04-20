@@ -886,5 +886,65 @@
       "completed": "Tugatilgan",
       "cancelled": "Bekor qilingan"
     }
+  },
+  "myJobs": {
+    "title": "Mening joblarim",
+    "subtitle": "Barcha e'lon qilgan loyihalaringizni boshqaring",
+    "create": "Yangi job e'lon qilish",
+    "stats": {
+      "total": "Jami joblar",
+      "active": "Aktiv",
+      "drafts": "Qoralama",
+      "closed": "Yopilgan"
+    },
+    "tabs": {
+      "all": "Barchasi",
+      "active": "Aktiv",
+      "drafts": "Qoralama",
+      "closed": "Yopilgan"
+    },
+    "search": "Joblar bo'yicha qidirish...",
+    "empty": {
+      "title": "Hech qanday job topilmadi",
+      "desc": "Hali hech qanday job e'lon qilmagansiz",
+      "btn": "Birinchi jobni e'lon qilish"
+    },
+    "card": {
+      "proposals": "ta proposal",
+      "view": "Ko'rish",
+      "edit": "Tahrirlash",
+      "copy": "Nusxalash",
+      "delete": "O'chirish",
+      "more": "Holatni o'zgartirish",
+      "manageProposals": "Takliflarni boshqarish",
+      "invite": "Freelancer taklif qilish"
+    },
+    "negotiable": "Kelishiladi",
+    "deleteConfirmTitle": "O'chirishni tasdiqlang",
+    "deleteConfirmDesc": "\"{{title}}\" nomli jobni o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi.",
+    "statusModalTitle": "Holatni o'zgartirish",
+    "statusModalDesc": "\"{{title}}\" jobining holatini tanlang",
+    "actions": {
+      "cancel": "Bekor qilish",
+      "delete": "O'chirish",
+      "deleting": "O'chirilmoqda...",
+      "makeActive": "Aktiv qilish",
+      "makeDraft": "Qoralama qilish",
+      "close": "Yopish"
+    },
+    "status": {
+      "active": "Aktiv",
+      "open": "Aktiv",
+      "draft": "Qoralama",
+      "closed": "Yopilgan",
+      "completed": "Tugatilgan",
+      "in_progress": "Jarayonda"
+    }
+  },
+  "common": {
+    "loading": "Yuklanmoqda...",
+    "errorDelete": "O'chirishda xatolik yuz berdi",
+    "errorCopy": "Nusxalashda xatolik yuz berdi",
+    "errorStatusUpdate": "Holatni yangilashda xatolik yuz berdi"
   }
 }

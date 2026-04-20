@@ -56,6 +56,18 @@ const ContractManagement = () => {
     loadContracts();
   }, [loadContracts]);
 
+  // Modal ochiqligida sahifa skrollini to'xtatib turish
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isModalOpen]);
+
   const handleViewDetails = async (contract) => {
     setSelectedContract(contract);
     setIsModalOpen(true);

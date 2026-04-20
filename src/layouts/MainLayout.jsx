@@ -15,6 +15,7 @@ export default function MainLayout() {
         style={{
           flex: 1,
           background: isChatPage ? "transparent" : "var(--bg)",
+          backgroundAttachment: isChatPage ? "initial" : "var(--bg-fixed, initial)",
           color: "var(--text)",
           overflow: isChatPage ? "hidden" : undefined,
         }}

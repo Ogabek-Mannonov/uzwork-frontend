@@ -57,7 +57,8 @@
   --bg-h: 222;
   --bg-s: 47%;
   --bg-l: 11%;
-  --bg: hsl(var(--bg-h), var(--bg-s), var(--bg-l));
+  --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%);
+  --bg-fixed: fixed;
   
   --surface: #0f172a;
   --surface-2: #1e293b;
@@ -123,5 +124,7 @@
 /* GLOBAL APPLY */
 body {
   background: var(--bg);
+  background-attachment: var(--bg-fixed, initial);
   color: var(--text);
+  min-height: 100vh;
 }

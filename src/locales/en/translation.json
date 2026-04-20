@@ -887,5 +887,65 @@
       "completed": "Completed",
       "cancelled": "Cancelled"
     }
+  },
+  "myJobs": {
+    "title": "My Jobs",
+    "subtitle": "Manage all your posted job listings",
+    "create": "Post a New Job",
+    "stats": {
+      "total": "Total Jobs",
+      "active": "Active",
+      "drafts": "Drafts",
+      "closed": "Closed"
+    },
+    "tabs": {
+      "all": "All",
+      "active": "Active",
+      "drafts": "Drafts",
+      "closed": "Closed"
+    },
+    "search": "Search jobs...",
+    "empty": {
+      "title": "No jobs found",
+      "desc": "You haven't posted any jobs yet",
+      "btn": "Post your first job"
+    },
+    "card": {
+      "proposals": "proposals",
+      "view": "View",
+      "edit": "Edit",
+      "copy": "Copy",
+      "delete": "Delete",
+      "more": "Change Status",
+      "manageProposals": "Manage Proposals",
+      "invite": "Invite Freelancer"
+    },
+    "negotiable": "Negotiable",
+    "deleteConfirmTitle": "Confirm Deletion",
+    "deleteConfirmDesc": "Are you sure you want to delete the job \"{{title}}\"? This action cannot be undone.",
+    "statusModalTitle": "Change Status",
+    "statusModalDesc": "Select a status for the job \"{{title}}\"",
+    "actions": {
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleting": "Deleting...",
+      "makeActive": "Make Active",
+      "makeDraft": "Move to Drafts",
+      "close": "Close"
+    },
+    "status": {
+      "active": "Active",
+      "open": "Active",
+      "draft": "Draft",
+      "closed": "Closed",
+      "completed": "Completed",
+      "in_progress": "In Progress"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "errorDelete": "An error occurred while deleting",
+    "errorCopy": "An error occurred while copying",
+    "errorStatusUpdate": "An error occurred while updating status"
   }
 }
