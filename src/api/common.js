@@ -53,9 +53,9 @@ export const search = async (query) => {
 // ===================== NOTIFICATIONS =====================
 
 /** Bildirishnomalar */
-export const getNotifications = async () => {
+export const getNotifications = async (params = {}) => {
   try {
-    const res = await api.get("/notifications");
+    const res = await api.get("/notifications/me", { params });
     return res?.data;
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err?.message };
@@ -65,7 +65,17 @@ export const getNotifications = async () => {
 /** Bildirishnomani o'qilgan deb belgilash */
 export const markNotificationRead = async (id) => {
   try {
-    const res = await api.put(`/notifications/${id}/read`);
+    const res = await api.post(`/notifications/${id}/mark-as-read`);
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Barcha bildirishnomalarni o'qilgan deb belgilash */
+export const markAllNotificationsRead = async () => {
+  try {
+    const res = await api.post("/notifications/mark-all-read");
     return res?.data;
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err?.message };
