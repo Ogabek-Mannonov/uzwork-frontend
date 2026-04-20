@@ -21,6 +21,12 @@
   padding: 0;
 }
 
+[data-theme='dark'] .uzwork-notif-trigger {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
 .uzwork-notif-trigger:hover, 
 .uzwork-notif-trigger.active {
   background: #ffffff;
@@ -28,6 +34,14 @@
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.15);
   border-color: rgba(59, 130, 246, 0.3);
   transform: translateY(-1px);
+}
+
+[data-theme='dark'] .uzwork-notif-trigger:hover, 
+[data-theme='dark'] .uzwork-notif-trigger.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .uzwork-notif-trigger:active {
@@ -61,6 +75,12 @@
   animation: notif-slide-up 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
 }
 
+[data-theme='dark'] .uzwork-notif-dropdown {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
 @keyframes notif-slide-up {
   from { 
       opacity: 0; 
@@ -87,6 +107,10 @@
   font-size: 17px;
   font-weight: 700;
   color: #0f172a;
+}
+
+[data-theme='dark'] .uzwork-notif-header h3 {
+  color: #fff;
 }
 
 .uzwork-notif-more {

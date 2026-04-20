@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Briefcase, Eye, Edit, Trash2, Copy, Users,
   Clock, DollarSign, Search, X,
   CheckCircle, Archive, Plus, MoreHorizontal,
-  AlertCircle
+  Info
 } from "lucide-react";
 import { 
   getMyJobs, 
@@ -15,9 +16,8 @@ import {
 import { useThemeContext } from "../components/Theme/ThemeContext";
 import "../Client/css/myjobs.css";
 
-// Mock functions removed, using real API from ../../api/jobs
-
 const MyJobs = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isDark } = useThemeContext();
   const [jobs, setJobs] = useState([]);
@@ -28,6 +28,14 @@ const MyJobs = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // For Stats
+  const [stats, setStats] = useState({
+    total: 0,
+    active: 0,
+    drafts: 0,
+    closed: 0
+  });
 
   const fetchJobs = useCallback(async (currentSearch = searchTerm, isInitial = false) => {
     if (isInitial) setInitialLoading(true);
@@ -47,6 +55,21 @@ const MyJobs = () => {
       
       const allJobs = response?.data?.projects || response?.data || [];
       setJobs(allJobs);
+
+      // If initial fetch, calculate stats for all jobs
+      if (isInitial || activeTab === "all") {
+        const totalCount = allJobs.length;
+        const activeCount = allJobs.filter(j => j.status === "active" || j.status === "open").length;
+        const draftsCount = allJobs.filter(j => j.status === "draft").length;
+        const closedCount = allJobs.filter(j => j.status === "closed" || j.status === "completed").length;
+        
+        setStats({
+          total: totalCount,
+          active: activeCount,
+          drafts: draftsCount,
+          closed: closedCount
+        });
+      }
     } catch (error) {
       console.error("Error fetching jobs:", error);
     } finally {
@@ -55,18 +78,17 @@ const MyJobs = () => {
     }
   }, [activeTab, searchTerm]);
 
-  // Combined fetch logic
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchJobs(searchTerm);
-    }, activeTab === "all" && searchTerm === "" ? 0 : 300); // No delay for initial or tab switch
+    }, activeTab === "all" && searchTerm === "" ? 0 : 300);
     
     return () => clearTimeout(timer);
-  }, [activeTab, searchTerm]); // Removed fetchJobs from deps to avoid re-calls
+  }, [activeTab, searchTerm]);
 
   useEffect(() => {
-    fetchJobs("", true); // Actual initial fetch
-  }, []); // Only once on mount
+    fetchJobs("", true);
+  }, []);
 
   const handleDeleteJob = async (jobId) => {
     setActionLoading(true);
@@ -75,8 +97,9 @@ const MyJobs = () => {
       if (res?.success !== false) {
         setJobs(jobs.filter(job => job.id !== jobId));
         setShowDeleteModal(null);
+        fetchJobs("", true); // Update stats
       } else {
-        alert(res?.message || "O'chirishda xato yuz berdi");
+        alert(res?.message || t('common.errorDelete'));
       }
     } catch (error) {
       console.error("Error deleting job:", error);
@@ -88,7 +111,6 @@ const MyJobs = () => {
   const handleDuplicateJob = async (job) => {
     setActionLoading(true);
     try {
-      // Prepare payload for a new job based on existing one
       const payload = {
         title: `${job.title} (Copy)`,
         description: job.description,
@@ -107,9 +129,9 @@ const MyJobs = () => {
       };
       const res = await apiCreateJob(payload);
       if (res?.success !== false) {
-        fetchJobs(); // Refresh to see the new draft
+        fetchJobs("", true);
       } else {
-        alert(res?.message || "Nusxalashda xato yuz berdi");
+        alert(res?.message || t('common.errorCopy'));
       }
     } catch (error) {
       console.error("Error duplicating job:", error);
@@ -123,10 +145,10 @@ const MyJobs = () => {
     try {
       const res = await apiUpdateJob(jobId, { status: newStatus });
       if (res?.success !== false) {
-        fetchJobs();
+        fetchJobs("", true);
         setShowStatusModal(null);
       } else {
-        alert(res?.message || "Holatni o'zgartirishda xato yuz berdi");
+        alert(res?.message || t('common.errorStatusUpdate'));
       }
     } catch (error) {
       console.error("Error updating job status:", error);
@@ -136,57 +158,92 @@ const MyJobs = () => {
   };
 
   const tabs = [
-    { id: "all", label: "Barcha joblar", icon: <Briefcase size={16} />, count: jobs.length },
-    { id: "active", label: "Aktiv", icon: <CheckCircle size={16} />, count: jobs.filter(j => j.status === "active" || j.status === "open").length },
-    { id: "drafts", label: "Qoralama", icon: <Edit size={16} />, count: jobs.filter(j => j.status === "draft").length },
-    { id: "closed", label: "Yopiq", icon: <Archive size={16} />, count: jobs.filter(j => j.status === "closed" || j.status === "completed").length }
+    { id: "all", label: t('myJobs.tabs.all'), icon: <Briefcase size={16} />, count: stats.total },
+    { id: "active", label: t('myJobs.tabs.active'), icon: <CheckCircle size={16} />, count: stats.active },
+    { id: "drafts", label: t('myJobs.tabs.drafts'), icon: <Edit size={16} />, count: stats.drafts },
+    { id: "closed", label: t('myJobs.tabs.closed'), icon: <Archive size={16} />, count: stats.closed }
   ];
-
-  // We now use server-side search, so filteredJobsBySearch is just jobs
-  const filteredJobsBySearch = jobs;
 
   const getStatusBadge = (status) => {
     switch(status) {
       case "active":
       case "open":
-        return <span className="mj-status-badge mj-active"><CheckCircle size={12} /> Aktiv</span>;
+        return <span className="mj-status-badge mj-active">{t('myJobs.status.active')}</span>;
       case "draft":
-        return <span className="mj-status-badge mj-draft"><Edit size={12} /> Qoralama</span>;
+        return <span className="mj-status-badge mj-draft">{t('myJobs.status.draft')}</span>;
       case "closed":
       case "completed":
-        return <span className="mj-status-badge mj-closed"><Archive size={12} /> Yopiq</span>;
-      case "cancelled":
-        return <span className="mj-status-badge mj-closed" style={{ background: "#fee2e2", color: "#ef4444" }}><Archive size={12} /> Bekor qilingan</span>;
+        return <span className="mj-status-badge mj-closed">{t('myJobs.status.closed')}</span>;
+      case "in_progress":
+        return <span className="mj-status-badge mj-info">{t('myJobs.status.in_progress')}</span>;
       default:
-        return <span className="mj-status-badge mj-draft">{status}</span>;
+        return <span className="mj-status-badge">{status}</span>;
     }
   };
 
   if (initialLoading) {
     return (
-      <div className="mj-loading">
-        <div className="mj-spinner"></div>
-        <p>Yuklanmoqda...</p>
+      <div className={`mj-page ${isDark ? "mj-dark" : ""}`}>
+        <div className="mj-loading" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+          <div className="mj-spinner"></div>
+          <p style={{ marginTop: '20px', color: isDark ? '#94a3b8' : '#64748b' }}>{t('common.loading')}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={`mj-page ${isDark ? "mj-dark" : ""}`} style={{
-      backgroundColor: isDark ? "#0a0c10" : "#f4f6f9",
-      minHeight: "100vh",
-      transition: "all .3s ease"
-    }}>
+    <div className={`mj-page ${isDark ? "mj-dark" : ""}`}>
       <div className="mj-container">
         {/* Header */}
         <div className="mj-header">
-          <div>
-            <h1>Mening joblarim</h1>
-            <p>Barcha e'lon qilgan joblaringizni boshqaring</p>
+          <div className="mj-header-info">
+            <h1>{t('myJobs.title')}</h1>
+            <p>{t('myJobs.subtitle')}</p>
           </div>
           <button className="mj-post-btn" onClick={() => navigate("/client/postjob")}>
-            <Plus size={18} /> Yangi job e'lon qilish
+            <Plus size={20} /> {t('myJobs.create')}
           </button>
+        </div>
+
+        {/* Stats Section */}
+        <div className="mj-stats">
+          <div className="mj-stat-card" onClick={() => setActiveTab("all")}>
+            <div className="mj-stat-icon total">
+              <Briefcase size={20} />
+            </div>
+            <div className="mj-stat-details">
+              <span className="mj-stat-value">{stats.total}</span>
+              <span className="mj-stat-label">{t('myJobs.stats.total')}</span>
+            </div>
+          </div>
+          <div className="mj-stat-card" onClick={() => setActiveTab("active")}>
+            <div className="mj-stat-icon active">
+              <CheckCircle size={20} />
+            </div>
+            <div className="mj-stat-details">
+              <span className="mj-stat-value">{stats.active}</span>
+              <span className="mj-stat-label">{t('myJobs.stats.active')}</span>
+            </div>
+          </div>
+          <div className="mj-stat-card" onClick={() => setActiveTab("drafts")}>
+            <div className="mj-stat-icon drafts">
+              <Edit size={20} />
+            </div>
+            <div className="mj-stat-details">
+              <span className="mj-stat-value">{stats.drafts}</span>
+              <span className="mj-stat-label">{t('myJobs.stats.drafts')}</span>
+            </div>
+          </div>
+          <div className="mj-stat-card" onClick={() => setActiveTab("closed")}>
+            <div className="mj-stat-icon closed">
+              <Archive size={20} />
+            </div>
+            <div className="mj-stat-details">
+              <span className="mj-stat-value">{stats.closed}</span>
+              <span className="mj-stat-label">{t('myJobs.stats.closed')}</span>
+            </div>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -197,7 +254,6 @@ const MyJobs = () => {
               className={`mj-tab-btn ${activeTab === tab.id ? "mj-active" : ""}`}
               onClick={() => setActiveTab(tab.id)}
             >
-              {tab.icon}
               {tab.label}
               <span className="mj-tab-count">{tab.count}</span>
             </button>
@@ -210,32 +266,31 @@ const MyJobs = () => {
             <Search size={18} />
             <input
               type="text"
-              placeholder="Job nomi yoki ko'nikmalar bo'yicha qidirish..."
+              placeholder={t('myJobs.search')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             {searchTerm && (
-              <button className="mj-search-clear" onClick={() => setSearchTerm("")}>
-                <X size={14} />
+              <button className="mj-search-clear" style={{ background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setSearchTerm("")}>
+                <X size={16} />
               </button>
             )}
           </div>
-          {loading && !initialLoading && <div className="mj-search-loading">Yangilanmoqda...</div>}
         </div>
 
         {/* Jobs List */}
         <div className="mj-list">
-          {filteredJobsBySearch.length === 0 ? (
-            <div className="mj-empty">
-              <Briefcase size={48} strokeWidth={1} />
-              <h3>Hech qanday job topilmadi</h3>
-              <p>Hali hech qanday job e'lon qilmagansiz</p>
-              <button className="mj-btn-primary" onClick={() => navigate("/client/postjob")}>
-                <Plus size={16} /> Birinchi jobni e'lon qilish
+          {jobs.length === 0 ? (
+            <div className="mj-empty" style={{ textAlign: 'center', padding: '60px 20px', background: isDark ? 'rgba(255,255,255,0.02)' : '#fff', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
+              <Briefcase size={48} strokeWidth={1} style={{ marginBottom: '20px', color: '#94a3b8' }} />
+              <h3 style={{ fontSize: '20px', marginBottom: '8px', color: isDark ? '#fff' : '#1e293b' }}>{t('myJobs.empty.title')}</h3>
+              <p style={{ color: '#64748b', marginBottom: '24px' }}>{t('myJobs.empty.desc')}</p>
+              <button className="mj-post-btn" style={{ margin: '0 auto' }} onClick={() => navigate("/client/postjob")}>
+                <Plus size={16} /> {t('myJobs.empty.btn')}
               </button>
             </div>
           ) : (
-            filteredJobsBySearch.map(job => (
+            jobs.map(job => (
               <div key={job.id} className="mj-card">
                 <div className="mj-card-header">
                   <div className="mj-title-section">
@@ -243,110 +298,76 @@ const MyJobs = () => {
                     {getStatusBadge(job.status)}
                   </div>
                   <div className="mj-card-actions">
-                    <button 
-                      className="mj-action-btn"
-                      onClick={() => navigate(`/client/landing/${job.id}`)}
-                      title="Ko'rish"
-                    >
-                      <Eye size={16} />
+                    <button className="mj-action-btn" title="Ko'rish" onClick={() => navigate(`/client/landing/${job.id}`)}>
+                      <Eye size={18} />
                     </button>
-                    <button 
-                      className="mj-action-btn"
-                      onClick={() => navigate(`/client/edit-job/${job.id}`)}
-                      title="Tahrirlash"
-                    >
-                      <Edit size={16} />
+                    <button className="mj-action-btn" title="Tahrirlash" onClick={() => navigate(`/client/edit-job/${job.id}`)}>
+                      <Edit size={18} />
                     </button>
-                    <button 
-                      className="mj-action-btn"
-                      onClick={() => handleDuplicateJob(job)}
-                      title="Nusxalash"
-                    >
-                      <Copy size={16} />
+                    <button className="mj-action-btn" title="Nusxalash" onClick={() => handleDuplicateJob(job)}>
+                      <Copy size={18} />
                     </button>
                     {job.status === "draft" && (
-                      <button 
-                        className="mj-action-btn mj-danger"
-                        onClick={() => setShowDeleteModal(job)}
-                        title="O'chirish"
-                      >
-                        <Trash2 size={16} />
+                      <button className="mj-action-btn mj-danger" title="O'chirish" onClick={() => setShowDeleteModal(job)}>
+                        <Trash2 size={18} />
                       </button>
                     )}
-                    <button 
-                      className="mj-action-btn"
-                      onClick={() => setShowStatusModal(job)}
-                      title="Holatni o'zgartirish"
-                    >
-                      <MoreHorizontal size={16} />
+                    <button className="mj-action-btn" title="Batafsil" onClick={() => setShowStatusModal(job)}>
+                      <MoreHorizontal size={18} />
                     </button>
                   </div>
                 </div>
                 
                 <div className="mj-card-details">
                   <div className="mj-detail-item">
-                    <DollarSign size={14} />
-                    <span>{job.budget_max ? `$${job.budget_max}` : (job.budget_min ? `$${job.budget_min}` : "Kelishiladi")}</span>
+                    <DollarSign size={16} />
+                    <span>{job.budget_max ? `$${job.budget_max}` : (job.budget_min ? `$${job.budget_min}` : t('myJobs.negotiable'))}</span>
                   </div>
                   <div className="mj-detail-item">
-                    <Users size={14} />
-                    <span>{job.proposals_count || 0} ta proposal</span>
+                    <Users size={16} />
+                    <span>{job.proposals_count || 0} {t('myJobs.card.proposals')}</span>
                   </div>
                   <div className="mj-detail-item">
-                    <Clock size={14} />
+                    <Clock size={16} />
                     <span>{new Date(job.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
                 
                 <div className="mj-skills">
-                  {job.required_skills?.slice(0, 5).map(skill => (
+                  {job.required_skills?.slice(0, 6).map(skill => (
                     <span key={skill} className="mj-skill-tag">{skill}</span>
                   ))}
-                  {job.required_skills?.length > 5 && (
-                    <span className="mj-skill-tag mj-more">+{job.required_skills.length - 5}</span>
+                  {job.required_skills?.length > 6 && (
+                    <span className="mj-skill-tag" style={{ border: 'none', padding: '4px 0' }}>+{job.required_skills.length - 6}</span>
                   )}
                 </div>
                 
                 <div className="mj-card-footer">
-                  {job.status === "active" && (
+                  {(job.status === "active" || job.status === "open" || job.status === "in_progress") && (
                     <>
                       <button 
                         className="mj-footer-btn mj-primary"
-                        onClick={() => navigate(`/client/job/${job.id}?tab=proposals`)} // Navigate to job proposals tab
+                        onClick={() => navigate(`/client/job/${job.id}?tab=proposals`)}
                       >
-                        <Users size={14} /> Proposals ({job.proposals_count || 0})
+                        <Users size={18} /> {t('myJobs.card.manageProposals')} ({job.proposals_count || 0})
                       </button>
                       <button 
                         className="mj-footer-btn mj-outline"
                         onClick={() => navigate(`/client/invite/${job.id}`)}
                       >
-                        <Plus size={14} /> Freelancer taklif qilish
+                        <Plus size={18} /> {t('myJobs.card.invite')}
                       </button>
                     </>
                   )}
                   {job.status === "draft" && (
                     <>
-                      <button 
-                        className="mj-footer-btn mj-primary"
-                        onClick={() => navigate(`/client/edit-job/${job.id}`)}
-                      >
-                        <Edit size={14} /> To'ldirish
+                      <button className="mj-footer-btn mj-primary" onClick={() => navigate(`/client/edit-job/${job.id}`)}>
+                        <Edit size={18} /> {t('myJobs.card.edit')}
                       </button>
-                      <button 
-                        className="mj-footer-btn mj-outline"
-                        onClick={() => navigate(`/client/job-preview/${job.id}`)}
-                      >
-                        <Eye size={14} /> Oldindan ko'rish
+                      <button className="mj-footer-btn mj-outline" onClick={() => navigate(`/client/landing/${job.id}`)}>
+                        <Eye size={18} /> {t('myJobs.card.view')}
                       </button>
                     </>
-                  )}
-                  {job.status === "closed" && (
-                    <button 
-                      className="mj-footer-btn mj-outline"
-                      onClick={() => navigate(`/client/landing/${job.id}`)}
-                    >
-                      <Eye size={14} /> Ko'rish
-                    </button>
                   )}
                 </div>
               </div>
@@ -359,14 +380,14 @@ const MyJobs = () => {
           <div className="mj-modal-overlay" onClick={() => setShowDeleteModal(null)}>
             <div className="mj-modal-content" onClick={e => e.stopPropagation()}>
               <div className="mj-modal-icon mj-danger">
-                <Trash2 size={24} />
+                <Trash2 size={32} />
               </div>
-              <h3>Jobni o'chirish</h3>
-              <p>"{showDeleteModal.title}" nomli jobni o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi.</p>
+              <h3 style={{ textAlign: 'center', marginBottom: '12px' }}>{t('myJobs.deleteConfirmTitle')}</h3>
+              <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '32px' }}>{t('myJobs.deleteConfirmDesc', { title: showDeleteModal.title })}</p>
               <div className="mj-modal-actions">
-                <button className="mj-btn-cancel" onClick={() => setShowDeleteModal(null)} disabled={actionLoading}>Bekor qilish</button>
+                <button className="mj-btn-cancel" onClick={() => setShowDeleteModal(null)} disabled={actionLoading}>{t('myJobs.actions.cancel')}</button>
                 <button className="mj-btn-danger" onClick={() => handleDeleteJob(showDeleteModal.id)} disabled={actionLoading}>
-                  {actionLoading ? "O'chirilmoqda..." : "O'chirish"}
+                  {actionLoading ? t('myJobs.actions.deleting') : t('myJobs.actions.delete')}
                 </button>
               </div>
             </div>
@@ -377,34 +398,23 @@ const MyJobs = () => {
         {showStatusModal && (
           <div className="mj-modal-overlay" onClick={() => setShowStatusModal(null)}>
             <div className="mj-modal-content" onClick={e => e.stopPropagation()}>
-              <div className="mj-modal-icon">
-                <MoreHorizontal size={24} />
+              <div className="mj-modal-icon" style={{ background: isDark ? 'rgba(79,70,229,0.1)' : '#f5f3ff', color: '#4f46e5' }}>
+                <Info size={32} />
               </div>
-              <h3>Job holatini o'zgartirish</h3>
-              <p>"{showStatusModal.title}" jobining holatini tanlang</p>
+              <h3 style={{ textAlign: 'center', marginBottom: '12px' }}>{t('myJobs.statusModalTitle')}</h3>
+              <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '24px' }}>{t('myJobs.statusModalDesc', { title: showStatusModal.title })}</p>
               <div className="mj-status-options">
-                <button 
-                  className="mj-status-option"
-                  onClick={() => handleStatusChange(showStatusModal.id, "active")}
-                >
-                  <CheckCircle size={16} /> Aktiv qilish
+                <button className="mj-status-option" onClick={() => handleStatusChange(showStatusModal.id, "active")}>
+                  <CheckCircle size={18} /> {t('myJobs.actions.makeActive')}
                 </button>
-                <button 
-                  className="mj-status-option"
-                  onClick={() => handleStatusChange(showStatusModal.id, "paused")}
-                >
-                  <Clock size={16} /> Pauzaga qo'yish
+                <button className="mj-status-option" onClick={() => handleStatusChange(showStatusModal.id, "draft")}>
+                  <Edit size={18} /> {t('myJobs.actions.makeDraft')}
                 </button>
-                <button 
-                  className="mj-status-option"
-                  onClick={() => handleStatusChange(showStatusModal.id, "closed")}
-                >
-                  <Archive size={16} /> Yopish
+                <button className="mj-status-option" onClick={() => handleStatusChange(showStatusModal.id, "closed")}>
+                  <Archive size={18} /> {t('myJobs.actions.close')}
                 </button>
               </div>
-              <div className="mj-modal-actions">
-                <button className="mj-btn-cancel" onClick={() => setShowStatusModal(null)} disabled={actionLoading}>Yopish</button>
-              </div>
+              <button className="mj-btn-cancel" style={{ width: '100%', marginTop: '12px', padding: '12px' }} onClick={() => setShowStatusModal(null)} disabled={actionLoading}>{t('myJobs.actions.close')}</button>
             </div>
           </div>
         )}
@@ -413,4 +423,4 @@ const MyJobs = () => {
   );
 };
 
-export default MyJobs;
+export default MyJobs;
