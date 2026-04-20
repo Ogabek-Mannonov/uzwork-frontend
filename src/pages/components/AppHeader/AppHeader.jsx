@@ -13,6 +13,7 @@ import { useThemeContext } from "../Theme/ThemeContext";
 import "../header/Header.css";
 import "../../../assets/style/FreeNavbar.css";
 import "../../../assets/style/theme.css";
+import NotificationDropdown from "../NotificationDropdown/NotificationDropdown";
 
 const getToken = () => localStorage.getItem("accessToken");
 
@@ -523,9 +524,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                 {t("navbar.postJob")}
               </button>
             )}
-            <button className="icon-btn icon-btn--notif" title="Notifications">
-              <Bell size={16} /><span className="notif-dot" />
-            </button>
+            <NotificationDropdown />
             <div className="profile-menu-container" ref={profileRef} style={{ position: "relative" }}>
               <button 
                 className={`avatar ${profileOpen ? 'active' : ''}`} 
