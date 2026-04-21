@@ -1,10 +1,8 @@
 // src/hooks/useSocket.js
 import { io } from "socket.io-client";
 
-const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL ||
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:3000";
+const VITE_URL = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || "http://localhost:3000";
+const SOCKET_URL = VITE_URL.replace(/\/api$/, "");
 
 let globalSocket = null;
 
@@ -44,10 +42,7 @@ export const getSocket = () => {
   const token =
     localStorage.getItem("accessToken") || localStorage.getItem("token");
 
-  // Agar socket mavjud va ulangan bo'lsa, shuni qaytaramiz
   if (globalSocket?.connected) return globalSocket;
-
-  // Agar socket bor lekin ulanmagan (reconnecting) bo'lsa ham shuni qaytaramiz
   if (globalSocket) return globalSocket;
 
   globalSocket = io(SOCKET_URL, {
@@ -60,11 +55,20 @@ export const getSocket = () => {
     timeout: 10000,
   });
 
-  // Har safar connect bo'lganda (birinchi marta ham, reconnect bo'lganda ham)
   globalSocket.on("connect", () => {
     console.log("✅ Socket connected:", globalSocket.id);
     emitJoinUser(globalSocket);
   });
+
+  // Re-join when auth changes (login/logout/switch role)
+  if (typeof window !== "undefined") {
+    window.addEventListener("authChange", () => {
+      if (globalSocket?.connected) {
+        console.log("🔄 Auth change detected, re-emitting joinUser...");
+        emitJoinUser(globalSocket);
+      }
+    });
+  }
 
   globalSocket.on("connect_error", (err) => {
     console.warn("⚠️ Socket connect error:", err.message);
@@ -72,8 +76,6 @@ export const getSocket = () => {
 
   globalSocket.on("disconnect", (reason) => {
     console.log("❌ Socket disconnected:", reason);
-    // io server-side disconnect bo'lsa, manually reconnect qilinmaydi,
-    // shuning uchun agar server to'xtatgan bo'lsa socket ni null qilamiz
     if (reason === "io server disconnect") {
       globalSocket = null;
     }
@@ -84,21 +86,23 @@ export const getSocket = () => {
 
 export const onSocketReady = (callback) => {
   const socket = getSocket();
+  let cleanup = null;
+
+  const onConnect = () => {
+    cleanup = callback(socket);
+  };
 
   if (socket.connected) {
-    callback(socket);
-    return () => {};
-  }
-
-  const handleConnect = () => callback(socket);
-  socket.once("connect", handleConnect);
-
-  if (!socket.active) {
-    socket.connect();
+    onConnect();
+  } else {
+    socket.once("connect", onConnect);
   }
 
   return () => {
-    socket.off("connect", handleConnect);
+    socket.off("connect", onConnect);
+    if (typeof cleanup === "function") {
+      cleanup();
+    }
   };
 };
 

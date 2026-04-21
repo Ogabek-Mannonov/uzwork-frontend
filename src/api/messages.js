@@ -13,6 +13,16 @@ export const getChats = async () => {
   }
 };
 
+/** O'qilmagan xabarlar sonini olish */
+export const getUnreadMessagesCount = async () => {
+  try {
+    const res = await api.get("/messages/unread/count");
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
 /** Bitta chatning tarixini olish */
 export const getChatHistory = async (chatId) => {
   try {

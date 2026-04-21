@@ -346,23 +346,105 @@ function AuthHeader({ i18n, changeLanguage, user }) {
 
 
 
-  const links = useMemo(() => {
-    if (isClient) {
-      return [
-        { to: "/client/talent", label: t("navbar.findTalent") },
-        { to: "/client/my-jobs", label: t("navbar.myJobs") },
-        { to: "/client/proposals", label: t("navbar.proposals") },
-        { to: "/messages",      label: t("navbar.messages") },
-      ];
+  const [unreadCount, setUnreadCount] = useState(0);
+  const audioRef = useRef(new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"));
+
+  // Brauzer bildirishnomasi funksiyasi
+  const showBrowserNotification = (title, body, icon = "/UzWork transparent.png") => {
+    if (Notification.permission === "granted") {
+      new Notification(title, { body, icon });
     }
-    return [
-      { to: "/find-work", label: t("navbar.findWork") },
-      { to: "/my-jobs",   label: t("navbar.myJobs") },
-      { to: "/proposals", label: t("navbar.proposals") },
-      { to: "/reports",   label: t("navbar.reports") },
-      { to: "/messages",  label: t("navbar.messages") },
-    ];
-  }, [t, isClient]);
+  };
+
+  useEffect(() => {
+    let mounted = true;
+
+    // Brauzer bildirishnomasi uchun ruxsat so'rash
+    if (Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
+    const fetchCount = async () => {
+      try {
+        const res = await import("../../../api/messages").then(m => m.getUnreadMessagesCount());
+        if (res?.success && mounted) {
+          setUnreadCount(res.data.unread_count);
+        }
+      } catch (err) {
+        console.error("Unread count fetch error:", err);
+      }
+    };
+
+    fetchCount();
+
+    let socketObj = null;
+    import("../../../hooks/useSocket").then(({ getSocket }) => {
+      socketObj = getSocket();
+      if (!socketObj) return;
+
+      // 1. YANGI CHAT XABARI
+      const handleNewMessage = (msg) => {
+        if (msg.sender_id !== user?.id) {
+          fetchCount();
+          // Ovoz
+          audioRef.current.play().catch(e => console.warn("Audio play blocked:", e));
+          // Brauzer xabari
+          showBrowserNotification(
+            msg.sender_name || "Yangi xabar",
+            msg.content || msg.body || "Sizga yangi xabar keldi"
+          );
+        }
+      };
+
+      // 2. YANGI BILDIRISNOMA (Proporsal, Payment, New Job va h.k.)
+      const handleNewNotification = (noti) => {
+        // Ovoz
+        audioRef.current.play().catch(e => console.warn("Audio play blocked:", e));
+        // Brauzer xabari
+        showBrowserNotification(noti.title || "Bildirishnoma", noti.message || noti.body || "Yangi bildirishnoma");
+      };
+
+      const handleRead = () => fetchCount();
+      const handleUnreadUpdate = () => fetchCount();
+
+      socketObj.on("newMessage", handleNewMessage);
+      socketObj.on("newNotification", handleNewNotification);
+      socketObj.on("unreadUpdate", handleUnreadUpdate);
+      socketObj.on("messagesRead", handleRead);
+    });
+
+    return () => {
+      mounted = false;
+      if (socketObj) {
+        socketObj.off("newMessage");
+        socketObj.off("newNotification");
+        socketObj.off("unreadUpdate");
+        socketObj.off("messagesRead");
+      }
+    };
+  }, [user?.id]);
+
+  const links = useMemo(() => {
+    const base = isClient
+      ? [
+          { to: "/client/talent", label: t("navbar.findTalent") },
+          { to: "/client/my-jobs", label: t("navbar.myJobs") },
+          { to: "/client/proposals", label: t("navbar.proposals") },
+          { to: "/messages", label: t("navbar.messages") },
+        ]
+      : [
+          { to: "/find-work", label: t("navbar.findWork") },
+          { to: "/my-jobs", label: t("navbar.myJobs") },
+          { to: "/proposals", label: t("navbar.proposals") },
+          { to: "/reports", label: t("navbar.reports") },
+          { to: "/messages", label: t("navbar.messages") },
+        ];
+
+    return base.map((l) => ({
+      ...l,
+      badge: l.to === "/messages" ? unreadCount : 0,
+    }));
+  }, [t, isClient, unreadCount]);
 
   const handleSearch = (e) => {
     if (e.key === "Enter" || e.type === "click") {
@@ -457,20 +539,35 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                     {t("navbar.contracts")}
                   </Link>
 
-                  <Link to="/messages" className="nav__link">
+                  <Link
+                    to="/messages"
+                    className="nav__link"
+                    style={{ position: "relative" }}
+                  >
                     {t("navbar.messages")}
+                    {unreadCount > 0 && (
+                      <span className="nav__badge unread-badge">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </span>
+                    )}
                   </Link>
                 </>
               ) : (
-                [
-                  { to: "/find-work", label: t("navbar.findWork") },
-                  { to: "/my-jobs",   label: t("navbar.myJobs") },
-                  { to: "/proposals", label: t("navbar.proposals") },
-                  { to: "/reports",   label: t("navbar.reports") },
-                  { to: "/messages",  label: t("navbar.messages") },
-                ].map(l => (
-                  <NavLink key={l.to} to={l.to} className={({ isActive }) => "nav__link" + (isActive ? " is-active" : "")}>
+                links.map((l) => (
+                  <NavLink
+                    key={l.to}
+                    to={l.to}
+                    className={({ isActive }) =>
+                      "nav__link" + (isActive ? " is-active" : "")
+                    }
+                    style={{ position: "relative" }}
+                  >
                     {l.label}
+                    {l.badge > 0 && (
+                      <span className="nav__badge unread-badge">
+                        {l.badge > 99 ? "99+" : l.badge}
+                      </span>
+                    )}
                   </NavLink>
                 ))
               )}
@@ -684,7 +781,15 @@ function AuthHeader({ i18n, changeLanguage, user }) {
               <NavLink key={l.to} to={l.to}
                 className={({ isActive }) => "drawer-link" + (isActive ? " is-active" : "")}
                 onClick={() => setDrawerOpen(false)}
-              >{l.label}</NavLink>
+                style={{ position: "relative" }}
+              >
+                {l.label}
+                {l.badge > 0 && (
+                  <span className="nav__badge unread-badge">
+                    {l.badge > 99 ? "99+" : l.badge}
+                  </span>
+                )}
+              </NavLink>
             ))}
           </nav>
           <div className="drawer-nav" style={{ borderBottom: "none" }}>
