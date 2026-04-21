@@ -739,3 +739,28 @@
     font-size: 18px;
   }
 }
+/* ───── UNREAD BADGE ───── */
+.unread-badge {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 5;
+  transform: translate(50%, -50%);
+}
+
+/* Ensure relative position for nav links */
+.nav__link {
+  position: relative;
+}
