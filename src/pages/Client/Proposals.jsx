@@ -16,6 +16,7 @@ import {
   acceptProposal 
 } from "../../api/proposals";
 import { getUserProfile } from "../../api/common";
+import { findOrCreateProposalChat } from "../../api/messages";
 import { useThemeContext } from "../components/Theme/ThemeContext";
 import { useTranslation } from "react-i18next";
 import "./css/proposals.css";
@@ -268,6 +269,23 @@ const Proposals = () => {
     openHireModal(proposal);
   };
 
+  const handleMessage = async (proposalId) => {
+    if (actionLoading) return;
+    setActionLoading(proposalId);
+    try {
+      const res = await findOrCreateProposalChat(proposalId);
+      if (res?.success && res?.data?.chatId) {
+        navigate(`/messages/${res.data.chatId}`);
+      } else {
+        notify(res?.message || "Chatni boshlab bo'lmadi", "error");
+      }
+    } catch (err) {
+      notify("Xatolik yuz berdi", "error");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const filteredProposals = useMemo(() => {
     if (!Array.isArray(proposals)) return [];
     return proposals.filter(p => {
@@ -498,8 +516,8 @@ const Proposals = () => {
                       >
                         <Star size={18} fill={proposal.status === "shortlisted" ? "#f59e0b" : "none"} />
                       </button>
-                      <button className="cp-btn-msg" onClick={() => navigate(`/messages/${proposal.freelancer_id || proposal.user_id}`)}>
-                        <MessageSquare size={16} /> Xabar
+                      <button className="cp-btn-msg" onClick={() => handleMessage(proposal.id)} disabled={actionLoading === proposal.id}>
+                        {actionLoading === proposal.id ? <Clock size={16} className="cp-spin" /> : <MessageSquare size={16} />} Xabar
                       </button>
                       
                       {proposal.status === "accepted" ? (

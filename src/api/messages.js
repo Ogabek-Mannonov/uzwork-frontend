@@ -34,6 +34,18 @@ export const getChatHistory = async (chatId) => {
 };
 
 /**
+ * Proposal bo'yicha chatni topish yoki yaratish
+ */
+export const findOrCreateProposalChat = async (proposalId) => {
+  try {
+    const res = await api.post(`/messages/find-or-create/${proposalId}`);
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/**
  * Xabar yuborish
  * Backend kutadi: { chat_id, message_text, type?, file_url? }
  */

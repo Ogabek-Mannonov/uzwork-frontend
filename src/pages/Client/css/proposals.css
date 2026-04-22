@@ -489,6 +489,15 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
+.cp-spin {
+  animation: cp-spin 1s linear infinite;
+}
+
+@keyframes cp-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .cp-dark .cp-toast {
   background: #1a1d23;
   border-color: #2d333b;
