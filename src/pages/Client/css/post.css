@@ -338,9 +338,15 @@ body { font-family: var(--pj-font); color: var(--pj-text); background: var(--pj-
   outline: none;
 }
 [data-theme='dark'] .pj-input, 
-[data-theme='dark'] .pj-select, 
 [data-theme='dark'] .pj-textarea {
   background: rgba(255, 255, 255, 0.03);
+}
+[data-theme='dark'] .pj-select {
+  background: var(--pj-surface);
+}
+.pj-select option {
+  background: var(--pj-surface);
+  color: var(--pj-text);
 }
 
 .pj-input:focus, .pj-select:focus, .pj-textarea:focus {
