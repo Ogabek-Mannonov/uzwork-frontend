@@ -110,11 +110,12 @@ export default function MyProposals() {
   }
 
   return (
-    <div className="fprop-container">
-      <header className="fprop-header">
-        <h1 className="fprop-title">{t("myProposals.title")}</h1>
-        <p className="fprop-subtitle">{t("myProposals.subtitle")}</p>
-      </header>
+    <div className="fprop-page-wrapper">
+      <div className="fprop-container">
+        <header className="fprop-header">
+          <h1 className="fprop-title">{t("myProposals.title")}</h1>
+          <p className="fprop-subtitle">{t("myProposals.subtitle")}</p>
+        </header>
 
       <div className="fprop-tabs-wrap">
         <button 
@@ -257,12 +258,14 @@ export default function MyProposals() {
         job={selectedJob}
         onClose={() => setIsJobDrawerOpen(false)}
       />
-
-      <ProposalDetailsDrawer 
-        isOpen={isProposalDrawerOpen}
-        proposal={selectedProposal}
-        onClose={() => setIsProposalDrawerOpen(false)}
-      />
+      {selectedProposal && (
+        <ProposalDetailsDrawer 
+          isOpen={isProposalDrawerOpen}
+          onClose={() => setIsProposalDrawerOpen(false)}
+          proposal={selectedProposal}
+        />
+      )}
+      </div>
     </div>
   );
 }

@@ -1176,5 +1176,92 @@
       "server": "Error connecting to the server."
     },
     "noCoverLetter": "No additional information."
+  },
+  "submitProposal": {
+    "title": "Submit a proposal",
+    "back": "Back",
+    "sections": {
+      "jobDetails": "Job details",
+      "terms": "Terms",
+      "duration": "Duration",
+      "additional": "Additional details"
+    },
+    "job": {
+      "category": "Category",
+      "posted": "Posted time",
+      "experience": "Experience level",
+      "budget": "Budget",
+      "duration": "Expected period"
+    },
+    "terms": {
+      "paymentHeader": "How do you want to be paid?",
+      "milestone": {
+        "title": "By milestone",
+        "desc": "Divide the project into smaller parts. You will be paid after each section is completed."
+      },
+      "project": {
+        "title": "By project",
+        "desc": "You will receive the full amount once the project is fully delivered."
+      }
+    },
+    "milestones": {
+      "header": "How many milestones do you want to include?",
+      "description": "Description",
+      "dueDate": "Due date",
+      "amount": "Price ($)",
+      "add": "Add next milestone",
+      "placeholderDesc": "Example: Finalize design",
+      "placeholderDate": "Example: June 10"
+    },
+    "project": {
+      "priceLabel": "Total project price ($)",
+      "placeholder": "Example: 500"
+    },
+    "fee": {
+      "totalBalance": "Total project price",
+      "totalDesc": "All in All",
+      "serviceFee": "Service Fee 10%",
+      "serviceDesc": "For platform service",
+      "receive": "Amount you will receive",
+      "receiveDesc": "Excluding service fee"
+    },
+    "duration": {
+      "label": "How long will the project take?",
+      "placeholder": "Select duration",
+      "less1Month": "Less than 1 month",
+      "1To3Months": "1-3 months",
+      "3To6Months": "3-6 months",
+      "more6Months": "More than 6 months"
+    },
+    "additional": {
+      "coverLetter": "Cover Letter",
+      "placeholder": "Write about your experience and what you can do for this project...",
+      "attachments": "Attachments",
+      "uploadDesc": "Drop files here or select",
+      "uploadLimit": "Maximum 10 files, each up to 25MB"
+    },
+    "actions": {
+      "submit": "Submit proposal",
+      "submitting": "Submitting...",
+      "cancel": "Cancel"
+    },
+    "sidebar": {
+      "protectionTitle": "Project protection",
+      "protectionDesc": "Payments are controlled by the platform.",
+      "jobType": "Project type",
+      "experience": "Experience level"
+    },
+    "success": {
+      "title": "Your proposal has been successfully sent!",
+      "desc": "Your proposal has been delivered to the client. After reviewing the project, the client can contact you through chat.",
+      "myProposals": "My proposals",
+      "findWork": "Continue looking for work"
+    },
+    "toast": {
+      "coverLetterReq": "Please write your cover letter!",
+      "priceReq": "Please indicate the correct price!",
+      "error": "An error occurred"
+    },
+    "loading": "Loading..."
   }
 }

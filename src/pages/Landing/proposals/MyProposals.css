@@ -45,11 +45,42 @@
   padding: 4rem 1.5rem;
   min-height: 90vh;
   animation: fprop-fade-in 0.8s var(--fprop-ease);
+  position: relative;
+  z-index: 1;
 }
 
-@keyframes fprop-fade-in {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Page Wrapper with Glows */
+.fprop-page-wrapper {
+  background: transparent;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.fprop-page-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: -5%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.fprop-page-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: -5%;
+  left: -5%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* Header */

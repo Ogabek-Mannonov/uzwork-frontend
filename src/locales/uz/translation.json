@@ -1175,5 +1175,92 @@
       "server": "Server bilan bog'lanishda xato."
     },
     "noCoverLetter": "Qo'shimcha ma'lumot yo'q."
+  },
+  "submitProposal": {
+    "title": "Taklif yuborish",
+    "back": "Orqaga",
+    "sections": {
+      "jobDetails": "Loyiha tafsilotlari",
+      "terms": "Shartlar",
+      "duration": "Muddat",
+      "additional": "Qo'shimcha ma'lumotlar"
+    },
+    "job": {
+      "category": "Kategoriya",
+      "posted": "Yuborilgan vaqti",
+      "experience": "Tajriba darajasi",
+      "budget": "Byudjet",
+      "duration": "Kutilayotgan davr"
+    },
+    "terms": {
+      "paymentHeader": "Qanday to'lov olishni xohlaysiz?",
+      "milestone": {
+        "title": "Bosqichma-bosqich (By milestone)",
+        "desc": "Loyihani kichik bo'laklarga bo'ling. Har bir bo'lim yakunlangach haq olasiz."
+      },
+      "project": {
+        "title": "Loyiha yakunida (By project)",
+        "desc": "Loyiha to'liq topshirilgandan so'ng umumiy summani bir marta qabul qilasiz."
+      }
+    },
+    "milestones": {
+      "header": "Nechta bosqichda bajarmoqchisiz?",
+      "description": "Tavsif",
+      "dueDate": "Muddati",
+      "amount": "Narxi ($)",
+      "add": "Keyingi bosqichni qo'shish",
+      "placeholderDesc": "Masalan: Dizaynni yakunlash",
+      "placeholderDate": "Masalan: 10-iyun"
+    },
+    "project": {
+      "priceLabel": "Loyiha uchun umumiy narx ($)",
+      "placeholder": "Masalan: 500"
+    },
+    "fee": {
+      "totalBalance": "Loyihaning umumiy narxi",
+      "totalDesc": "Hammasi bo'lib",
+      "serviceFee": "Xizmat haqi (Service Fee) 10%",
+      "serviceDesc": "Platforma xizmati uchun",
+      "receive": "Siz qabul qiladigan summa",
+      "receiveDesc": "Xizmat haqidan tashqari"
+    },
+    "duration": {
+      "label": "Loyiha qancha vaqt ichida bajariladi?",
+      "placeholder": "Muddatni tanlang",
+      "less1Month": "1 oydan kam",
+      "1To3Months": "1-3 oy",
+      "3To6Months": "3-6 oy",
+      "more6Months": "6 oydan ko'p"
+    },
+    "additional": {
+      "coverLetter": "Murojaat xati (Cover Letter)",
+      "placeholder": "O'z tajribangiz va bu loyiha uchun nimalar qila olishingizni yozing...",
+      "attachments": "Fayl biriktirish (Attachments)",
+      "uploadDesc": "Fayllarni bu yerga tashlang yoki tanlang",
+      "uploadLimit": "Maksimal 10 ta fayl, har biri 25MB gacha"
+    },
+    "actions": {
+      "submit": "Taklif yuborish",
+      "submitting": "Yuborilmoqda...",
+      "cancel": "Bekor qilish"
+    },
+    "sidebar": {
+      "protectionTitle": "Loyihani himoyalash",
+      "protectionDesc": "To'lovlar platforma tomonidan nazorat qilinadi.",
+      "jobType": "Loyihaning turi",
+      "experience": "Tajriba darajasi"
+    },
+    "success": {
+      "title": "Taklifingiz muvaffaqiyatli yuborildi!",
+      "desc": "Sizning taklifingiz mijozga yetkazildi. Mijoz loyihani ko'rib chiqqach, chat orqali siz bilan bog'lanishi mumkin.",
+      "myProposals": "Mening takliflarim",
+      "findWork": "Ish qidirishda davom etish"
+    },
+    "toast": {
+      "coverLetterReq": "Murojaat xatingizni yozing!",
+      "priceReq": "Narxni to'g'ri ko'rsating!",
+      "error": "Xato yuz berdi"
+    },
+    "loading": "Yuklanmoqda..."
   }
 }
