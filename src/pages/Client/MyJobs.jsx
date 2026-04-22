@@ -347,13 +347,13 @@ const MyJobs = () => {
                     <>
                       <button 
                         className="mj-footer-btn mj-primary"
-                        onClick={() => navigate(`/client/job/${job.id}?tab=proposals`)}
+                        onClick={() => navigate(`/client/proposals?jobId=${job.id}`)}
                       >
                         <Users size={18} /> {t('myJobs.card.manageProposals')} ({job.proposals_count || 0})
                       </button>
                       <button 
                         className="mj-footer-btn mj-outline"
-                        onClick={() => navigate(`/client/invite/${job.id}`)}
+                        onClick={() => navigate(`/client/talent?jobId=${job.id}`)}
                       >
                         <Plus size={18} /> {t('myJobs.card.invite')}
                       </button>

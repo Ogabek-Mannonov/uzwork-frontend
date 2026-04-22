@@ -11,6 +11,7 @@ import "../Client/css/find.css";
 import { getFreelancers } from "../../api/freelancer";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { inviteFreelancer } from "../../api/proposals";
 
 /* ================================================================
    MOCK DATA
@@ -60,14 +61,36 @@ const FtFilterSection = ({ title, info, children, defaultOpen = true }) => {
 /* ================================================================
    FREELANCER CARD
    ================================================================ */
-const FtFreelancerCard = ({ fl, onInvite }) => {
+const FtFreelancerCard = ({ fl, onInvite, targetJobId }) => {
   const { t } = useTranslation();
   const [invited, setInvited] = useState(false);
   const [liked,   setLiked]   = useState(false);
 
-  const handleInvite = () => {
-    setInvited(i => !i);
-    if (!invited) onInvite(fl.name);
+  const handleInvite = async () => {
+    if (invited) return;
+    
+    setInvited(true);
+    if (targetJobId) {
+      try {
+        const res = await inviteFreelancer({
+          job_id: targetJobId,
+          freelancer_id: fl.id
+        });
+        
+        if (res?.success) {
+          onInvite(fl.name, true);
+        } else {
+          setInvited(false);
+          onInvite(res?.message || "Taklif yuborishda xato", false);
+        }
+      } catch (err) {
+        setInvited(false);
+        onInvite("Server xatosi", false);
+      }
+    } else {
+      // If no job ID, we just show a local toast for now (mock)
+      onInvite(fl.name, true);
+    }
   };
 
   const successClass =
@@ -110,7 +133,7 @@ const FtFreelancerCard = ({ fl, onInvite }) => {
             <button
               className={`ft-invite-btn ${invited ? "invited" : ""}`}
               onClick={handleInvite}>
-              {invited ? <><Check size={14} /> {t("findTalent.card.invited")}</> : t("findTalent.card.invite")}
+              {invited ? <><Check size={14} /> {t("findTalent.card.invited")}</> : (targetJobId ? "Ushbu ishga taklif qilish" : t("findTalent.card.invite"))}
             </button>
           </div>
         </div>
@@ -214,6 +237,8 @@ const FindTalent = () => {
   const [successRate, setSuccessRate] = useState("");
   const [sort,        setSort]        = useState("relevance");
   const [toast,       setToast]       = useState("");
+  const [targetJobId, setTargetJobId] = useState(searchParams.get("jobId"));
+  const [targetJobTitle, setTargetJobTitle] = useState("");
 
   const [freelancers, setFreelancers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -266,7 +291,17 @@ const FindTalent = () => {
   useEffect(() => {
     const q = searchParams.get("q");
     if (q) setSearch(q);
+    const jId = searchParams.get("jobId");
+    if (jId) setTargetJobId(jId);
   }, [searchParams]);
+
+  // Fetch target job title if jobId is present
+  useEffect(() => {
+    if (targetJobId) {
+      // getJobById should be used here, but for now we'll just keep the ID
+      // or we can mock the title if needed
+    }
+  }, [targetJobId]);
 
   const notify = useCallback((msg) => {
     setToast(msg);
@@ -489,7 +524,14 @@ const FindTalent = () => {
               <FtFreelancerCard
                 key={fl.id}
                 fl={fl}
-                onInvite={(name) => notify(`${name} ga taklif yuborildi!`)}
+                targetJobId={targetJobId}
+                onInvite={(name, isSuccess) => {
+                  if (isSuccess) {
+                    notify(targetJobId ? `${name} ga ushbu loyiha uchun taklif yuborildi!` : `${name} ga taklif yubarildi!`);
+                  } else {
+                    notify(name, true); // name is error message here
+                  }
+                }}
               />
             ))
           ) : (

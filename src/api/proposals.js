@@ -153,6 +153,17 @@ export function aiScore(id) {
 }
 
 
+/**
+ * POST /proposals/invite
+ * { job_id, freelancer_id }
+ */
+export function inviteFreelancer(payload) {
+  return request("/proposals/invite", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 export default {
   createProposal,
   getProposals,
@@ -161,6 +172,7 @@ export default {
   withdrawProposal,
   acceptProposal,
   rejectProposal,
+  inviteFreelancer,
   aiWriter,
   aiScore,
 };
