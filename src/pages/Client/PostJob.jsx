@@ -6,7 +6,7 @@ import {
   ChevronLeft, ChevronRight, Check, X, Plus,
   Lightbulb, Briefcase, Clock, DollarSign,
   FileText, Star, AlertCircle, CheckCircle,
-  Rocket, ArrowLeft, Eye, Paperclip, File
+  Rocket, ArrowLeft, Eye, Paperclip, File, Upload, Trash2
 } from "lucide-react";
 import "../Client/css/post.css";
 import { createJob, getJobById, updateJob } from "../../api/jobs";
@@ -168,40 +168,45 @@ const PjStep1 = ({ form, setForm, errors }) => {
         {errors.title && <div className="pj-error-msg"><AlertCircle size={13} />{errors.title}</div>}
       </div>
 
-      <div className="pj-row">
-        <div className="pj-form-group half">
-          <label className="pj-label">{t('postJob.step1.category')} <span className="pj-label-req">*</span></label>
-          <select
-            className={`pj-select ${errors.category ? "error" : ""}`}
-            value={form.category}
-            onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
-          >
-            <option value="">{t('postJob.step1.selectCategory')}</option>
-            {CATEGORIES.map(c => (
-              <option key={c} value={c}>{t(`postJob.categories.${c}`)}</option>
-            ))}
-          </select>
-          {errors.category && <div className="pj-error-msg"><AlertCircle size={13} />{errors.category}</div>}
-        </div>
+      <div className="pj-form-group">
+        <label className="pj-label">{t('postJob.step1.category')} <span className="pj-label-req">*</span></label>
+        <select
+          className={`pj-select ${errors.category ? "error" : ""}`}
+          value={form.category}
+          onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
+        >
+          <option value="">{t('postJob.step1.selectCategory')}</option>
+          {CATEGORIES.map(c => (
+            <option key={c} value={c}>{t(`postJob.categories.${c}`)}</option>
+          ))}
+        </select>
+        {errors.category && <div className="pj-error-msg"><AlertCircle size={13} />{errors.category}</div>}
+      </div>
 
-        <div className="pj-form-group half">
-          <label className="pj-label">{t('postJob.step1.jobType')} <span className="pj-label-req">*</span></label>
-          <div className="pj-type-switch">
-            <button
-              className={`pj-type-btn ${form.jobType === "fixed" ? "active" : ""}`}
-              onClick={() => setForm(p => ({ ...p, jobType: "fixed" }))}
-            >
-              {t('postJob.step1.fixedType.name')}
-            </button>
-            <button
-              className={`pj-type-btn ${form.jobType === "hourly" ? "active" : ""}`}
-              onClick={() => setForm(p => ({ ...p, jobType: "hourly" }))}
-            >
-              {t('postJob.step1.hourlyType.name')}
-            </button>
+      <div className="pj-form-group">
+        <label className="pj-label">{t('postJob.step1.jobType')} <span className="pj-label-req">*</span></label>
+        <div className="pj-type-grid">
+          <div
+            className={`pj-type-card ${form.jobType === "fixed" ? "selected" : ""}`}
+            onClick={() => setForm(p => ({ ...p, jobType: "fixed" }))}
+          >
+            <span className="pj-type-icon"><DollarSign size={24} /></span>
+            <div className="pj-type-name">{t('postJob.step1.fixedType.name')}</div>
+            <div className="pj-type-desc">{t('postJob.step1.fixedType.desc', "Loyiha uchun bir martalik ruxsat etilgan narx to'lash.")}</div>
+            <div className="pj-type-check"><Check size={11} /></div>
+          </div>
+          <div
+            className={`pj-type-card ${form.jobType === "hourly" ? "selected" : ""}`}
+            onClick={() => setForm(p => ({ ...p, jobType: "hourly" }))}
+          >
+            <span className="pj-type-icon"><Clock size={24} /></span>
+            <div className="pj-type-name">{t('postJob.step1.hourlyType.name')}</div>
+            <div className="pj-type-desc">{t('postJob.step1.hourlyType.desc', "Freelancer ishlagan soatiga qarab haq to'lash.")}</div>
+            <div className="pj-type-check"><Check size={11} /></div>
           </div>
         </div>
       </div>
+
 
       <div className="pj-form-group">
         <label className="pj-label">{t('postJob.step1.description')} <span className="pj-label-req">*</span></label>
@@ -222,7 +227,7 @@ const PjStep1 = ({ form, setForm, errors }) => {
 
       <div className="pj-form-group">
         <label className="pj-label">{t('postJob.step1.attachments')}</label>
-        <div className="pj-upload-zone">
+        <div className="pj-drop-zone">
           <input
             type="file"
             id="pj-file-input"
@@ -231,50 +236,36 @@ const PjStep1 = ({ form, setForm, errors }) => {
             onChange={handleFileChange}
             accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
           />
-          <label htmlFor="pj-file-input" className={`pj-upload-label ${uploading ? "uploading" : ""}`}>
-            <Paperclip size={18} />
-            <span>{uploading ? t('postJob.header.saving') : t('postJob.step1.upload')}</span>
+          <label htmlFor="pj-file-input" className={`pj-drop-label ${uploading ? "uploading" : ""}`}>
+            <div className="pj-drop-icon-wrap">
+              {uploading ? <div className="loading-spinner small"></div> : <Upload size={24} />}
+            </div>
+            <div className="pj-drop-text">
+              <span className="pj-drop-main">{t('postJob.step1.uploadMain', "Loyihaga oid fayllarni biriktiring")}</span>
+              <span className="pj-drop-sub">{t('postJob.step1.uploadSub', "Kompyuterdan tanlash uchun bosing yoki faylni sudrab tashlang")}</span>
+            </div>
+            <div className="pj-drop-info">
+              {t('postJob.step1.maxSize')} • {t('postJob.step1.docType')}
+            </div>
           </label>
-          <div className="pj-upload-info">
-            {t('postJob.step1.maxSize')} • {t('postJob.step1.docType')}
-          </div>
         </div>
 
         {form.attachments.length > 0 && (
-          <div className="pj-file-list">
+          <div className="pj-file-pills">
             {form.attachments.map((file, idx) => (
-              <div key={idx} className="pj-file-item">
-                <File size={16} />
-                <span className="pj-file-name" title={file.name}>{file.name}</span>
-                <button className="pj-file-remove" onClick={() => removeFile(idx)}>
-                  <Check size={12} style={{ transform: "rotate(45deg)" }} />
+              <div key={idx} className="pj-file-pill">
+                <File size={14} className="pj-pill-icon" />
+                <div className="pj-pill-main">
+                  <span className="pj-pill-name" title={file.name}>{file.name}</span>
+                  <span className="pj-pill-size">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                </div>
+                <button className="pj-pill-remove" onClick={() => removeFile(idx)}>
+                  <X size={12} />
                 </button>
               </div>
             ))}
           </div>
         )}
-      </div>
-
-      <div className="pj-form-group">
-        <label className="pj-label">{t('postJob.step1.experience')} <span className="pj-label-req">*</span></label>
-        <div className="pj-exp-grid">
-          {EXP_LEVELS.map(e => (
-            <div
-              key={e.id}
-              className={`pj-exp-item ${form.experience === e.id ? "selected" : ""}`}
-              onClick={() => setForm(p => ({ ...p, experience: e.id }))}
-            >
-              <div className="pj-exp-radio">
-                <div className="pj-exp-radio-dot" />
-              </div>
-              <div className="pj-exp-info">
-                <div className="pj-exp-name">{t(`postJob.step1.exp.${e.id}.name`)}</div>
-                <div className="pj-exp-desc">{t(`postJob.step1.exp.${e.id}.desc`)}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        {errors.experience && <div className="pj-error-msg" style={{ marginTop: 8 }}><AlertCircle size={13} />{errors.experience}</div>}
       </div>
 
       <div className="pj-divider" />
