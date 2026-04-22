@@ -50,6 +50,31 @@
   --pj-bounce:       cubic-bezier(.34,1.56,.64,1);
 }
 
+/* ── Dark Theme Overrides ───────────────────────────────── */
+[data-theme='dark'] {
+  --pj-blue:         #3b82f6;
+  --pj-blue-dark:    #60a5fa;
+  --pj-blue-soft:    rgba(59,130,246,.15);
+  --pj-blue-light:   rgba(59,130,246,.1);
+  --pj-blue-border:  rgba(59,130,246,.3);
+  --pj-blue-glow:    rgba(59,130,246,.25);
+
+  --pj-text:         #f8fafc;
+  --pj-text-2:       #e2e8f0;
+  --pj-text-3:       #94a3b8;
+  --pj-text-4:       #64748b;
+
+  --pj-border:       rgba(255,255,255,.08);
+  --pj-border-2:     rgba(255,255,255,.04);
+  --pj-surface:      #1e293b;
+  --pj-bg:           transparent;
+  --pj-bg-2:         #020617;
+  
+  --pj-shadow-xs:    0 1px 2px rgba(0,0,0,.3);
+  --pj-shadow-sm:    0 4px 12px rgba(0,0,0,.4);
+  --pj-shadow-md:    0 12px 32px rgba(0,0,0,.5);
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--pj-font); color: var(--pj-text); background: var(--pj-bg); -webkit-font-smoothing: antialiased; }
 
@@ -302,18 +327,22 @@ body { font-family: var(--pj-font); color: var(--pj-text); background: var(--pj-
 
 .pj-input, .pj-select, .pj-textarea {
   width: 100%;
-  padding: 11px 14px;
+  padding: 10px 14px;
+  background: var(--pj-surface);
   border: 1.5px solid var(--pj-border);
   border-radius: var(--pj-radius);
-  font-size: 14px;
-  font-family: var(--pj-font);
   color: var(--pj-text);
-  background: var(--pj-surface);
+  font-size: 14.5px;
+  font-family: var(--pj-font);
+  transition: all .2s;
   outline: none;
-  transition: all .2s var(--pj-ease);
-  line-height: 1.5;
 }
-.pj-input::placeholder, .pj-textarea::placeholder { color: var(--pj-text-4); }
+[data-theme='dark'] .pj-input, 
+[data-theme='dark'] .pj-select, 
+[data-theme='dark'] .pj-textarea {
+  background: rgba(255, 255, 255, 0.03);
+}
+
 .pj-input:focus, .pj-select:focus, .pj-textarea:focus {
   border-color: var(--pj-blue);
   box-shadow: 0 0 0 3px var(--pj-blue-glow);
@@ -497,10 +526,13 @@ body { font-family: var(--pj-font); color: var(--pj-text); background: var(--pj-
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  background: #fff;
+  background: var(--pj-surface);
   border: 1.5px solid var(--pj-border);
   border-radius: 12px;
   transition: all .2s;
+}
+[data-theme='dark'] .pj-file-pill {
+  background: rgba(255,255,255,0.04);
 }
 .pj-file-pill:hover {
   border-color: var(--pj-blue-border);
