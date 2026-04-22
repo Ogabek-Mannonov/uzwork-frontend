@@ -1,12 +1,32 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { 
+  Briefcase, 
+  Calendar, 
+  Clock, 
+  DollarSign, 
+  Mail, 
+  MessageSquare, 
+  User,
+  ArrowUpRight,
+  TrendingUp,
+  MapPin,
+  CheckCircle2,
+  AlertCircle,
+  Archive,
+  ArrowRight,
+  Search
+} from "lucide-react";
 import { getMyProposals } from "../../../api/proposals";
+import "./MyProposals.css";
 
-const STATUS_COLORS = {
-  pending:  { bg: "#fff3e0", color: "#f57c00", label: "Kutilmoqda" },
-  accepted: { bg: "#e6f7e6", color: "#14a800", label: "Qabul qilindi" },
-  rejected: { bg: "#ffeef0", color: "#dc2626", label: "Rad etildi" },
-  withdrawn:{ bg: "#f5f5f5", color: "#999",    label: "Bekor qilindi" },
+const STATUS_MAP = {
+  pending:   { label: "Kutilmoqda",   color: "#f59e0b", bg: "rgba(245, 158, 11, 0.15)" },
+  accepted:  { label: "Qabul qilindi",color: "#10b981", bg: "rgba(16, 185, 129, 0.15)" },
+  rejected:  { label: "Rad etildi",   color: "#f43f5e", bg: "rgba(244, 63, 94, 0.15)" },
+  withdrawn: { label: "Bekor qilindi",color: "#64748b", bg: "rgba(100, 116, 139, 0.15)" },
+  invited:   { label: "Taklif oldingiz",color: "#3b82f6", bg: "rgba(59, 130, 246, 0.15)" },
+  shortlisted:{ label: "Saralandi",   color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.15)" }
 };
 
 export default function MyProposals() {
@@ -14,70 +34,199 @@ export default function MyProposals() {
   const [proposals, setProposals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("applications");
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchProposals = async () => {
       setLoading(true);
-      const res = await getMyProposals();
-      if (res?.success === false) setError(res?.message || "Xato");
-      else setProposals(res?.data || res?.proposals || res || []);
-      setLoading(false);
+      try {
+        const res = await getMyProposals();
+        if (res?.success) {
+          setProposals(res.data?.proposals || res.proposals || res.data || []);
+        } else {
+          setError(res?.message || "Takliflarni yuklashda xato yuz berdi.");
+        }
+      } catch (err) {
+        setError("Server bilan bog'lanishda xato.");
+      } finally {
+        setLoading(false);
+      }
     };
-    fetch();
+    fetchProposals();
   }, []);
 
-  return (
-    <div style={{ maxWidth: 860, margin: "0 auto", padding: "32px 16px" }}>
-      <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 24 }}>Mening Takliflarim</h1>
+  const filteredProposals = useMemo(() => {
+    if (activeTab === "applications") {
+      return proposals.filter(p => p.status !== "invited" && p.status !== "rejected" && p.status !== "withdrawn");
+    }
+    if (activeTab === "invitations") {
+      return proposals.filter(p => p.status === "invited");
+    }
+    if (activeTab === "archived") {
+      return proposals.filter(p => p.status === "rejected" || p.status === "withdrawn");
+    }
+    return proposals;
+  }, [proposals, activeTab]);
 
-      {loading && <p style={{ textAlign: "center", color: "#666" }}>Yuklanmoqda...</p>}
-      {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
+  const counts = useMemo(() => ({
+    applications: proposals.filter(p => p.status !== "invited" && p.status !== "rejected" && p.status !== "withdrawn").length,
+    invitations: proposals.filter(p => p.status === "invited").length,
+    archived: proposals.filter(p => p.status === "rejected" || p.status === "withdrawn").length,
+  }), [proposals]);
 
-      {!loading && proposals.length === 0 && (
-        <div style={{ textAlign: "center", padding: 60, color: "#aaa" }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>📄</div>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>Hali takliflar yo'q</div>
-          <button
-            onClick={() => navigate("/jobs")}
-            style={{ marginTop: 16, padding: "10px 24px", background: "#14a800", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
-          >Ish topish</button>
+  if (loading) {
+    return (
+      <div className="fprop-container">
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
+          <div className="loading-spinner"></div>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {proposals.map((p) => {
-          const st = STATUS_COLORS[p.status] || STATUS_COLORS.pending;
-          return (
-            <div
-              key={p.id}
-              style={{
-                background: "#fff", border: "1px solid #e0e0e0",
-                borderRadius: 12, padding: "20px 24px",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.05)"
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-                <h3
-                  style={{ fontSize: 15, fontWeight: 700, color: "#14a800", cursor: "pointer" }}
-                  onClick={() => navigate(`/jobs/${p.project_id}`)}
-                >
-                  {p.project_title || `Ish #${p.project_id}`}
-                </h3>
-                <span style={{ fontSize: 12, padding: "3px 12px", borderRadius: 20, fontWeight: 700, background: st.bg, color: st.color }}>
-                  {st.label}
-                </span>
+  return (
+    <div className="fprop-container">
+      <header className="fprop-header">
+        <h1 className="fprop-title">Mening Takliflarim</h1>
+        <p className="fprop-subtitle">Loyihalar bo'yicha yuborilgan arizalar va kelib tushgan takliflarni boshqarish</p>
+      </header>
+
+      <div className="fprop-tabs-wrap">
+        <button 
+          className={`fprop-tab ${activeTab === "applications" ? "active" : ""}`}
+          onClick={() => setActiveTab("applications")}
+        >
+          <Briefcase size={18} />
+          Arizalarim <span className="fprop-tab-count">{counts.applications}</span>
+        </button>
+        <button 
+          className={`fprop-tab ${activeTab === "invitations" ? "active" : ""}`}
+          onClick={() => setActiveTab("invitations")}
+        >
+          <Mail size={18} />
+          Taklifnomalar <span className="fprop-tab-count">{counts.invitations}</span>
+        </button>
+        <button 
+          className={`fprop-tab ${activeTab === "archived" ? "active" : ""}`}
+          onClick={() => setActiveTab("archived")}
+        >
+          <Archive size={18} />
+          Arxiv <span className="fprop-tab-count">{counts.archived}</span>
+        </button>
+      </div>
+
+      {error && <div className="error-alert">{error}</div>}
+
+      <div className="fprop-list">
+        {filteredProposals.length > 0 ? (
+          filteredProposals.map((p) => (
+            <div key={p.id} className={`fprop-card ${p.status === "invited" ? "invited" : ""}`}>
+              <div className="fprop-card-main">
+                <div className="fprop-job-info">
+                  <h3 
+                    className="fprop-job-title"
+                    onClick={() => navigate(`/jobs/${p.job_id || p.project_id}`)}
+                  >
+                    {p.job_title || `Loyiha #${p.id.slice(0,8)}`}
+                  </h3>
+                  
+                  <div className="fprop-client-badge">
+                    {p.client_avatar ? (
+                      <img src={p.client_avatar} alt="" className="fprop-client-ava" />
+                    ) : (
+                      <div className="fprop-client-ava" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "#e2e8f0" }}>
+                        <User size={14} />
+                      </div>
+                    )}
+                    <span className="fprop-client-name">{p.client_first_name} {p.client_last_name}</span>
+                  </div>
+                </div>
+                
+                <div className="fprop-status-box">
+                  <span 
+                    className="fprop-status-tag" 
+                    style={{ 
+                      backgroundColor: STATUS_MAP[p.status]?.bg || "rgba(0,0,0,0.05)", 
+                      color: STATUS_MAP[p.status]?.color || "#6b7280" 
+                    }}
+                  >
+                    {p.status === "invited" && <TrendingUp size={12} style={{ marginRight: 6 }} />}
+                    {STATUS_MAP[p.status]?.label || p.status}
+                  </span>
+                </div>
               </div>
-              <p style={{ fontSize: 13, color: "#666", marginTop: 8, lineHeight: 1.6 }}>
-                {p.cover_letter?.slice(0, 200)}{p.cover_letter?.length > 200 ? "..." : ""}
+
+              <p className="fprop-cover-letter">
+                {p.cover_letter || "Qo'shimcha ma'lumot yo'q."}
               </p>
-              <div style={{ marginTop: 10, display: "flex", gap: 16, fontSize: 13, color: "#999" }}>
-                {p.proposed_price && <span>💰 ${p.proposed_price}</span>}
-                {p.proposed_duration && <span>⏱ {p.proposed_duration}</span>}
-                {p.created_at && <span>📅 {new Date(p.created_at).toLocaleDateString()}</span>}
+
+              <div className="fprop-footer">
+                <div className="fprop-stats">
+                  <div className="fprop-stat-item">
+                    <span className="fprop-stat-label">Taklif narxi</span>
+                    <span className="fprop-stat-val price">
+                      <DollarSign size={16} /> {p.proposed_price || "Kelishiladi"}
+                    </span>
+                  </div>
+                  <div className="fprop-stat-item">
+                    <span className="fprop-stat-label">Muddat</span>
+                    <span className="fprop-stat-val">
+                      <Clock size={16} /> {p.proposed_duration ? `${p.proposed_duration} kun` : "Kelishuv"}
+                    </span>
+                  </div>
+                  <div className="fprop-stat-item">
+                    <span className="fprop-stat-label">Yuborilgan vaqt</span>
+                    <span className="fprop-stat-val">
+                      <Calendar size={16} /> {new Date(p.created_at).toLocaleDateString("uz-UZ")}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="fprop-actions">
+                  {p.status === "invited" ? (
+                    <button 
+                      className="fprop-btn-wow primary"
+                      onClick={() => navigate(`/jobs/${p.job_id || p.project_id}`)}
+                    >
+                      Taklifni ko'rish <ArrowUpRight size={18} />
+                    </button>
+                  ) : (
+                    <>
+                      <button 
+                        className="fprop-btn-wow secondary"
+                        onClick={() => navigate(`/jobs/${p.job_id || p.project_id}`)}
+                      >
+                        Tafsilotlar
+                      </button>
+                      <button 
+                        className="fprop-btn-icon"
+                        onClick={() => navigate(`/messages/${p.job_id || p.project_id}`)}
+                        title="Xabar yozish"
+                      >
+                        <MessageSquare size={20} />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
-          );
-        })}
+          ))
+        ) : (
+          <div className="fprop-empty-container">
+            <span className="fprop-empty-art">✨</span>
+            <h3>Hozircha hech narsa yo'q</h3>
+            <p>Ushbu bo'limda bildirishnomalar mavjud emas. Yangi loyihalarni qidirib ko'ring!</p>
+            {activeTab === "applications" && (
+              <button 
+                className="fprop-btn-wow primary" 
+                style={{ margin: "2rem auto 0" }}
+                onClick={() => navigate("/find-work")}
+              >
+                Yangi ish ochish <Search size={18} style={{ marginLeft: 8 }} />
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

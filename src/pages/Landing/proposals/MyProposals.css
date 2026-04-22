@@ -1,0 +1,379 @@
+/* src/pages/Landing/proposals/MyProposals.css */
+
+:root {
+  --fprop-primary: #3b82f6;
+  --fprop-primary-glow: rgba(59, 130, 246, 0.5);
+  --fprop-emerald: #10b981;
+  --fprop-rose: #f43f5e;
+  --fprop-amber: #f59e0b;
+  --fprop-sky: #0ea5e9;
+  --fprop-indigo: #6366f1;
+}
+
+.fprop-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    min-height: 100vh;
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fprop-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 3.5rem;
+}
+
+.fprop-title {
+    font-size: 2.75rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, #1e293b 0%, #3b82f6 50%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.fprop-subtitle {
+    color: #64748b;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* Glassmorphism Tabs */
+.fprop-tabs-wrap {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(241, 245, 249, 0.8);
+    padding: 0.4rem;
+    border-radius: 16px;
+    margin-bottom: 3rem;
+    width: fit-content;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.fprop-tab {
+    padding: 0.8rem 1.5rem;
+    font-weight: 700;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fprop-tab:hover {
+    color: #334155;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.fprop-tab.active {
+    color: #ffffff;
+    background: #3b82f6;
+    box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+.fprop-tab-count {
+    background: rgba(0, 0, 0, 0.08);
+    color: inherit;
+    padding: 0.1rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+}
+
+.fprop-tab.active .fprop-tab-count {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Premium Card Design */
+.fprop-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+}
+
+.fprop-card {
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 24px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
+}
+
+.fprop-card:hover {
+    transform: translateY(-6px) scale(1.005);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.08), 0 18px 36px -18px rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.fprop-card.invited::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 6px;
+    background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+}
+
+.fprop-card-main {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.fprop-job-title {
+    font-size: 1.5rem;
+    font-weight: 850;
+    color: #1e293b;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.2;
+    cursor: pointer;
+    background: linear-gradient(to right, #1e293b, #1e293b);
+    background-size: 0% 2px;
+    background-position: left bottom;
+    background-repeat: no-repeat;
+    transition: background-size 0.4s, color 0.3s;
+    width: fit-content;
+}
+
+.fprop-job-title:hover {
+    color: #3b82f6;
+    background-size: 100% 2px;
+}
+
+.fprop-client-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: #f8fafc;
+    padding: 0.5rem 1rem;
+    border-radius: 100px;
+    width: fit-content;
+    border: 1px solid #f1f5f9;
+}
+
+.fprop-client-ava {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.fprop-client-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #475569;
+}
+
+.fprop-status-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.fprop-status-tag {
+    padding: 0.6rem 1.25rem;
+    border-radius: 14px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    box-shadow: 0 4px 10px -2px rgba(0,0,0,0.1);
+}
+
+.fprop-cover-letter {
+    font-size: 1.05rem;
+    color: #475569;
+    line-height: 1.7;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    position: relative;
+    padding-left: 1.5rem;
+    border-left: 2px solid #e2e8f0;
+}
+
+.fprop-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.fprop-stats {
+    display: flex;
+    gap: 2rem;
+}
+
+.fprop-stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.fprop-stat-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.fprop-stat-val {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.fprop-stat-val.price { color: #10b981; }
+
+.fprop-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.fprop-btn-wow {
+    padding: 0.9rem 1.75rem;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+}
+
+.fprop-btn-wow.primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+}
+
+.fprop-btn-wow.primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.5);
+}
+
+.fprop-btn-wow.secondary {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.fprop-btn-wow.secondary:hover {
+    background: #e2e8f0;
+    transform: translateY(-2px);
+}
+
+.fprop-btn-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    background: #f1f5f9;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.fprop-btn-icon:hover {
+    background: #3b82f6;
+    color: white;
+    transform: rotate(15deg);
+}
+
+/* Empty State WOW */
+.fprop-empty-container {
+    padding: 6rem 2rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px dashed #e2e8f0;
+    border-radius: 32px;
+}
+
+.fprop-empty-art {
+    font-size: 5rem;
+    margin-bottom: 2rem;
+    display: block;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Dark Mode WOW */
+[data-theme='dark'] .fprop-title {
+    background: linear-gradient(135deg, #f8fafc 0%, #3b82f6 50%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+}
+
+[data-theme='dark'] .fprop-tabs-wrap {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(255,255,255,0.1);
+}
+
+[data-theme='dark'] .fprop-card {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .fprop-job-title {
+    color: #f1f5f9;
+}
+
+[data-theme='dark'] .fprop-client-badge {
+    background: #0f172a;
+    border-color: #1e293b;
+}
+
+[data-theme='dark'] .fprop-cover-letter {
+    color: #94a3b8;
+    border-color: #334155;
+}
+
+[data-theme='dark'] .fprop-stat-val {
+    color: #f1f5f9;
+}
+
+[data-theme='dark'] .fprop-btn-wow.secondary, 
+[data-theme='dark'] .fprop-btn-icon {
+    background: #334155;
+    color: #f1f5f9;
+}
+
+[data-theme='dark'] .fprop-empty-container {
+    background: rgba(30, 41, 59, 0.3);
+}
