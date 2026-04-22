@@ -361,6 +361,24 @@
 .cp-btn-hire:hover { background: #2563eb; }
 .cp-btn-msg:hover { background: var(--bg, #f8fafc); }
 
+.cp-btn-hired {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #10b981;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: default;
+  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
 .cp-star-btn {
   width: 40px;
   height: 40px;

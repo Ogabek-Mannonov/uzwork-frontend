@@ -235,12 +235,23 @@ const Proposals = () => {
     } finally {
       setActionLoading(null);
       if (!modal.isOpen || modal.type !== "success") {
-         // Only close if not opening the success modal
          if (modal.type !== "hire") {
            setModal({ isOpen: false, type: null, data: null });
          }
       }
     }
+  };
+
+  const openHireModal = (proposal) => {
+    if (proposal.status === "accepted") {
+      notify("Bu freelancer allaqachon yollangan", "error");
+      return;
+    }
+    setModal({
+      isOpen: true,
+      type: "hire",
+      data: proposal.id
+    });
   };
 
   const openModal = (type, proposalId) => {
@@ -252,7 +263,9 @@ const Proposals = () => {
   };
 
   const handleHire = (jobId, proposalId) => {
-    openModal("hire", proposalId);
+    const proposal = proposals.find(p => p.id === proposalId);
+    if (!proposal) return;
+    openHireModal(proposal);
   };
 
   const filteredProposals = useMemo(() => {
@@ -290,6 +303,15 @@ const Proposals = () => {
       }
       groups[jobId].proposals.push(p);
     });
+
+    // Sort proposals within each group: pending -> shortlisted -> accepted (last)
+    Object.values(groups).forEach(group => {
+      group.proposals.sort((a, b) => {
+        const statusOrder = { "shortlisted": 1, "pending": 2, "accepted": 3, "rejected": 4 };
+        return (statusOrder[a.status] || 5) - (statusOrder[b.status] || 5);
+      });
+    });
+
     return Object.values(groups);
   }, [filteredProposals, jobs]);
 
@@ -479,9 +501,17 @@ const Proposals = () => {
                       <button className="cp-btn-msg" onClick={() => navigate(`/messages/${proposal.freelancer_id || proposal.user_id}`)}>
                         <MessageSquare size={16} /> Xabar
                       </button>
-                      <button className="cp-btn-hire" onClick={() => handleHire(group.job.id, proposal.id)}>
-                        Yollash
-                      </button>
+                      
+                      {proposal.status === "accepted" ? (
+                        <button className="cp-btn-hired" disabled>
+                          <CheckCircle size={16} /> Yollangan
+                        </button>
+                      ) : (
+                        <button className="cp-btn-hire" onClick={() => handleHire(group.job.id, proposal.id)}>
+                          Yollash
+                        </button>
+                      )}
+
                       {activeTab !== "archived" && proposal.status !== "accepted" && (
                         <button 
                           className="cp-star-btn" 
