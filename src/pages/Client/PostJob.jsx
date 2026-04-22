@@ -95,6 +95,7 @@ const INITIAL = {
   scope: "medium",
   freelancers: "1",
   visibility: "public",
+  currency: "USD",
 };
 
 /* ================================================================
@@ -454,7 +455,15 @@ const PjStep3 = ({ form, setForm, errors }) => {
         <div className="pj-form-group">
           <label className="pj-label">{t('postJob.step3.budget')} <span className="pj-label-req">*</span></label>
           <div className="pj-budget-input-wrap">
-            <span className="pj-budget-prefix">$</span>
+            <select 
+              className="pj-currency-select"
+              value={form.currency}
+              onChange={e => setForm(p => ({ ...p, currency: e.target.value }))}
+            >
+              <option value="USD">USD ($)</option>
+              <option value="UZS">UZS (so'm)</option>
+              <option value="RUB">RUB (₽)</option>
+            </select>
             <input
               className={`pj-input ${errors.budget ? "error" : ""}`}
               type="number"
@@ -462,7 +471,6 @@ const PjStep3 = ({ form, setForm, errors }) => {
               value={form.budgetFixed}
               onChange={e => setForm(p => ({ ...p, budgetFixed: e.target.value }))}
             />
-            <span className="pj-budget-suffix">USD</span>
           </div>
           {errors.budget && <div className="pj-error-msg"><AlertCircle size={13} />{errors.budget}</div>}
         </div>
@@ -473,7 +481,15 @@ const PjStep3 = ({ form, setForm, errors }) => {
           <label className="pj-label">{t('postJob.step3.budgetRange')} <span className="pj-label-req">*</span></label>
           <div className="pj-range-row">
             <div className="pj-budget-input-wrap">
-              <span className="pj-budget-prefix">$</span>
+              <select 
+                className="pj-currency-select"
+                value={form.currency}
+                onChange={e => setForm(p => ({ ...p, currency: e.target.value }))}
+              >
+                <option value="USD">$</option>
+                <option value="UZS">so'm</option>
+                <option value="RUB">₽</option>
+              </select>
               <input
                 className={`pj-input ${errors.budget ? "error" : ""}`}
                 type="number"
@@ -484,7 +500,6 @@ const PjStep3 = ({ form, setForm, errors }) => {
             </div>
             <span className="pj-range-sep">–</span>
             <div className="pj-budget-input-wrap">
-              <span className="pj-budget-prefix">$</span>
               <input
                 className={`pj-input ${errors.budget ? "error" : ""}`}
                 type="number"
@@ -492,6 +507,7 @@ const PjStep3 = ({ form, setForm, errors }) => {
                 value={form.budgetMax}
                 onChange={e => setForm(p => ({ ...p, budgetMax: e.target.value }))}
               />
+              <span className="pj-budget-suffix">{form.currency}</span>
             </div>
           </div>
           {errors.budget && <div className="pj-error-msg"><AlertCircle size={13} />{errors.budget}</div>}
@@ -610,9 +626,24 @@ const PjStep3 = ({ form, setForm, errors }) => {
 const PjStep4 = ({ form }) => {
   const { t } = useTranslation();
   const getBudgetStr = () => {
-    if (form.budgetType === "fixed")  return `$${form.budgetFixed} USD (${t('postJob.step3.types.fixed.name')})`;
-    if (form.budgetType === "range")  return `$${form.budgetMin} – $${form.budgetMax} USD`;
-    if (form.budgetType === "hourly") return `$${form.hourlyMin} – $${form.hourlyMax}/hr`;
+    const symbols = { USD: "$", UZS: "so'm", RUB: "₽" };
+    const s = symbols[form.currency] || "$";
+    
+    if (form.budgetType === "fixed") {
+      return form.currency === "USD" 
+        ? `${s}${form.budgetFixed} USD (${t('postJob.step3.types.fixed.name')})`
+        : `${form.budgetFixed} ${s} (${t('postJob.step3.types.fixed.name')})`;
+    }
+    if (form.budgetType === "range") {
+      return form.currency === "USD"
+        ? `${s}${form.budgetMin} – ${s}${form.budgetMax} USD`
+        : `${form.budgetMin} – ${form.budgetMax} ${s}`;
+    }
+    if (form.budgetType === "hourly") {
+      return form.currency === "USD"
+        ? `${s}${form.hourlyMin} – ${s}${form.hourlyMax}/hr`
+        : `${form.hourlyMin} – ${form.hourlyMax} ${s}/hr`;
+    }
     return "—";
   };
 

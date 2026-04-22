@@ -321,7 +321,14 @@ const MyJobs = () => {
                 <div className="mj-card-details">
                   <div className="mj-detail-item">
                     <DollarSign size={16} />
-                    <span>{job.budget_max ? `$${job.budget_max}` : (job.budget_min ? `$${job.budget_min}` : t('myJobs.negotiable'))}</span>
+                    <span>
+                      {job.budget_max 
+                        ? (job.currency === 'UZS' ? `${Number(job.budget_max).toLocaleString()} UZS` : (job.currency === 'RUB' ? `${job.budget_max} ₽` : `$${job.budget_max}`))
+                        : (job.budget_min 
+                            ? (job.currency === 'UZS' ? `${Number(job.budget_min).toLocaleString()} UZS` : (job.currency === 'RUB' ? `${job.budget_min} ₽` : `$${job.budget_min}`))
+                            : t('myJobs.negotiable'))
+                      }
+                    </span>
                   </div>
                   <div className="mj-detail-item">
                     <Users size={16} />

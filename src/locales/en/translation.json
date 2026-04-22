@@ -1017,6 +1017,7 @@
       "desc": "Define how much you'll pay and how long the project will take.",
       "paymentStructure": "Payment Structure",
       "budget": "Budget",
+      "currency": "Currency",
       "budgetRange": "Budget Range",
       "hourlyRange": "Hourly Rate Range",
       "types": {

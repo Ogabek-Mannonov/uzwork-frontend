@@ -1016,6 +1016,7 @@
       "desc": "Qancha to'lashingizni va loyiha qancha davom etishini belgilang.",
       "paymentStructure": "To'lov tuzilmasi",
       "budget": "Byudjet",
+      "currency": "Valyuta",
       "budgetRange": "Byudjet oralig'i",
       "hourlyRange": "Soatbay tarif oralig'i",
       "types": {
