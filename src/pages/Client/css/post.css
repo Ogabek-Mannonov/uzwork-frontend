@@ -68,7 +68,7 @@ body { font-family: var(--pj-font); color: var(--pj-text); background: var(--pj-
   align-items: center;
   justify-content: space-between;
   position: sticky;
-  top: 0;
+  top: 64px;
   z-index: 200;
   box-shadow: var(--pj-shadow-xs);
 }
