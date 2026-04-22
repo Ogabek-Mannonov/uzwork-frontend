@@ -241,8 +241,8 @@ const PjStep1 = ({ form, setForm, errors }) => {
               {uploading ? <div className="loading-spinner small"></div> : <Upload size={24} />}
             </div>
             <div className="pj-drop-text">
-              <span className="pj-drop-main">{t('postJob.step1.uploadMain', "Loyihaga oid fayllarni biriktiring")}</span>
-              <span className="pj-drop-sub">{t('postJob.step1.uploadSub', "Kompyuterdan tanlash uchun bosing yoki faylni sudrab tashlang")}</span>
+              <span className="pj-drop-main">{t('postJob.step1.uploadMain')}</span>
+              <span className="pj-drop-sub">{t('postJob.step1.uploadSub')}</span>
             </div>
             <div className="pj-drop-info">
               {t('postJob.step1.maxSize')} • {t('postJob.step1.docType')}
