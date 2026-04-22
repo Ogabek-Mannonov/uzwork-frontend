@@ -134,8 +134,8 @@ export default function MyProposals() {
                     {p.client_avatar ? (
                       <img src={p.client_avatar} alt="" className="fprop-client-ava" />
                     ) : (
-                      <div className="fprop-client-ava" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "#e2e8f0" }}>
-                        <User size={14} />
+                      <div className="fprop-client-ava" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "var(--fprop-surface-2)" }}>
+                        <User size={12} color="var(--fprop-text-3)" />
                       </div>
                     )}
                     <span className="fprop-client-name">{p.client_first_name} {p.client_last_name}</span>
@@ -165,7 +165,11 @@ export default function MyProposals() {
                   <div className="fprop-stat-item">
                     <span className="fprop-stat-label">Taklif narxi</span>
                     <span className="fprop-stat-val price">
-                      <DollarSign size={16} /> {p.proposed_price || "Kelishiladi"}
+                      {p.proposed_price ? (
+                        <>
+                          {p.currency === 'UZS' ? `${Number(p.proposed_price).toLocaleString()} UZS` : (p.currency === 'RUB' ? `${p.proposed_price} ₽` : `$${p.proposed_price}`)}
+                        </>
+                      ) : "Kelishiladi"}
                     </span>
                   </div>
                   <div className="fprop-stat-item">
@@ -183,29 +187,31 @@ export default function MyProposals() {
                 </div>
 
                 <div className="fprop-actions">
-                  {p.status === "invited" ? (
-                    <button 
-                      className="fprop-btn-wow primary"
-                      onClick={() => navigate(`/jobs/${p.job_id || p.project_id}`)}
-                    >
-                      Taklifni ko'rish <ArrowUpRight size={18} />
-                    </button>
-                  ) : (
-                    <>
+                  {activeTab === "archived" ? null : (
+                    p.status === "invited" ? (
                       <button 
-                        className="fprop-btn-wow secondary"
+                        className="fprop-btn-wow primary"
                         onClick={() => navigate(`/jobs/${p.job_id || p.project_id}`)}
                       >
-                        Tafsilotlar
+                        Taklifni ko'rish <ArrowUpRight size={18} />
                       </button>
-                      <button 
-                        className="fprop-btn-icon"
-                        onClick={() => navigate(`/messages/${p.job_id || p.project_id}`)}
-                        title="Xabar yozish"
-                      >
-                        <MessageSquare size={20} />
-                      </button>
-                    </>
+                    ) : (
+                      <>
+                        <button 
+                          className="fprop-btn-wow secondary"
+                          onClick={() => navigate(`/jobs/${p.job_id || p.project_id}`)}
+                        >
+                          Tafsilotlar
+                        </button>
+                        <button 
+                          className="fprop-btn-icon"
+                          onClick={() => navigate(`/messages/${p.job_id || p.project_id}`)}
+                          title="Xabar yozish"
+                        >
+                          <MessageSquare size={20} />
+                        </button>
+                      </>
+                    )
                   )}
                 </div>
               </div>
