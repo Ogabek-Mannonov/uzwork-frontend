@@ -1136,5 +1136,44 @@
         "To'liq ma'lumotga ega ishlar 3 baravar ko'p takliflar oladi."
       ]
     }
+  },
+  "myProposals": {
+    "title": "Mening Takliflarim",
+    "subtitle": "Loyihalar bo'yicha yuborilgan arizalar va kelib tushgan takliflarni boshqarish",
+    "tabs": {
+      "applications": "Arizalarim",
+      "invitations": "Taklifnomalar",
+      "archived": "Arxiv"
+    },
+    "status": {
+      "pending": "Kutilmoqda",
+      "accepted": "Qabul qilindi",
+      "rejected": "Rad etildi",
+      "withdrawn": "Bekor qilindi",
+      "invited": "Taklif oldingiz",
+      "shortlisted": "Saralandi"
+    },
+    "stats": {
+      "price": "Taklif narxi",
+      "duration": "Muddat",
+      "date": "Yuborilgan vaqt",
+      "negotiable": "Kelishiladi",
+      "agreement": "Kelishuv",
+      "days": "kun"
+    },
+    "actions": {
+      "viewProposal": "Taklifni ko'rish",
+      "details": "Tafsilotlar"
+    },
+    "empty": {
+      "title": "Hozircha hech narsa yo'q",
+      "desc": "Ushbu bo'limda bildirishnomalar mavjud emas. Yangi loyihalarni qidirib ko'ring!",
+      "button": "Yangi ish qidirish"
+    },
+    "errors": {
+      "loading": "Takliflarni yuklashda xato yuz berdi.",
+      "server": "Server bilan bog'lanishda xato."
+    },
+    "noCoverLetter": "Qo'shimcha ma'lumot yo'q."
   }
 }

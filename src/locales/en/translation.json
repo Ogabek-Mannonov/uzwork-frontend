@@ -1137,5 +1137,44 @@
         "Jobs with complete details get 3× more proposals."
       ]
     }
+  },
+  "myProposals": {
+    "title": "My Proposals",
+    "subtitle": "Manage submitted applications and received invitations for projects",
+    "tabs": {
+      "applications": "My Applications",
+      "invitations": "Invitations",
+      "archived": "Archive"
+    },
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn",
+      "invited": "Invited",
+      "shortlisted": "Shortlisted"
+    },
+    "stats": {
+      "price": "Proposed price",
+      "duration": "Duration",
+      "date": "Sent date",
+      "negotiable": "Negotiable",
+      "agreement": "By agreement",
+      "days": "days"
+    },
+    "actions": {
+      "viewProposal": "View Proposal",
+      "details": "Details"
+    },
+    "empty": {
+      "title": "Nothing here yet",
+      "desc": "There are no notifications in this section. Try searching for new projects!",
+      "button": "Find work"
+    },
+    "errors": {
+      "loading": "An error occurred while loading proposals.",
+      "server": "Error connecting to the server."
+    },
+    "noCoverLetter": "No additional information."
   }
 }

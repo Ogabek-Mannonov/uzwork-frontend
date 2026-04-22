@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { 
   Briefcase, 
   Calendar, 
@@ -21,15 +22,16 @@ import { getMyProposals } from "../../../api/proposals";
 import "./MyProposals.css";
 
 const STATUS_MAP = {
-  pending:   { label: "Kutilmoqda",   color: "#f59e0b", bg: "rgba(245, 158, 11, 0.15)" },
-  accepted:  { label: "Qabul qilindi",color: "#10b981", bg: "rgba(16, 185, 129, 0.15)" },
-  rejected:  { label: "Rad etildi",   color: "#f43f5e", bg: "rgba(244, 63, 94, 0.15)" },
-  withdrawn: { label: "Bekor qilindi",color: "#64748b", bg: "rgba(100, 116, 139, 0.15)" },
-  invited:   { label: "Taklif oldingiz",color: "#3b82f6", bg: "rgba(59, 130, 246, 0.15)" },
-  shortlisted:{ label: "Saralandi",   color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.15)" }
+  pending:   { key: "pending",   color: "#f59e0b", bg: "rgba(245, 158, 11, 0.15)" },
+  accepted:  { key: "accepted",  color: "#10b981", bg: "rgba(16, 185, 129, 0.15)" },
+  rejected:  { key: "rejected",  color: "#f43f5e", bg: "rgba(244, 63, 94, 0.15)" },
+  withdrawn: { key: "withdrawn", color: "#64748b", bg: "rgba(100, 116, 139, 0.15)" },
+  invited:   { key: "invited",   color: "#3b82f6", bg: "rgba(59, 130, 246, 0.15)" },
+  shortlisted:{ key: "shortlisted",color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.15)" }
 };
 
 export default function MyProposals() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [proposals, setProposals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,16 +46,16 @@ export default function MyProposals() {
         if (res?.success) {
           setProposals(res.data?.proposals || res.proposals || res.data || []);
         } else {
-          setError(res?.message || "Takliflarni yuklashda xato yuz berdi.");
+          setError(res?.message || t("myProposals.errors.loading"));
         }
       } catch (err) {
-        setError("Server bilan bog'lanishda xato.");
+        setError(t("myProposals.errors.server"));
       } finally {
         setLoading(false);
       }
     };
     fetchProposals();
-  }, []);
+  }, [t]);
 
   const filteredProposals = useMemo(() => {
     if (activeTab === "applications") {
@@ -87,8 +89,8 @@ export default function MyProposals() {
   return (
     <div className="fprop-container">
       <header className="fprop-header">
-        <h1 className="fprop-title">Mening Takliflarim</h1>
-        <p className="fprop-subtitle">Loyihalar bo'yicha yuborilgan arizalar va kelib tushgan takliflarni boshqarish</p>
+        <h1 className="fprop-title">{t("myProposals.title")}</h1>
+        <p className="fprop-subtitle">{t("myProposals.subtitle")}</p>
       </header>
 
       <div className="fprop-tabs-wrap">
@@ -97,21 +99,21 @@ export default function MyProposals() {
           onClick={() => setActiveTab("applications")}
         >
           <Briefcase size={18} />
-          Arizalarim <span className="fprop-tab-count">{counts.applications}</span>
+          {t("myProposals.tabs.applications")} <span className="fprop-tab-count">{counts.applications}</span>
         </button>
         <button 
           className={`fprop-tab ${activeTab === "invitations" ? "active" : ""}`}
           onClick={() => setActiveTab("invitations")}
         >
           <Mail size={18} />
-          Taklifnomalar <span className="fprop-tab-count">{counts.invitations}</span>
+          {t("myProposals.tabs.invitations")} <span className="fprop-tab-count">{counts.invitations}</span>
         </button>
         <button 
           className={`fprop-tab ${activeTab === "archived" ? "active" : ""}`}
           onClick={() => setActiveTab("archived")}
         >
           <Archive size={18} />
-          Arxiv <span className="fprop-tab-count">{counts.archived}</span>
+          {t("myProposals.tabs.archived")} <span className="fprop-tab-count">{counts.archived}</span>
         </button>
       </div>
 
@@ -151,37 +153,37 @@ export default function MyProposals() {
                     }}
                   >
                     {p.status === "invited" && <TrendingUp size={12} style={{ marginRight: 6 }} />}
-                    {STATUS_MAP[p.status]?.label || p.status}
+                    {t(`myProposals.status.${STATUS_MAP[p.status]?.key}`) || p.status}
                   </span>
                 </div>
               </div>
 
               <p className="fprop-cover-letter">
-                {p.cover_letter || "Qo'shimcha ma'lumot yo'q."}
+                {p.cover_letter || t("myProposals.noCoverLetter")}
               </p>
 
               <div className="fprop-footer">
                 <div className="fprop-stats">
                   <div className="fprop-stat-item">
-                    <span className="fprop-stat-label">Taklif narxi</span>
+                    <span className="fprop-stat-label">{t("myProposals.stats.price")}</span>
                     <span className="fprop-stat-val price">
                       {p.proposed_price ? (
                         <>
                           {p.currency === 'UZS' ? `${Number(p.proposed_price).toLocaleString()} UZS` : (p.currency === 'RUB' ? `${p.proposed_price} ₽` : `$${p.proposed_price}`)}
                         </>
-                      ) : "Kelishiladi"}
+                      ) : t("myProposals.stats.negotiable")}
                     </span>
                   </div>
                   <div className="fprop-stat-item">
-                    <span className="fprop-stat-label">Muddat</span>
+                    <span className="fprop-stat-label">{t("myProposals.stats.duration")}</span>
                     <span className="fprop-stat-val">
-                      <Clock size={16} /> {p.proposed_duration ? `${p.proposed_duration} kun` : "Kelishuv"}
+                      <Clock size={16} /> {p.proposed_duration ? `${p.proposed_duration} ${t("myProposals.stats.days")}` : t("myProposals.stats.agreement")}
                     </span>
                   </div>
                   <div className="fprop-stat-item">
-                    <span className="fprop-stat-label">Yuborilgan vaqt</span>
+                    <span className="fprop-stat-label">{t("myProposals.stats.date")}</span>
                     <span className="fprop-stat-val">
-                      <Calendar size={16} /> {new Date(p.created_at).toLocaleDateString("uz-UZ")}
+                      <Calendar size={16} /> {new Date(p.created_at).toLocaleDateString(i18n.language === 'uz' ? 'uz-UZ' : (i18n.language === 'ru' ? 'ru-RU' : 'en-US'))}
                     </span>
                   </div>
                 </div>
@@ -193,24 +195,15 @@ export default function MyProposals() {
                         className="fprop-btn-wow primary"
                         onClick={() => navigate(`/jobs/${p.job_id || p.project_id}`)}
                       >
-                        Taklifni ko'rish <ArrowUpRight size={18} />
+                        {t("myProposals.actions.viewProposal")} <ArrowUpRight size={18} />
                       </button>
                     ) : (
-                      <>
-                        <button 
-                          className="fprop-btn-wow secondary"
-                          onClick={() => navigate(`/jobs/${p.job_id || p.project_id}`)}
-                        >
-                          Tafsilotlar
-                        </button>
-                        <button 
-                          className="fprop-btn-icon"
-                          onClick={() => navigate(`/messages/${p.job_id || p.project_id}`)}
-                          title="Xabar yozish"
-                        >
-                          <MessageSquare size={20} />
-                        </button>
-                      </>
+                      <button 
+                        className="fprop-btn-wow secondary"
+                        onClick={() => navigate(`/jobs/${p.job_id || p.project_id}`)}
+                      >
+                        {t("myProposals.actions.details")}
+                      </button>
                     )
                   )}
                 </div>
@@ -220,15 +213,15 @@ export default function MyProposals() {
         ) : (
           <div className="fprop-empty-container">
             <span className="fprop-empty-art">✨</span>
-            <h3>Hozircha hech narsa yo'q</h3>
-            <p>Ushbu bo'limda bildirishnomalar mavjud emas. Yangi loyihalarni qidirib ko'ring!</p>
+            <h3>{t("myProposals.empty.title")}</h3>
+            <p>{t("myProposals.empty.desc")}</p>
             {activeTab === "applications" && (
               <button 
                 className="fprop-btn-wow primary" 
                 style={{ margin: "2rem auto 0" }}
                 onClick={() => navigate("/find-work")}
               >
-                Yangi ish ochish <Search size={18} style={{ marginLeft: 8 }} />
+                {t("myProposals.empty.button")} <Search size={18} style={{ marginLeft: 8 }} />
               </button>
             )}
           </div>
