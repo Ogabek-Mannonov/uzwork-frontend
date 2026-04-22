@@ -1187,6 +1187,21 @@ body.dark-mode {
   visibility: hidden;
 }
 
+.edit-pencil-btn.mini {
+  width: 22px;
+  height: 22px;
+  opacity: 0.6;
+  visibility: visible; /* Always visible for meta items */
+  border: none;
+  background: rgba(59, 130, 246, 0.1);
+  margin-left: 4px;
+}
+
+.edit-pencil-btn.mini svg {
+  width: 12px;
+  height: 12px;
+}
+
 .section-edit-trigger:hover .edit-pencil-btn,
 .edit-pencil-btn.visible {
   opacity: 1;
@@ -1194,13 +1209,15 @@ body.dark-mode {
 }
 
 .edit-pencil-btn:hover {
-  background: var(--blue-bg);
+  background: rgba(255, 255, 255, 0.1);
   transform: scale(1.1);
+  color: white !important;
 }
 
 .dark .edit-pencil-btn {
-  background: var(--dark-surface);
-  border-color: var(--dark-border);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: white !important;
 }
 
 .inline-edit-actions {
@@ -1285,6 +1302,62 @@ body.dark-mode {
 .dark .inline-edit-textarea {
   background: var(--dark-card-alt);
   color: var(--dark-text);
+}
+
+/* Exhaustive Specificity Fixes for Dark Mode */
+.dark #my-profile-root,
+body.dark-mode #my-profile-root {
+  background: transparent !important;
+}
+
+.dark #my-profile-settings-main,
+body.dark-mode #my-profile-settings-main,
+.dark #my-profile-settings-content,
+body.dark-mode #my-profile-settings-content {
+  background: transparent !important;
+}
+
+.dark #my-profile-main-card,
+body.dark-mode #my-profile-main-card,
+.settings-container.dark #my-profile-main-card {
+  background: rgba(15, 23, 42, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark #my-profile-content-area,
+body.dark-mode #my-profile-content-area,
+.settings-container.dark #my-profile-content-area {
+  background: transparent !important;
+}
+
+.dark #my-profile-bio-section,
+body.dark-mode #my-profile-bio-section {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.dark #my-profile-bio-box,
+body.dark-mode #my-profile-bio-box,
+.settings-container.dark #my-profile-bio-box {
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark #my-profile-meta-bar,
+body.dark-mode #my-profile-meta-bar,
+.settings-container.dark #my-profile-meta-bar {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark #my-profile-meta-bar .profile-meta-item,
+body.dark-mode #my-profile-meta-bar .profile-meta-item {
+  color: #cbd5e1 !important;
 }
 
 .profile-card {
@@ -1693,21 +1766,51 @@ body.dark-mode {
 .profile-meta-row {
   display: flex;
   align-items: center;
-  gap: 24px;
+  justify-content: space-between;
+  gap: 16px;
   flex-wrap: wrap;
-  margin: 20px 0 16px;
-  padding: 16px 20px;
-  background: rgba(59, 130, 246, 0.03);
-  border-radius: var(--radius-lg);
+  margin: 24px 0 20px;
+  padding: 0; /* No background on row, items will have cards */
+  background: transparent !important;
 }
 
+
 .profile-meta-item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 15px;
+  gap: 12px;
+  font-size: 14px;
   color: var(--light-text);
   font-weight: 500;
+  padding: 12px 20px;
+  background: white; /* Light mode */
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 160px; /* Make them consistent size */
+  justify-content: center;
+}
+
+.dark .profile-meta-item {
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+.profile-meta-item:hover {
+  transform: translateY(-2px);
+  background: white;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  border-color: var(--blue);
+}
+
+.dark .profile-meta-item:hover {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4) !important;
 }
 
 .profile-meta-item svg {
@@ -1715,9 +1818,10 @@ body.dark-mode {
   flex-shrink: 0;
 }
 
-.dark .profile-meta-item {
-  color: var(--dark-text);
+.dark .profile-meta-item svg {
+  color: white !important; /* All icons white in WOW dark mode */
 }
+
 
 /* ===== PROFILE STATS ===== */
 .profile-stats {

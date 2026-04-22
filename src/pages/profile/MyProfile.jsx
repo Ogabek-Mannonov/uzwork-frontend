@@ -66,6 +66,7 @@ import {
 } from "lucide-react";
 import "../profile/profile-css/profile.css";
 import { getMyProfile, updateMyProfile, uploadFile, uploadImage } from "../../api/common";
+import { getCategories } from "../../api/profile";
 
 
 import { logout } from "../../api/auth";
@@ -115,6 +116,7 @@ const MyProfile = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [editingSection, setEditingSection] = useState(null); // 'name', 'bio', 'rate', 'skills', 'contact'
   const [editFormData, setEditFormData] = useState({});
+  const [categories, setCategories] = useState([]); // State for categories
 
 
   // const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -261,6 +263,14 @@ const MyProfile = () => {
         const certList = certRes?.data?.certifications || certRes?.data?.items || certRes?.data || certRes?.certifications;
         if (Array.isArray(certList)) {
           setCertificates(certList);
+        }
+
+        // Fetch categories for editing
+        const catRes = await getCategories();
+        if (catRes?.success && Array.isArray(catRes.data)) {
+          setCategories(catRes.data);
+        } else if (Array.isArray(catRes)) {
+          setCategories(catRes);
         }
       } catch (err) {
         console.error("fetchData error:", err);
@@ -1162,7 +1172,7 @@ const MyProfile = () => {
   };
 
   return (
-    <div className={`settings-container ${isDark ? "dark" : "light"}`}>
+    <div id="my-profile-root" className={`settings-container ${isDark ? "dark" : "light"}`}>
       
       {/* HEADER
       <header className="settings-header">
@@ -1261,12 +1271,12 @@ const MyProfile = () => {
       </header> */}
 
       {/* MAIN CONTENT */}
-      <div className="settings-main">
+      <div id="my-profile-settings-main" className="settings-main">
         
         {/* SIDEBAR DELETED */}
 
         {/* CONTENT AREA */}
-        <main className="settings-content" style={{ width: "100%", maxWidth: "1440px", margin: "0 auto", padding: "24px 24px" }}>
+        <main id="my-profile-settings-content" className="settings-content" style={{ width: "100%", maxWidth: "1440px", margin: "0 auto", padding: "24px 24px" }}>
           
           {message.text && (
             <div className={`message-banner ${message.type}`}>
@@ -1298,7 +1308,7 @@ const MyProfile = () => {
                 </a>
               </div>
               
-              <div className="profile-card soft-fade-in stagger-1">
+              <div id="my-profile-main-card" className="profile-card soft-fade-in stagger-1">
                 <div className="profile-cover" style={{ position: 'relative' }}>
                   <span className="section-badge" style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 10, background: 'var(--surface, rgba(255,255,255,0.9))', color: 'var(--blue, #3b82f6)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '600', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
                     <User size={14} />{t("profile.professionalProfile", "Professional Profile")}
@@ -1317,7 +1327,7 @@ const MyProfile = () => {
                 </div>
 
                 
-                <div className="profile-content">
+                <div id="my-profile-content-area" className="profile-content">
                   {/* Avatar va ism qismi */}
                   <div className="profile-avatar-section">
                     <div className="avatar-wrapper">
@@ -1403,7 +1413,7 @@ const MyProfile = () => {
                   </div>
 
                   {/* BIO SECTION */}
-                  <div className="profile-bio-section soft-fade-in stagger-2">
+                  <div id="my-profile-bio-section" className="profile-bio-section soft-fade-in stagger-2">
                     {editingSection === 'bio' ? (
                       <div className="inline-edit-container">
                         <textarea
@@ -1424,7 +1434,7 @@ const MyProfile = () => {
                       </div>
                     ) : (
                       <div className="section-edit-trigger bio-edit-trigger" onClick={() => handleSectionEdit('bio', { bio: userData.bio })}>
-                        <div className="profile-bio-text">
+                        <div id="my-profile-bio-box" className="profile-bio-text">
                           {userData.bio || t("profile.noBio", "No bio provided. Click to add one.")}
                         </div>
                         <button className="edit-pencil-btn">
@@ -1435,7 +1445,7 @@ const MyProfile = () => {
 
                     
                     {/* META INFO */}
-                    <div className="profile-meta-row">
+                    <div id="my-profile-meta-bar" className="profile-meta-row">
                       <span className="profile-meta-item">
                         <MapPin size={14} />
                         {userData.location}
