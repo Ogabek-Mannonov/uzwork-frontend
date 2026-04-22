@@ -353,6 +353,11 @@ body { font-family: var(--pj-font); color: var(--pj-text); background: var(--pj-
   border-color: var(--pj-blue);
   box-shadow: 0 0 0 3px var(--pj-blue-glow);
 }
+[data-theme='dark'] .pj-input:focus,
+[data-theme='dark'] .pj-select:focus,
+[data-theme='dark'] .pj-textarea:focus {
+  background: var(--pj-surface);
+}
 .pj-input.error, .pj-select.error, .pj-textarea.error {
   border-color: var(--pj-red);
   box-shadow: 0 0 0 3px rgba(239,68,68,.08);
