@@ -5,20 +5,18 @@ import {
   Briefcase, 
   Calendar, 
   Clock, 
-  DollarSign, 
   Mail, 
   MessageSquare, 
   User,
   ArrowUpRight,
   TrendingUp,
-  MapPin,
-  CheckCircle2,
-  AlertCircle,
   Archive,
-  ArrowRight,
   Search
 } from "lucide-react";
 import { getMyProposals } from "../../../api/proposals";
+import { getJobById } from "../../../api/jobs";
+import JobDetailsDrawer from "../../components/JobDetailsDrawer";
+import ProposalDetailsDrawer from "../../components/ProposalDetailsDrawer";
 import "./MyProposals.css";
 
 const STATUS_MAP = {
@@ -33,10 +31,18 @@ const STATUS_MAP = {
 export default function MyProposals() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  
+  // Data states
   const [proposals, setProposals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("applications");
+
+  // Drawer states
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [selectedProposal, setSelectedProposal] = useState(null);
+  const [isJobDrawerOpen, setIsJobDrawerOpen] = useState(false);
+  const [isProposalDrawerOpen, setIsProposalDrawerOpen] = useState(false);
 
   useEffect(() => {
     const fetchProposals = async () => {
@@ -56,6 +62,23 @@ export default function MyProposals() {
     };
     fetchProposals();
   }, [t]);
+
+  const handleOpenJobDrawer = async (jobId) => {
+    try {
+      const res = await getJobById(jobId);
+      if (res?.success) {
+        setSelectedJob(res.data.project || res.data);
+        setIsJobDrawerOpen(true);
+      }
+    } catch (e) {
+      console.error("Error fetching job:", e);
+    }
+  };
+
+  const handleOpenProposalDrawer = (proposal) => {
+    setSelectedProposal(proposal);
+    setIsProposalDrawerOpen(true);
+  };
 
   const filteredProposals = useMemo(() => {
     if (activeTab === "applications") {
@@ -127,7 +150,7 @@ export default function MyProposals() {
                 <div className="fprop-job-info">
                   <h3 
                     className="fprop-job-title"
-                    onClick={() => navigate(`/jobs/${p.job_id || p.project_id}`)}
+                    onClick={() => handleOpenJobDrawer(p.job_id || p.project_id)}
                   >
                     {p.job_title || `Loyiha #${p.id.slice(0,8)}`}
                   </h3>
@@ -193,14 +216,14 @@ export default function MyProposals() {
                     p.status === "invited" ? (
                       <button 
                         className="fprop-btn-wow primary"
-                        onClick={() => navigate(`/jobs/${p.job_id || p.project_id}`)}
+                        onClick={() => handleOpenProposalDrawer(p)}
                       >
                         {t("myProposals.actions.viewProposal")} <ArrowUpRight size={18} />
                       </button>
                     ) : (
                       <button 
                         className="fprop-btn-wow secondary"
-                        onClick={() => navigate(`/jobs/${p.job_id || p.project_id}`)}
+                        onClick={() => handleOpenProposalDrawer(p)}
                       >
                         {t("myProposals.actions.details")}
                       </button>
@@ -227,6 +250,19 @@ export default function MyProposals() {
           </div>
         )}
       </div>
+
+      {/* DRAWERS */}
+      <JobDetailsDrawer 
+        isOpen={isJobDrawerOpen}
+        job={selectedJob}
+        onClose={() => setIsJobDrawerOpen(false)}
+      />
+
+      <ProposalDetailsDrawer 
+        isOpen={isProposalDrawerOpen}
+        proposal={selectedProposal}
+        onClose={() => setIsProposalDrawerOpen(false)}
+      />
     </div>
   );
 }
