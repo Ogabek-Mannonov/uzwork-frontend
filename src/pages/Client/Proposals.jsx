@@ -157,6 +157,13 @@ const Proposals = () => {
 
   const handleToggleShortlist = async (proposalId, currentStatus) => {
     if (actionLoading) return;
+    
+    // Yollanganlarni statusini o'zgartirib bo'lmaydi (ular baribir saralangan hisoblanadi)
+    if (currentStatus === "accepted") {
+      notify("Yollangan mutaxassis har doim saralangan hisoblanadi");
+      return;
+    }
+
     setActionLoading(proposalId);
     try {
       const newStatus = currentStatus === "shortlisted" ? "pending" : "shortlisted";
@@ -290,9 +297,9 @@ const Proposals = () => {
     if (!Array.isArray(proposals)) return [];
     return proposals.filter(p => {
       // Tab filter
-      if (activeTab === "shortlisted" && p.status !== "shortlisted") return false;
+      if (activeTab === "shortlisted" && p.status !== "shortlisted" && p.status !== "accepted") return false;
       if (activeTab === "archived" && p.status !== "rejected") return false;
-      if (activeTab === "all" && p.status === "rejected") return false;
+      if (activeTab === "all" && p.status === "rejected" && p.status !== "withdrawn") return false;
 
       // Search filter
       if (searchTerm) {
@@ -390,13 +397,13 @@ const Proposals = () => {
         <div className="cp-controls">
           <div className="cp-tabs">
             <button className={`cp-tab-btn ${activeTab === "all" ? "active" : ""}`} onClick={() => setActiveTab("all")}>
-              Barchasi
+              Barchasi ({proposals.filter(p => p.status !== "rejected").length})
             </button>
             <button className={`cp-tab-btn ${activeTab === "shortlisted" ? "active" : ""}`} onClick={() => setActiveTab("shortlisted")}>
-              <Star size={14} /> Saralangan
+              <Star size={14} /> Saralangan ({proposals.filter(p => p.status === "shortlisted").length})
             </button>
             <button className={`cp-tab-btn ${activeTab === "archived" ? "active" : ""}`} onClick={() => setActiveTab("archived")}>
-              Arxiv
+              Arxiv ({proposals.filter(p => p.status === "rejected").length})
             </button>
           </div>
 
@@ -415,11 +422,25 @@ const Proposals = () => {
         {groupedProposals.length === 0 ? (
           <div className="cp-empty">
             <Users size={64} strokeWidth={1} />
-            <h3>Hali takliflar yo'q</h3>
-            <p>Hozircha hech qanday talabgor ariza topshirmadi.</p>
-            <button className="cp-btn-hire" style={{ maxWidth: "200px", margin: "0 auto" }} onClick={() => navigate("/client/talent")}>
-              Mutaxassislarni ko'rish
-            </button>
+            <h3>
+              {activeTab === "shortlisted" 
+                ? "Saralangan takliflar yo'q" 
+                : activeTab === "archived" 
+                  ? "Arxivlangan takliflar yo'q" 
+                  : "Hali takliflar yo'q"}
+            </h3>
+            <p>
+              {activeTab === "shortlisted" 
+                ? "Siz hali hech bir taklifni saralamadingiz." 
+                : activeTab === "archived" 
+                  ? "Rad etilgan takliflar shu yerda ko'rinadi." 
+                  : "Hozircha hech qanday talabgor ariza topshirmadi."}
+            </p>
+            {activeTab === "all" && (
+              <button className="cp-btn-hire" style={{ maxWidth: "200px", margin: "0 auto" }} onClick={() => navigate("/client/talent")}>
+                Mutaxassislarni ko'rish
+              </button>
+            )}
           </div>
         ) : (
           groupedProposals.map(group => (
@@ -489,7 +510,7 @@ const Proposals = () => {
                         <span>{proposal.proposed_duration || "Kiritilmagan"}</span>
                       </div>
                       <div className="cp-detail-item">
-                        <CheckCircle size={14} color="#10b981" />
+                        <CheckCircle size={14} color="#3b82f6" />
                         <span>{t("publicProfile.verified")}</span>
                       </div>
                     </div>
@@ -524,13 +545,21 @@ const Proposals = () => {
                         <button className="cp-btn-hired" disabled>
                           <CheckCircle size={16} /> Yollangan
                         </button>
+                      ) : proposal.status === "rejected" ? (
+                        <button className="cp-btn-rejected" disabled>
+                          <XCircle size={16} /> Rad etilgan
+                        </button>
+                      ) : proposal.status === "withdrawn" ? (
+                        <button className="cp-btn-rejected" disabled>
+                          <Clock size={16} /> Bekor qilingan
+                        </button>
                       ) : (
                         <button className="cp-btn-hire" onClick={() => handleHire(group.job.id, proposal.id)}>
                           Yollash
                         </button>
                       )}
 
-                      {activeTab !== "archived" && proposal.status !== "accepted" && (
+                      {activeTab !== "archived" && !["accepted", "rejected", "withdrawn"].includes(proposal.status) && (
                         <button 
                           className="cp-star-btn" 
                           style={{ color: "#ef4444" }} 
