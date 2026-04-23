@@ -470,6 +470,10 @@ function AuthHeader({ i18n, changeLanguage, user }) {
 
   const handleProfileNav = (section) => {
     setProfileOpen(false);
+    if (section === "billing") {
+      navigate(isClient ? "/client/payments" : "/wallet");
+      return;
+    }
     if (isClient) {
       navigate(`/profile/client?section=${section}`);
     } else {

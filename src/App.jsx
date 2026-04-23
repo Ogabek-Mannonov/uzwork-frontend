@@ -119,7 +119,7 @@ function App() {
             <Route path="/client/postjob" element={<PostJob />} />
             <Route path="/client/my-jobs" element={<MyJobs />} />
             <Route path="/client/proposals" element={<Proposals />} />
-            <Route path="/client/payments" element={<BillingPayments />} />  
+            <Route path="/client/payments" element={<Wallet />} />  
             <Route path="/client/management" element={<ContractManagement />} />
             <Route path="/client/security" element={<SecuritySettings />} />
             <Route path="/client/escrow" element={<Escrow />} />
@@ -134,6 +134,8 @@ function App() {
             </Route>
 
             {/* Wallet */}
+            <Route path="/billing" element={<Wallet />} />
+            <Route path="/payments" element={<Wallet />} />
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/wallet/transactions" element={<Transactions />} />
 
