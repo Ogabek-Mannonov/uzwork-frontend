@@ -15,7 +15,7 @@ import {
   rejectProposal,
   acceptProposal 
 } from "../../api/proposals";
-import { getUserProfile } from "../../api/common";
+import { getUserProfile, markAllNotificationsReadByType } from "../../api/common";
 import { findOrCreateProposalChat } from "../../api/messages";
 import { useThemeContext } from "../components/Theme/ThemeContext";
 import { useTranslation } from "react-i18next";
@@ -180,6 +180,8 @@ const Proposals = () => {
 
   useEffect(() => {
     fetchData();
+    // Mark proposal notifications as read when visiting this page
+    markAllNotificationsReadByType('proposal_');
   }, [fetchData]);
 
   const handleToggleShortlist = async (proposalId, currentStatus) => {

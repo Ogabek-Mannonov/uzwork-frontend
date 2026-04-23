@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { CheckCircle, AlertCircle, Info, AlertTriangle, X } from 'lucide-react';
 
-export function Toast({ message, type = 'error', onClose }) {
+export function Toast({ message, type = 'error', onClose, onClick }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -50,14 +50,17 @@ export function Toast({ message, type = 'error', onClose }) {
         style={{
           position: 'fixed',
           right: '20px',
+          bottom: '20px',
           zIndex: 9999,
           animation: 'slideInRight 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-          pointerEvents: 'auto'
+          pointerEvents: 'auto',
+          cursor: onClick ? 'pointer' : 'default'
         }}
+        onClick={onClick}
       >
         <div
           style={{
-            background: 'linear-gradient(to right, #ef4444, #dc2626)',
+            background: config.bg,
             color: 'white',
             padding: '16px 24px',
             borderRadius: '12px',
@@ -67,30 +70,19 @@ export function Toast({ message, type = 'error', onClose }) {
             gap: '12px',
             minWidth: '320px',
             maxWidth: '450px',
-            border: '1px solid rgba(248, 113, 113, 0.5)',
+            border: `1px solid ${config.border}`,
             backdropFilter: 'blur(10px)'
           }}
         >
-          {/* Warning Icon */}
+          {/* Icon */}
           <div
             style={{
               flexShrink: 0,
-              animation: 'bounce 1s infinite'
+              display: 'flex',
+              alignItems: 'center'
             }}
           >
-            <svg
-              style={{ width: '28px', height: '28px' }}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.5}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
+            {config.icon}
           </div>
 
           {/* Message */}
@@ -102,7 +94,10 @@ export function Toast({ message, type = 'error', onClose }) {
 
           {/* Close Button */}
           <button
-            onClick={onClose}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
             style={{
               flexShrink: 0,
               background: 'transparent',
@@ -114,7 +109,7 @@ export function Toast({ message, type = 'error', onClose }) {
               color: 'white'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(185, 28, 28, 0.8)';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
               e.currentTarget.style.transform = 'scale(1.1)';
             }}
             onMouseLeave={(e) => {
@@ -122,19 +117,7 @@ export function Toast({ message, type = 'error', onClose }) {
               e.currentTarget.style.transform = 'scale(1)';
             }}
           >
-            <svg
-              style={{ width: '20px', height: '20px' }}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X size={20} />
           </button>
         </div>
       </div>
