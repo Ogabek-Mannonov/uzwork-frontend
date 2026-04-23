@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, Filter, ThumbsDown, Heart, CheckCircle, ChevronDown, Award, Star } from "lucide-react";
 import "../../../assets/Freelancer/FindW/FindWork.css";
@@ -33,32 +33,34 @@ export default function FindWork() {
 
   // User details
   const [userData, setUserData] = useState(null);
-  const [profileCompletion, setProfileCompletion] = useState(0);
-  const [completionItems, setCompletionItems] = useState([]);
 
   // Calculate profile completion percentage
-  const calculateCompletion = (user, profile, portfolioItems = [], certifications = []) => {
+  const { profileCompletion, completionItems } = useMemo(() => {
+    if (!userData) return { profileCompletion: 0, completionItems: [] };
+    
+    // We assume userData here has combined user + profile data from fetch
+    const profile = userData; 
     const checks = [
-      { label: "Avatar", done: !!user?.avatar_url },
-      { label: "Ism / Familiya", done: !!(user?.first_name && user?.last_name) },
-      { label: "Sarlavha (Title)", done: !!(profile?.title && profile.title.trim && profile.title.trim()) },
-      { label: "Bio", done: !!(profile?.bio && profile.bio.length >= 20) },
-      { label: "Ko'nikmalar", done: (() => {
+      { label: t("findWork.layout.sidebar.checklist.avatar"), done: !!userData?.avatar_url },
+      { label: t("findWork.layout.sidebar.checklist.name"), done: !!(userData?.first_name && userData?.last_name) },
+      { label: t("findWork.layout.sidebar.checklist.title"), done: !!(profile?.title?.trim && profile.title.trim()) },
+      { label: t("findWork.layout.sidebar.checklist.bio"), done: !!(profile?.bio && profile.bio.length >= 20) },
+      { label: t("findWork.layout.sidebar.checklist.skills"), done: (() => {
           try {
             const parsed = typeof profile?.skills === 'string' ? JSON.parse(profile.skills) : profile?.skills;
             return Array.isArray(parsed) ? parsed.length >= 1 : false;
           } catch(e) { return false; }
       })() },
-      { label: "Soatlik stavka", done: !!(profile?.hourly_rate && Number(profile.hourly_rate) > 0) },
-      { label: "Kategoriya", done: !!profile?.category_id },
-      { label: "Joylashuv", done: !!(profile?.location && profile.location.trim()) },
-      { label: "Portfolio", done: portfolioItems.length >= 1 },
-      { label: "Sertifikat", done: certifications.length >= 1 },
+      { label: t("findWork.layout.sidebar.checklist.rate"), done: !!(profile?.hourly_rate && Number(profile.hourly_rate) > 0) },
+      { label: t("findWork.layout.sidebar.checklist.category"), done: !!profile?.category_id },
+      { label: t("findWork.layout.sidebar.checklist.location"), done: !!(profile?.location?.trim && profile.location.trim()) },
+      { label: t("findWork.layout.sidebar.checklist.portfolio"), done: !!userData?.has_portfolio },
+      { label: t("findWork.layout.sidebar.checklist.certification"), done: !!userData?.has_certifications },
     ];
     const done = checks.filter(c => c.done).length;
     const pct = Math.round((done / checks.length) * 100);
-    return { pct, checks };
-  };
+    return { profileCompletion: pct, completionItems: checks };
+  }, [userData, t]);
 
   useEffect(() => {
     // Load basic user from localStorage first for fast render
@@ -82,23 +84,22 @@ export default function FindWork() {
         if (profileRes?.success) {
           user = profileRes.data?.user || profileRes.data || {};
           profile = profileRes.data?.profile || profileRes.data || {};
-          // Update userData with fresh info (avatar, name, title etc.)
-          setUserData(prev => ({ ...prev, ...user, title: profile?.title }));
         }
 
         if (portfolioRes?.success) {
-          // Backend returns { data: { portfolio: [...] } } or { data: [...] }
           portfolioItems = portfolioRes.data?.portfolio || portfolioRes.data?.items || (Array.isArray(portfolioRes.data) ? portfolioRes.data : []);
         }
 
         if (certRes?.success) {
-          // Backend returns { data: { certifications: [...] } } or { data: [...] }
           certifications = certRes.data?.certifications || (Array.isArray(certRes.data) ? certRes.data : []);
         }
-
-        const { pct, checks } = calculateCompletion(user, profile, portfolioItems, certifications);
-        setProfileCompletion(pct);
-        setCompletionItems(checks);
+        setUserData(prev => ({ 
+          ...prev, 
+          ...user, 
+          ...profile, 
+          has_portfolio: portfolioItems.length > 0,
+          has_certifications: certifications.length > 0
+        }));
       } catch(e) {
         console.error("Profile completion fetch error:", e);
       }
@@ -179,60 +180,60 @@ export default function FindWork() {
         {/* LEFT SIDEBAR (FILTERS) */}
         <aside className={`fw-sidebar-left ${showFilters ? "mobile-open" : ""}`}>
           <div className="fw-filter-sidebar-header">
-            <h3>Filtrlar</h3>
+            <h3>{t("findWork.layout.filters.title") || "Filtrlar"}</h3>
             <button className="fw-close-filters-mobile" onClick={() => setShowFilters(false)}>✕</button>
           </div>
 
           <div className="fw-filter-group">
-            <h4>Ish turi</h4>
+            <h4>{t("findWork.layout.filters.jobType")}</h4>
             <label className="fw-filter-radio">
-              <input type="radio" name="jobType" value="all" checked={jobType === "all"} onChange={(e) => setJobType(e.target.value)} /> Barchasi
+              <input type="radio" name="jobType" value="all" checked={jobType === "all"} onChange={(e) => setJobType(e.target.value)} /> {t("findWork.layout.filters.all")}
             </label>
             <label className="fw-filter-radio">
-              <input type="radio" name="jobType" value="hourly" checked={jobType === "hourly"} onChange={(e) => setJobType(e.target.value)} /> Soatbay
+              <input type="radio" name="jobType" value="hourly" checked={jobType === "hourly"} onChange={(e) => setJobType(e.target.value)} /> {t("findWork.layout.filters.hourly")}
             </label>
             <label className="fw-filter-radio">
-              <input type="radio" name="jobType" value="fixed" checked={jobType === "fixed"} onChange={(e) => setJobType(e.target.value)} /> Qat'iy narx
-            </label>
-          </div>
-
-          <div className="fw-filter-group">
-            <h4>Takliflar soni</h4>
-            <label className="fw-filter-radio">
-              <input type="radio" name="proposals" value="all" checked={proposalsTier === "all"} onChange={(e) => setProposalsTier(e.target.value)} /> Barchasi
-            </label>
-            <label className="fw-filter-radio">
-              <input type="radio" name="proposals" value="less_5" checked={proposalsTier === "less_5"} onChange={(e) => setProposalsTier(e.target.value)} /> 5 tadan kam
-            </label>
-            <label className="fw-filter-radio">
-              <input type="radio" name="proposals" value="5_10" checked={proposalsTier === "5_10"} onChange={(e) => setProposalsTier(e.target.value)} /> 5 dan 10 tagacha
-            </label>
-            <label className="fw-filter-radio">
-              <input type="radio" name="proposals" value="10_15" checked={proposalsTier === "10_15"} onChange={(e) => setProposalsTier(e.target.value)} /> 10 dan 15 tagacha
-            </label>
-            <label className="fw-filter-radio">
-              <input type="radio" name="proposals" value="15_50" checked={proposalsTier === "15_50"} onChange={(e) => setProposalsTier(e.target.value)} /> 15 dan 50 tagacha
+              <input type="radio" name="jobType" value="fixed" checked={jobType === "fixed"} onChange={(e) => setJobType(e.target.value)} /> {t("findWork.layout.filters.fixed")}
             </label>
           </div>
 
           <div className="fw-filter-group">
-            <h4>Mijoz tarixi</h4>
+            <h4>{t("findWork.layout.filters.proposalsCount") || "Takliflar soni"}</h4>
             <label className="fw-filter-radio">
-              <input type="radio" name="clientHistory" value="all" checked={clientHistory === "all"} onChange={(e) => setClientHistory(e.target.value)} /> Barchasi
+              <input type="radio" name="proposals" value="all" checked={proposalsTier === "all"} onChange={(e) => setProposalsTier(e.target.value)} /> {t("findWork.layout.filters.all")}
             </label>
             <label className="fw-filter-radio">
-              <input type="radio" name="clientHistory" value="no_hires" checked={clientHistory === "no_hires"} onChange={(e) => setClientHistory(e.target.value)} /> Yangi mijoz (xarajati yo'q)
+              <input type="radio" name="proposals" value="less_5" checked={proposalsTier === "less_5"} onChange={(e) => setProposalsTier(e.target.value)} /> {t("findWork.layout.filters.lessThan5") || "5 tadan kam"}
             </label>
             <label className="fw-filter-radio">
-              <input type="radio" name="clientHistory" value="has_hires" checked={clientHistory === "has_hires"} onChange={(e) => setClientHistory(e.target.value)} /> Xarajat qilgan mijoz
+              <input type="radio" name="proposals" value="5_10" checked={proposalsTier === "5_10"} onChange={(e) => setProposalsTier(e.target.value)} /> {t("findWork.layout.filters.5to10") || "5 dan 10 tagacha"}
+            </label>
+            <label className="fw-filter-radio">
+              <input type="radio" name="proposals" value="10_15" checked={proposalsTier === "10_15"} onChange={(e) => setProposalsTier(e.target.value)} /> {t("findWork.layout.filters.10to15") || "10 dan 15 tagacha"}
+            </label>
+            <label className="fw-filter-radio">
+              <input type="radio" name="proposals" value="15_50" checked={proposalsTier === "15_50"} onChange={(e) => setProposalsTier(e.target.value)} /> {t("findWork.layout.filters.15to50") || "15 dan 50 tagacha"}
             </label>
           </div>
 
           <div className="fw-filter-group">
-            <h4>Byudjet</h4>
+            <h4>{t("findWork.layout.filters.clientHistory") || "Mijoz tarixi"}</h4>
+            <label className="fw-filter-radio">
+              <input type="radio" name="clientHistory" value="all" checked={clientHistory === "all"} onChange={(e) => setClientHistory(e.target.value)} /> {t("findWork.layout.filters.all")}
+            </label>
+            <label className="fw-filter-radio">
+              <input type="radio" name="clientHistory" value="no_hires" checked={clientHistory === "no_hires"} onChange={(e) => setClientHistory(e.target.value)} /> {t("findWork.layout.filters.newClient") || "Yangi mijoz (xarajati yo'q)"}
+            </label>
+            <label className="fw-filter-radio">
+              <input type="radio" name="clientHistory" value="has_hires" checked={clientHistory === "has_hires"} onChange={(e) => setClientHistory(e.target.value)} /> {t("findWork.layout.filters.hasSpent") || "Xarajat qilgan mijoz"}
+            </label>
+          </div>
+
+          <div className="fw-filter-group">
+            <h4>{t("findWork.layout.filters.budget")}</h4>
             <select className="fw-filter-select-full" value={budgetRange} onChange={(e) => setBudgetRange(e.target.value)}>
-              <option value="all">Istalgan summa</option>
-              <option value="0-100">$100 gacha</option>
+              <option value="all">{t("findWork.layout.filters.anyAmount")}</option>
+              <option value="0-100">{t("findWork.layout.filters.upTo100")}</option>
               <option value="100-500">$100 - $500</option>
               <option value="500-1000">$500 - $1K</option>
               <option value="1000+">$1K +</option>
@@ -240,14 +241,14 @@ export default function FindWork() {
           </div>
 
           <div className="fw-filter-group">
-            <h4>Tartiblash</h4>
+            <h4>{t("findWork.layout.filters.sort")}</h4>
             <select className="fw-filter-select-full" value={`${sortBy}|${sortOrder}`} onChange={(e) => {
               const [sb, so] = e.target.value.split('|'); 
               setSortBy(sb); setSortOrder(so);
             }}>
-              <option value="created_at|DESC">Eng yangi birinchi</option>
-              <option value="budget_min|DESC">Katta byudjet birinchi</option>
-              <option value="budget_min|ASC">Kichik byudjet birinchi</option>
+              <option value="created_at|DESC">{t("findWork.layout.filters.newestFirst")}</option>
+              <option value="budget_min|DESC">{t("findWork.layout.filters.highestBudget")}</option>
+              <option value="budget_min|ASC">{t("findWork.layout.filters.lowestBudget")}</option>
             </select>
           </div>
         </aside>
@@ -375,7 +376,7 @@ export default function FindWork() {
               {profileCompletion === 100 && (
                 <div className="fw-completion-success" style={{ marginTop: '12px', padding: '12px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: '#059669', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                     <CheckCircle size={16} color="#10b981" /> Profilingiz 100% to'ldirildi! Endi ishlarni olish imkoniyatingiz yuqori.
+                     <CheckCircle size={16} color="#10b981" /> {t("findWork.layout.sidebar.checklist.completeMsg")}
                   </p>
                 </div>
               )}

@@ -555,7 +555,16 @@
         "sort": "Sort by",
         "newestFirst": "Newest first",
         "highestBudget": "Highest budget",
-        "lowestBudget": "Lowest budget"
+        "lowestBudget": "Lowest budget",
+        "title": "Filters",
+        "proposalsCount": "Proposals Count",
+        "lessThan5": "Less than 5",
+        "5to10": "5 to 10",
+        "10to15": "10 to 15",
+        "15to50": "15 to 50",
+        "clientHistory": "Client History",
+        "newClient": "New client (no spend)",
+        "hasSpent": "Client with spend"
       },
       "sidebar": {
         "completeProfile": "Complete your profile",
@@ -566,7 +575,20 @@
         "availabilityBadge": "Availability badge",
         "off": "Off",
         "boostProfile": "Boost your profile",
-        "statsAnalytics": "Stats & Analytics"
+        "statsAnalytics": "Stats & Analytics",
+        "checklist": {
+          "avatar": "Avatar",
+          "name": "First / Last Name",
+          "title": "Professional Title",
+          "bio": "Bio",
+          "skills": "Skills",
+          "rate": "Hourly Rate",
+          "category": "Category",
+          "location": "Location",
+          "portfolio": "Portfolio",
+          "certification": "Certification",
+          "completeMsg": "Your profile is 100% complete! You're more likely to win jobs now."
+        }
       }
     },
     "drawer": {
@@ -768,8 +790,36 @@
         "lowercase": "One lowercase letter",
         "number": "One number",
         "special": "One special character",
-        "match": "Passwords match"
+        "match": "Passwords match",
+        "weak": "Weak",
+        "medium": "Medium",
+        "strong": "Strong",
+        "matchError": "Passwords do not match"
       },
+      "updateSuccess": "Password updated successfully!",
+      "refresh": "Refresh",
+      "noSessions": "No active sessions found.",
+      "revokeSessionTitle": "Revoke Session",
+      "revokeSessionConfirm": "Are you sure you want to end the session on \"{{device}}\"?",
+      "twoFactor": {
+        "title": "Two-Factor Authentication (2FA)",
+        "desc": "Add an extra layer of security to your account. A special code will be required when logging in.",
+        "status": "Status",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "setup": "Setup",
+        "disable": "Disable",
+        "setupTitle": "2FA Setup",
+        "setupStep1": "Step 1: Scan this QR code with your Authenticator app",
+        "setupStep2": "Step 2: Enter the 6-digit code from the app",
+        "placeholder": "000000",
+        "verify": "Verify",
+        "secretKey": "Secret Key",
+        "copyKey": "Copy Key",
+        "success": "2FA enabled successfully!",
+        "error": "Invalid code, please try again."
+      },
+      "revokeSuccess": "Session revoked successfully.",
       "twoStep": "Two-step verification",
       "twoStepDesc": "Add an extra layer of security to your account by requiring a code from your phone",
       "biometric": "Biometric login",

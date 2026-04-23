@@ -13,109 +13,6 @@ const api = axios.create({
 
 // Access token ni headerga qo‘shish
 api.interceptors.request.use((config) => {
-  // Mock responses for specific endpoints
-  if (config.url === "/profiles/security") {
-    return Promise.resolve({
-      data: {
-        success: true,
-        data: {
-          twoFactorEnabled: false,
-          biometricEnabled: false,
-          loginNotifications: true,
-          sessionTimeout: true,
-          passwordStrength: "strong",
-          lastPasswordChange: "2024-01-15",
-          activeSessions: [
-            {
-              id: 1,
-              device: "Windows PC - Chrome",
-              browser: "Chrome 120.0",
-              os: "Windows 11",
-              location: "Tashkent, Uzbekistan",
-              ip: "192.168.1.1",
-              lastActive: "Now",
-              current: true
-            },
-            {
-              id: 2,
-              device: "iPhone 14 Pro",
-              browser: "Safari 17.0",
-              os: "iOS 17.2",
-              location: "Tashkent, Uzbekistan",
-              ip: "192.168.1.2",
-              lastActive: "2 hours ago",
-              current: false
-            }
-          ]
-        }
-      },
-      status: 200,
-      statusText: "OK",
-      headers: {},
-      config
-    });
-  }
-  if (config.url === "/freelancers/security/portfolio") {
-    return Promise.resolve({
-      data: {
-        success: true,
-        data: [
-          {
-            id: 1,
-            title: "E-commerce Website",
-            description: "Full-stack e-commerce platform with React and Node.js",
-            technologies: ["React", "Node.js", "MongoDB"],
-            image: "https://via.placeholder.com/300x200",
-            link: "https://example.com"
-          },
-          {
-            id: 2,
-            title: "Mobile App",
-            description: "Cross-platform mobile app using React Native",
-            technologies: ["React Native", "Firebase"],
-            image: "https://via.placeholder.com/300x200",
-            link: "https://example.com"
-          }
-        ]
-      },
-      status: 200,
-      statusText: "OK",
-      headers: {},
-      config
-    });
-  }
-  if (config.url === "/freelancers/security/certifications") {
-    return Promise.resolve({
-      data: {
-        success: true,
-        data: [
-          {
-            id: 1,
-            name: "AWS Certified Developer",
-            issuer: "Amazon Web Services",
-            issueDate: "2023-06-15",
-            expiryDate: "2026-06-15",
-            credentialId: "AWS-DEV-123456",
-            file: "https://via.placeholder.com/300x200"
-          },
-          {
-            id: 2,
-            name: "Google Cloud Professional",
-            issuer: "Google Cloud",
-            issueDate: "2023-08-20",
-            expiryDate: "2026-08-20",
-            credentialId: "GC-PRO-789012",
-            file: "https://via.placeholder.com/300x200"
-          }
-        ]
-      },
-      status: 200,
-      statusText: "OK",
-      headers: {},
-      config
-    });
-  }
-
   const token = localStorage.getItem("accessToken");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
@@ -342,7 +239,7 @@ export const resetPassword = async (payload) => {
  */
 export const changePassword = async (payload) => {
   try {
-    const res = await api.put("/auth/change-password", payload);
+    const res = await api.post("/auth/change-password", payload);
     return unwrap(res);
   } catch (err) {
     const msg =
@@ -350,6 +247,64 @@ export const changePassword = async (payload) => {
       err?.message ||
       "Change-password request failed";
     return { success: false, message: msg };
+  }
+};
+
+/* ===================== ✅ SESSIONS ===================== */
+
+export const getSessions = async () => {
+  try {
+    const res = await api.get("/auth/sessions");
+    return unwrap(res);
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err.message };
+  }
+};
+
+export const revokeSession = async (id) => {
+  try {
+    const res = await api.delete(`/auth/sessions/${id}`);
+    return unwrap(res);
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err.message };
+  }
+};
+
+/* ===================== ✅ SECURITY SETTINGS ===================== */
+
+export const getSecuritySettings = async () => {
+  try {
+    const res = await api.get("/auth/security-settings");
+    return unwrap(res);
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err.message };
+  }
+};
+
+export const enable2FA = async () => {
+  try {
+    const res = await api.post("/auth/2fa/enable");
+    return unwrap(res);
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err.message };
+  }
+};
+
+export const verify2FA = async (code, secret) => {
+  try {
+    const res = await api.post("/auth/2fa/verify", { code, secret });
+    return unwrap(res);
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err.message };
+  }
+};
+
+export const disable2FA = async () => {
+  try {
+    const res = await api.post("/auth/2fa/disable");
+    return unwrap(res);
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err.message };
   }
 };
 

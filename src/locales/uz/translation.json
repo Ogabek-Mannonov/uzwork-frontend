@@ -555,7 +555,16 @@
         "sort": "Tartiblash",
         "newestFirst": "Eng yangi birinchi",
         "highestBudget": "Katta byudjetli",
-        "lowestBudget": "Kichik byudjetli"
+        "lowestBudget": "Kichik byudjetli",
+        "title": "Filtrlar",
+        "proposalsCount": "Takliflar soni",
+        "lessThan5": "5 tadan kam",
+        "5to10": "5 dan 10 tagacha",
+        "10to15": "10 dan 15 tagacha",
+        "15to50": "15 dan 50 tagacha",
+        "clientHistory": "Mijoz tarixi",
+        "newClient": "Yangi mijoz (xarajati yo'q)",
+        "hasSpent": "Xarajat qilgan mijoz"
       },
       "sidebar": {
         "completeProfile": "Profilingizni to'ldiring",
@@ -566,7 +575,20 @@
         "availabilityBadge": "Mavjudlik nishoni",
         "off": "O'chirilgan",
         "boostProfile": "Profilingizni ko'tarish",
-        "statsAnalytics": "Statistika va tahlillar"
+        "statsAnalytics": "Statistika va tahlillar",
+        "checklist": {
+          "avatar": "Avatar",
+          "name": "Ism / Familiya",
+          "title": "Sarlavha (Title)",
+          "bio": "Bio",
+          "skills": "Ko'nikmalar",
+          "rate": "Soatlik stavka",
+          "category": "Kategoriya",
+          "location": "Joylashuv",
+          "portfolio": "Portfolio",
+          "certification": "Sertifikat",
+          "completeMsg": "Profilingiz 100% to'ldirildi! Endi ishlarni olish imkoniyatingiz yuqori."
+        }
       }
     },
     "drawer": {
@@ -766,8 +788,36 @@
         "lowercase": "Bitta kichik harf",
         "number": "Bitta raqam",
         "special": "Bitta maxsus belgi",
-        "match": "Parollar bir xil"
+        "match": "Parollar bir xil",
+        "weak": "Zaif",
+        "medium": "O'rta",
+        "strong": "Kuchli",
+        "matchError": "Parollar mos kelmadi"
       },
+      "updateSuccess": "Parol muvaffaqiyatli yangilandi!",
+      "refresh": "Yangilash",
+      "noSessions": "Faol seanslar topilmadi.",
+      "revokeSessionTitle": "Seansni o'chirish",
+      "revokeSessionConfirm": "\"{{device}}\" qurilmasidagi seansni o'chirmoqchimisiz?",
+      "twoFactor": {
+        "title": "Ikki bosqichli autentifikatsiya (2FA)",
+        "desc": "Hisobingizga qo'shimcha xavfsizlik qatlamini qo'shing. Kirish paytida maxsus kod talab qilinadi.",
+        "status": "Holat",
+        "enabled": "Yoqilgan",
+        "disabled": "O'chirilgan",
+        "setup": "Sozlash",
+        "disable": "O'chirish",
+        "setupTitle": "2FA sozlash",
+        "setupStep1": "1-qadam: Authenticator ilovangiz bilan ushbu QR kodni skanerlang",
+        "setupStep2": "2-qadam: Ilovadagi 6 xonali kodni kiriting",
+        "placeholder": "000000",
+        "verify": "Tasdiqlash",
+        "secretKey": "Maxfiy kalit",
+        "copyKey": "Kalitni nusxalash",
+        "success": "2FA muvaffaqiyatli yoqildi!",
+        "error": "Noto'g'ri kod, qaytadan urining."
+      },
+      "revokeSuccess": "Sessiya muvaffaqiyatli o'chirildi.",
       "twoStep": "Ikki bosqichli tasdiqlash",
       "twoStepDesc": "Telefoningizga keladigan kodni talab qilish orqali hisobingizga qo'shimcha xavfsizlik qavatini qo'shing",
       "biometric": "Biometrik kirish",
