@@ -81,7 +81,9 @@ import {
   updateMyProfile, 
   uploadImage, 
   getSecuritySettings,
-  getNotifications
+  getNotifications,
+  getNotificationSettings,
+  updateNotificationSettings
 } from "../../api/common";
 import { 
   getBalance, 
@@ -231,6 +233,33 @@ const Settings = () => {
             setActiveSessions(securityRes.data.activeSessions || []);
           }
           break;
+        case 'notifications':
+          const notiSettingsRes = await getNotificationSettings();
+          if (notiSettingsRes?.success) {
+            const s = notiSettingsRes.data;
+            setNotificationSettings([
+              {
+                category: "Jobs & Proposals",
+                settings: [
+                  { id: "proposal_received", label: "New proposal received", description: "Notify when a freelancer submits a proposal to your job", enabled: s.proposal_received },
+                  { id: "proposal_withdrawn", label: "Proposal withdrawn", description: "Notify when a freelancer withdraws their proposal", enabled: s.proposal_withdrawn }
+                ]
+              },
+              {
+                category: "Payments & Billing",
+                settings: [
+                  { id: "payment_success", label: "Payment successful", description: "Confirm when a payment has been processed correctly", enabled: s.payment_success },
+                  { id: "invoice_ready", label: "Invoice ready", description: "Notify when a new invoice is available for download", enabled: s.invoice_ready }
+                ]
+              }
+            ]);
+            // Delivery preferences
+            setDeliveryPrefs({
+              email: s.email_notifications,
+              push: s.push_notifications
+            });
+          }
+          break;
         default:
           break;
       }
@@ -362,6 +391,11 @@ const Settings = () => {
       ]
     }
   ]);
+
+  const [deliveryPrefs, setDeliveryPrefs] = useState({
+    email: true,
+    push: true
+  });
 
   const [activeSessions, setActiveSessions] = useState([
     {
@@ -506,15 +540,43 @@ const Settings = () => {
     // TODO: Connect to updateSecuritySettings API
   };
 
-  const handleToggleNotification = (catIdx, settingId) => {
+  const handleToggleNotification = async (catIdx, settingId) => {
+    let newValue = false;
     setNotificationSettings(prev => {
       const newSettings = [...prev];
       const category = { ...newSettings[catIdx] };
-      category.settings = category.settings.map(s => s.id === settingId ? { ...s, enabled: !s.enabled } : s);
+      category.settings = category.settings.map(s => {
+        if (s.id === settingId) {
+          newValue = !s.enabled;
+          return { ...s, enabled: newValue };
+        }
+        return s;
+      });
       newSettings[catIdx] = category;
       return newSettings;
     });
-    showMessage("success", "Notification preference updated");
+
+    try {
+      await updateNotificationSettings({ [settingId]: newValue });
+      showMessage("success", "Xabarnoma sozlamasi yangilandi");
+    } catch (err) {
+      showMessage("error", "Saqlashda xatolik");
+    }
+  };
+
+  const handleToggleDeliveryPref = async (type) => {
+    const newValue = !deliveryPrefs[type];
+    setDeliveryPrefs(prev => ({ ...prev, [type]: newValue }));
+    
+    try {
+      const payload = type === 'email' 
+        ? { email_notifications: newValue } 
+        : { push_notifications: newValue };
+      await updateNotificationSettings(payload);
+      showMessage("success", "Yetkazib berish sozlamasi yangilandi");
+    } catch (err) {
+      showMessage("error", "Saqlashda xatolik");
+    }
   };
 
   const handleRevokeSession = (sessionId) => {
@@ -1497,11 +1559,11 @@ const Settings = () => {
                 <h2>{t('clientProfile.notifications.deliveryPreferences')}</h2>
                 <div className="preferences-options">
                   <label className="preference-option">
-                    <input type="checkbox" defaultChecked onChange={() => handleToggleNotification(0, 'all_email')} />
+                    <input type="checkbox" checked={deliveryPrefs.email} onChange={() => handleToggleDeliveryPref('email')} />
                     <span>{t('clientProfile.notifications.emailNotifications')}</span>
                   </label>
                   <label className="preference-option">
-                    <input type="checkbox" defaultChecked onChange={() => handleToggleNotification(0, 'all_push')} />
+                    <input type="checkbox" checked={deliveryPrefs.push} onChange={() => handleToggleDeliveryPref('push')} />
                     <span>{t('clientProfile.notifications.pushNotifications')}</span>
                   </label>
                 </div>

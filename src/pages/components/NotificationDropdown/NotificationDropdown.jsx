@@ -63,7 +63,22 @@ const NotificationDropdown = () => {
       };
 
       socket.on('newNotification', handleNewNotification);
-      return () => socket.off('newNotification', handleNewNotification);
+
+      socket.on('notificationRead', ({ id }) => {
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      });
+
+      socket.on('notificationsAllRead', () => {
+        setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+        setUnreadCount(0);
+      });
+
+      return () => {
+        socket.off('newNotification', handleNewNotification);
+        socket.off('notificationRead');
+        socket.off('notificationsAllRead');
+      };
     });
 
     return () => cleanup?.();
@@ -131,10 +146,84 @@ const NotificationDropdown = () => {
     }
   };
 
+  const handleNotificationClick = (notif) => {
+    // 1. O'qilgan deb belgilash
+    if (!notif.is_read) {
+      handleMarkRead(notif.id);
+    }
+
+    // 2. Turiga qarab navigatsiya qilish
+    const type = notif.type;
+    const related_id = notif.data?.related_id;
+    
+    switch (type) {
+      case 'proposal_received':
+        navigate('/client/proposals');
+        break;
+      case 'proposal_accepted':
+      case 'proposal_rejected':
+      case 'job_invitation':
+        navigate('/my-proposals');
+        break;
+      case 'contract_started':
+      case 'contract_completed':
+      case 'contract_cancelled':
+      case 'milestone_submitted':
+      case 'milestone_approved':
+        if (related_id) {
+          navigate(`/contracts/${related_id}`);
+        } else {
+          navigate('/contracts');
+        }
+        break;
+      case 'payment_received':
+      case 'payment_sent':
+      case 'withdrawal_request':
+        navigate('/wallet');
+        break;
+      case 'dispute_opened':
+      case 'dispute_resolved':
+        if (related_id) {
+          navigate(`/disputes/${related_id}`);
+        } else {
+          navigate('/disputes');
+        }
+        break;
+      case 'message':
+        if (related_id) {
+          navigate(`/messages/${related_id}`);
+        } else {
+          navigate('/messages');
+        }
+        break;
+      default:
+        // Default holatda bildirishnomalar sahifasiga
+        navigate('/profile?section=notifications');
+        break;
+    }
+    
+    setIsOpen(false);
+  };
+
   const formatTime = (dateStr) => {
-    const date = new Date(dateStr);
+    if (!dateStr) return '';
+    
+    // Serverdan kelgan vaqtni UTC deb hisoblash uchun 'Z' qo'shamiz (agar yo'q bo'lsa)
+    let date = new Date(dateStr);
+    if (typeof dateStr === 'string' && !dateStr.includes('Z') && !dateStr.includes('+')) {
+      // Ba'zan Postgres '2024-01-01 12:00:00' formatida qaytaradi, buni UTC deb ko'rsatish kerak
+      const utcDate = new Date(dateStr.replace(' ', 'T') + 'Z');
+      if (!isNaN(utcDate.getTime())) {
+        date = utcDate;
+      }
+    }
+
     const now = new Date();
     const diffMs = now - date;
+    
+    // Agar vaqt kelajakda bo'lib qolsa (server/client vaqti farqi), 'Hozir' deb ko'rsatamiz
+    if (diffMs < 0) return 'Hozir';
+
     const diffMin = Math.floor(diffMs / 60000);
     const diffHour = Math.floor(diffMin / 60);
     const diffDay = Math.floor(diffHour / 24);
@@ -143,7 +232,7 @@ const NotificationDropdown = () => {
     if (diffMin < 60) return `${diffMin} daqiqa oldin`;
     if (diffHour < 24) return `${diffHour} soat oldin`;
     if (diffDay < 7) return `${diffDay} kun oldin`;
-    return date.toLocaleDateString();
+    return date.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' });
   };
 
   return (
@@ -178,7 +267,7 @@ const NotificationDropdown = () => {
                   <div 
                     key={notif.id} 
                     className={`uzwork-notif-item ${notif.is_read ? '' : 'unread'}`}
-                    onClick={() => handleMarkRead(notif.id)}
+                    onClick={() => handleNotificationClick(notif)}
                   >
                     <div className={`uzwork-notif-icon-box ${color}`}>
                       {icon}

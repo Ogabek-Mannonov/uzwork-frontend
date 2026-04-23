@@ -82,6 +82,46 @@ export const markAllNotificationsRead = async () => {
   }
 };
 
+/** Xabarnoma sozlamalarini olish */
+export const getNotificationSettings = async () => {
+  try {
+    const res = await api.get("/notifications/settings");
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Xabarnoma sozlamalarini yangilash */
+export const updateNotificationSettings = async (payload) => {
+  try {
+    const res = await api.put("/notifications/settings", payload);
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** O'qilmagan takliflar sonini olish */
+export const getUnreadProposalsCount = async () => {
+  try {
+    const res = await api.get("/notifications/unread-proposals-count");
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Bildirishnomalarni turi bo'yicha o'qilgan deb belgilandi */
+export const markAllNotificationsReadByType = async (typePrefix) => {
+  try {
+    const res = await api.post("/notifications/mark-all-read-by-type", { typePrefix });
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
 // ===================== RATINGS =====================
 
 /** Reyting qo'shish */

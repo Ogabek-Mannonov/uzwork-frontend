@@ -349,6 +349,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
 
 
   const [unreadCount, setUnreadCount] = useState(0);
+  const [proposalsCount, setProposalsCount] = useState(0);
   const audioRef = useRef(new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"));
 
   // Brauzer bildirishnomasi funksiyasi
@@ -366,18 +367,23 @@ function AuthHeader({ i18n, changeLanguage, user }) {
       Notification.requestPermission();
     }
 
-    const fetchCount = async () => {
+    const fetchCounts = async () => {
       try {
-        const res = await import("../../../api/messages").then(m => m.getUnreadMessagesCount());
-        if (res?.success && mounted) {
-          setUnreadCount(res.data.unread_count);
+        const [msgRes, propRes] = await Promise.all([
+          import("../../../api/messages").then(m => m.getUnreadMessagesCount()),
+          import("../../../api/common").then(m => m.getUnreadProposalsCount())
+        ]);
+        
+        if (mounted) {
+          if (msgRes?.success) setUnreadCount(msgRes.data.unread_count);
+          if (propRes?.success) setProposalsCount(propRes.data.unread_count);
         }
       } catch (err) {
-        console.error("Unread count fetch error:", err);
+        console.error("Unread counts fetch error:", err);
       }
     };
 
-    fetchCount();
+    fetchCounts();
 
     let socketObj = null;
     import("../../../hooks/useSocket").then(({ getSocket }) => {
@@ -398,7 +404,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
         }
       };
 
-      // 2. YANGI BILDIRISNOMA (Proporsal, Payment, New Job va h.k.)
+      // 2. YANGI BILDIRISNOMA (Proposal, Payment, New Job va h.k.)
       const handleNewNotification = (noti) => {
         // Ovoz
         audioRef.current.play().catch(e => console.warn("Audio play blocked:", e));
@@ -407,16 +413,28 @@ function AuthHeader({ i18n, changeLanguage, user }) {
         // Visual Toast
         if (mounted) {
           setActiveToast(noti);
+          // Agar taklif bilan bog'liq bo'lsa, sonini yangilaymiz
+          if (noti.type && (noti.type.startsWith('proposal_') || noti.type === 'job_invitation')) {
+            fetchCounts();
+          }
         }
       };
 
-      const handleRead = () => fetchCount();
-      const handleUnreadUpdate = () => fetchCount();
+      const handleRead = () => fetchCounts();
+      const handleUnreadUpdate = () => fetchCounts();
 
       socketObj.on("newMessage", handleNewMessage);
       socketObj.on("newNotification", handleNewNotification);
       socketObj.on("unreadUpdate", handleUnreadUpdate);
+      // 3. BILDIRISHNOMA O'QILGANDA
+      const handleNotifRead = () => {
+        if (mounted) fetchCounts();
+      };
+
       socketObj.on("messagesRead", handleRead);
+      socketObj.on("notificationRead", handleNotifRead);
+      socketObj.on("notificationsAllRead", handleNotifRead);
+      socketObj.on("notificationsAllReadByType", handleNotifRead);
     });
 
     return () => {
@@ -426,6 +444,9 @@ function AuthHeader({ i18n, changeLanguage, user }) {
         socketObj.off("newNotification");
         socketObj.off("unreadUpdate");
         socketObj.off("messagesRead");
+        socketObj.off("notificationRead");
+        socketObj.off("notificationsAllRead");
+        socketObj.off("notificationsAllReadByType");
       }
     };
   }, [user?.id]);
@@ -448,9 +469,9 @@ function AuthHeader({ i18n, changeLanguage, user }) {
 
     return base.map((l) => ({
       ...l,
-      badge: l.to === "/messages" ? unreadCount : 0,
+      badge: l.to === "/messages" ? unreadCount : (l.to.includes("proposals") ? proposalsCount : 0),
     }));
-  }, [t, isClient, unreadCount]);
+  }, [t, isClient, unreadCount, proposalsCount]);
 
   const handleSearch = (e) => {
     if (e.key === "Enter" || e.type === "click") {
@@ -534,9 +555,14 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                         <Briefcase size={16} />
                         <span>{t("navbar.myJobs")}</span>
                       </Link>
-                      <Link to="/client/proposals" className="dropdown__link">
+                      <Link to="/client/proposals" className="dropdown__link" style={{ display: 'flex', alignItems: 'center' }}>
                         <Users size={16} />
                         <span>{t("navbar.proposals")}</span>
+                        {proposalsCount > 0 && (
+                          <span className="nav__badge unread-badge" style={{ marginLeft: 'auto', position: 'static', transform: 'none' }}>
+                            {proposalsCount > 99 ? "99+" : proposalsCount}
+                          </span>
+                        )}
                       </Link>
                       <Link to="/client/talent" className="dropdown__link">
                         <Star size={16} />
@@ -780,6 +806,32 @@ function AuthHeader({ i18n, changeLanguage, user }) {
             return 'info';
           })()}
           onClose={() => setActiveToast(null)} 
+          onClick={() => {
+            const type = activeToast.type;
+            const relatedId = activeToast.data?.related_id || activeToast.relatedId;
+            switch (type) {
+              case 'proposal_received': navigate('/client/proposals'); break;
+              case 'proposal_accepted':
+              case 'proposal_rejected':
+              case 'job_invitation': navigate('/my-proposals'); break;
+              case 'contract_started':
+              case 'contract_completed':
+              case 'contract_cancelled':
+              case 'milestone_submitted':
+              case 'milestone_approved':
+                if (relatedId) navigate(`/contracts/${relatedId}`);
+                else navigate('/contracts');
+                break;
+              case 'payment_received':
+              case 'payment_sent': navigate('/wallet'); break;
+              case 'message':
+                if (relatedId) navigate(`/messages/${relatedId}`);
+                else navigate('/messages');
+                break;
+              default: navigate('/profile?section=notifications'); break;
+            }
+            setActiveToast(null);
+          }}
         />
       )}
 

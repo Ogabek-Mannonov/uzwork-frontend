@@ -17,6 +17,7 @@ import { getMyProposals } from "../../../api/proposals";
 import { getJobById } from "../../../api/jobs";
 import JobDetailsDrawer from "../../components/JobDetailsDrawer";
 import ProposalDetailsDrawer from "../../components/ProposalDetailsDrawer";
+import { markAllNotificationsReadByType } from "../../../api/common";
 import "./MyProposals.css";
 
 const STATUS_MAP = {
@@ -61,6 +62,8 @@ export default function MyProposals() {
       }
     };
     fetchProposals();
+    // Mark proposal notifications as read when visiting this page
+    markAllNotificationsReadByType('proposal_');
   }, [t]);
 
   const handleOpenJobDrawer = async (jobId) => {
