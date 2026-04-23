@@ -14,6 +14,7 @@ import "../header/Header.css";
 import "../../../assets/style/FreeNavbar.css";
 import "../../../assets/style/theme.css";
 import NotificationDropdown from "../NotificationDropdown/NotificationDropdown";
+import { Toast } from "../Toast";
 
 const getToken = () => localStorage.getItem("accessToken");
 
@@ -324,6 +325,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
   const jobsRef = useRef(null);
   const profileRef = useRef(null);
   const navigate = useNavigate();
+  const [activeToast, setActiveToast] = useState(null);
 
   const isClient = user?.role === "client";
 
@@ -402,6 +404,10 @@ function AuthHeader({ i18n, changeLanguage, user }) {
         audioRef.current.play().catch(e => console.warn("Audio play blocked:", e));
         // Brauzer xabari
         showBrowserNotification(noti.title || "Bildirishnoma", noti.message || noti.body || "Yangi bildirishnoma");
+        // Visual Toast
+        if (mounted) {
+          setActiveToast(noti);
+        }
       };
 
       const handleRead = () => fetchCount();
@@ -762,6 +768,20 @@ function AuthHeader({ i18n, changeLanguage, user }) {
           </div>
         </div>
       </header>
+
+      {activeToast && (
+        <Toast 
+          message={activeToast.message || activeToast.title || "Yangi bildirishnoma"} 
+          type={(() => {
+            const t = activeToast.type;
+            if (['proposal_accepted', 'contract_started', 'contract_completed', 'milestone_approved', 'dispute_resolved', 'verification_status'].includes(t)) return 'success';
+            if (['proposal_rejected', 'contract_cancelled', 'dispute_opened', 'security_update', 'error'].includes(t)) return 'error';
+            if (['job_invitation', 'warning'].includes(t)) return 'warning';
+            return 'info';
+          })()}
+          onClose={() => setActiveToast(null)} 
+        />
+      )}
 
       <div className={`mobile-drawer${drawerOpen ? " open" : ""}`} aria-modal="true" role="dialog">
         <div className="drawer-overlay" onClick={() => setDrawerOpen(false)} />

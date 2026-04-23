@@ -1,7 +1,8 @@
 // components/Toast.jsx
 import { useEffect } from 'react';
+import { CheckCircle, AlertCircle, Info, AlertTriangle, X } from 'lucide-react';
 
-export function Toast({ message, onClose }) {
+export function Toast({ message, type = 'error', onClose }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -10,12 +11,44 @@ export function Toast({ message, onClose }) {
     return () => clearTimeout(timer);
   }, [onClose]);
 
+  const getConfig = () => {
+    switch (type) {
+      case 'success':
+        return {
+          bg: 'linear-gradient(135deg, #10b981, #059669)',
+          icon: <CheckCircle size={24} />,
+          border: 'rgba(16, 185, 129, 0.5)'
+        };
+      case 'warning':
+        return {
+          bg: 'linear-gradient(135deg, #f59e0b, #d97706)',
+          icon: <AlertTriangle size={24} />,
+          border: 'rgba(245, 158, 11, 0.5)'
+        };
+      case 'info':
+        return {
+          bg: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+          icon: <Info size={24} />,
+          border: 'rgba(59, 130, 246, 0.5)'
+        };
+      case 'error':
+      default:
+        return {
+          bg: 'linear-gradient(135deg, #ef4444, #dc2626)',
+          icon: <AlertCircle size={24} />,
+          border: 'rgba(239, 68, 68, 0.5)'
+        };
+    }
+  };
+
+  const config = getConfig();
+
   return (
     <>
       <div
+        className="uzwork-toast-wrapper"
         style={{
           position: 'fixed',
-          top: '20px',
           right: '20px',
           zIndex: 9999,
           animation: 'slideInRight 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)',

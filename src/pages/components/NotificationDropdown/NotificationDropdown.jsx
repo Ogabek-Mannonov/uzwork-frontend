@@ -102,17 +102,32 @@ const NotificationDropdown = () => {
       case 'proposal_received': return { icon: <Briefcase size={18} />, color: 'purple' };
       case 'proposal_accepted': return { icon: <UserCheck size={18} />, color: 'green' };
       case 'proposal_rejected': return { icon: <UserX size={18} />, color: 'red' };
+      case 'job_invitation': return { icon: <ArrowUpRight size={18} />, color: 'orange' };
+      
+      case 'contract_started': return { icon: <CheckCircle size={18} />, color: 'blue' };
+      case 'contract_completed': return { icon: <Lock size={18} />, color: 'green' };
+      case 'contract_cancelled': return { icon: <AlertTriangle size={18} />, color: 'red' };
+      
+      case 'milestone_submitted': return { icon: <Info size={18} />, color: 'orange' };
+      case 'milestone_approved': return { icon: <CheckCircle size={18} />, color: 'green' };
+      
       case 'payment_received': return { icon: <ArrowDownLeft size={18} />, color: 'green' };
       case 'payment_sent': return { icon: <ArrowUpRight size={18} />, color: 'blue' };
       case 'withdrawal_request': return { icon: <DollarSign size={18} />, color: 'orange' };
       case 'escrow_hold': return { icon: <Lock size={18} />, color: 'purple' };
-      case 'payment': return { icon: <DollarSign size={18} />, color: 'green' };
-      case 'project': 
-      case 'job': return { icon: <Briefcase size={18} />, color: 'purple' };
+      
+      case 'dispute_opened': return { icon: <AlertCircle size={18} />, color: 'red' };
+      case 'dispute_resolved': return { icon: <CheckCircle size={18} />, color: 'green' };
+      
+      case 'new_review': return { icon: <MoreHorizontal size={18} />, color: 'purple' };
+      case 'security_update': return { icon: <Lock size={18} />, color: 'red' };
+      case 'verification_status': return { icon: <UserCheck size={18} />, color: 'blue' };
+      
+      case 'new_job_posted': return { icon: <Briefcase size={18} />, color: 'blue' };
       case 'success': return { icon: <CheckCircle size={18} />, color: 'green' };
       case 'warning': return { icon: <AlertTriangle size={18} />, color: 'orange' };
       case 'error': return { icon: <AlertCircle size={18} />, color: 'red' };
-      default: return { icon: <Info size={18} />, color: 'blue' };
+      default: return { icon: <Bell size={18} />, color: 'blue' };
     }
   };
 
