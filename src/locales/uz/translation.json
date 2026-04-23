@@ -677,6 +677,8 @@
       "escrow_hold": "Escrow ushlab turish",
       "escrow_release": "To'lov o'tkazildi",
       "fee": "Xizmat haqi",
+      "proposal_deposit": "Taklif uchun to'lov",
+      "premium_activation": "Premium akkaunt",
       "refund": "Qaytarildi"
     },
     "history": "Tranzaksiyalar tarixi",
@@ -1262,5 +1264,24 @@
       "error": "Xato yuz berdi"
     },
     "loading": "Yuklanmoqda..."
+  },
+  "reports": {
+    "title": "Moliyaviy Hisobotlar",
+    "subtitle": "Daromadlaringiz va tranzaksiyalaringizni kuzatib boring",
+    "weekly": "Haftalik",
+    "monthly": "Oylik",
+    "yearly": "Yillik",
+    "totalEarned": "Umumiy Daromad",
+    "platformFees": "Platforma komissiyasi",
+    "netIncome": "Sof Foyda",
+    "recentActivity": "So'nggi harakatlar",
+    "noData": "Ma'lumotlar topilmadi",
+    "earned": "Topildi",
+    "fee": "Komissiya",
+    "net": "Sof",
+    "periodEarnings": "Davr daromadi",
+    "status": "Holati",
+    "date": "Sana",
+    "amount": "Summa"
   }
 }

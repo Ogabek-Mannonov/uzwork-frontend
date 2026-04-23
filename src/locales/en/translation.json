@@ -677,6 +677,8 @@
       "escrow_hold": "Escrow Hold",
       "escrow_release": "Payment Released",
       "fee": "Service Fee",
+      "proposal_deposit": "Proposal Fee",
+      "premium_activation": "Premium Activation",
       "refund": "Refunded"
     },
     "history": "Transaction History",
@@ -1263,5 +1265,24 @@
       "error": "An error occurred"
     },
     "loading": "Loading..."
+  },
+  "reports": {
+    "title": "Financial Reports",
+    "subtitle": "Track your earnings and transactions efficiently",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "totalEarned": "Total Earned",
+    "platformFees": "Platform Fees",
+    "netIncome": "Net Income",
+    "recentActivity": "Recent Activity",
+    "noData": "No data found for this period",
+    "earned": "Earned",
+    "fee": "Fee",
+    "net": "Net",
+    "periodEarnings": "Period Earnings",
+    "status": "Status",
+    "date": "Date",
+    "amount": "Amount"
   }
 }

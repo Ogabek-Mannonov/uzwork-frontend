@@ -59,6 +59,7 @@ import ContractManagement from "./pages/Client/ContractManegment.jsx";
 import SecuritySettings from "./pages/Client/Security.jsx";
 import Escrow from "./pages/Client/Escrow.jsx";
 import Proposals from "./pages/Client/Proposals.jsx";
+import Reports from "./pages/Freelancer/Reports.jsx";
 
 function App() {
   return (
@@ -106,6 +107,7 @@ function App() {
               <Route path="/proposals" element={<Proposal />} />
               <Route path="/my-proposals" element={<MyProposals />} />
               <Route path="/proposals/new/:jobId" element={<Proposal />} />
+              <Route path="/reports" element={<Reports />} />
             </Route>
 
             {/* Create Job (client) */}

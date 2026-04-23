@@ -21,6 +21,7 @@ export default function FreeNavbar() {
       { to: "/find-work",   label: t("navbar.findWork") },
       { to: "/saved",       label: t("navbar.savedJobs") },
       { to: "/proposals",   label: t("navbar.proposals") },
+      { to: "/reports",     label: t("navbar.reports") },
       { to: "/messages",    label: t("navbar.messages") },
     ],
     [t]
