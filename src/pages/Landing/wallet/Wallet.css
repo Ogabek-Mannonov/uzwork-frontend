@@ -598,3 +598,28 @@
   .wallet-v3-grid { grid-template-columns: 1fr; }
   .luxury-balance-card { height: auto; }
 }
+
+.premium-toast {
+  position: fixed;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 16px 32px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 10000;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  animation: toastSlideDown 0.5s ease-out;
+}
+
+.dark .premium-toast { background: #1e293b; color: white; }
+.premium-toast.success { border-left: 5px solid #10b981; }
+.premium-toast.error { border-left: 5px solid #ef4444; }
+
+@keyframes toastSlideDown {
+  from { opacity: 0; transform: translate(-50%, -20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}

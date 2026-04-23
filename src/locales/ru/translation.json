@@ -1308,6 +1308,12 @@
     "confirmDelete": "Вы уверены, что хотите удалить эту карту?",
     "yes": "Да",
     "no": "Нет",
+    "successCard": "Карта успешно добавлена!",
+    "successDelete": "Карта удалена!",
+    "successDeposit": "Счет успешно пополнен!",
+    "successWithdraw": "Запрос на вывод отправлен!",
+    "errorCardNumber": "Неверный номер карты",
+    "errorGeneric": "Произошла ошибка",
     "types": {
       "deposit": "Пополнение",
       "withdrawal": "Вывод средств",

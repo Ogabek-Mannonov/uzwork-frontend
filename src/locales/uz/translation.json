@@ -1324,6 +1324,12 @@
     "confirmDelete": "Haqiqatan ham ushbu kartani o'chirmoqchimisiz?",
     "yes": "Ha",
     "no": "Yo'q",
+    "successCard": "Karta muvaffaqiyatli qo'shildi!",
+    "successDelete": "Karta muvaffaqiyatli o'chirildi!",
+    "successDeposit": "Mablag' muvaffaqiyatli tushirildi!",
+    "successWithdraw": "Pul yechish so'rovi yuborildi!",
+    "errorCardNumber": "Karta raqami noto'g'ri",
+    "errorGeneric": "Xatolik yuz berdi",
     "types": {
       "deposit": "Hisobni to'ldirish",
       "withdrawal": "Pul yechish",

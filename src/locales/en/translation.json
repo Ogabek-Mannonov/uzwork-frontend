@@ -1326,6 +1326,12 @@
     "confirmDelete": "Are you sure you want to delete this card?",
     "yes": "Yes",
     "no": "No",
+    "successCard": "Card added successfully!",
+    "successDelete": "Card deleted successfully!",
+    "successDeposit": "Deposit successful!",
+    "successWithdraw": "Withdrawal request sent!",
+    "errorCardNumber": "Invalid card number",
+    "errorGeneric": "Something went wrong",
     "types": {
       "deposit": "Deposit",
       "withdrawal": "Withdrawal",
