@@ -1460,6 +1460,18 @@
     },
     "loading": "Loading..."
   },
+  "proposals": {
+    "received": "Received Proposals",
+    "sent": "My Invitations",
+    "receivedSubtitle": "Review applications from specialists",
+    "sentSubtitle": "Invitations sent by you",
+    "receivedEmpty": "No applications yet",
+    "sentEmpty": "You haven't invited anyone yet",
+    "total": "Total",
+    "shortlisted": "Shortlisted",
+    "hired": "Hired",
+    "invited": "Invited"
+  },
   "reports": {
     "title": "Financial Reports",
     "subtitle": "Track your earnings and transactions efficiently",

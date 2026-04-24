@@ -11,6 +11,7 @@ import { getMyJobs } from "../../api/jobs";
 import { 
   getProposals, 
   getProjectProposals,
+  getMyProposals,
   updateProposal, 
   rejectProposal,
   acceptProposal 
@@ -77,6 +78,7 @@ const Proposals = () => {
   const [jobs, setJobs] = useState([]);
   const [proposals, setProposals] = useState([]);
   const [activeTab, setActiveTab] = useState("all"); // all, shortlisted, archived
+  const [mainTab, setMainTab] = useState("received"); // received, sent
   const [searchTerm, setSearchTerm] = useState("");
   const [filterJobId, setFilterJobId] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
@@ -100,79 +102,36 @@ const Proposals = () => {
   }, [location.search]);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
     try {
-      // If we are filtering by a specific job, we can optimize the fetch
-      if (filterJobId) {
-        const [jobRes, propsRes] = await Promise.all([
-          getMyJobs({ id: filterJobId }), // Attempt to get just this job
-          getProjectProposals(filterJobId, { limit: 100 })
-        ]);
-
-        let job = null;
+      setLoading(true);
+      // Get client jobs
+      const jobsRes = await getMyJobs({ limit: 100 });
+      if (jobsRes?.success !== false) {
         const jobsList = 
-          Array.isArray(jobRes?.projects) ? jobRes.projects :
-          Array.isArray(jobRes?.data?.projects) ? jobRes.data.projects : 
-          Array.isArray(jobRes?.data) ? jobRes.data :
-          Array.isArray(jobRes) ? jobRes : [];
-        
-        job = jobsList.find(j => String(j.id) === String(filterJobId)) || jobsList[0];
-
-        // If not found in my jobs (might be a direct ID fetch needed)
-        if (!job) {
-          // Fallback or just use the ID we have
-          job = { id: filterJobId, title: "Loyiha takliflari" };
-        }
-
-        setJobs([job]);
-
-        const list = 
-          Array.isArray(propsRes?.proposals) ? propsRes.proposals :
-          Array.isArray(propsRes?.data?.proposals) ? propsRes.data.proposals :
-          Array.isArray(propsRes?.data) ? propsRes.data :
-          Array.isArray(propsRes) ? propsRes : [];
-
-        const listWithJobId = list.map(p => ({ 
-          ...p, 
-          job_id: p.job_id || p.project_id || filterJobId 
-        }));
-
-        setProposals(listWithJobId);
-      } else {
-        // Fetch all jobs and their proposals as before
-        const jobsRes = await getMyJobs({ limit: 100 });
-        
-        const jobsList = 
-          Array.isArray(jobsRes?.projects) ? jobsRes.projects :
           Array.isArray(jobsRes?.data?.projects) ? jobsRes.data.projects :
+          Array.isArray(jobsRes?.projects) ? jobsRes.projects :
           Array.isArray(jobsRes?.data) ? jobsRes.data :
           Array.isArray(jobsRes) ? jobsRes : [];
-
-        const propsResponses = await Promise.all(
-          jobsList.map(job => getProjectProposals(job.id, { limit: 50 }))
-        );
-
-        const allProposals = [];
-        propsResponses.forEach((res, index) => {
-          const jobId = jobsList[index]?.id;
-          const list = 
-            Array.isArray(res?.proposals) ? res.proposals :
-            Array.isArray(res?.data?.proposals) ? res.data.proposals :
-            Array.isArray(res?.data) ? res.data :
-            Array.isArray(res) ? res : [];
-          
-          const listWithJobId = list.map(p => ({ 
-            ...p, 
-            job_id: p.job_id || p.project_id || jobId 
-          }));
-          allProposals.push(...listWithJobId);
-        });
-
         setJobs(jobsList);
-        setProposals(allProposals);
       }
-    } catch (error) {
-      console.error("Error fetching proposals data:", error);
+
+      // Get all proposals for this client's jobs in one go
+      const propsRes = await getMyProposals({ limit: 200 });
+      if (propsRes?.success !== false) {
+        const rawProposals = propsRes.data?.proposals || propsRes.data || [];
+        
+        // Map freelancer details for consistency
+        const mappedProposals = rawProposals.map(p => ({
+          ...p,
+          freelancer_name: p.freelancer_name || (p.freelancer_first_name ? `${p.freelancer_first_name} ${p.freelancer_last_name || ""}` : "Noma'lum"),
+          freelancer_avatar: p.freelancer_avatar || null,
+          freelancer_title: p.freelancer_title || "Freelancer"
+        }));
+        
+        setProposals(mappedProposals);
+      }
+    } catch (err) {
+      console.error("Fetch data error:", err);
     } finally {
       setLoading(false);
     }
@@ -322,13 +281,25 @@ const Proposals = () => {
     }
   };
 
+  const mainTabFilteredProposals = useMemo(() => {
+    if (!Array.isArray(proposals)) return [];
+    if (mainTab === "sent") {
+      // Mening takliflarim: Client tomonidan yuborilgan taklifnomalar
+      return proposals.filter(p => p.is_invitation === true || p.status === "invited");
+    } else {
+      // Kelib tushgan takliflar: Barcha takliflar (arizalar + taklifnomalar)
+      // Mijoz hamma narsani bir joyda ko'rishi uchun buni cheklamaymiz
+      return proposals;
+    }
+  }, [proposals, mainTab]);
+
   const jobFilteredProposals = useMemo(() => {
-    if (!filterJobId) return proposals;
-    return proposals.filter(p => {
+    if (!filterJobId) return mainTabFilteredProposals;
+    return mainTabFilteredProposals.filter(p => {
       const pJobId = String(p.job_id || p.project_id || "");
       return pJobId.toLowerCase() === String(filterJobId).toLowerCase();
     });
-  }, [proposals, filterJobId]);
+  }, [mainTabFilteredProposals, filterJobId]);
 
   const filteredProposals = useMemo(() => {
     if (!Array.isArray(jobFilteredProposals)) return [];
@@ -405,11 +376,25 @@ const Proposals = () => {
             <h1>{t("navbar.proposals")}</h1>
             <p>
               {filterJobId 
-                ? "Loyiha bo'yicha saralangan takliflar" 
-                : "Kelib tushgan takliflarni ko'rib chiqing va eng yaxshisini tanlang"}
+                ? (mainTab === "sent" ? t("proposals.sentSubtitle") : t("proposals.receivedSubtitle"))
+                : (mainTab === "sent" ? t("proposals.sentSubtitle") : t("proposals.receivedSubtitle"))}
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div className="cp-main-toggle">
+              <button 
+                className={`cp-toggle-btn ${mainTab === "received" ? "active" : ""}`}
+                onClick={() => setMainTab("received")}
+              >
+                {t("proposals.received")}
+              </button>
+              <button 
+                className={`cp-toggle-btn ${mainTab === "sent" ? "active" : ""}`}
+                onClick={() => setMainTab("sent")}
+              >
+                {t("proposals.sent")}
+              </button>
+            </div>
             {filterJobId && (
               <button className="cp-btn-msg" style={{ width: "auto", padding: "10px 20px", borderColor: '#3b82f6', color: '#3b82f6' }} onClick={() => navigate("/client/proposals")}>
                 <Filter size={16} style={{ marginRight: 8 }} /> Barcha loyihalar
@@ -427,21 +412,21 @@ const Proposals = () => {
             <div className="cp-stat-icon blue"><Users size={20} /></div>
             <div className="cp-stat-info">
               <span>{jobFilteredProposals.length}</span>
-              <span>Jami takliflar</span>
+              <span>{mainTab === "sent" ? t("proposals.invited") : t("proposals.total")}</span>
             </div>
           </div>
           <div className="cp-stat-card">
             <div className="cp-stat-icon orange"><Star size={20} /></div>
             <div className="cp-stat-info">
               <span>{jobFilteredProposals.filter(p => p.status === "shortlisted").length}</span>
-              <span>Saralangan</span>
+              <span>{t("proposals.shortlisted")}</span>
             </div>
           </div>
           <div className="cp-stat-card">
             <div className="cp-stat-icon green"><CheckCircle size={20} /></div>
             <div className="cp-stat-info">
               <span>{jobFilteredProposals.filter(p => p.status === "accepted").length}</span>
-              <span>Yollangan</span>
+              <span>{t("proposals.hired")}</span>
             </div>
           </div>
         </div>
@@ -477,17 +462,17 @@ const Proposals = () => {
             <Users size={64} strokeWidth={1} />
             <h3>
               {activeTab === "shortlisted" 
-                ? "Saralangan takliflar yo'q" 
+                ? t("proposals.shortlisted")
                 : activeTab === "archived" 
-                  ? "Arxivlangan takliflar yo'q" 
-                  : "Hali takliflar yo'q"}
+                  ? t("proposals.archived") 
+                  : (mainTab === "sent" ? t("proposals.sentEmpty") : t("proposals.receivedEmpty"))}
             </h3>
             <p>
               {activeTab === "shortlisted" 
                 ? "Siz hali hech bir taklifni saralamadingiz." 
                 : activeTab === "archived" 
                   ? "Rad etilgan takliflar shu yerda ko'rinadi." 
-                  : "Hozircha hech qanday talabgor ariza topshirmadi."}
+                  : (mainTab === "sent" ? "Siz hali mutaxassislarni ishga taklif qilmadingiz." : "Hozircha hech qanday talabgor ariza topshirmadi.")}
             </p>
             {activeTab === "all" && (
               <button className="cp-btn-hire" style={{ maxWidth: "200px", margin: "0 auto" }} onClick={() => navigate("/client/talent")}>
@@ -516,7 +501,7 @@ const Proposals = () => {
                   <div key={proposal.id} className="cp-card">
                     <div className="cp-card-top">
                       <img 
-                        src={avatarSrc(proposal.freelancer_avatar || proposal.user_avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(proposal.freelancer_name || "F")}&background=random`} 
+                        src={avatarSrc(proposal.freelancer_avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(proposal.freelancer_name || "F")}&background=random`} 
                         alt="" 
                         className="cp-avatar"
                         onClick={() => navigate(`/profile/${proposal.freelancer_id || proposal.user_id}`)}
@@ -524,20 +509,10 @@ const Proposals = () => {
                       />
                       <div className="cp-info">
                         <h3 onClick={() => navigate(`/profile/${proposal.freelancer_id || proposal.user_id}`)} style={{ cursor: "pointer" }}>
-                          {proposal.freelancer_name || 
-                           proposal.user_name || 
-                           proposal.full_name ||
-                           (proposal.freelancer?.user?.first_name ? `${proposal.freelancer.user.first_name} ${proposal.freelancer.user.last_name || ""}` : "") ||
-                           (proposal.freelancer?.first_name ? `${proposal.freelancer.first_name} ${proposal.freelancer.last_name || ""}` : "") ||
-                           (proposal.user?.first_name ? `${proposal.user.first_name} ${proposal.user.last_name || ""}` : "") ||
-                           (proposal.first_name ? `${proposal.first_name} ${proposal.last_name || ""}` : "") ||
-                           `Frelanser #${String(proposal.freelancer_id || proposal.user_id || proposal.id).slice(0, 6)}`}
+                          {proposal.freelancer_name}
                         </h3>
                         <div className="cp-title">
-                           {proposal.freelancer_title || 
-                           proposal.freelancer?.title || 
-                           proposal.freelancer?.user?.title ||
-                           "Top Rated Specialist"}
+                          {proposal.freelancer_title || "Top Rated Specialist"}
                         </div>
                         <div className="cp-meta-row">
                           <div className="cp-rating">

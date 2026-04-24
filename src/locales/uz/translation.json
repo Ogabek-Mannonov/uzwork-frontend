@@ -1607,6 +1607,18 @@
     },
     "loading": "Yuklanmoqda..."
   },
+  "proposals": {
+    "received": "Kelib tushgan takliflar",
+    "sent": "Mening takliflarim",
+    "receivedSubtitle": "Mutaxassislardan kelgan arizalarni ko'rib chiqing",
+    "sentSubtitle": "Siz tomoningizdan yuborilgan taklifnomalar",
+    "receivedEmpty": "Hali arizalar yo'q",
+    "sentEmpty": "Siz hali hech kimni taklif qilmadingiz",
+    "total": "Jami",
+    "shortlisted": "Saralangan",
+    "hired": "Yollangan",
+    "invited": "Taklif qilingan"
+  },
   "reports": {
     "title": "Moliyaviy Hisobotlar",
     "subtitle": "Daromadlaringiz va tranzaksiyalaringizni kuzatib boring",

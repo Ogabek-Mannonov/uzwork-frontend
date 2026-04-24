@@ -115,6 +115,43 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+/* Main Toggle (Received vs Sent) */
+.cp-main-toggle {
+  display: flex;
+  background: rgba(100, 116, 139, 0.1);
+  padding: 4px;
+  border-radius: 12px;
+  margin-right: 12px;
+}
+
+.cp-toggle-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.cp-toggle-btn.active {
+  background: white;
+  color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.cp-dark .cp-main-toggle {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.cp-dark .cp-toggle-btn.active {
+  background: #2d333b;
+  color: #58a6ff;
+}
+
 .cp-search-box {
   position: relative;
   flex: 1;

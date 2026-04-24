@@ -376,13 +376,13 @@ function AuthHeader({ i18n, changeLanguage, user }) {
         ]);
         
         if (mounted) {
-          if (msgRes?.success) {
-            setUnreadCount(msgRes.data.unread_count);
+          if (msgRes?.success && msgRes.data) {
+            setUnreadCount(msgRes.data.unread_count || 0);
             
             // O'tkazib yuborilgan xabarlarni tekshirish
-            if (msgRes.data.unread_count > 0 && Notification.permission === "granted") {
+            if ((msgRes.data.unread_count || 0) > 0 && Notification.permission === "granted") {
               const chatRes = await import("../../../api/messages").then(m => m.getChats());
-              if (chatRes?.success) {
+              if (chatRes?.success && chatRes.data?.chats) {
                 const unreadChats = chatRes.data.chats.filter(c => c.unread_count > 0);
                 const shownIds = JSON.parse(localStorage.getItem('shown_notifications') || '[]');
                 let updated = false;
@@ -391,9 +391,9 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                   const msgId = chat.last_message_id || `chat_${chat.chat_id}_${chat.last_message_at}`;
                   if (!shownIds.includes(msgId)) {
                     showBrowserNotification(
-                      `Yangi xabar: ${chat.partner.first_name}`,
+                      `Yangi xabar: ${chat.partner?.first_name || 'Foydalanuvchi'}`,
                       chat.last_message_content || "Xabar yuborildi",
-                      chat.partner.avatar_url || "/UzWork transparent.png"
+                      chat.partner?.avatar_url || "/UzWork transparent.png"
                     );
                     shownIds.push(msgId);
                     updated = true;
@@ -406,7 +406,9 @@ function AuthHeader({ i18n, changeLanguage, user }) {
               }
             }
           }
-          if (propRes?.success) setProposalsCount(propRes.data.unread_count);
+          if (propRes?.success && propRes.data) {
+            setProposalsCount(propRes.data.unread_count || 0);
+          }
         }
       } catch (err) {
         console.error("Unread counts fetch error:", err);
