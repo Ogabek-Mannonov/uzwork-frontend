@@ -364,6 +364,111 @@
       "available": "Available",
       "busy": "Busy",
       "away": "Away"
+    },
+    "security": {
+      "title": "Password & Security",
+      "overview": "Security Overview",
+      "changePassword": "Change Password",
+      "passwordHint": "Your password must be at least 8 characters and contain a mix of letters, numbers, and symbols",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "passwordPlaceholder": "Enter current password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "updatePassword": "Update Password",
+      "updating": "Updating...",
+      "requirements": {
+        "length": "At least 8 characters",
+        "uppercase": "One uppercase letter",
+        "lowercase": "One lowercase letter",
+        "number": "One number",
+        "special": "One special character",
+        "match": "Passwords match"
+      },
+      "twoStep": "Two-factor authentication",
+      "twoStepDesc": "Add an extra layer of security to your account by requiring a code from your phone",
+      "loginNotify": "Login notifications",
+      "loginNotifyDesc": "Get notified via email whenever a new device logs into your account",
+      "deviceManagement": "Device management",
+      "deviceManagementDesc": "Manage and review devices that have access to your account",
+      "passwordExpiry": "Password expiry",
+      "passwordExpiryDesc": "Require password change every 90 days for enhanced security",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "setup2fa": "Set up 2FA"
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "settings": "Notification Settings",
+      "deliveryPreferences": "Delivery Preferences",
+      "email": "Email notifications",
+      "push": "Push notifications",
+      "categories": {
+        "jobs": "Jobs & Proposals",
+        "payments": "Payments & Billing"
+      },
+      "items": {
+        "proposal_received": {
+          "label": "New proposal received",
+          "desc": "Notify when a freelancer submits a proposal to your job"
+        },
+        "proposal_withdrawn": {
+          "label": "Proposal withdrawn",
+          "desc": "Notify when a freelancer withdraws their proposal"
+        },
+        "payment_success": {
+          "label": "Payment successful",
+          "desc": "Confirm when a payment has been processed correctly"
+        },
+        "invoice_ready": {
+          "label": "Invoice ready",
+          "desc": "Notify when a new invoice is available for download"
+        }
+      }
+    },
+    "appeals": {
+      "title": "Appeals Tracker",
+      "subtitle": "Support Requests",
+      "desc": "Track your support tickets, disputes, and account-related appeals.",
+      "underDevelopment": "This section is under development and will be available soon."
+    },
+    "upgrade": {
+      "title": "Upgrade to {{plan}}",
+      "current": "Current Plan",
+      "new": "New Plan",
+      "benefits": "You'll get:",
+      "total": "Total",
+      "note": "You will be charged immediately. Your billing cycle will reset today.",
+      "processing": "Processing...",
+      "confirm": "Confirm Upgrade",
+      "success": "Successfully upgraded to {{plan}} plan!",
+      "subtotal": "Subtotal",
+      "tax": "Tax",
+      "currentPlan": "{{plan}} Plan",
+      "started": "Started",
+      "nextBilling": "Next billing",
+      "cancelMembership": "Cancel Membership",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "save17": "Save 17%",
+      "mostPopular": "Most Popular",
+      "free": "Free",
+      "currentPlanShort": "Current Plan",
+      "downgrade": "Downgrade",
+      "upgrade": "Upgrade"
+    },
+    "messages": {
+      "portfolioSaved": "Portfolio saved successfully",
+      "portfolioDeleted": "Portfolio deleted successfully",
+      "notifSettingUpdated": "Notification setting updated",
+      "deliverySettingUpdated": "Delivery preference updated",
+      "allRead": "All notifications marked as read",
+      "cvUploaded": "CV uploaded successfully",
+      "avatarUpdated": "Profile picture updated successfully",
+      "saveError": "Error saving",
+      "deleteConfirm": "Are you sure you want to delete?",
+      "deleteError": "Error deleting"
     }
   },
   "skills": {
@@ -849,6 +954,10 @@
       "availablePlans": "Available Plans",
       "mostPopular": "Most Popular",
       "upgrade": "Upgrade",
+      "basic": "Basic",
+      "plus": "Plus",
+      "professional": "Professional",
+      "enterprise": "Enterprise",
       "benefits": {
         "proposals5": "Up to 5 job proposals per month",
         "proposals20": "20 job proposals",
@@ -870,7 +979,29 @@
       "title": "Notification Settings",
       "deliveryPreferences": "Delivery Preferences",
       "emailNotifications": "Email notifications",
-      "pushNotifications": "Push notifications"
+      "pushNotifications": "Push notifications",
+      "categories": {
+        "jobs": "Jobs & Proposals",
+        "payments": "Payments & Billing"
+      },
+      "settings": {
+        "proposal_received": {
+          "label": "New proposal received",
+          "desc": "Notify when a freelancer submits a proposal to your job"
+        },
+        "proposal_withdrawn": {
+          "label": "Proposal withdrawn",
+          "desc": "Notify when a freelancer withdraws their proposal"
+        },
+        "payment_success": {
+          "label": "Payment successful",
+          "desc": "Confirm when a payment has been processed correctly"
+        },
+        "invoice_ready": {
+          "label": "Invoice ready",
+          "desc": "Notify when a new invoice is available for download"
+        }
+      }
     },
     "placeholders": {
       "taxTitle": "Tax Information",
@@ -1391,6 +1522,33 @@
       "proposal_deposit_refund": "Proposal Refund",
       "payment": "Payment",
       "refund": "Refund"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "all": "All",
+    "allNotifications": "All Notifications",
+    "markAllRead": "Mark all as read",
+    "empty": "No notifications yet",
+    "settings": "Notification Settings",
+    "loading": "Loading...",
+    "unread": "Unread",
+    "markRead": "Mark as read",
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}} minutes ago",
+      "hoursAgo": "{{count}} hours ago",
+      "daysAgo": "{{count}} days ago"
+    },
+    "types": {
+      "proposal_received": "New proposal received",
+      "proposal_accepted": "Your proposal was accepted",
+      "proposal_rejected": "Your proposal was rejected",
+      "job_invitation": "You received a job invitation",
+      "contract_started": "Contract started",
+      "payment_received": "Payment received",
+      "message": "New message received",
+      "security_update": "Security alert"
     }
   }
 }

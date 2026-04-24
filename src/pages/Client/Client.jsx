@@ -83,7 +83,9 @@ import {
   getSecuritySettings,
   getNotifications,
   getNotificationSettings,
-  updateNotificationSettings
+  updateNotificationSettings,
+  markNotificationRead,
+  markAllNotificationsRead
 } from "../../api/common";
 import { 
   getBalance, 
@@ -104,7 +106,7 @@ function avatarSrc(url) {
 }
 
 const Settings = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const sectionParam = searchParams.get("section") || "my-info";
   const [activeSection, setActiveSection] = useState(sectionParam);
@@ -239,14 +241,14 @@ const Settings = () => {
             const s = notiSettingsRes.data;
             setNotificationSettings([
               {
-                category: "Jobs & Proposals",
+                category: "jobs",
                 settings: [
                   { id: "proposal_received", label: "New proposal received", description: "Notify when a freelancer submits a proposal to your job", enabled: s.proposal_received },
                   { id: "proposal_withdrawn", label: "Proposal withdrawn", description: "Notify when a freelancer withdraws their proposal", enabled: s.proposal_withdrawn }
                 ]
               },
               {
-                category: "Payments & Billing",
+                category: "payments",
                 settings: [
                   { id: "payment_success", label: "Payment successful", description: "Confirm when a payment has been processed correctly", enabled: s.payment_success },
                   { id: "invoice_ready", label: "Invoice ready", description: "Notify when a new invoice is available for download", enabled: s.invoice_ready }
@@ -258,6 +260,12 @@ const Settings = () => {
               email: s.email_notifications,
               push: s.push_notifications
             });
+          }
+          break;
+        case 'all-notifications':
+          const historyRes = await getNotifications({ limit: 50 });
+          if (historyRes?.success) {
+            setAllNotifications(historyRes.data.notifications || []);
           }
           break;
         default:
@@ -343,32 +351,32 @@ const Settings = () => {
   const [securitySettings, setSecuritySettings] = useState([
     { 
       id: "two_factor", 
-      label: "Two-step verification", 
-      description: "Add an extra layer of security to your account by requiring a code from your phone", 
+      label: "twoStep", 
+      description: "twoStepDesc", 
       enabled: false,
       icon: <ShieldCheck size={20} />,
       color: "#3b82f6"
     },
     { 
       id: "biometric", 
-      label: "Biometric login", 
-      description: "Use your fingerprint or face recognition to log in quickly and securely", 
+      label: "biometric", 
+      description: "biometricDesc", 
       enabled: false,
       icon: <Fingerprint size={20} />,
       color: "#ec4899"
     },
     { 
       id: "login_notify", 
-      label: "Login notifications", 
-      description: "Get notified via email whenever a new device logs into your account", 
+      label: "loginNotify", 
+      description: "loginNotifyDesc", 
       enabled: true,
       icon: <Bell size={20} />,
       color: "#10b981"
     },
     { 
       id: "password_expiry", 
-      label: "Password expiry", 
-      description: "Require password change every 90 days for enhanced security", 
+      label: "passwordExpiry", 
+      description: "passwordExpiryDesc", 
       enabled: false,
       icon: <Clock size={20} />,
       color: "#f59e0b"
@@ -377,17 +385,17 @@ const Settings = () => {
 
   const [notificationSettings, setNotificationSettings] = useState([
     {
-      category: "Jobs & Proposals",
+      category: "jobs",
       settings: [
-        { id: "proposal_received", label: "New proposal received", description: "Notify when a freelancer submits a proposal to your job", enabled: true },
-        { id: "proposal_withdrawn", label: "Proposal withdrawn", description: "Notify when a freelancer withdraws their proposal", enabled: false }
+        { id: "proposal_received", enabled: true },
+        { id: "proposal_withdrawn", enabled: false }
       ]
     },
     {
-      category: "Payments & Billing",
+      category: "payments",
       settings: [
-        { id: "payment_success", label: "Payment successful", description: "Confirm when a payment has been processed correctly", enabled: true },
-        { id: "invoice_ready", label: "Invoice ready", description: "Notify when a new invoice is available for download", enabled: true }
+        { id: "payment_success", enabled: true },
+        { id: "invoice_ready", enabled: true }
       ]
     }
   ]);
@@ -396,6 +404,8 @@ const Settings = () => {
     email: true,
     push: true
   });
+  const [allNotifications, setAllNotifications] = useState([]);
+  const [notifLoading, setNotifLoading] = useState(false);
 
   const [activeSessions, setActiveSessions] = useState([
     {
@@ -576,6 +586,21 @@ const Settings = () => {
       showMessage("success", "Yetkazib berish sozlamasi yangilandi");
     } catch (err) {
       showMessage("error", "Saqlashda xatolik");
+    }
+  };
+
+  const handleMarkNotifRead = async (id) => {
+    const res = await markNotificationRead(id);
+    if (res?.success) {
+      setAllNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    const res = await markAllNotificationsRead();
+    if (res?.success) {
+      setAllNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      showMessage("success", "Barcha bildirishnomalar o'qildi deb belgilandi");
     }
   };
 
@@ -1347,8 +1372,8 @@ const Settings = () => {
                         {setting.icon}
                       </div>
                       <div className="item-info">
-                        <h3 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{setting.label}</h3>
-                        <p style={{ fontSize: '13px', color: 'var(--light-text-tertiary)', margin: 0 }}>{setting.description}</p>
+                        <h3 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{t(`clientProfile.security.${setting.label}`)}</h3>
+                        <p style={{ fontSize: '13px', color: 'var(--light-text-tertiary)', margin: 0 }}>{t(`clientProfile.security.${setting.description}`)}</p>
                       </div>
                     </div>
                     <label className="switch">
@@ -1490,7 +1515,7 @@ const Settings = () => {
                 <h2>{t('clientProfile.membership.availablePlans')}</h2>
                 <div className="plans-grid">
                   <div className="plan-card">
-                    <h3>Plus</h3>
+                    <h3>{t('clientProfile.membership.plus')}</h3>
                     <p className="plan-price">$14.99<span>/month</span></p>
                     <ul>
                       <li><Check size={16} /> {t('clientProfile.membership.benefits.proposals20')}</li>
@@ -1503,7 +1528,7 @@ const Settings = () => {
                   
                   <div className="plan-card popular">
                     <div className="popular-badge">{t('clientProfile.membership.mostPopular')}</div>
-                    <h3>Professional</h3>
+                    <h3>{t('clientProfile.membership.professional')}</h3>
                     <p className="plan-price">$29.99<span>/month</span></p>
                     <ul>
                       <li><Check size={16} /> {t('clientProfile.membership.benefits.proposalsUnlimited')}</li>
@@ -1531,14 +1556,14 @@ const Settings = () => {
                   <div key={idx} className="notification-card">
                     <div className="notification-card-header">
                       <Bell size={18} />
-                      <h2>{category.category}</h2>
+                      <h2>{t(`clientProfile.notifications.categories.${category.category}`)}</h2>
                     </div>
                     <div className="notification-card-body">
                       {category.settings.map(setting => (
                         <div key={setting.id} className="notification-setting">
                           <div className="setting-info">
-                            <h3>{setting.label}</h3>
-                            <p>{setting.description}</p>
+                            <h3>{t(`clientProfile.notifications.settings.${setting.id}.label`)}</h3>
+                            <p>{t(`clientProfile.notifications.settings.${setting.id}.desc`)}</p>
                           </div>
                           <label className="switch">
                             <input 
@@ -1567,6 +1592,69 @@ const Settings = () => {
                     <span>{t('clientProfile.notifications.pushNotifications')}</span>
                   </label>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* ALL NOTIFICATIONS SECTION */}
+          {activeSection === "all-notifications" && (
+            <div className="content-section">
+              <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h1 className="section-title">{t('notifications.allNotifications')}</h1>
+                {allNotifications.some(n => !n.is_read) && (
+                  <button 
+                    onClick={handleMarkAllRead}
+                    style={{ background: 'none', border: 'none', color: 'var(--blue, #3b82f6)', cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <CheckCircle size={16} />
+                    {t('notifications.markAllRead')}
+                  </button>
+                )}
+              </div>
+
+              <div className="notifications-list-container">
+                {notifLoading ? (
+                  <div className="notif-loading-state">{t('notifications.loading')}</div>
+                ) : allNotifications.length > 0 ? (
+                  <div className="notif-history-list">
+                    {allNotifications.map((n, idx) => (
+                      <div 
+                        key={n.id} 
+                        className={`notif-history-item ${!n.is_read ? 'unread' : ''}`}
+                        onClick={() => !n.is_read && handleMarkNotifRead(n.id)}
+                      >
+                        <div className="notif-history-icon">
+                          <Bell size={20} />
+                        </div>
+                        <div className="notif-history-content">
+                          <div className="notif-history-header">
+                            <h4>
+                              {i18n.language === 'en' && n.title_en ? n.title_en : 
+                               i18n.language === 'ru' && n.title_ru ? n.title_ru : 
+                               n.title || t(`notifications.types.${n.type}`, { defaultValue: t('notifications.title') })}
+                            </h4>
+                            <span className="notif-history-time">
+                              {new Date(n.created_at).toLocaleDateString(i18n.language === 'uz' ? 'uz-UZ' : i18n.language === 'ru' ? 'ru-RU' : 'en-US')} {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                          <p>
+                            {i18n.language === 'en' && n.body_en ? n.body_en : 
+                             i18n.language === 'ru' && n.body_ru ? n.body_ru : 
+                             n.message}
+                          </p>
+                        </div>
+                        {!n.is_read && (
+                          <div className="unread-status-dot"></div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="notif-empty-state">
+                    <Bell size={48} />
+                    <p>{t('notifications.empty')}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

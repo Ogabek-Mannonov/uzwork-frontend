@@ -62,11 +62,51 @@ import {
   Crown,
   Sparkles,
   Rocket,
-  Gift
+  Gift,
+  ArrowUpRight,
+  ArrowDownLeft,
+  UserCheck,
+  UserX,
+  Users
 } from "lucide-react";
 import "../profile/profile-css/profile.css";
-import { getMyProfile, updateMyProfile, uploadFile, uploadImage } from "../../api/common";
+import { 
+  getMyProfile, 
+  updateMyProfile, 
+  uploadFile, 
+  uploadImage, 
+  getNotificationSettings, 
+  updateNotificationSettings,
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead
+} from "../../api/common";
 import { getCategories } from "../../api/profile";
+
+// Notification icon helper (same as dropdown)
+const getNotifIcon = (type) => {
+  switch (type) {
+    case 'proposal_received':   return { icon: <Briefcase size={18} />, color: '#8b5cf6', bg: 'rgba(139,92,246,0.15)' };
+    case 'proposal_accepted':   return { icon: <UserCheck size={18} />, color: '#22c55e', bg: 'rgba(34,197,94,0.15)' };
+    case 'proposal_rejected':   return { icon: <UserX size={18} />, color: '#ef4444', bg: 'rgba(239,68,68,0.15)' };
+    case 'job_invitation':      return { icon: <ArrowUpRight size={18} />, color: '#f97316', bg: 'rgba(249,115,22,0.15)' };
+    case 'contract_started':    return { icon: <CheckCircle size={18} />, color: '#3b82f6', bg: 'rgba(59,130,246,0.15)' };
+    case 'contract_completed':  return { icon: <Lock size={18} />, color: '#22c55e', bg: 'rgba(34,197,94,0.15)' };
+    case 'contract_cancelled':  return { icon: <AlertTriangle size={18} />, color: '#ef4444', bg: 'rgba(239,68,68,0.15)' };
+    case 'milestone_submitted': return { icon: <Info size={18} />, color: '#f97316', bg: 'rgba(249,115,22,0.15)' };
+    case 'milestone_approved':  return { icon: <CheckCircle size={18} />, color: '#22c55e', bg: 'rgba(34,197,94,0.15)' };
+    case 'payment_received':    return { icon: <ArrowDownLeft size={18} />, color: '#22c55e', bg: 'rgba(34,197,94,0.15)' };
+    case 'payment_sent':        return { icon: <ArrowUpRight size={18} />, color: '#3b82f6', bg: 'rgba(59,130,246,0.15)' };
+    case 'withdrawal_request':  return { icon: <DollarSign size={18} />, color: '#f97316', bg: 'rgba(249,115,22,0.15)' };
+    case 'escrow_hold':         return { icon: <Lock size={18} />, color: '#8b5cf6', bg: 'rgba(139,92,246,0.15)' };
+    case 'dispute_opened':      return { icon: <AlertCircle size={18} />, color: '#ef4444', bg: 'rgba(239,68,68,0.15)' };
+    case 'dispute_resolved':    return { icon: <CheckCircle size={18} />, color: '#22c55e', bg: 'rgba(34,197,94,0.15)' };
+    case 'new_review':          return { icon: <Star size={18} />, color: '#8b5cf6', bg: 'rgba(139,92,246,0.15)' };
+    case 'new_job_posted':      return { icon: <Briefcase size={18} />, color: '#3b82f6', bg: 'rgba(59,130,246,0.15)' };
+    case 'verification_status': return { icon: <UserCheck size={18} />, color: '#3b82f6', bg: 'rgba(59,130,246,0.15)' };
+    default:                    return { icon: <Bell size={18} />, color: '#3b82f6', bg: 'rgba(59,130,246,0.15)' };
+  }
+};
 
 
 import { logout } from "../../api/auth";
@@ -106,7 +146,7 @@ function AvatarImage({ src, size = 16, className = "" }) {
 
 const MyProfile = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isDark } = useThemeContext();
 
   const location = useLocation();
@@ -182,6 +222,32 @@ const MyProfile = () => {
   const [skillSearch, setSkillSearch] = useState("");
   const [skillSuggestions, setSkillSuggestions] = useState([]);
   const [activeSuggestion, setActiveSuggestion] = useState(0);
+
+  // Notification Settings State
+  const [notificationSettings, setNotificationSettings] = useState([
+    {
+      category: "profile.notifications.categories.jobs",
+      settings: [
+        { id: "proposal_received", label: "profile.notifications.items.proposal_received.label", description: "profile.notifications.items.proposal_received.desc", enabled: true },
+        { id: "proposal_withdrawn", label: "profile.notifications.items.proposal_withdrawn.label", description: "profile.notifications.items.proposal_withdrawn.desc", enabled: false }
+      ]
+    },
+    {
+      category: "profile.notifications.categories.payments",
+      settings: [
+        { id: "payment_success", label: "profile.notifications.items.payment_success.label", description: "profile.notifications.items.payment_success.desc", enabled: true },
+        { id: "invoice_ready", label: "profile.notifications.items.invoice_ready.label", description: "profile.notifications.items.invoice_ready.desc", enabled: true }
+      ]
+    }
+  ]);
+
+  const [deliveryPrefs, setDeliveryPrefs] = useState({
+    email: true,
+    push: true
+  });
+
+  const [allNotifications, setAllNotifications] = useState([]);
+  const [notifLoading, setNotifLoading] = useState(false);
   const showMessage = (type, text) => {
     setMessage({ type, text });
   };
@@ -272,6 +338,40 @@ const MyProfile = () => {
         } else if (Array.isArray(catRes)) {
           setCategories(catRes);
         }
+
+        // Fetch notification settings
+        const notiSettingsRes = await getNotificationSettings();
+        if (notiSettingsRes?.success) {
+          const s = notiSettingsRes.data;
+          setNotificationSettings([
+            {
+              category: "profile.notifications.categories.jobs",
+              settings: [
+                { id: "proposal_received", label: "profile.notifications.items.proposal_received.label", description: "profile.notifications.items.proposal_received.desc", enabled: s.proposal_received },
+                { id: "proposal_withdrawn", label: "profile.notifications.items.proposal_withdrawn.label", description: "profile.notifications.items.proposal_withdrawn.desc", enabled: s.proposal_withdrawn }
+              ]
+            },
+            {
+              category: "profile.notifications.categories.payments",
+              settings: [
+                { id: "payment_success", label: "profile.notifications.items.payment_success.label", description: "profile.notifications.items.payment_success.desc", enabled: s.payment_success },
+                { id: "invoice_ready", label: "profile.notifications.items.invoice_ready.label", description: "profile.notifications.items.invoice_ready.desc", enabled: s.invoice_ready }
+              ]
+            }
+          ]);
+          setDeliveryPrefs({
+            email: s.email_notifications,
+            push: s.push_notifications
+          });
+        }
+
+        // Fetch all notifications for history
+        setNotifLoading(true);
+        const notifsRes = await getNotifications({ limit: 50 });
+        if (notifsRes?.success) {
+          setAllNotifications(notifsRes.data.notifications || []);
+        }
+        setNotifLoading(false);
       } catch (err) {
         console.error("fetchData error:", err);
       }
@@ -756,29 +856,83 @@ const MyProfile = () => {
       }
 
       setShowPortfolioModal(false);
-      showMessage("success", t("profile.portfolioSaved", "Portfolio muvaffaqiyatli saqlandi"));
+      showMessage("success", t("profile.messages.portfolioSaved"));
     } catch (err) {
       console.error("Save portfolio error:", err);
-      showMessage("error", err.message || "Xatolik yuz berdi");
+      showMessage("error", err.message || t("profile.messages.saveError"));
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDeletePortfolio = async (id) => {
-    if (window.confirm("Are you sure you want to delete this portfolio item?")) {
+    if (window.confirm(t("profile.messages.deleteConfirm"))) {
       setIsLoading(true);
       try {
         const res = await deletePortfolioItem(id);
         if (res?.success === false) throw new Error(res.message);
         
         setPortfolio(prev => prev.filter(item => item.id !== id));
-        showMessage("success", "Portfolio deleted successfully");
+        showMessage("success", t("profile.messages.portfolioDeleted"));
       } catch (err) {
-        showMessage("error", err.message || "Failed to delete portfolio");
+        showMessage("error", err.message || t("profile.messages.deleteError"));
       } finally {
         setIsLoading(false);
       }
+    }
+  };
+
+  const handleToggleNotification = async (catIdx, settingId) => {
+    let newValue = false;
+    setNotificationSettings(prev => {
+      const newSettings = [...prev];
+      const category = { ...newSettings[catIdx] };
+      category.settings = category.settings.map(s => {
+        if (s.id === settingId) {
+          newValue = !s.enabled;
+          return { ...s, enabled: newValue };
+        }
+        return s;
+      });
+      newSettings[catIdx] = category;
+      return newSettings;
+    });
+
+    try {
+      await updateNotificationSettings({ [settingId]: newValue });
+      showMessage("success", t("profile.messages.notifSettingUpdated"));
+    } catch (err) {
+      showMessage("error", t("profile.messages.saveError"));
+    }
+  };
+
+  const handleToggleDeliveryPref = async (type) => {
+    const newValue = !deliveryPrefs[type];
+    setDeliveryPrefs(prev => ({ ...prev, [type]: newValue }));
+    
+    try {
+      const payload = type === 'email' 
+        ? { email_notifications: newValue } 
+        : { push_notifications: newValue };
+      await updateNotificationSettings(payload);
+      showMessage("success", t("profile.messages.deliverySettingUpdated"));
+    } catch (err) {
+      showMessage("error", t("profile.messages.saveError"));
+    }
+  };
+
+  const handleMarkNotifRead = async (id) => {
+    const res = await markNotificationRead(id);
+    if (res?.success) {
+      setAllNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    const res = await markAllNotificationsRead();
+    if (res?.success) {
+      setAllNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      showMessage("success", t("profile.messages.allRead"));
     }
   };
 
@@ -813,9 +967,9 @@ const MyProfile = () => {
       if (!updateRes.success) throw new Error(updateRes.message || updateRes.error);
 
       setUserData(prev => ({ ...prev, cv_url: cvUrl }));
-      showMessage("success", "CV uploaded successfully!");
+      showMessage("success", t("profile.messages.cvUploaded"));
     } catch (err) {
-      showMessage("error", err.message || "Failed to upload CV");
+      showMessage("error", err.message || t("profile.messages.saveError"));
     } finally {
       setIsLoading(false);
     }
@@ -853,9 +1007,9 @@ const MyProfile = () => {
       localStorage.setItem("user", JSON.stringify({ ...storedUser, avatar_url: imageUrl }));
       window.dispatchEvent(new Event("authChange"));
 
-      showMessage("success", "Profile picture updated successfully!");
+      showMessage("success", t("profile.messages.avatarUpdated"));
     } catch (err) {
-      showMessage("error", err.message || "Failed to update avatar");
+      showMessage("error", err.message || t("profile.messages.saveError"));
     } finally {
       setIsLoading(false);
       e.target.value = "";
@@ -1983,17 +2137,17 @@ const MyProfile = () => {
                     <Lock size={20} />
                   </div>
                   <div>
-                    <h3>Change Password</h3>
-                    <p>Your password must be at least 8 characters and contain a mix of letters, numbers, and symbols</p>
+                    <h3>{t("profile.security.changePassword")}</h3>
+                    <p>{t("profile.security.passwordHint")}</p>
                   </div>
                 </div>
                 <div className="password-form">
                   <div className="form-group">
-                    <label>Current Password</label>
+                    <label>{t("profile.security.currentPassword")}</label>
                     <div className="password-input-wrapper">
                       <input
                         type={showPasswords.current ? "text" : "password"}
-                        placeholder="Enter current password"
+                        placeholder={t("profile.security.passwordPlaceholder")}
                         className="form-input"
                         value={passwordForm.current}
                         onChange={(e) => handlePasswordChange("current", e.target.value)}
@@ -2005,11 +2159,11 @@ const MyProfile = () => {
                     </div>
                   </div>
                   <div className="form-group">
-                    <label>New Password</label>
+                    <label>{t("profile.security.newPassword")}</label>
                     <div className="password-input-wrapper">
                       <input
                         type={showPasswords.new ? "text" : "password"}
-                        placeholder="Enter new password"
+                        placeholder={t("profile.security.newPasswordPlaceholder")}
                         className="form-input"
                         value={passwordForm.new}
                         onChange={(e) => handlePasswordChange("new", e.target.value)}
@@ -2028,7 +2182,7 @@ const MyProfile = () => {
                           ></div>
                         </div>
                         <span className="password-strength-text" style={{ color: getPasswordStrengthColor() }}>
-                          {getPasswordStrengthText()} strength
+                          {getPasswordStrengthText()} {t("profile.security.strength", "strength")}
                         </span>
                       </div>
                     )}
@@ -2036,35 +2190,35 @@ const MyProfile = () => {
                   <div className="password-requirements-grid">
                     <div className="password-req-item">
                       {passwordValidations.minLength ? <Check size={14} className="req-check" /> : <X size={14} className="req-uncheck" />}
-                      <span>At least 8 characters</span>
+                      <span>{t("profile.security.requirements.length")}</span>
                     </div>
                     <div className="password-req-item">
                       {passwordValidations.uppercase ? <Check size={14} className="req-check" /> : <X size={14} className="req-uncheck" />}
-                      <span>One uppercase letter</span>
+                      <span>{t("profile.security.requirements.uppercase")}</span>
                     </div>
                     <div className="password-req-item">
                       {passwordValidations.lowercase ? <Check size={14} className="req-check" /> : <X size={14} className="req-uncheck" />}
-                      <span>One lowercase letter</span>
+                      <span>{t("profile.security.requirements.lowercase")}</span>
                     </div>
                     <div className="password-req-item">
                       {passwordValidations.number ? <Check size={14} className="req-check" /> : <X size={14} className="req-uncheck" />}
-                      <span>One number</span>
+                      <span>{t("profile.security.requirements.number")}</span>
                     </div>
                     <div className="password-req-item">
                       {passwordValidations.special ? <Check size={14} className="req-check" /> : <X size={14} className="req-uncheck" />}
-                      <span>One special character</span>
+                      <span>{t("profile.security.requirements.special")}</span>
                     </div>
                     <div className="password-req-item">
                       {passwordValidations.match ? <Check size={14} className="req-check" /> : <X size={14} className="req-uncheck" />}
-                      <span>Passwords match</span>
+                      <span>{t("profile.security.requirements.match")}</span>
                     </div>
                   </div>
                   <div className="form-group">
-                    <label>Confirm New Password</label>
+                    <label>{t("profile.security.confirmPassword")}</label>
                     <div className="password-input-wrapper">
                       <input
                         type={showPasswords.confirm ? "text" : "password"}
-                        placeholder="Confirm new password"
+                        placeholder={t("profile.security.confirmPasswordPlaceholder")}
                         className="form-input"
                         value={passwordForm.confirm}
                         onChange={(e) => handlePasswordChange("confirm", e.target.value)}
@@ -2076,7 +2230,7 @@ const MyProfile = () => {
                     </div>
                   </div>
                   <button className="btn-primary" onClick={handlePasswordSubmit} disabled={isLoading}>
-                    {isLoading ? <><RefreshCw size={16} className="spinning" /> Updating...</> : <><Save size={16} />Update Password</>}
+                    {isLoading ? <><RefreshCw size={16} className="spinning" /> {t("profile.security.updating")}</> : <><Save size={16} />{t("profile.security.updatePassword")}</>}
                   </button>
                 </div>
               </div>
@@ -2090,13 +2244,13 @@ const MyProfile = () => {
                       <Fingerprint size={20} style={{ color: 'var(--blue)' }} />
                     </div>
                     <div className="security-option-content">
-                      <h4>Two-factor authentication</h4>
-                      <p>Add an extra layer of security to your account</p>
+                      <h4>{t("profile.security.twoStep")}</h4>
+                      <p>{t("profile.security.twoStepDesc")}</p>
                     </div>
                   </div>
                   <div className="security-option-control">
                     <span className={`toggle-label ${securityToggles.twoFactor ? 'enabled' : 'disabled'}`}>
-                      {securityToggles.twoFactor ? "Enabled" : "Disabled"}
+                      {securityToggles.twoFactor ? t("profile.security.enabled") : t("profile.security.disabled")}
                     </span>
                     <label className="toggle-switch">
                       <input
@@ -2110,7 +2264,7 @@ const MyProfile = () => {
                   </div>
                   {!securityToggles.twoFactor && (
                     <button className="setup-btn" onClick={() => toggleSecurity("twoFactor")} disabled={isLoading}>
-                      <Shield size={14} />Set up 2FA
+                      <Shield size={14} />{t("profile.security.setup2fa")}
                     </button>
                   )}
                 </div>
@@ -2122,13 +2276,13 @@ const MyProfile = () => {
                       <Bell size={20} style={{ color: 'var(--success)' }} />
                     </div>
                     <div className="security-option-content">
-                      <h4>Login notifications</h4>
-                      <p>Get notified via email whenever a new device logs into your account</p>
+                      <h4>{t("profile.security.loginNotify")}</h4>
+                      <p>{t("profile.security.loginNotifyDesc")}</p>
                     </div>
                   </div>
                   <div className="security-option-control">
                     <span className={`toggle-label ${securityToggles.loginNotifications ? 'enabled' : 'disabled'}`}>
-                      {securityToggles.loginNotifications ? "Enabled" : "Disabled"}
+                      {securityToggles.loginNotifications ? t("profile.security.enabled") : t("profile.security.disabled")}
                     </span>
                     <label className="toggle-switch">
                       <input
@@ -2149,13 +2303,13 @@ const MyProfile = () => {
                       <Smartphone size={20} style={{ color: '#8b5cf6' }} />
                     </div>
                     <div className="security-option-content">
-                      <h4>Device management</h4>
-                      <p>Manage and review devices that have access to your account</p>
+                      <h4>{t("profile.security.deviceManagement")}</h4>
+                      <p>{t("profile.security.deviceManagementDesc")}</p>
                     </div>
                   </div>
                   <div className="security-option-control">
                     <span className={`toggle-label ${securityToggles.deviceManagement ? 'enabled' : 'disabled'}`}>
-                      {securityToggles.deviceManagement ? "Enabled" : "Disabled"}
+                      {securityToggles.deviceManagement ? t("profile.security.enabled") : t("profile.security.disabled")}
                     </span>
                     <label className="toggle-switch">
                       <input
@@ -2176,13 +2330,13 @@ const MyProfile = () => {
                       <Clock size={20} style={{ color: 'var(--warning)' }} />
                     </div>
                     <div className="security-option-content">
-                      <h4>Password expiry</h4>
-                      <p>Require password change every 90 days for enhanced security</p>
+                      <h4>{t("profile.security.passwordExpiry")}</h4>
+                      <p>{t("profile.security.passwordExpiryDesc")}</p>
                     </div>
                   </div>
                   <div className="security-option-control">
                     <span className={`toggle-label ${securityToggles.passwordExpiry ? 'enabled' : 'disabled'}`}>
-                      {securityToggles.passwordExpiry ? "Enabled" : "Disabled"}
+                      {securityToggles.passwordExpiry ? t("profile.security.enabled") : t("profile.security.disabled")}
                     </span>
                     <label className="toggle-switch">
                       <input
@@ -2273,11 +2427,11 @@ const MyProfile = () => {
                     {currentPlan.icon}
                   </div>
                   <div className="membership-current-info">
-                    <h2>{currentPlan.name} Plan</h2>
+                    <h2>{t("profile.upgrade.currentPlan", { plan: t("clientProfile.membership." + currentPlan.id) })}</h2>
                     <p className="membership-status">{userData.membershipStatus}</p>
                     <div className="membership-dates">
-                      <span>Started: {userData.membershipStartDate}</span>
-                      <span>Next billing: {userData.membershipNextBilling}</span>
+                      <span>{t("profile.upgrade.started")}: {userData.membershipStartDate}</span>
+                      <span>{t("profile.upgrade.nextBilling")}: {userData.membershipNextBilling}</span>
                     </div>
                   </div>
                   {currentPlan.id !== "basic" && (
@@ -2286,13 +2440,13 @@ const MyProfile = () => {
                       onClick={handleCancelMembership}
                       disabled={isLoading}
                     >
-                      Cancel Membership
+                      {t("profile.upgrade.cancelMembership")}
                     </button>
                   )}
                 </div>
 
                 <div className="membership-features-list">
-                  <h3>Your benefits:</h3>
+                  <h3>{t("profile.upgrade.benefits")}:</h3>
                   <div className="features-grid">
                     {currentPlan.features.map((feature, index) => (
                       <div key={index} className="feature-item">
@@ -2307,10 +2461,10 @@ const MyProfile = () => {
               {/* Billing Cycle Toggle */}
               <div className="billing-cycle-toggle">
                 <span className={billingCycle === "monthly" ? "active" : ""} onClick={() => setBillingCycle("monthly")}>
-                  Monthly
+                  {t("profile.upgrade.monthly")}
                 </span>
                 <span className={billingCycle === "yearly" ? "active" : ""} onClick={() => setBillingCycle("yearly")}>
-                  Yearly <span className="save-badge">Save 17%</span>
+                  {t("profile.upgrade.yearly")} <span className="save-badge">{t("profile.upgrade.save17")}</span>
                 </span>
               </div>
 
@@ -2322,15 +2476,15 @@ const MyProfile = () => {
                     className={`membership-plan-card ${plan.popular ? 'popular' : ''} ${plan.current ? 'current' : ''}`}
                     style={{ borderColor: plan.color }}
                   >
-                    {plan.popular && <div className="popular-badge">Most Popular</div>}
+                    {plan.popular && <div className="popular-badge">{t("profile.upgrade.mostPopular")}</div>}
                     <div className="plan-header" style={{ color: plan.color }}>
                       <div className="plan-icon">{plan.icon}</div>
-                      <h3>{plan.name}</h3>
+                      <h3>{t("clientProfile.membership." + plan.id)}</h3>
                     </div>
                     
                     <div className="plan-price">
                       {plan.price[billingCycle] === 0 ? (
-                        <span className="price-free">Free</span>
+                        <span className="price-free">{t("profile.upgrade.free")}</span>
                       ) : (
                         <>
                           <span className="price">${plan.price[billingCycle]}</span>
@@ -2356,7 +2510,7 @@ const MyProfile = () => {
 
                     {plan.current ? (
                       <button className="btn-outline" disabled>
-                        Current Plan
+                        {t("profile.upgrade.currentPlanShort")}
                       </button>
                     ) : (
                       <button 
@@ -2364,7 +2518,7 @@ const MyProfile = () => {
                         onClick={() => handleUpgradeClick(plan.id)}
                         disabled={isLoading}
                       >
-                        {plan.price[billingCycle] === 0 ? "Downgrade" : "Upgrade"}
+                        {plan.price[billingCycle] === 0 ? t("profile.upgrade.downgrade") : t("profile.upgrade.upgrade")}
                       </button>
                     )}
                   </div>
@@ -2373,25 +2527,183 @@ const MyProfile = () => {
             </div>
           )}
 
-          {/* NOTIFICATIONS SECTION */}
+          {/* NOTIFICATIONS SECTION (SETTINGS) */}
           {activeSection === "notifications" && (
-            <div className="content-section">
+            <div className="content-section profile-notifications">
               <div className="section-header">
                 <div className="header-left">
-                  <h1 className="section-title">Notification Settings</h1>
-                  <span className="section-badge">
-                    <Bell size={14} />Manage Alerts
-                  </span>
+                  <h1 className="section-title">{t("profile.notifications.title")}</h1>
                 </div>
               </div>
 
-              <div className="placeholder-card">
-                <Bell size={64} />
-                <h2>Notification Settings</h2>
-                <p>Customize email, push, and in-app notifications for jobs, messages, and updates.</p>
-                <p style={{ fontSize: '13px', marginTop: '12px', color: 'var(--light-text-tertiary)' }}>
-                  This section is under development and will be available soon.
-                </p>
+              <div className="notifications-grid">
+                {notificationSettings.map((category, idx) => (
+                  <div key={category.category} className="notification-card">
+                    <div className="category-header">
+                      <Bell size={18} className="category-icon" />
+                      <h3>{t(category.category)}</h3>
+                    </div>
+                    <div className="settings-list">
+                      {category.settings.map(setting => (
+                        <div key={setting.id} className="setting-item">
+                          <div className="setting-info">
+                            <h4>{t(setting.label)}</h4>
+                            <p>{t(setting.description)}</p>
+                          </div>
+                          <label className="uzwork-switch">
+                            <input 
+                              type="checkbox" 
+                              checked={setting.enabled} 
+                              onChange={() => handleToggleNotification(idx, setting.id)}
+                            />
+                            <span className="uzwork-slider"></span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="delivery-preferences">
+                <h2 className="delivery-title">{t("profile.notifications.deliveryPreferences")}</h2>
+                <div className="delivery-options">
+                  <label className="delivery-checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={deliveryPrefs.email} 
+                      onChange={() => handleToggleDeliveryPref('email')} 
+                      className="delivery-checkbox"
+                    />
+                    <span className="checkbox-custom"></span>
+                    <span className="delivery-label-text">{t("profile.notifications.email")}</span>
+                  </label>
+                  <label className="delivery-checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={deliveryPrefs.push} 
+                      onChange={() => handleToggleDeliveryPref('push')} 
+                      className="delivery-checkbox"
+                    />
+                    <span className="checkbox-custom"></span>
+                    <span className="delivery-label-text">{t("profile.notifications.push")}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ALL NOTIFICATIONS SECTION (HISTORY) */}
+          {activeSection === "all-notifications" && (
+            <div className="content-section profile-all-notifications">
+              <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="header-left">
+                  <h1 className="section-title">{t('notifications.allNotifications')}</h1>
+                </div>
+                {allNotifications.some(n => !n.is_read) && (
+                  <button 
+                    onClick={handleMarkAllRead}
+                    style={{ background: 'none', border: 'none', color: 'var(--blue, #3b82f6)', cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <CheckCircle size={16} />
+                    {t('notifications.markAllRead')}
+                  </button>
+                )}
+              </div>
+
+              <div className="notifications-list-container">
+                {notifLoading ? (
+                  <div className="notif-loading-state">{t('notifications.loading')}</div>
+                ) : allNotifications.length > 0 ? (
+                  <div className="notif-history-list">
+                    {allNotifications.map((n, idx) => {
+                      const { icon, color, bg } = getNotifIcon(n.type);
+
+                      // Smart body with data field fallback
+                      let d = {};
+                      try { d = typeof n.data === 'string' ? JSON.parse(n.data || '{}') : (n.data || {}); } catch {}
+                      const clientName = d.clientName || d.client_name;
+                      const jobTitle   = d.jobTitle   || d.job_title;
+
+                      const getBody = () => {
+                        const lang = i18n.language;
+                        if (n.type === 'job_invitation') {
+                          if (clientName && jobTitle) {
+                            if (lang === 'ru') return `${clientName} пригласил вас в проект "${jobTitle}".`;
+                            if (lang === 'en') return `${clientName} invited you to the project "${jobTitle}".`;
+                            return `${clientName} sizni "${jobTitle}" loyihasiga taklif qildi.`;
+                          }
+                          if (jobTitle) {
+                            if (lang === 'ru') return `Вы получили приглашение в проект "${jobTitle}".`;
+                            if (lang === 'en') return `You have been invited to the project "${jobTitle}".`;
+                            return `"${jobTitle}" loyihasiga taklif qabul qildingiz.`;
+                          }
+                        }
+                        if (n.type === 'proposal_accepted' && jobTitle) {
+                          if (lang === 'ru') return `Ваше предложение по проекту "${jobTitle}" было принято.`;
+                          if (lang === 'en') return `Your proposal for "${jobTitle}" has been accepted.`;
+                          return `"${jobTitle}" loyihasiga taklifingiz qabul qilindi.`;
+                        }
+                        if (n.type === 'proposal_rejected' && jobTitle) {
+                          if (lang === 'ru') return `Ваше предложение по проекту "${jobTitle}" было отклонено.`;
+                          if (lang === 'en') return `Your proposal for "${jobTitle}" has been rejected.`;
+                          return `"${jobTitle}" loyihasiga taklifingiz rad etildi.`;
+                        }
+                        if (n.type === 'new_job_posted' && jobTitle) {
+                          if (lang === 'ru') return `Размещена новая вакансия по вашим навыкам: "${jobTitle}"`;
+                          if (lang === 'en') return `A new job matching your skills: "${jobTitle}"`;
+                          return `Ko'nikmalaringizga mos yangi loyiha: "${jobTitle}"`;
+                        }
+                        return lang === 'en' && n.body_en ? n.body_en
+                             : lang === 'ru' && n.body_ru ? n.body_ru
+                             : n.message || '';
+                      };
+
+                      return (
+                        <div 
+                          key={n.id} 
+                          className={`notif-history-item ${!n.is_read ? 'unread' : ''}`}
+                          onClick={() => !n.is_read && handleMarkNotifRead(n.id)}
+                        >
+                          <div className="notif-history-icon" style={{
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '12px',
+                            background: bg,
+                            color: color,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}>
+                            {icon}
+                          </div>
+                          <div className="notif-history-content">
+                            <div className="notif-history-header">
+                              <h4>
+                                {i18n.language === 'en' && n.title_en ? n.title_en : 
+                                 i18n.language === 'ru' && n.title_ru ? n.title_ru : 
+                                 n.title || t(`notifications.types.${n.type}`, { defaultValue: t('notifications.title') })}
+                              </h4>
+                              <span className="notif-history-time">
+                                {new Date(n.created_at).toLocaleDateString(i18n.language === 'uz' ? 'uz-UZ' : i18n.language === 'ru' ? 'ru-RU' : 'en-US')} {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                            <p>{getBody()}</p>
+                          </div>
+                          {!n.is_read && (
+                            <div className="unread-status-dot"></div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="notif-empty-state">
+                    <Bell size={48} />
+                    <p>{t('notifications.empty')}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -2410,10 +2722,10 @@ const MyProfile = () => {
 
               <div className="placeholder-card">
                 <AlertTriangle size={64} />
-                <h2>Appeals Tracker</h2>
-                <p>Track your support tickets, disputes, and account-related appeals.</p>
+                <h2>{t("profile.appeals.title")}</h2>
+                <p>{t("profile.appeals.desc")}</p>
                 <p style={{ fontSize: '13px', marginTop: '12px', color: 'var(--light-text-tertiary)' }}>
-                  This section is under development and will be available soon.
+                  {t("profile.appeals.underDevelopment")}
                 </p>
               </div>
             </div>
@@ -2426,7 +2738,7 @@ const MyProfile = () => {
         <div className="modal-overlay" onClick={() => setShowUpgradeModal(false)}>
           <div className="modal-content upgrade-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Upgrade to {selectedPlanForModal.name}</h2>
+              <h2>{t("profile.upgrade.title", { plan: selectedPlanForModal.name })}</h2>
               <button className="modal-close" onClick={() => setShowUpgradeModal(false)} disabled={isLoading}>
                 <X size={20} />
               </button>
@@ -2436,7 +2748,7 @@ const MyProfile = () => {
               <div className="upgrade-summary">
                 <div className="plan-comparison">
                   <div className="current-plan">
-                    <h4>Current Plan</h4>
+                    <h4>{t("profile.upgrade.current")}</h4>
                     <p className="plan-name">{currentPlan.name}</p>
                     <p className="plan-price">
                       {currentPlan.price[billingCycle] === 0 ? "Free" : `$${currentPlan.price[billingCycle]}/${billingCycle === "monthly" ? "mo" : "yr"}`}
@@ -2446,7 +2758,7 @@ const MyProfile = () => {
                     <ChevronRight size={24} />
                   </div>
                   <div className="new-plan">
-                    <h4>New Plan</h4>
+                    <h4>{t("profile.upgrade.new")}</h4>
                     <p className="plan-name">{selectedPlanForModal.name}</p>
                     <p className="plan-price">
                       ${selectedPlanForModal.price[billingCycle]}/{billingCycle === "monthly" ? "mo" : "yr"}
@@ -2455,7 +2767,7 @@ const MyProfile = () => {
                 </div>
 
                 <div className="upgrade-benefits">
-                  <h4>You'll get:</h4>
+                  <h4>{t("profile.upgrade.benefits")}</h4>
                   <ul>
                     {selectedPlanForModal.features
                       .filter(feature => !currentPlan.features.includes(feature))
@@ -2472,22 +2784,22 @@ const MyProfile = () => {
 
               <div className="upgrade-total">
                 <div className="total-row">
-                  <span>Subtotal</span>
+                  <span>{t("profile.upgrade.subtotal")}</span>
                   <span>${selectedPlanForModal.price[billingCycle]}</span>
                 </div>
                 <div className="total-row">
-                  <span>Tax</span>
+                  <span>{t("profile.upgrade.tax")}</span>
                   <span>$0.00</span>
                 </div>
                 <div className="total-row final">
-                  <span>Total</span>
+                  <span>{t("profile.upgrade.total")}</span>
                   <span>${selectedPlanForModal.price[billingCycle]}</span>
                 </div>
               </div>
 
               <div className="upgrade-note">
                 <Info size={16} />
-                <p>You will be charged immediately. Your billing cycle will reset today.</p>
+                <p>{t("profile.upgrade.note")}</p>
               </div>
             </div>
 
@@ -2496,7 +2808,7 @@ const MyProfile = () => {
                 Cancel
               </button>
               <button className="btn-primary" onClick={handleUpgradeConfirm} disabled={isLoading}>
-                {isLoading ? <><RefreshCw size={16} className="spinning" /> Processing...</> : `Confirm Upgrade`}
+                {isLoading ? <><RefreshCw size={16} className="spinning" /> {t("profile.upgrade.processing")}</> : t("profile.upgrade.confirm")}
               </button>
             </div>
           </div>

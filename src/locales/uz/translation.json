@@ -1,42 +1,120 @@
 {
   "findTalent": {
-    "badges": {"top_rated_plus": "Yuqori baholangan+","top_rated": "Yuqori baholangan","rising_talent": "Yangi iste'dod"},
-    "filter": {"title": "Filtrlar","clearAll": "Tozalash","clearAllCount": "Barcha filtrlarni tozalash ({{count}})","talentBadge": "Mutaxassis darajasi","talentBadgeInfo": "Natijalariga qarab berilgan yutuqlar","hourlyRate": "Soatlik ish haqi","under": "${{min}} dan kam","location": "Joylashuv","searchLocation": "Shahar, mamlakat yoki hudud","jobSuccess": "Muvaffaqiyat ko'rsatkichi","jobSuccessInfo": "Minimal ishdagi muvaffaqiyat foizi","successUp": "{{percent}}% va undan yuqori","englishLevel": "Ingliz tili darajasi"},
-    "results": {"searchPlaceholder": "Malaka yoki ism bo'yicha qidiring","advancedSearch": "Kengaytirilgan qidiruv","freelancersFound": "{{count}} ta mutaxassis topildi","location": "Joylashuv","successCount": "✅ {{percent}}%+ muvaffaqiyat","sort": {"relevance": "Eng mos tushadigan","rate_asc": "Narx: Arzondan Qimmatga","rate_desc": "Narx: Qimmatdan Arzonga","success": "Ishdagi muvaffaqiyat","earned": "Eng ko'p ishlagan"},"loading": "Mutaxassislar yuklanmoqda...","empty": "Hech qanday mutaxassis topilmadi","emptySub": "Filtrlarni yoki qidiruv so'zini o'zgartirib ko'ring","loadMore": "Yana yuklash","loadingMore": "Yana mutaxassislar yuklanmoqda..."},
-    "card": {"save": "Mutaxassisni saqlash","invited": "Taklif qilingan","invite": "Ishga taklif qilish","success": "Muvaffaqiyat","earned": "topilgan","consults": "Konsultatsiya beradi","insights": "{{name}} haqida qisqacha ma'lumot","insightsInfo": "AI tomonidan yozilgan ma'lumotlar","feedback": "Fikr-mulohaza bering","associatedWith": "Bilan bog'liq","viewProfile": "Profilni ko'rish","sendMessage": "Xabar yozish","saveAction": "Saqlash","boosted": "Tavsiya etilgan", "mutaxassis": "Mutaxassis", "negotiable": "Kelishiladi", "jobsDone": "ta topshirilgan", "newFreelancer": "Yangi frilanser"},
-    "nations": {"uz": "O'zbekiston","tashkent": "Toshkent","samarkand": "Samarqand","bukhara": "Buxoro","kz": "Qozog'iston","kg": "Qirg'iziston","remote": "Masofadan (Istalgan joy)"},
-    "englishLevels": {"any": "Istalgan daraja","basic": "Boshlang'ich","conversational": "So'zlashuvchi","fluent": "Erkin","native": "Ona tili"}
+    "badges": {
+      "top_rated_plus": "Yuqori baholangan+",
+      "top_rated": "Yuqori baholangan",
+      "rising_talent": "Yangi iste'dod"
+    },
+    "filter": {
+      "title": "Filtrlar",
+      "clearAll": "Tozalash",
+      "clearAllCount": "Barcha filtrlarni tozalash ({{count}})",
+      "talentBadge": "Mutaxassis darajasi",
+      "talentBadgeInfo": "Natijalariga qarab berilgan yutuqlar",
+      "hourlyRate": "Soatlik ish haqi",
+      "under": "${{min}} dan kam",
+      "location": "Joylashuv",
+      "searchLocation": "Shahar, mamlakat yoki hudud",
+      "jobSuccess": "Muvaffaqiyat ko'rsatkichi",
+      "jobSuccessInfo": "Minimal ishdagi muvaffaqiyat foizi",
+      "successUp": "{{percent}}% va undan yuqori",
+      "englishLevel": "Ingliz tili darajasi"
+    },
+    "results": {
+      "searchPlaceholder": "Malaka yoki ism bo'yicha qidiring",
+      "advancedSearch": "Kengaytirilgan qidiruv",
+      "freelancersFound": "{{count}} ta mutaxassis topildi",
+      "location": "Joylashuv",
+      "successCount": "✅ {{percent}}%+ muvaffaqiyat",
+      "sort": {
+        "relevance": "Eng mos tushadigan",
+        "rate_asc": "Narx: Arzondan Qimmatga",
+        "rate_desc": "Narx: Qimmatdan Arzonga",
+        "success": "Ishdagi muvaffaqiyat",
+        "earned": "Eng ko'p ishlagan"
+      },
+      "loading": "Mutaxassislar yuklanmoqda...",
+      "empty": "Hech qanday mutaxassis topilmadi",
+      "emptySub": "Filtrlarni yoki qidiruv so'zini o'zgartirib ko'ring",
+      "loadMore": "Yana yuklash",
+      "loadingMore": "Yana mutaxassislar yuklanmoqda..."
+    },
+    "card": {
+      "save": "Mutaxassisni saqlash",
+      "invited": "Taklif qilingan",
+      "invite": "Ishga taklif qilish",
+      "success": "Muvaffaqiyat",
+      "earned": "topilgan",
+      "consults": "Konsultatsiya beradi",
+      "insights": "{{name}} haqida qisqacha ma'lumot",
+      "insightsInfo": "AI tomonidan yozilgan ma'lumotlar",
+      "feedback": "Fikr-mulohaza bering",
+      "associatedWith": "Bilan bog'liq",
+      "viewProfile": "Profilni ko'rish",
+      "sendMessage": "Xabar yozish",
+      "saveAction": "Saqlash",
+      "boosted": "Tavsiya etilgan",
+      "mutaxassis": "Mutaxassis",
+      "negotiable": "Kelishiladi",
+      "jobsDone": "ta topshirilgan",
+      "newFreelancer": "Yangi frilanser"
+    },
+    "nations": {
+      "uz": "O'zbekiston",
+      "tashkent": "Toshkent",
+      "samarkand": "Samarqand",
+      "bukhara": "Buxoro",
+      "kz": "Qozog'iston",
+      "kg": "Qirg'iziston",
+      "remote": "Masofadan (Istalgan joy)"
+    },
+    "englishLevels": {
+      "any": "Istalgan daraja",
+      "basic": "Boshlang'ich",
+      "conversational": "So'zlashuvchi",
+      "fluent": "Erkin",
+      "native": "Ona tili"
+    }
   },
-    "navbar": {
-      "findWork": "Ish izlash",
-      "savedJobs": "Saqlangan ishlar",
-      "proposals": "Takliflar",
-      "hireFreelancers": "Freelancer yollash",
-      "myJobs": "Mening ishlarim",
-      "contracts": "Kontraktlar",
-      "postJob": "Ish e'lon qilish",
-      "reports": "Hisobotlar",
-      "messages": "Xabarlar",
-      "findTalent": "Mutaxassis topish",
-      "searchJobs": "Ishlar",
-      "searchTalent": "Mutaxassislar",
-      "searchProjects": "Loyihalar",
-      "login": "Kirish",
-      "signup": "Ro'yxatdan o'tish",
-      "billing": "To'lovlar",
-      "saved": "Saqlanganlar"
-    },
-    "common": {
-      "viewAll": "Hammasini ko'rish",
-      "export": "Eksport qilish",
-      "save": "Saqlash",
-      "cancel": "Bekor qilish",
-      "description": "Tavsif",
-      "actions": "Harakatlar",
-      "status": "Holati",
-      "date": "Sana",
-      "amount": "Summa"
-    },
+  "navbar": {
+    "findWork": "Ish izlash",
+    "savedJobs": "Saqlangan ishlar",
+    "proposals": "Takliflar",
+    "hireFreelancers": "Freelancer yollash",
+    "myJobs": "Mening ishlarim",
+    "contracts": "Kontraktlar",
+    "postJob": "Ish e'lon qilish",
+    "reports": "Hisobotlar",
+    "messages": "Xabarlar",
+    "findTalent": "Mutaxassis topish",
+    "searchJobs": "Ishlar",
+    "searchTalent": "Mutaxassislar",
+    "searchProjects": "Loyihalar",
+    "login": "Kirish",
+    "signup": "Ro'yxatdan o'tish",
+    "billing": "To'lovlar",
+    "saved": "Saqlanganlar"
+  },
+  "common": {
+    "viewAll": "Hammasini ko'rish",
+    "export": "Eksport qilish",
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "description": "Tavsif",
+    "actions": "Harakatlar",
+    "status": "Holati",
+    "date": "Sana",
+    "amount": "Summa",
+    "next": "Keyingisi",
+    "back": "Orqaga",
+    "logout": "Chiqish",
+    "loading": "Yuklanmoqda...",
+    "retry": "Qayta urinish",
+    "saving": "Saqlanmoqda...",
+    "errorDelete": "O'chirishda xatolik yuz berdi",
+    "errorCopy": "Nusxalashda xatolik yuz berdi",
+    "errorStatusUpdate": "Holatni yangilashda xatolik yuz berdi"
+  },
   "header": {
     "hireTalent": "Mutaxassis yollash",
     "findWork": "Ish topish",
@@ -85,7 +163,13 @@
     "tabWork": "Ish topish",
     "searchPlaceholder": "Qanday mutaxassis kerakligini yozing...",
     "searchBtn": "Qidirish",
-    "popularTags": ["UI/UX dizayner", "React dasturchi", "Python expert", "Kopirayter", "Mobil dasturchi"],
+    "popularTags": [
+      "UI/UX dizayner",
+      "React dasturchi",
+      "Python expert",
+      "Kopirayter",
+      "Mobil dasturchi"
+    ],
     "popularSearches": "Ommabop qidiruvlar",
     "workTitle": "UZWORK bilan frilanserlik karyerangizni boshlang va rivojlantiring",
     "workDesc": "Har hafta minglab yangi ish e'lonlari sizni kutmoqda.",
@@ -364,6 +448,111 @@
       "available": "Faol",
       "busy": "Band",
       "away": "Uzoqda"
+    },
+    "security": {
+      "title": "Parol va xavfsizlik",
+      "overview": "Xavfsizlik sharhi",
+      "changePassword": "Parolni o'zgartirish",
+      "passwordHint": "Parolingiz kamida 8 ta belgidan iborat bo'lishi va harflar, raqamlar hamda belgilarni o'z ichiga olishi kerak",
+      "currentPassword": "Joriy parol",
+      "newPassword": "Yangi parol",
+      "confirmPassword": "Yangi parolni tasdiqlash",
+      "passwordPlaceholder": "Joriy parolni kiriting",
+      "newPasswordPlaceholder": "Yangi parolni kiriting",
+      "confirmPasswordPlaceholder": "Yangi parolni tasdiqlang",
+      "updatePassword": "Parolni yangilash",
+      "updating": "Yangilanmoqda...",
+      "requirements": {
+        "length": "Kamida 8 ta belgi",
+        "uppercase": "Bitta katta harf",
+        "lowercase": "Bitta kichik harf",
+        "number": "Bitta raqam",
+        "special": "Bitta maxsus belgi",
+        "match": "Parollar bir xil"
+      },
+      "twoStep": "Ikki bosqichli tasdiqlash",
+      "twoStepDesc": "Telefoningizga keladigan kodni talab qilish orqali hisobingizga qo'shimcha xavfsizlik qavatini qo'shing",
+      "loginNotify": "Kirish haqida bildirishnomalar",
+      "loginNotifyDesc": "Hisobingizga yangi qurilmadan kirilganda elektron pochta orqali xabar oling",
+      "deviceManagement": "Qurilmalarni boshqarish",
+      "deviceManagementDesc": "Hisobingizga kirish huquqiga ega qurilmalarni ko'rib chiqing va boshqaring",
+      "passwordExpiry": "Parolning amal qilish muddati",
+      "passwordExpiryDesc": "Xavfsizlikni oshirish uchun har 90 kunda parolni o'zgartirishni talab qilish",
+      "enabled": "Yoqilgan",
+      "disabled": "O'chirilgan",
+      "setup2fa": "2FA-ni o'rnatish"
+    },
+    "notifications": {
+      "title": "Bildirishnoma sozlamalari",
+      "settings": "Bildirishnoma sozlamalari",
+      "deliveryPreferences": "Yetkazib berish afzalliklari",
+      "email": "Email bildirishnomalar",
+      "push": "Push bildirishnomalar",
+      "categories": {
+        "jobs": "Ishlar va takliflar",
+        "payments": "To'lovlar va hisob-kitoblar"
+      },
+      "items": {
+        "proposal_received": {
+          "label": "Yangi taklif qabul qilindi",
+          "desc": "Frilanser sizning ishingizga taklif yuborganda xabar bering"
+        },
+        "proposal_withdrawn": {
+          "label": "Taklif qaytarib olindi",
+          "desc": "Frilanser o'z taklifini qaytarib olganida xabar bering"
+        },
+        "payment_success": {
+          "label": "To'lov muvaffaqiyatli",
+          "desc": "To'lov to'g'ri amalga oshirilganligini tasdiqlang"
+        },
+        "invoice_ready": {
+          "label": "Hisob-faktura tayyor",
+          "desc": "Yangi hisob-faktura yuklab olish uchun mavjud bo'lganda xabar bering"
+        }
+      }
+    },
+    "appeals": {
+      "title": "Shikoyatlarni kuzatish",
+      "subtitle": "Qo'llab-quvvatlash so'rovlari",
+      "desc": "Shikoyatlaringiz, nizolar va hisobingiz bilan bog'liq muammolarni kuzatib boring.",
+      "underDevelopment": "Ushbu bo'lim ishlab chiqilmoqda va tez orada tayyor bo'ladi."
+    },
+    "upgrade": {
+      "title": "{{plan}} rejasiga o'tish",
+      "current": "Joriy reja",
+      "new": "Yangi reja",
+      "benefits": "Sizga nima beradi:",
+      "total": "Jami",
+      "note": "To'lov hozir amalga oshiriladi. Hisob-kitob davri bugun qayta tiklanadi.",
+      "processing": "Ishlanmoqda...",
+      "confirm": "Yangilashni tasdiqlash",
+      "success": "Muvaffaqiyatli {{plan}} rejasiga o'tildi!",
+      "subtotal": "Oraliq jami",
+      "tax": "Soliq",
+      "currentPlan": "{{plan}} rejasi",
+      "started": "Boshlangan",
+      "nextBilling": "Keyingi to'lov",
+      "cancelMembership": "A'zolikni bekor qilish",
+      "monthly": "Oylik",
+      "yearly": "Yillik",
+      "save17": "17% tejang",
+      "mostPopular": "Eng mashhur",
+      "free": "Bepul",
+      "currentPlanShort": "Joriy reja",
+      "downgrade": "Pasaytirish",
+      "upgrade": "Yangilash"
+    },
+    "messages": {
+      "portfolioSaved": "Portfolio muvaffaqiyatli saqlandi",
+      "portfolioDeleted": "Portfolio muvaffaqiyatli o'chirildi",
+      "notifSettingUpdated": "Xabarnoma sozlamasi yangilandi",
+      "deliverySettingUpdated": "Yetkazib berish sozlamasi yangilandi",
+      "allRead": "Barcha bildirishnomalar o'qildi deb belgilandi",
+      "cvUploaded": "CV muvaffaqiyatli yuklandi",
+      "avatarUpdated": "Profil rasmi muvaffaqiyatli yangilandi",
+      "saveError": "Saqlashda xatolik",
+      "deleteConfirm": "Haqiqatan ham o'chirmoqchimisiz?",
+      "deleteError": "O'chirishda xatolik"
     }
   },
   "skills": {
@@ -675,14 +864,6 @@
     "readyDesc": "Siz UzWork hamjamiyatiga qo'shilishga tayyorsiz. Ma'lumotlarni tasdiqlash uchun pastdagi tugmani bosing.",
     "finish": "Tugallash"
   },
-  "common": {
-    "next": "Keyingisi",
-    "back": "Orqaga",
-    "logout": "Chiqish",
-    "loading": "Yuklanmoqda...",
-    "retry": "Qayta urinish",
-    "saving": "Saqlanmoqda..."
-  },
   "wallet": {
     "title": "Mening hamyonim",
     "availableBalance": "Mavjud balans",
@@ -691,37 +872,45 @@
     "totalEarned": "Umumiy daromad",
     "myCards": "Mening kartalarim",
     "addCard": "Karta qo'shish",
-    "noCards": "Hali kartalar qo'shilmagan",
-    "transactions": "So'nggi amallar",
-    "noTransactions": "Tranzaksiyalar topilmadi",
-    "deposit": "Pul qo'shish",
+    "noCards": "Sizda hali kartalar yo'q",
+    "transactions": "Tranzaksiyalar tarixi",
+    "noTransactions": "Hali tranzaksiyalar mavjud emas",
+    "deposit": "Hisobni to'ldirish",
     "withdraw": "Pul yechish",
     "amountPlaceholder": "Summani kiriting",
     "cardNumberPlaceholder": "Karta raqami",
-    "cardHolderPlaceholder": "Ega ismi",
-    "expiryDatePlaceholder": "PP/YY",
+    "cardHolderPlaceholder": "Karta egasi",
+    "expiryDatePlaceholder": "Muddati (MM/YY)",
     "mainCard": "Asosiy",
     "setAsMain": "Asosiy qilish",
-    "deleteCard": "O'chirish",
-    "confirmDelete": "Haqiqatdan ham ushbu kartani o'chirib tashlamoqchimisiz?",
+    "deleteCard": "Kartani o'chirish",
+    "confirmDelete": "Haqiqatan ham ushbu kartani o'chirmoqchimisiz?",
     "yes": "Ha",
     "no": "Yo'q",
     "types": {
-      "deposit": "Pul qo'shish",
+      "deposit": "Hisobni to'ldirish",
       "withdrawal": "Pul yechish",
-      "escrow_hold": "Escrow ushlab turish",
-      "escrow_release": "To'lov o'tkazildi",
+      "escrow_hold": "Muzlatilgan (Escrow)",
+      "escrow_release": "To'lab berilgan",
       "fee": "Xizmat haqi",
       "proposal_deposit": "Taklif uchun to'lov",
       "premium_activation": "Premium akkaunt",
-      "refund": "Qaytarildi"
+      "refund": "Qaytarish",
+      "proposal_deposit_lock": "Taklif depoziti (Muzlatilgan)",
+      "proposal_deposit_refund": "Taklif depoziti (Qaytarilgan)",
+      "payment": "To'lov"
     },
     "history": "Tranzaksiyalar tarixi",
     "topUpDemo": "Demo: Balansni to'ldirish",
-    "successDeposit": "Mablag' muvaffaqiyatli qo'shildi!",
+    "successDeposit": "Mablag' muvaffaqiyatli tushirildi!",
     "successCard": "Karta muvaffaqiyatli qo'shildi!",
-    "successDelete": "Karta o'chirildi",
-    "errorGeneric": "Xatolik yuz berdi"
+    "successDelete": "Karta muvaffaqiyatli o'chirildi!",
+    "errorGeneric": "Xatolik yuz berdi",
+    "subtitle": "Mablag'laringiz va tranzaksiyalaringizni xavfsiz boshqaring",
+    "overview": "Umumiy ko'rinish",
+    "methods": "Mening kartalarim",
+    "successWithdraw": "Pul yechish so'rovi yuborildi!",
+    "errorCardNumber": "Karta raqami noto'g'ri"
   },
   "clientProfile": {
     "title": "Mening ma'lumotlarim",
@@ -847,7 +1036,10 @@
       "availablePlans": "Mavjud rejalar",
       "mostPopular": "Eng mashhur",
       "upgrade": "Rejani yangilash",
-      "currentBenefits": "Joriy imtiyozlar",
+      "basic": "Basic",
+      "plus": "Plus",
+      "professional": "Professional",
+      "enterprise": "Enterprise",
       "benefits": {
         "proposals5": "Oyiga 5 tagacha ish takliflari",
         "proposals20": "20 ta ish taklifi",
@@ -869,7 +1061,29 @@
       "title": "Xabarnoma sozlamalari",
       "deliveryPreferences": "Yetkazib berish afzalliklari",
       "emailNotifications": "Email bildirishnomalar",
-      "pushNotifications": "Push bildirishnomalar"
+      "pushNotifications": "Push bildirishnomalar",
+      "categories": {
+        "jobs": "Ishlar va takliflar",
+        "payments": "To'lovlar va hisob-kitoblar"
+      },
+      "settings": {
+        "proposal_received": {
+          "label": "Yangi taklif qabul qilindi",
+          "desc": "Frilanser sizning ishingizga taklif yuborganda xabar bering"
+        },
+        "proposal_withdrawn": {
+          "label": "Taklif qaytarib olindi",
+          "desc": "Frilanser o'z taklifini qaytarib olganida xabar bering"
+        },
+        "payment_success": {
+          "label": "To'lov muvaffaqiyatli",
+          "desc": "To'lov to'g'ri amalga oshirilganligini tasdiqlang"
+        },
+        "invoice_ready": {
+          "label": "Hisob-faktura tayyor",
+          "desc": "Yangi hisob-faktura yuklab olish uchun mavjud bo'lganda xabar bering"
+        }
+      }
     },
     "placeholders": {
       "taxTitle": "Soliq ma'lumotlari",
@@ -1006,12 +1220,6 @@
       "in_progress": "Jarayonda"
     }
   },
-  "common": {
-    "loading": "Yuklanmoqda...",
-    "errorDelete": "O'chirishda xatolik yuz berdi",
-    "errorCopy": "Nusxalashda xatolik yuz berdi",
-    "errorStatusUpdate": "Holatni yangilashda xatolik yuz berdi"
-  },
   "postJob": {
     "header": {
       "post": "Ish e'lonini joylash",
@@ -1023,19 +1231,31 @@
       "saving": "Saqlanmoqda..."
     },
     "steps": {
-      "details": { "label": "Ish tafsilotlari", "sub": "Sarlavha va tavsif" },
-      "skills": { "label": "Ko'nikmalar", "sub": "Zarur ko'nikmalar" },
-      "budget": { "label": "Byudjet", "sub": "Narx va davomiylik" },
-      "review": { "label": "Tekshirish", "sub": "Tekshirish va nashr etish" }
+      "details": {
+        "label": "Ish tafsilotlari",
+        "sub": "Sarlavha va tavsif"
+      },
+      "skills": {
+        "label": "Ko'nikmalar",
+        "sub": "Zarur ko'nikmalar"
+      },
+      "budget": {
+        "label": "Byudjet",
+        "sub": "Narx va davomiylik"
+      },
+      "review": {
+        "label": "Tekshirish",
+        "sub": "Tekshirish va nashr etish"
+      }
     },
     "categories": {
       "Web Development": "Veb dasturlash",
       "Mobile Development": "Mobil dasturlash",
       "Design & Creative": "Dizayn va kreativ",
       "Writing & Translation": "Yozish va tarjima",
-      "IT & Networking": "IT va tarmoqlar",
-      "Data Science & AI": "Ma'lumotlar fani va AI",
-      "Marketing": "Marketing va savdo",
+      "IT & Networking": "IT va tarmoq",
+      "Data Science & AI": "Ma'lumotlar fanlari va AI",
+      "Marketing": "Marketing",
       "Business Consulting": "Biznes konsalting",
       "Video & Animation": "Video va animatsiya"
     },
@@ -1047,8 +1267,14 @@
       "category": "Kategoriya",
       "selectCategory": "Kategoriyani tanlang...",
       "jobType": "Ish turi",
-      "fixedType": { "name": "Ruxsat etilgan narx", "desc": "Ish tugagach, butun loyiha uchun belgilangan narxni to'lang." },
-      "hourlyType": { "name": "Soatbay to'lov", "desc": "Ishlagan soatiga qarab to'lang. Davomiy ishlar uchun juda mos." },
+      "fixedType": {
+        "name": "Ruxsat etilgan narx",
+        "desc": "Ish tugagach, butun loyiha uchun belgilangan narxni to'lang."
+      },
+      "hourlyType": {
+        "name": "Soatbay to'lov",
+        "desc": "Ishlagan soatiga qarab to'lang. Davomiy ishlar uchun juda mos."
+      },
       "description": "Ish tavsifi",
       "descPlaceholder": "Loyihangizni batafsil tavsiflang. Quyidagilarni kiriting:\n• Nima qilinishi kerak\n• Maqsadlar va natijalar\n• Maxsus talablar yoki cheklovlar\n• Afzal texnologiyalar",
       "attachments": "Hujjatlar biriktirish",
@@ -1058,9 +1284,18 @@
       "docType": "Formatlar: PDF, DOCX, PNG, JPG",
       "experience": "Tajriba darajasi",
       "exp": {
-        "entry": { "name": "Boshlang'ich", "desc": "Ushbu sohada yangi bo'lgan, yo'l-yo'riq va ustozlikka muhtoj odamni qidiryapman." },
-        "mid": { "name": "O'rta", "desc": "Ushbu sohada katta tajribaga ega bo'lgan odamni qidiryapman. Avvalgi ishlarini ko'rsata oladigan." },
-        "expert": { "name": "Ekspert", "desc": "Ushbu sohada chuqur va keng ko'lamli tajribaga ega bo'lgan odamni qidiryapman." }
+        "entry": {
+          "name": "Boshlang'ich",
+          "desc": "Ushbu sohada yangi bo'lgan, yo'l-yo'riq va ustozlikka muhtoj odamni qidiryapman."
+        },
+        "mid": {
+          "name": "O'rta",
+          "desc": "Ushbu sohada katta tajribaga ega bo'lgan odamni qidiryapman. Avvalgi ishlarini ko'rsata oladigan."
+        },
+        "expert": {
+          "name": "Ekspert",
+          "desc": "Ushbu sohada chuqur va keng ko'lamli tajribaga ega bo'lgan odamni qidiryapman."
+        }
       }
     },
     "step2": {
@@ -1072,8 +1307,14 @@
       "suggested": "Tavsiya etilgan ko'nikmalar",
       "freelancersCount": "Kerakli freelancerlar soni",
       "count": {
-        "1": { "name": "1 Freelancer", "desc": "Ish uchun bir kishi" },
-        "2plus": { "name": "2+ Freelancerlar", "desc": "Kattaroq ishlar uchun bir nechta odam" }
+        "1": {
+          "name": "1 Freelancer",
+          "desc": "Ish uchun bir kishi"
+        },
+        "2plus": {
+          "name": "2+ Freelancerlar",
+          "desc": "Kattaroq ishlar uchun bir nechta odam"
+        }
       }
     },
     "step3": {
@@ -1085,9 +1326,18 @@
       "budgetRange": "Byudjet oralig'i",
       "hourlyRange": "Soatbay tarif oralig'i",
       "types": {
-        "fixed": { "name": "Ruxsat etilgan narx", "desc": "Umumiy narxni belgilang" },
-        "range": { "name": "Narx oralig'i", "desc": "Min–Max byudjet" },
-        "hourly": { "name": "Soatbay tarif", "desc": "Soatiga to'lash" }
+        "fixed": {
+          "name": "Ruxsat etilgan narx",
+          "desc": "Umumiy narxni belgilang"
+        },
+        "range": {
+          "name": "Narx oralig'i",
+          "desc": "Min–Max byudjet"
+        },
+        "hourly": {
+          "name": "Soatbay tarif",
+          "desc": "Soatiga to'lash"
+        }
       },
       "min": "Min",
       "max": "Max",
@@ -1095,22 +1345,62 @@
       "maxHr": "Max/soat",
       "duration": "Loyiha davomiyligi",
       "durations": {
-        "less1": { "icon": "⚡", "name": "Tezkor", "sub": "1 oydan kam" },
-        "1to3": { "icon": "📅", "name": "Qisqa", "sub": "1–3 oy" },
-        "3to6": { "icon": "🗓️", "name": "O'rtacha", "sub": "3–6 oy" },
-        "6plus": { "icon": "🏗️", "name": "Uzoq", "sub": "6 oydan ko'p" },
-        "ongoing": { "icon": "♾️", "name": "Davomiy", "sub": "Takroriy" }
+        "less1": {
+          "icon": "⚡",
+          "name": "Tezkor",
+          "sub": "1 oydan kam"
+        },
+        "1to3": {
+          "icon": "📅",
+          "name": "Qisqa",
+          "sub": "1–3 oy"
+        },
+        "3to6": {
+          "icon": "🗓️",
+          "name": "O'rtacha",
+          "sub": "3–6 oy"
+        },
+        "6plus": {
+          "icon": "🏗️",
+          "name": "Uzoq",
+          "sub": "6 oydan ko'p"
+        },
+        "ongoing": {
+          "icon": "♾️",
+          "name": "Davomiy",
+          "sub": "Takroriy"
+        }
       },
       "scope": "Loyiha ko'lami",
       "scopes": {
-        "small": { "icon": "🎯", "name": "Kichik", "sub": "Oddiy vazifa" },
-        "medium": { "icon": "🚀", "name": "O'rtacha", "sub": "Mo'tadil" },
-        "large": { "icon": "🏢", "name": "Katta", "sub": "Murakkab" }
+        "small": {
+          "icon": "🎯",
+          "name": "Kichik",
+          "sub": "Oddiy vazifa"
+        },
+        "medium": {
+          "icon": "🚀",
+          "name": "O'rtacha",
+          "sub": "Mo'tadil"
+        },
+        "large": {
+          "icon": "🏢",
+          "name": "Katta",
+          "sub": "Murakkab"
+        }
       },
       "visibility": "Ko'rinish",
       "vis": {
-        "public": { "icon": "🌍", "name": "Ommaviy", "desc": "Barcha freelancerlar ko'rishi mumkin" },
-        "private": { "icon": "🔒", "name": "Maxfiy", "desc": "Faqat taklif qilinganlar" }
+        "public": {
+          "icon": "🌍",
+          "name": "Ommaviy",
+          "desc": "Barcha freelancerlar ko'rishi mumkin"
+        },
+        "private": {
+          "icon": "🔒",
+          "name": "Maxfiy",
+          "desc": "Faqat taklif qilinganlar"
+        }
       }
     },
     "step4": {
@@ -1124,17 +1414,6 @@
       "notSpecified": "Belgilanmagan",
       "noSkills": "Ko'nikmalar qo'shilmagan",
       "noDesc": "Tavsif berilmagan"
-    },
-    "categories": {
-      "Web Development": "Veb dasturlash",
-      "Mobile Development": "Mobil dasturlash",
-      "Design & Creative": "Dizayn va kreativ",
-      "Writing & Translation": "Yozish va tarjima",
-      "IT & Networking": "IT va tarmoq",
-      "Data Science & AI": "Ma'lumotlar fanlari va AI",
-      "Marketing": "Marketing",
-      "Business Consulting": "Biznes konsalting",
-      "Video & Animation": "Video va animatsiya"
     },
     "sidebar": {
       "progress": "Jarayon",
@@ -1350,45 +1629,31 @@
     "date": "Sana",
     "amount": "Summa"
   },
-  "wallet": {
-    "title": "Mening hamyonim",
-    "subtitle": "Mablag'laringiz va tranzaksiyalaringizni xavfsiz boshqaring",
-    "overview": "Umumiy ko'rinish",
-    "transactions": "Tranzaksiyalar tarixi",
-    "methods": "Mening kartalarim",
-    "availableBalance": "Mavjud balans",
-    "lockedBalance": "Muzlatilgan (Escrow)",
-    "totalEarned": "Umumiy daromad",
-    "addCard": "Karta qo'shish",
-    "myCards": "Mening kartalarim",
-    "deposit": "Hisobni to'ldirish",
-    "withdraw": "Pul yechish",
-    "noTransactions": "Hali tranzaksiyalar mavjud emas",
-    "history": "Tranzaksiyalar tarixi",
-    "amountPlaceholder": "Summani kiriting",
-    "cardNumberPlaceholder": "Karta raqami",
-    "cardHolderPlaceholder": "Karta egasi",
-    "expiryDatePlaceholder": "Muddati (MM/YY)",
-    "noCards": "Sizda hali kartalar yo'q",
-    "deleteCard": "Kartani o'chirish",
-    "confirmDelete": "Haqiqatan ham ushbu kartani o'chirmoqchimisiz?",
-    "yes": "Ha",
-    "no": "Yo'q",
-    "successCard": "Karta muvaffaqiyatli qo'shildi!",
-    "successDelete": "Karta muvaffaqiyatli o'chirildi!",
-    "successDeposit": "Mablag' muvaffaqiyatli tushirildi!",
-    "successWithdraw": "Pul yechish so'rovi yuborildi!",
-    "errorCardNumber": "Karta raqami noto'g'ri",
-    "errorGeneric": "Xatolik yuz berdi",
+  "notifications": {
+    "title": "Bildirishnomalar",
+    "all": "Barchasi",
+    "allNotifications": "Barcha bildirishnomalar",
+    "markAllRead": "Hammasini o'qilgan deb belgilash",
+    "empty": "Hozircha bildirishnomalar yo'q",
+    "settings": "Bildirishnoma sozlamalari",
+    "loading": "Yuklanmoqda...",
+    "unread": "O'qilmagan",
+    "markRead": "O'qilgan deb belgilash",
+    "time": {
+      "justNow": "Hozirgina",
+      "minutesAgo": "{{count}} daqiqa oldin",
+      "hoursAgo": "{{count}} soat oldin",
+      "daysAgo": "{{count}} kun oldin"
+    },
     "types": {
-      "deposit": "Hisobni to'ldirish",
-      "withdrawal": "Pul yechish",
-      "escrow_hold": "Muzlatilgan (Escrow)",
-      "escrow_release": "To'lab berilgan",
-      "proposal_deposit_lock": "Taklif depoziti (Muzlatilgan)",
-      "proposal_deposit_refund": "Taklif depoziti (Qaytarilgan)",
-      "payment": "To'lov",
-      "refund": "Qaytarish"
+      "proposal_received": "Yangi taklif qabul qilindi",
+      "proposal_accepted": "Sizning taklifingiz qabul qilindi",
+      "proposal_rejected": "Sizning taklifingiz rad etildi",
+      "job_invitation": "Sizni loyihaga taklif qilishdi",
+      "contract_started": "Shartnoma boshlandi",
+      "payment_received": "Hisob to'ldirildi",
+      "message": "Yangi xabar",
+      "security_update": "Xavfsizlik ogohlantirishi"
     }
   }
 }
