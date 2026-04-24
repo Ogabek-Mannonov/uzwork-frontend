@@ -2622,7 +2622,7 @@ const MyProfile = () => {
                       // Smart body with data field fallback
                       let d = {};
                       try { d = typeof n.data === 'string' ? JSON.parse(n.data || '{}') : (n.data || {}); } catch {}
-                      const clientName = d.clientName || d.client_name;
+                      const clientName = d.clientName || d.client_name || n.sender_name || n.senderName;
                       const jobTitle   = d.jobTitle   || d.job_title;
 
                       const getBody = () => {

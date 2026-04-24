@@ -740,24 +740,38 @@
   }
 }
 /* ───── UNREAD BADGE ───── */
+.nav__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .unread-badge {
   position: absolute;
   top: 0;
   right: -2px;
-  background: #ef4444;
-  color: #fff;
-  font-size: 9px;
-  font-weight: 700;
-  min-width: 15px;
-  height: 15px;
-  border-radius: 50%;
+  background: #3390ec;
+  color: #ffffff !important;
+  font-size: 11px;
+  font-weight: 800;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
+  padding: 0 5px;
   pointer-events: none;
-  z-index: 5;
+  z-index: 10;
   transform: translate(50%, -50%);
+  border: 2px solid var(--surface, #fff);
+  box-shadow: 0 2px 5px rgba(51, 144, 236, 0.3);
+}
+
+.dark-mode .unread-badge {
+  border-color: #0f172a;
 }
 
 /* Ensure relative position for nav links */

@@ -1796,8 +1796,8 @@ export default function ChatDetail() {
         <div
           style={{
             height: 66,
-            background: "#fff",
-            borderBottom: "1px solid #e5e7eb",
+            background: "var(--header-bg)",
+            borderBottom: "1px solid var(--border)",
             display: "flex",
             alignItems: "center",
             gap: 12,
@@ -2506,17 +2506,6 @@ function TranslateBar({
     { id: "uz", label: "O'zbekcha" },
     { id: "ru", label: "Русский" },
     { id: "en", label: "English" },
-    { id: "tr", label: "Türkçe" },
-    { id: "kk", label: "Қазақша" },
-    { id: "ky", label: "Кыргызcha" },
-    { id: "tk", label: "Türkmençe" },
-    { id: "tg", label: "Тоҷикӣ" },
-    { id: "de", label: "Deutsch" },
-    { id: "fr", label: "Français" },
-    { id: "es", label: "Español" },
-    { id: "zh", label: "中文" },
-    { id: "ko", label: "한국어" },
-    { id: "ar", label: "العربية" },
   ];
 
   const currentLangLabel = languages.find(l => l.id === targetLang)?.label || "O'zbekcha";
@@ -2533,7 +2522,7 @@ function TranslateBar({
               ? i18n.t("chat.translating", "Tarjima qilinmoqda...")
               : isAutoTranslateOn
                 ? i18n.t("chat.showOriginal", "Aslini ko'rsatish")
-                : `${currentLangLabel} tiliga tarjima qilish`}
+                : i18n.t("chat.translateTo", `{{lang}} tiliga tarjima qilish`, { lang: currentLangLabel })}
           </span>
         </div>
         <div className="translate-bar-right">
