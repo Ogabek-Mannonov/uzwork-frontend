@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Bell, HelpCircle, Settings, User, Moon, Sun, Search, Menu, X, ChevronDown, Globe } from "lucide-react";
+import { Bell, HelpCircle, Settings, User, Moon, Sun, Search, Menu, X, ChevronDown, Globe, Briefcase, FileText } from "lucide-react";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import useTheme from "../Theme/useTheme";
@@ -18,7 +18,6 @@ export default function FreeNavbar() {
 
   const links = useMemo(
     () => [
-      { to: "/find-work",   label: t("navbar.findWork") },
       { to: "/saved",       label: t("navbar.savedJobs") },
       { to: "/proposals",   label: t("navbar.proposals") },
       { to: "/reports",     label: t("navbar.reports") },
@@ -75,6 +74,39 @@ export default function FreeNavbar() {
             <span className="nav__divider" />
 
             <nav className="nav__menu">
+              {/* Ish izlash */}
+              <NavLink
+                to="/find-work"
+                className={({ isActive }) =>
+                  "nav__link" + (isActive ? " is-active" : "")
+                }
+              >
+                {t("navbar.findWork")}
+              </NavLink>
+
+              {/* Mening ishlarim Dropdown */}
+              <div className="nav__item-with-dropdown">
+                <NavLink
+                  to="/my-jobs"
+                  className={({ isActive }) =>
+                    "nav__link" + (isActive ? " is-active" : "")
+                  }
+                >
+                  {t("navbar.myJobs")}
+                  <ChevronDown size={14} className="nav__chevron" />
+                </NavLink>
+                <div className="nav__dropdown">
+                  <NavLink to="/my-jobs" className="dropdown__link">
+                    <Briefcase size={16} />
+                    <span>{t("navbar.myJobs")}</span>
+                  </NavLink>
+                  <NavLink to="/contracts" className="dropdown__link">
+                    <FileText size={16} />
+                    <span>{t("navbar.contracts")}</span>
+                  </NavLink>
+                </div>
+              </div>
+
               {links.map((l) => (
                 <NavLink
                   key={l.to}

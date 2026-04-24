@@ -635,23 +635,55 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                   </Link>
                 </>
               ) : (
-                links.map((l) => (
+                <>
                   <NavLink
-                    key={l.to}
-                    to={l.to}
+                    to="/find-work"
                     className={({ isActive }) =>
                       "nav__link" + (isActive ? " is-active" : "")
                     }
-                    style={{ position: "relative" }}
                   >
-                    {l.label}
-                    {l.badge > 0 && (
-                      <span className="nav__badge unread-badge">
-                        {l.badge > 99 ? "99+" : l.badge}
-                      </span>
-                    )}
+                    {t("navbar.findWork")}
                   </NavLink>
-                ))
+
+                  {/* My Jobs Dropdown (Freelancer) */}
+                  <div className="nav__item-with-dropdown">
+                    <NavLink
+                      to="/my-jobs"
+                      className={({ isActive }) =>
+                        "nav__link" + (isActive ? " is-active" : "")
+                      }
+                    >
+                      {t("navbar.myJobs")}
+                      <ChevronDown size={14} className="nav__chevron" />
+                    </NavLink>
+                    <div className="nav__dropdown">
+                      <NavLink to="/my-jobs" className="dropdown__link">
+                        <span>{t("navbar.myJobs")}</span>
+                      </NavLink>
+                      <NavLink to="/contracts" className="dropdown__link">
+                        <span>{t("navbar.contracts")}</span>
+                      </NavLink>
+                    </div>
+                  </div>
+
+                  {links.filter(l => l.to !== "/find-work" && l.to !== "/my-jobs").map((l) => (
+                    <NavLink
+                      key={l.to}
+                      to={l.to}
+                      className={({ isActive }) =>
+                        "nav__link" + (isActive ? " is-active" : "")
+                      }
+                      style={{ position: "relative" }}
+                    >
+                      {l.label}
+                      {l.badge > 0 && (
+                        <span className="nav__badge unread-badge">
+                          {l.badge > 99 ? "99+" : l.badge}
+                        </span>
+                      )}
+                    </NavLink>
+                  ))}
+                </>
               )}
             </nav>
           </div>
