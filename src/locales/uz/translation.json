@@ -1681,5 +1681,31 @@
       "message": "Yangi xabar",
       "security_update": "Xavfsizlik ogohlantirishi"
     }
+  },
+  "myJobsFreelancer": {
+    "title": "Mening ishlarim",
+    "subtitle": "Barcha faol va yakunlangan loyihalaringizni boshqaring",
+    "activeProjects": "Faol loyihalar",
+    "totalEarnings": "Umumiy daromad",
+    "tabs": {
+      "active": "Faol",
+      "completed": "Yakunlangan",
+      "all": "Barchasi",
+      "cancelled": "Bekor qilingan",
+      "disputed": "Nizo"
+    },
+    "searchPlaceholder": "Loyiha yoki mijoz nomi bo'yicha qidirish...",
+    "contract": {
+      "amount": "Summa",
+      "startDate": "Boshlangan sana",
+      "lastUpdate": "Oxirgi yangilanish",
+      "chat": "Chat",
+      "details": "Batafsil"
+    },
+    "empty": {
+      "noProjects": "Loyihalar topilmadi",
+      "desc": "Hozircha sizda {{status}} loyihalar mavjud emas.",
+      "findWork": "Ish topish"
+    }
   }
 }

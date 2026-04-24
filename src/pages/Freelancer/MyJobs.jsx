@@ -80,44 +80,56 @@ const FreelancerMyJobs = () => {
   return (
     <div className="f-myjobs soft-fade-in">
       <div className="f-myjobs__header">
-        <div>
-          <h1 className="f-myjobs__title">{t("myJobsFreelancer.title")}</h1>
-          <p style={{ color: "var(--muted)", marginTop: "8px" }}>
-            {t("myJobsFreelancer.subtitle")}
+        <div className="f-myjobs__header-content">
+          <h1 className="f-myjobs__title">{t("myJobsFreelancer.title", "Mening ishlarim")}</h1>
+          <p className="f-myjobs__subtitle">
+            {t("myJobsFreelancer.subtitle", "Barcha faol va yakunlangan loyihalaringizni boshqaring")}
           </p>
         </div>
         
         <div className="f-myjobs__stats">
-          <div className="f-myjobs__stat-card">
-            <span className="f-myjobs__stat-label">{t("myJobsFreelancer.activeProjects")}</span>
-            <span className="f-myjobs__stat-value">{stats.activeCount}</span>
+          <div className="f-myjobs__stat-card glass-card">
+            <div className="f-myjobs__stat-icon active-icon">
+              <Briefcase size={20} />
+            </div>
+            <div className="f-myjobs__stat-info">
+              <span className="f-myjobs__stat-label">{t("myJobsFreelancer.activeProjects", "Faol loyihalar")}</span>
+              <span className="f-myjobs__stat-value">{stats.activeCount}</span>
+            </div>
           </div>
-          <div className="f-myjobs__stat-card">
-            <span className="f-myjobs__stat-label">{t("myJobsFreelancer.totalEarnings")}</span>
-            <span className="f-myjobs__stat-value">${stats.totalEarned.toLocaleString()}</span>
+          <div className="f-myjobs__stat-card glass-card">
+            <div className="f-myjobs__stat-icon earned-icon">
+              <DollarSign size={20} />
+            </div>
+            <div className="f-myjobs__stat-info">
+              <span className="f-myjobs__stat-label">{t("myJobsFreelancer.totalEarnings", "Umumiy daromad")}</span>
+              <span className="f-myjobs__stat-value">${stats.totalEarned.toLocaleString()}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="f-myjobs__tabs">
-        {["active", "completed", "all"].map(tab => (
-          <button 
-            key={tab}
-            className={`f-myjobs__tab ${activeTab === tab ? "active" : ""}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {t(`myJobsFreelancer.tabs.${tab}`)}
-          </button>
-        ))}
-      </div>
+      <div className="f-myjobs__controls">
+        <div className="f-myjobs__tabs-wrapper">
+          <div className="f-myjobs__tabs">
+            {["active", "completed", "all"].map(tab => (
+              <button 
+                key={tab}
+                className={`f-myjobs__tab ${activeTab === tab ? "active" : ""}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {t(`myJobsFreelancer.tabs.${tab}`, tab === "active" ? "Faol" : tab === "completed" ? "Yakunlangan" : "Barchasi")}
+              </button>
+            ))}
+          </div>
+        </div>
 
-      <div className="f-myjobs__filters">
-        <div className="f-myjobs__search">
+        <div className="f-myjobs__search-container">
           <Search size={18} className="f-myjobs__search-icon" />
           <input 
             type="text" 
-            placeholder={t("myJobsFreelancer.searchPlaceholder")} 
-            className="f-myjobs__search-input"
+            placeholder={t("myJobsFreelancer.searchPlaceholder", "Loyiha yoki mijoz nomi bo'yicha qidirish...")} 
+            className="f-myjobs__search-input glass-card"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -125,9 +137,9 @@ const FreelancerMyJobs = () => {
       </div>
 
       {error ? (
-        <div className="f-myjobs__empty">
-          <AlertCircle size={48} color="#ef4444" />
-          <h3 className="f-myjobs__empty-title">{t("chat.error")}</h3>
+        <div className="f-myjobs__empty glass-card">
+          <AlertCircle size={48} className="text-danger" />
+          <h3 className="f-myjobs__empty-title">{t("chat.error", "Xato")}</h3>
           <p className="f-myjobs__empty-desc">{error}</p>
         </div>
       ) : filteredContracts.length > 0 ? (
@@ -135,62 +147,64 @@ const FreelancerMyJobs = () => {
           {filteredContracts.map((contract, index) => (
             <div 
               key={contract.id} 
-              className={`contract-card soft-fade-in stagger-${(index % 5) + 1}`}
+              className={`contract-card glass-card soft-fade-in stagger-${(index % 5) + 1}`}
               onClick={() => navigate(`/contracts/${contract.id}`)}
             >
               <div className="contract-card__main">
                 <div className="contract-card__header">
-                  <div>
+                  <div className="contract-card__info">
                     <h2 className="contract-card__title">
                       {contract.job_title || contract.title || `Kontrakt #${contract.id}`}
                     </h2>
                     <div className="contract-card__client">
-                      <Briefcase size={14} /> 
-                      {contract.client_first_name} {contract.client_last_name}
+                      <div className="client-avatar-mini">
+                        {contract.client_first_name?.[0] || "M"}
+                      </div>
+                      <span>{contract.client_first_name} {contract.client_last_name}</span>
                     </div>
                   </div>
-                  <span className={`contract-card__status ${STATUS_MAP[contract.status]?.class || ""}`}>
-                    {t(`myJobsFreelancer.tabs.${contract.status}`) || contract.status}
-                  </span>
+                  <div className={`contract-status-badge ${STATUS_MAP[contract.status]?.class || ""}`}>
+                    <div className="status-dot"></div>
+                    {t(`myJobsFreelancer.tabs.${contract.status}`, STATUS_MAP[contract.status]?.label) || contract.status}
+                  </div>
                 </div>
 
-                <div className="contract-card__meta">
-                  <div className="meta-item">
-                    <span className="meta-item__label">{t("myJobsFreelancer.contract.amount")}</span>
-                    <span className="meta-item__value">
-                      <DollarSign size={14} style={{ marginBottom: "-2px" }} />
-                      {contract.total_amount?.toLocaleString()}
+                <div className="contract-card__grid">
+                  <div className="card-stat">
+                    <span className="card-stat__label">{t("myJobsFreelancer.contract.amount", "Summa")}</span>
+                    <span className="card-stat__value amount">
+                      ${contract.total_amount?.toLocaleString()}
                     </span>
                   </div>
-                  <div className="meta-item">
-                    <span className="meta-item__label">{t("myJobsFreelancer.contract.startDate")}</span>
-                    <span className="meta-item__value">
-                      <Calendar size={14} style={{ marginBottom: "-2px", marginRight: "4px" }} />
+                  <div className="card-stat">
+                    <span className="card-stat__label">{t("myJobsFreelancer.contract.startDate", "Boshlangan sana")}</span>
+                    <span className="card-stat__value">
                       {contract.created_at ? new Date(contract.created_at).toLocaleDateString() : "N/A"}
                     </span>
                   </div>
-                  <div className="meta-item">
-                    <span className="meta-item__label">{t("myJobsFreelancer.contract.lastUpdate")}</span>
-                    <span className="meta-item__value">
-                      <Clock size={14} style={{ marginBottom: "-2px", marginRight: "4px" }} />
+                  <div className="card-stat">
+                    <span className="card-stat__label">{t("myJobsFreelancer.contract.lastUpdate", "Oxirgi yangilanish")}</span>
+                    <span className="card-stat__value">
                       {contract.updated_at ? new Date(contract.updated_at).toLocaleDateString() : "Yaqinda"}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="contract-card__actions">
+              <div className="contract-card__footer">
                 <button 
-                  className="btn-icon-text btn-primary"
+                  className="btn-chat-action"
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate(`/messages/${contract.id}`);
                   }}
                 >
-                  <MessageSquare size={16} /> {t("myJobsFreelancer.contract.chat")}
+                  <MessageSquare size={18} />
+                  <span>{t("myJobsFreelancer.contract.chat", "Chat")}</span>
                 </button>
-                <button className="btn-icon-text btn-outline">
-                  {t("myJobsFreelancer.contract.details")} <ChevronRight size={16} />
+                <button className="btn-details-action">
+                  <span>{t("myJobsFreelancer.contract.details", "Batafsil")}</span>
+                  <ChevronRight size={18} />
                 </button>
               </div>
             </div>
