@@ -408,7 +408,7 @@ export default function ChatPage() {
                           {isPinned && <Pin size={12} className="pinned-icon" style={{ opacity: 0.6 }} />}
                           {type && <span className="chat-item-badge">{type}</span>}
                           {hasUnread && (
-                            <span className={`unread-badge ${isMuted ? 'muted' : ''}`}>{chat.unread_count}</span>
+                            <span className={`chat-unread-badge ${isMuted ? 'muted' : ''}`}>{chat.unread_count}</span>
                           )}
                         </div>
                       </div>

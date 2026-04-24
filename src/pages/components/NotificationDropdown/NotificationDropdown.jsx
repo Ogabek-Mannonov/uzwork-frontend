@@ -272,7 +272,11 @@ const NotificationDropdown = () => {
         title="Notifications"
       >
         <Bell size={18} strokeWidth={2} />
-        {unreadCount > 0 && <span className="uzwork-notif-dot"></span>}
+        {unreadCount > 0 && (
+          <span className="uzwork-notif-badge">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
       </button>
 
       {isOpen && (
@@ -301,7 +305,7 @@ const NotificationDropdown = () => {
                     d = typeof notif.data === 'string' ? JSON.parse(notif.data || '{}') : (notif.data || {});
                   } catch {}
 
-                  const clientName = d.clientName || d.client_name;
+                  const clientName = d.clientName || d.client_name || notif.sender_name || notif.senderName;
                   const jobTitle   = d.jobTitle   || d.job_title;
                   const amount     = d.amount;
 
