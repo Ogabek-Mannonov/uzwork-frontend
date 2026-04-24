@@ -281,18 +281,18 @@ export const getSecuritySettings = async () => {
   }
 };
 
-export const enable2FA = async () => {
+export const enable2FA = async (payload) => {
   try {
-    const res = await api.post("/auth/2fa/enable");
+    const res = await api.post("/auth/2fa/enable", payload);
     return unwrap(res);
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err.message };
   }
 };
 
-export const verify2FA = async (code, secret) => {
+export const confirm2FA = async (code) => {
   try {
-    const res = await api.post("/auth/2fa/verify", { code, secret });
+    const res = await api.post("/auth/2fa/confirm", { code });
     return unwrap(res);
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err.message };
@@ -303,6 +303,18 @@ export const disable2FA = async () => {
   try {
     const res = await api.post("/auth/2fa/disable");
     return unwrap(res);
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err.message };
+  }
+};
+
+export const verify2FALogin = async (payload) => {
+  try {
+    const res = await api.post("/auth/2fa/verify-login", payload);
+    const body = unwrap(res);
+    const data = body?.data;
+    if (data?.accessToken || data?.user) saveAuth(data);
+    return body;
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err.message };
   }

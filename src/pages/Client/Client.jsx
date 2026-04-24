@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useThemeContext } from "../components/Theme/ThemeContext";
 import {
@@ -94,7 +94,7 @@ import {
   deleteCard, 
   getPayments 
 } from "../../api/payments";
-import { changePassword } from "../../api/auth";
+import { changePassword, enable2FA, confirm2FA, disable2FA, forgotPassword, resetPassword } from "../../api/auth";
 
 const BACKEND = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
 
@@ -107,6 +107,7 @@ function avatarSrc(url) {
 
 const Settings = () => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const sectionParam = searchParams.get("section") || "my-info";
   const [activeSection, setActiveSection] = useState(sectionParam);
@@ -407,6 +408,18 @@ const Settings = () => {
   const [allNotifications, setAllNotifications] = useState([]);
   const [notifLoading, setNotifLoading] = useState(false);
 
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [faStep, setFaStep] = useState("select");
+  const [selectedMethod, setSelectedMethod] = useState("email");
+  const [verificationCode, setVerificationCode] = useState("");
+
+  // Forgot Password States
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotStep, setForgotStep] = useState("email"); // email, reset
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotCode, setForgotCode] = useState("");
+  const [forgotNewPassword, setForgotNewPassword] = useState("");
+
   const [activeSessions, setActiveSessions] = useState([
     {
       id: 1,
@@ -544,10 +557,117 @@ const Settings = () => {
     }
   };
 
-  const handleToggleSecurity = (id) => {
+  const handleToggleSecurity = async (id) => {
+    if (id === "two_factor") {
+      const setting = securitySettings.find(s => s.id === "two_factor");
+      if (!setting.enabled) {
+        setFaStep("select");
+        setShow2FAModal(true);
+      } else {
+        setIsLoading(true);
+        const res = await disable2FA();
+        setIsLoading(false);
+        if (res.success) {
+          setSecuritySettings(prev => prev.map(s => s.id === "two_factor" ? { ...s, enabled: false } : s));
+          showMessage("success", "Ikki bosqichli tasdiqlash o'chirildi.");
+          const user = JSON.parse(localStorage.getItem("user") || "{}");
+          user.two_factor_enabled = false;
+          localStorage.setItem("user", JSON.stringify(user));
+        } else {
+          showMessage("error", res.message);
+        }
+      }
+      return;
+    }
     setSecuritySettings(prev => prev.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s));
     showMessage("success", "Security setting updated");
-    // TODO: Connect to updateSecuritySettings API
+  };
+
+  const handleSend2FACode = async () => {
+    setIsLoading(true);
+    const res = await enable2FA({ method: selectedMethod });
+    setIsLoading(false);
+    if (res.success) {
+      setFaStep("verify");
+      showMessage("success", "Tasdiqlash kodi yuborildi.");
+    } else {
+      showMessage("error", res.message);
+    }
+  };
+
+  const handleVerify2FA = async () => {
+    if (verificationCode.length !== 6) {
+      showMessage("error", "6 xonali kodni kiriting");
+      return;
+    }
+    setIsLoading(true);
+    const res = await confirm2FA(verificationCode);
+    setIsLoading(false);
+    if (res.success) {
+      setShow2FAModal(false);
+      setSecuritySettings(prev => prev.map(s => s.id === "two_factor" ? { ...s, enabled: true } : s));
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      user.two_factor_enabled = true;
+      localStorage.setItem("user", JSON.stringify(user));
+      showMessage("success", "Ikki bosqichli tasdiqlash yoqildi!");
+    } else {
+      showMessage("error", res.message);
+    }
+  };
+
+  // Forgot Password Handlers
+  const handleOpenForgotModal = () => {
+    try {
+      const userStr = localStorage.getItem("user");
+      const user = userStr ? JSON.parse(userStr) : {};
+      setForgotEmail(user.email || "");
+    } catch (e) {
+      setForgotEmail("");
+    }
+    setForgotStep("email");
+    setForgotCode("");
+    setForgotNewPassword("");
+    setShowForgotModal(true);
+  };
+
+  const handleSendForgotCode = async () => {
+    if (!forgotEmail) {
+      showMessage("error", "Email kiritilmadi");
+      return;
+    }
+    setIsLoading(true);
+    const res = await forgotPassword({ identifier: forgotEmail });
+    setIsLoading(false);
+    if (res.success) {
+      setForgotStep("reset");
+      showMessage("success", "Tasdiqlash kodi emailingizga yuborildi");
+    } else {
+      showMessage("error", res.message);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!forgotCode || !forgotNewPassword) {
+      showMessage("error", "Kod va yangi parolni kiriting");
+      return;
+    }
+    if (forgotNewPassword.length < 8) {
+      showMessage("error", "Parol kamida 8 ta belgidan iborat bo'lishi kerak");
+      return;
+    }
+    setIsLoading(true);
+    const res = await resetPassword({
+      identifier: forgotEmail,
+      code: forgotCode,
+      new_password: forgotNewPassword
+    });
+    setIsLoading(false);
+    if (res.success) {
+      setShowForgotModal(false);
+      showMessage("success", "Parol muvaffaqiyatli yangilandi! Endi yangi parol bilan kiring.");
+    } else {
+      showMessage("error", res.message);
+    }
   };
 
   const handleToggleNotification = async (catIdx, settingId) => {
@@ -1270,99 +1390,127 @@ const Settings = () => {
                 </div>
               </div>
 
-              <div className="password-card">
-                <div className="card-header">
-                  <div className="header-icon"><Lock size={24} /></div>
-                  <div className="header-info">
-                    <h2>{t('clientProfile.security.changePassword')}</h2>
-                    <p>{t('clientProfile.security.passwordHint')}</p>
+              <div className="password-change-card" style={{ background: 'var(--card-bg)', borderRadius: '24px', padding: '40px', border: '1px solid var(--light-border)', marginBottom: '30px' }}>
+                <div className="password-header" style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '40px' }}>
+                  <div className="password-icon-wrapper" style={{ width: '64px', height: '64px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifycenter: 'center', color: '#3b82f6', flexShrink: 0, justifyContent: 'center' }}>
+                    <Lock size={32} />
+                  </div>
+                  <div className="password-title-info">
+                    <h2 style={{ fontSize: '24px', fontWeight: '700', margin: '0 0 8px 0', color: 'white' }}>Parolni o'zgartirish</h2>
+                    <p style={{ fontSize: '15px', color: 'rgba(255, 255, 255, 0.6)', margin: 0 }}>
+                      Parolingiz kamida 8 ta belgidan iborat bo'lishi va harflar, raqamlar hamda belgilarni o'z ichiga olishi kerak
+                    </p>
                   </div>
                 </div>
 
                 <form onSubmit={handleUpdatePassword} className="password-form">
-                  <div className="form-group">
-                    <label>{t('clientProfile.security.currentPassword')}</label>
-                    <div className="password-input-wrapper">
+                  <div className="form-group" style={{ marginBottom: '25px' }}>
+                    <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: 'rgba(255, 255, 255, 0.8)' }}>Joriy parol</label>
+                    <div className="password-input-wrapper" style={{ position: 'relative' }}>
                       <input
                         type={showCurrentPassword ? "text" : "password"}
                         value={passwordForm.currentPassword}
                         onChange={(e) => handlePasswordChange("currentPassword", e.target.value)}
-                        placeholder="Enter current password"
-                        className="password-input"
+                        placeholder="Eski parolingizni kiriting"
+                        className="ps-premium-input"
+                        style={{ width: '100%', padding: '14px 50px 14px 20px', background: 'rgba(15, 23, 42, 0.5)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', color: 'white', fontSize: '16px' }}
                         disabled={isLoading}
                       />
-                      <button type="button" className="toggle-password" onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
-                        {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      <button 
+                        type="button" 
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.4)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      >
+                        {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                    <div style={{ textAlign: 'right', marginTop: '10px' }}>
+                      <button 
+                        type="button" 
+                        onClick={handleOpenForgotModal}
+                        style={{ background: 'none', border: 'none', color: '#3b82f6', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
+                      >
+                        Parolni unutdingizmi?
                       </button>
                     </div>
                   </div>
 
-                  <div className="form-group">
-                    <label>New Password</label>
-                    <div className="password-input-wrapper">
+                  <div className="form-group" style={{ marginBottom: '25px' }}>
+                    <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: 'rgba(255, 255, 255, 0.8)' }}>Yangi parol</label>
+                    <div className="password-input-wrapper" style={{ position: 'relative' }}>
                       <input
                         type={showNewPassword ? "text" : "password"}
                         value={passwordForm.newPassword}
                         onChange={(e) => handlePasswordChange("newPassword", e.target.value)}
-                        placeholder="Enter new password"
-                        className="password-input"
+                        placeholder="Yangi parolni kiriting"
+                        className="ps-premium-input"
+                        style={{ width: '100%', padding: '14px 50px 14px 20px', background: 'rgba(15, 23, 42, 0.5)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', color: 'white', fontSize: '16px' }}
                         disabled={isLoading}
                       />
-                      <button type="button" className="toggle-password" onClick={() => setShowNewPassword(!showNewPassword)}>
-                        {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      <button 
+                        type="button" 
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.4)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      >
+                        {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                       </button>
                     </div>
 
                     {passwordForm.newPassword && (() => {
                       const strength = calculatePasswordStrength(passwordForm.newPassword);
                       return (
-                        <div className="password-strength">
-                          <div className="strength-meter">
-                            <div className="strength-fill" style={{ width: `${strength.percentage}%`, backgroundColor: strength.color }} />
+                        <div className="password-strength" style={{ marginTop: '15px' }}>
+                          <div className="strength-meter" style={{ height: '6px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '10px', overflow: 'hidden', marginBottom: '8px' }}>
+                            <div className="strength-fill" style={{ width: `${strength.percentage}%`, backgroundColor: strength.color, height: '100%', transition: 'all 0.3s' }} />
                           </div>
-                          <span className="strength-label" style={{ color: strength.color }}>
-                            {strength.label === 'Weak' ? t('findWork.drawer.experienceLevel_entry') : strength.label} {t('clientProfile.security.updatePassword').split(' ')[0]}
+                          <span className="strength-label" style={{ color: strength.color, fontSize: '12px', fontWeight: '600' }}>
+                             {strength.label === 'Weak' ? 'Kuchsiz' : strength.label === 'Medium' ? 'O\'rtacha' : 'Kuchli'} Parol
                           </span>
                         </div>
                       );
                     })()}
 
-                    <div className="password-requirements">
+                    <div className="password-requirements" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '15px', padding: '15px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '14px' }}>
                       {passwordStrengthChecks.map((check) => (
-                        <div key={check.id} className={`requirement ${passwordValidations[check.id] ? "valid" : ""}`}>
-                          {passwordValidations[check.id] ? <CheckCircle size={14} className="valid-icon" /> : <div className="dot" />}
+                        <div key={check.id} className={`requirement ${passwordValidations[check.id] ? "valid" : ""}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: passwordValidations[check.id] ? '#10b981' : 'rgba(255, 255, 255, 0.4)' }}>
+                          {passwordValidations[check.id] ? <CheckCircle size={14} /> : <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'currentColor' }} />}
                           <span>{t(`clientProfile.security.requirements.${check.id}`)}</span>
                         </div>
                       ))}
-                      <div className={`requirement ${passwordValidations.match ? "valid" : ""}`}>
-                        {passwordValidations.match ? <CheckCircle size={14} className="valid-icon" /> : <div className="dot" />}
+                      <div className={`requirement ${passwordValidations.match ? "valid" : ""}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: passwordValidations.match ? '#10b981' : 'rgba(255, 255, 255, 0.4)' }}>
+                        {passwordValidations.match ? <CheckCircle size={14} /> : <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'currentColor' }} />}
                         <span>{t('clientProfile.security.requirements.match')}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="form-group">
-                    <label>{t('clientProfile.security.confirmPassword')}</label>
-                    <div className="password-input-wrapper">
+                  <div className="form-group" style={{ marginBottom: '35px' }}>
+                    <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: 'rgba(255, 255, 255, 0.8)' }}>Yangi parolni tasdiqlash</label>
+                    <div className="password-input-wrapper" style={{ position: 'relative' }}>
                       <input
                         type={showConfirmPassword ? "text" : "password"}
                         value={passwordForm.confirmPassword}
                         onChange={(e) => handlePasswordChange("confirmPassword", e.target.value)}
-                        placeholder="Confirm new password"
-                        className="password-input"
+                        placeholder="Yangi parolni qayta kiriting"
+                        className="ps-premium-input"
+                        style={{ width: '100%', padding: '14px 50px 14px 20px', background: 'rgba(15, 23, 42, 0.5)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', color: 'white', fontSize: '16px' }}
                         disabled={isLoading}
                       />
-                      <button type="button" className="toggle-password" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      <button 
+                        type="button" 
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.4)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      >
+                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                       </button>
                     </div>
                   </div>
 
-                  <button type="submit" className="update-password-btn" disabled={isLoading}>
+                  <button type="submit" className="ps-primary-btn" disabled={isLoading} style={{ width: '100%', height: '54px' }}>
                     {isLoading ? (
-                  <><RefreshCw size={18} className="spinning" />{t('common.saving')}</>
+                      <><RefreshCw size={18} className="spinning" /> {t('common.saving')}</>
                     ) : (
-                      <><Save size={18} />{t('clientProfile.security.updatePassword')}</>
+                      <><Save size={18} /> Parolni yangilash</>
                     )}
                   </button>
                 </form>
@@ -1776,6 +1924,161 @@ const Settings = () => {
           )}
         </main>
       </div>
+
+      {/* 2FA Modal */}
+      {show2FAModal && (
+        <div className="ps-modal-overlay" onClick={() => !isLoading && setShow2FAModal(false)}>
+          <div className="ps-modal-content" onClick={e => e.stopPropagation()}>
+            <button onClick={() => !isLoading && setShow2FAModal(false)} className="ps-close-btn" disabled={isLoading}>
+              <X size={18} />
+            </button>
+
+            <div className="ps-modal-header">
+              <div className="ps-modal-icon-wrapper">
+                <ShieldCheck size={32} />
+              </div>
+              <h3>{faStep === "select" ? "Xavfsizlik usuli" : "Tasdiqlash kodi"}</h3>
+            </div>
+
+            <div className="ps-modal-body">
+              {faStep === "select" ? (
+                <div className="ps-2fa-selection">
+                  <p className="ps-2fa-info">Hisobingizni himoya qilish uchun xavfsizlik kodini qayerga yuboraylik?</p>
+                  <div className="ps-method-options">
+                    <div 
+                      className={`ps-method-option ${selectedMethod === "email" ? "active" : ""}`}
+                      onClick={() => setSelectedMethod("email")}
+                    >
+                      <div className="ps-method-icon"><Mail size={20} /></div>
+                      <div>
+                        <strong style={{ display: 'block', fontSize: '16px' }}>Email</strong>
+                        <p style={{ fontSize: '13px', opacity: 0.6, margin: 0 }}>Pochtangizga 6 xonali kod boradi</p>
+                      </div>
+                    </div>
+                  </div>
+                  <button 
+                    className="ps-primary-btn" 
+                    onClick={handleSend2FACode}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <RefreshCw size={18} className="spinning" /> : <Shield size={18} />}
+                    <span>{isLoading ? "Yuborilmoqda..." : "Kodni yuborish"}</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="ps-2fa-verify">
+                  <p className="ps-2fa-info">
+                    Sizning pochtangizga yuborilgan <strong>6 xonali</strong> maxfiy kodni kiriting.
+                  </p>
+                  <div className="ps-code-input-container">
+                    <input 
+                      type="text" 
+                      placeholder="000000" 
+                      maxLength="6"
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                      className="ps-code-input"
+                      autoFocus
+                    />
+                  </div>
+                  <button 
+                    className="ps-primary-btn" 
+                    onClick={handleVerify2FA}
+                    disabled={isLoading || verificationCode.length !== 6}
+                  >
+                    {isLoading ? <RefreshCw size={18} className="spinning" /> : <Lock size={18} />}
+                    <span>{isLoading ? "Tekshirilmoqda..." : "Tasdiqlash va kirish"}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="ps-modal-overlay" onClick={() => !isLoading && setShowForgotModal(false)}>
+          <div className="ps-modal-content" onClick={e => e.stopPropagation()}>
+            <button onClick={() => !isLoading && setShowForgotModal(false)} className="ps-close-btn" disabled={isLoading}>
+              <X size={18} />
+            </button>
+
+            <div className="ps-modal-header">
+              <div className="ps-modal-icon-wrapper" style={{ color: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)', borderColor: 'rgba(245, 158, 11, 0.2)' }}>
+                <Key size={32} />
+              </div>
+              <h3>{forgotStep === "email" ? "Parolni tiklash" : "Yangi parol"}</h3>
+            </div>
+
+            <div className="ps-modal-body">
+              {forgotStep === "email" ? (
+                <div className="ps-forgot-email-step">
+                  <p className="ps-2fa-info">
+                    Tasdiqlash kodini quyidagi pochtaga yuboramizmi?
+                  </p>
+                  <div style={{ marginBottom: '25px' }}>
+                    <input 
+                      type="email" 
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      className="ps-premium-input"
+                      style={{ width: '100%', padding: '14px 20px', background: 'rgba(15, 23, 42, 0.5)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', color: 'white' }}
+                      placeholder="Email manzilingiz"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <button 
+                    className="ps-primary-btn" 
+                    onClick={handleSendForgotCode}
+                    disabled={isLoading || !forgotEmail}
+                  >
+                    {isLoading ? <RefreshCw size={18} className="spinning" /> : <Mail size={18} />}
+                    <span>{isLoading ? "Yuborilmoqda..." : "Kodni yuborish"}</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="ps-forgot-reset-step">
+                  <p className="ps-2fa-info">
+                    Emailingizga yuborilgan 6 xonali kodni va yangi parolni kiriting.
+                  </p>
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '8px' }}>Tasdiqlash kodi</label>
+                    <input 
+                      type="text" 
+                      maxLength="6"
+                      value={forgotCode}
+                      onChange={(e) => setForgotCode(e.target.value.replace(/\D/g, ''))}
+                      className="ps-premium-input"
+                      style={{ width: '100%', padding: '14px 20px', background: 'rgba(15, 23, 42, 0.5)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', color: 'white', textAlign: 'center', letterSpacing: '8px', fontSize: '20px', fontWeight: 'bold' }}
+                      placeholder="000000"
+                    />
+                  </div>
+                  <div style={{ marginBottom: '30px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '8px' }}>Yangi parol</label>
+                    <input 
+                      type="password" 
+                      value={forgotNewPassword}
+                      onChange={(e) => setForgotNewPassword(e.target.value)}
+                      className="ps-premium-input"
+                      style={{ width: '100%', padding: '14px 20px', background: 'rgba(15, 23, 42, 0.5)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', color: 'white' }}
+                      placeholder="Kamida 8 ta belgi"
+                    />
+                  </div>
+                  <button 
+                    className="ps-primary-btn" 
+                    onClick={handleResetPassword}
+                    disabled={isLoading || forgotCode.length !== 6 || forgotNewPassword.length < 8}
+                  >
+                    {isLoading ? <RefreshCw size={18} className="spinning" /> : <CheckCircle size={18} />}
+                    <span>{isLoading ? "Saqlanmoqda..." : "Parolni yangilash"}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -351,7 +351,8 @@ function AuthHeader({ i18n, changeLanguage, user }) {
 
   const [unreadCount, setUnreadCount] = useState(0);
   const [proposalsCount, setProposalsCount] = useState(0);
-  const audioRef = useRef(new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"));
+  // Stable notification sound source
+  const audioRef = useRef(new Audio("https://cdn.freesound.org/previews/235/235911_2391266-lq.mp3"));
 
   // Brauzer bildirishnomasi funksiyasi
   const showBrowserNotification = (title, body, icon = "/UzWork transparent.png") => {
@@ -424,8 +425,10 @@ function AuthHeader({ i18n, changeLanguage, user }) {
     const handleNewMessage = (msg) => {
       if (msg.sender_id !== user?.id) {
         fetchCounts();
-        // Ovoz
-        audioRef.current.play().catch(e => console.warn("Audio play blocked:", e));
+        // Ovoz (Try-catch with muted check)
+        if (audioRef.current) {
+          audioRef.current.play().catch(() => {});
+        }
         
         // Brauzer xabari (agar hali ko'rsatilmagan bo'lsa)
         const shownIds = JSON.parse(localStorage.getItem('shown_notifications') || '[]');
@@ -447,7 +450,9 @@ function AuthHeader({ i18n, changeLanguage, user }) {
         setActiveToast(noti);
         
         // Ovoz
-        audioRef.current.play().catch(e => console.warn("Audio play blocked:", e));
+        if (audioRef.current) {
+          audioRef.current.play().catch(() => {});
+        }
 
         // Brauzer xabari
         const shownIds = JSON.parse(localStorage.getItem('shown_notifications') || '[]');
