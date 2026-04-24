@@ -20,7 +20,8 @@ import {
   Calendar,
   Lock,
   Award,
-  TrendingUp
+  TrendingUp,
+  ChevronRight
 } from "lucide-react";
 import "./Proposal.css";
 
@@ -31,10 +32,7 @@ export default function Proposal() {
   const [job, setJob] = useState(null);
   const [jobLoading, setJobLoading] = useState(true);
   
-  // Payment Mode
   const [paymentMode, setPaymentMode] = useState("project"); // "milestone" or "project"
-  
-  // Form State
   const [milestones, setMilestones] = useState([
     { description: "", due_date: "", amount: "" }
   ]);
@@ -46,7 +44,7 @@ export default function Proposal() {
   const [toast, setToast] = useState({ msg: "", type: "" });
   const [submitted, setSubmitted] = useState(false);
 
-  const SERVICE_FEE_PCT = 0.10; // 10% fee
+  const SERVICE_FEE_PCT = 0.10; 
 
   const notify = (msg, type = "success") => {
     setToast({ msg, type });
@@ -60,7 +58,6 @@ export default function Proposal() {
         const project = res?.data?.project || res?.data || res;
         setJob(project);
         setJobLoading(false);
-        // Default price from job budget if fixed
         if (project?.job_type === 'fixed' && project.budget_max) {
            setProjectPrice(project.budget_max);
         }
@@ -68,7 +65,6 @@ export default function Proposal() {
     }
   }, [jobId]);
 
-  // Calculations
   const totalPrice = useMemo(() => {
     if (paymentMode === "project") {
       const p = parseFloat(projectPrice);
@@ -83,7 +79,6 @@ export default function Proposal() {
   const serviceFee = totalPrice * SERVICE_FEE_PCT;
   const youReceive = totalPrice - serviceFee;
 
-  // Milestone Actions
   const addMilestone = () => {
     setMilestones([...milestones, { description: "", due_date: "", amount: "" }]);
   };
@@ -126,22 +121,20 @@ export default function Proposal() {
 
   if (submitted) {
     return (
-      <div className="proposal-page">
-        <div className="proposal-success">
-          <div className="proposal-success__icon">
-            <div style={{ background: "rgba(16, 185, 129, 0.1)", padding: "20px", borderRadius: "50%" }}>
+      <div className="pr-page">
+        <div className="pr-success">
+          <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'center' }}>
+            <div style={{ background: "rgba(16, 185, 129, 0.1)", padding: "24px", borderRadius: "50%" }}>
               <CheckCircle2 size={64} color="#10b981" />
             </div>
           </div>
-          <h2 className="proposal-success__title">{t("submitProposal.success.title")}</h2>
-          <p className="proposal-success__desc">
-            {t("submitProposal.success.desc")}
-          </p>
-          <div className="proposal-success__actions">
-            <button className="proposal-btn--primary" onClick={() => navigate("/my-proposals")}>
+          <h2 className="pr-success-title">{t("submitProposal.success.title")}</h2>
+          <p className="pr-success-desc">{t("submitProposal.success.desc")}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <button className="pr-btn pr-btn-submit" style={{ maxWidth: '100%' }} onClick={() => navigate("/my-proposals")}>
               {t("submitProposal.success.myProposals")}
             </button>
-            <button className="proposal-btn--outline" onClick={() => navigate("/find-work")}>
+            <button className="pr-btn pr-btn-cancel" onClick={() => navigate("/find-work")}>
               {t("submitProposal.success.findWork")}
             </button>
           </div>
@@ -155,65 +148,69 @@ export default function Proposal() {
   ) : "";
 
   return (
-    <div className="proposal-page">
-      {/* Toast */}
+    <div className="pr-page">
       {toast.msg && (
-        <div className={`proposal-toast ${toast.type === "error" ? "proposal-toast--error" : "proposal-toast--success"}`}>
-          {toast.type === "error" ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+        <div style={{
+          position: "fixed", top: 32, right: 32, zIndex: 9999,
+          background: toast.type === "error" ? "#ef4444" : "var(--brand)",
+          color: "#fff", padding: "16px 28px", borderRadius: 12, fontWeight: 700,
+          boxShadow: "0 20px 40px rgba(0,0,0,0.3)", display: "flex", alignItems: "center", gap: 12
+        }}>
+          {toast.type === "error" ? <AlertCircle size={20} /> : <CheckCircle2 size={20} />}
           {toast.msg}
         </div>
       )}
 
-      <div className="proposal-container">
-        <header className="proposal-header">
-          <button className="proposal-back" onClick={() => navigate(-1)}>
+      <div className="pr-container">
+        <header className="pr-header">
+          <button className="pr-back" onClick={() => navigate(-1)}>
             <ArrowLeft size={18} /> {t("submitProposal.back")}
           </button>
-          <h1 className="proposal-title">{t("submitProposal.title")}</h1>
+          <h1 className="pr-title">{t("submitProposal.title")}</h1>
         </header>
 
-        <div className="proposal-grid">
-          
-          {/* Main Content */}
-          <div className="proposal-main-content">
-
-            {/* JOB DETAILS CARD */}
-            <section className="proposal-card">
-              <div className="proposal-card__header">
-                <h2 className="proposal-card__title">{t("submitProposal.sections.jobDetails")}</h2>
+        <div className="pr-grid">
+          <div className="pr-main">
+            
+            {/* JOB DETAILS */}
+            <section className="pr-card">
+              <div className="pr-card-header">
+                <h2 className="pr-card-title">{t("submitProposal.sections.jobDetails")}</h2>
               </div>
-              <div className="proposal-card__body">
+              <div className="pr-card-body">
                 {jobLoading ? (
-                  <div className="proposal-skeleton-text">{t("submitProposal.loading")}</div>
+                  <div style={{ color: 'var(--muted)', fontStyle: 'italic' }}>{t("submitProposal.loading")}</div>
                 ) : (
-                  <div className="proposal-job-summary">
-                    <h3 className="job-title-large">{job?.title}</h3>
-                    <div className="job-meta-pills">
-                      <span className="job-pill">{job?.category_name || t("submitProposal.job.category")}</span>
-                      <span className="job-pill-date">{t("submitProposal.job.posted")}: {jobDateStr}</span>
+                  <div>
+                    <h3 className="pr-job-title">{job?.title}</h3>
+                    <div className="pr-job-pills">
+                      <span className="pr-job-pill">{job?.category_name || t("submitProposal.job.category")}</span>
+                      <span style={{ color: 'var(--muted)', fontSize: 13, display: 'flex', alignItems: 'center' }}>
+                        {t("submitProposal.job.posted")}: {jobDateStr}
+                      </span>
                     </div>
                     
-                    <div className="job-desc-preview">
+                    <div className="pr-job-desc">
                       <p>{job?.description}</p>
                     </div>
 
-                    <div className="job-specs">
-                      <div className="spec-item">
-                        <Award size={18} />
+                    <div className="pr-job-specs">
+                      <div className="pr-spec-item">
+                        <Award size={20} />
                         <div>
                           <strong>{job?.experience_level || "Ekspert"}</strong>
                           <span>{t("submitProposal.job.experience")}</span>
                         </div>
                       </div>
-                      <div className="spec-item">
-                        <DollarSign size={18} />
+                      <div className="pr-spec-item">
+                        <DollarSign size={20} />
                         <div>
                           <strong>{job?.job_type === 'hourly' ? `$${job?.budget_min}-${job?.budget_max}` : `$${job?.budget_max}`}</strong>
                           <span>{job?.job_type === 'hourly' ? t("findWork.projectCard.hourly") : t("findWork.projectCard.fixed")}</span>
                         </div>
                       </div>
-                      <div className="spec-item">
-                        <Calendar size={18} />
+                      <div className="pr-spec-item">
+                        <Calendar size={20} />
                         <div>
                           <strong>{job?.duration || "1-3 oy"}</strong>
                           <span>{t("submitProposal.job.duration")}</span>
@@ -225,103 +222,70 @@ export default function Proposal() {
               </div>
             </section>
 
-            {/* TERMS SECTION */}
-            <section className="proposal-card">
-              <div className="proposal-card__header">
-                <h2 className="proposal-card__title">{t("submitProposal.sections.terms")}</h2>
+            {/* TERMS */}
+            <section className="pr-card">
+              <div className="pr-card-header">
+                <h2 className="pr-card-title">{t("submitProposal.sections.terms")}</h2>
               </div>
-              <div className="proposal-card__body">
-                <div className="payment-mode-shaper">
-                  <h4 className="payment-mode-title">{t("submitProposal.terms.paymentHeader")}</h4>
+              <div className="pr-card-body">
+                <div className="pr-payment-mode">
+                  <h4 style={{ fontSize: 18, fontWeight: 800, marginBottom: 20, color: 'var(--text)' }}>
+                    {t("submitProposal.terms.paymentHeader")}
+                  </h4>
                   
-                  <div className="payment-options">
-                    <label className={`payment-option ${paymentMode === 'milestone' ? 'active' : ''}`}>
-                      <input 
-                        type="radio" 
-                        name="paymentMode" 
-                        value="milestone" 
-                        checked={paymentMode === 'milestone'} 
-                        onChange={() => setPaymentMode('milestone')}
-                      />
-                      <div className="option-content">
+                  <div className="pr-options-grid">
+                    <div 
+                      className={`pr-option-card ${paymentMode === 'milestone' ? 'active' : ''}`}
+                      onClick={() => setPaymentMode('milestone')}
+                    >
+                      <div style={{ marginTop: 4 }}><div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${paymentMode === 'milestone' ? 'var(--brand)' : 'var(--border)'}`, background: paymentMode === 'milestone' ? 'var(--brand)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{paymentMode === 'milestone' && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />}</div></div>
+                      <div>
                         <strong>{t("submitProposal.terms.milestone.title")}</strong>
                         <p>{t("submitProposal.terms.milestone.desc")}</p>
                       </div>
-                    </label>
+                    </div>
 
-                    <label className={`payment-option ${paymentMode === 'project' ? 'active' : ''}`}>
-                      <input 
-                        type="radio" 
-                        name="paymentMode" 
-                        value="project" 
-                        checked={paymentMode === 'project'} 
-                        onChange={() => setPaymentMode('project')}
-                      />
-                      <div className="option-content">
+                    <div 
+                      className={`pr-option-card ${paymentMode === 'project' ? 'active' : ''}`}
+                      onClick={() => setPaymentMode('project')}
+                    >
+                      <div style={{ marginTop: 4 }}><div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${paymentMode === 'project' ? 'var(--brand)' : 'var(--border)'}`, background: paymentMode === 'project' ? 'var(--brand)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{paymentMode === 'project' && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />}</div></div>
+                      <div>
                         <strong>{t("submitProposal.terms.project.title")}</strong>
                         <p>{t("submitProposal.terms.project.desc")}</p>
                       </div>
-                    </label>
+                    </div>
                   </div>
                 </div>
 
-                {/* Milestone Editor */}
                 {paymentMode === 'milestone' && (
-                  <div className="milestones-editor">
-                    <h5 className="editor-title">{t("submitProposal.milestones.header")}</h5>
-                    <div className="milestone-table">
-                      <div className="milestone-table-header">
-                        <div className="col-desc">{t("submitProposal.milestones.description")}</div>
-                        <div className="col-date">{t("submitProposal.milestones.dueDate")}</div>
-                        <div className="col-amt">{t("submitProposal.milestones.amount")}</div>
-                        <div className="col-action"></div>
-                      </div>
+                  <div style={{ marginTop: 32, paddingTop: 32, borderTop: '1px solid var(--border)' }}>
+                    <h5 style={{ fontSize: 16, fontWeight: 800, marginBottom: 20, color: 'var(--text)' }}>{t("submitProposal.milestones.header")}</h5>
+                    <div style={{ display: 'grid', gap: 12 }}>
                       {milestones.map((m, idx) => (
-                        <div className="milestone-row" key={idx}>
-                          <div className="col-idx">{idx + 1}</div>
-                          <div className="col-desc">
-                            <input 
-                              type="text" 
-                              placeholder={t("submitProposal.milestones.placeholderDesc")}
-                              value={m.description}
-                              onChange={e => updateMilestone(idx, 'description', e.target.value)}
-                            />
-                          </div>
-                          <div className="col-date">
-                            <input 
-                              type="text" 
-                              placeholder={t("submitProposal.milestones.placeholderDate")}
-                              value={m.due_date}
-                              onChange={e => updateMilestone(idx, 'due_date', e.target.value)}
-                            />
-                          </div>
-                          <div className="col-amt">
-                            <input 
-                              type="number" 
-                              placeholder="50" 
-                              value={m.amount}
-                              onChange={e => updateMilestone(idx, 'amount', e.target.value)}
-                            />
-                          </div>
-                          <div className="col-action">
-                             <button type="button" onClick={() => removeMilestone(idx)} className="btn-remove"><Trash2 size={16}/></button>
-                          </div>
+                        <div key={idx} style={{ display: 'grid', gridTemplateColumns: '50px 1fr 140px 120px 40px', gap: 12, alignItems: 'center', padding: '16px 0', borderBottom: '1px solid var(--border)' }}>
+                          <span style={{ fontWeight: 800, color: 'var(--brand)' }}>#{idx+1}</span>
+                          <input className="pr-input" placeholder={t("submitProposal.milestones.placeholderDesc")} value={m.description} onChange={e => updateMilestone(idx, 'description', e.target.value)} />
+                          <input className="pr-input" placeholder={t("submitProposal.milestones.placeholderDate")} value={m.due_date} onChange={e => updateMilestone(idx, 'due_date', e.target.value)} />
+                          <input type="number" className="pr-input" placeholder="Summa" value={m.amount} onChange={e => updateMilestone(idx, 'amount', e.target.value)} />
+                          <button style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }} onClick={() => removeMilestone(idx)}><Trash2 size={18} /></button>
                         </div>
                       ))}
                     </div>
-                    <button type="button" onClick={addMilestone} className="btn-add-milestone">
+                    <button className="pr-btn pr-btn-cancel" style={{ width: '100%', borderStyle: 'dashed', marginTop: 16 }} onClick={addMilestone}>
                       <Plus size={16} /> {t("submitProposal.milestones.add")}
                     </button>
                   </div>
                 )}
 
-                {/* Project Price input */}
                 {paymentMode === 'project' && (
-                  <div className="project-price-field">
+                  <div className="pr-input-group" style={{ maxWidth: 400 }}>
                     <label>{t("submitProposal.project.priceLabel")}</label>
-                    <div className="price-input-wrap">
-                      <DollarSign size={18} />
+                    <div style={{ position: 'relative' }}>
+                      <DollarSign size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--brand)' }} />
                       <input 
+                        className="pr-input" 
+                        style={{ paddingLeft: 44, fontSize: 20, fontWeight: 800, color: 'var(--brand)' }}
                         type="number" 
                         value={projectPrice} 
                         onChange={e => setProjectPrice(e.target.value)}
@@ -331,64 +295,62 @@ export default function Proposal() {
                   </div>
                 )}
 
-                <div className="fee-calculator">
-                  <div className="fee-line">
-                    <div className="fee-label">
+                <div className="pr-fee-box">
+                  <div className="pr-fee-line">
+                    <div className="pr-fee-label">
                       <strong>{t("submitProposal.fee.totalBalance")}</strong>
                       <span>{t("submitProposal.fee.totalDesc")}</span>
                     </div>
-                    <div className="fee-value">${totalPrice.toLocaleString()}</div>
+                    <div className="pr-fee-value">${totalPrice.toLocaleString()}</div>
                   </div>
-                  <div className="fee-line">
-                    <div className="fee-label">
+                  <div className="pr-fee-line">
+                    <div className="pr-fee-label">
                       <strong>{t("submitProposal.fee.serviceFee")}</strong>
                       <span>{t("submitProposal.fee.serviceDesc")}</span>
                     </div>
-                    <div className="fee-value">-${serviceFee.toLocaleString()}</div>
+                    <div className="pr-fee-value" style={{ color: '#ef4444' }}>-${serviceFee.toLocaleString()}</div>
                   </div>
-                  <hr className="fee-divider" />
-                  <div className="fee-line fee-line-total">
-                    <div className="fee-label">
+                  <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '20px 0' }} />
+                  <div className="pr-fee-line pr-fee-total">
+                    <div className="pr-fee-label">
                       <strong>{t("submitProposal.fee.receive")}</strong>
                       <span>{t("submitProposal.fee.receiveDesc")}</span>
                     </div>
-                    <div className="fee-value">${youReceive.toLocaleString()}</div>
+                    <div className="pr-fee-value">${youReceive.toLocaleString()}</div>
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* DURATION SECTION */}
-            <section className="proposal-card">
-              <div className="proposal-card__header">
-                <h2 className="proposal-card__title">{t("submitProposal.sections.duration")}</h2>
+            {/* DURATION */}
+            <section className="pr-card">
+              <div className="pr-card-header">
+                <h2 className="pr-card-title">{t("submitProposal.sections.duration")}</h2>
               </div>
-              <div className="proposal-card__body">
-                <div className="duration-field">
+              <div className="pr-card-body">
+                <div className="pr-input-group" style={{ maxWidth: 450 }}>
                   <label>{t("submitProposal.duration.label")}</label>
-                  <div className="input-with-icon">
-                    <Clock size={18} />
-                    <select value={duration} onChange={e => setDuration(e.target.value)}>
-                      <option value="">{t("submitProposal.duration.placeholder")}</option>
-                      <option value="1 oydan kam">{t("submitProposal.duration.less1Month")}</option>
-                      <option value="1-3 oy">{t("submitProposal.duration.1To3Months")}</option>
-                      <option value="3-6 oy">{t("submitProposal.duration.3To6Months")}</option>
-                      <option value="6 oydan ko'p">{t("submitProposal.duration.more6Months")}</option>
-                    </select>
-                  </div>
+                  <select className="pr-select" value={duration} onChange={e => setDuration(e.target.value)}>
+                    <option value="">{t("submitProposal.duration.placeholder")}</option>
+                    <option value="1 oydan kam">{t("submitProposal.duration.less1Month")}</option>
+                    <option value="1-3 oy">{t("submitProposal.duration.1To3Months")}</option>
+                    <option value="3-6 oy">{t("submitProposal.duration.3To6Months")}</option>
+                    <option value="6 oydan ko'p">{t("submitProposal.duration.more6Months")}</option>
+                  </select>
                 </div>
               </div>
             </section>
 
-            {/* ADDITIONAL DETAILS SECTION */}
-            <section className="proposal-card">
-              <div className="proposal-card__header">
-                <h2 className="proposal-card__title">{t("submitProposal.sections.additional")}</h2>
+            {/* ADDITIONAL */}
+            <section className="pr-card">
+              <div className="pr-card-header">
+                <h2 className="pr-card-title">{t("submitProposal.sections.additional")}</h2>
               </div>
-              <div className="proposal-card__body">
-                <div className="cover-letter-field">
+              <div className="pr-card-body">
+                <div className="pr-input-group">
                   <label>{t("submitProposal.additional.coverLetter")} <span>*</span></label>
                   <textarea 
+                    className="pr-textarea"
                     rows={8}
                     placeholder={t("submitProposal.additional.placeholder")}
                     value={coverLetter}
@@ -396,54 +358,45 @@ export default function Proposal() {
                   />
                 </div>
                 
-                <div className="attachments-field">
+                <div className="pr-input-group">
                   <label>{t("submitProposal.additional.attachments")}</label>
-                  <div className="upload-placeholder">
-                    <FileText size={24} />
-                    <p>{t("submitProposal.additional.uploadDesc")}</p>
+                  <div style={{ border: '2px dashed var(--border)', padding: 48, borderRadius: 20, textAlign: 'center', cursor: 'pointer', background: 'var(--surface-2)', color: 'var(--muted)' }}>
+                    <FileText size={32} style={{ marginBottom: 12, marginInline: 'auto' }} />
+                    <p style={{ fontWeight: 700, color: 'var(--text-2)' }}>{t("submitProposal.additional.uploadDesc")}</p>
                     <small>{t("submitProposal.additional.uploadLimit")}</small>
                   </div>
                 </div>
               </div>
             </section>
 
-            <div className="proposal-form-actions">
-              <button 
-                type="submit" 
-                className="proposal-btn-submit" 
-                onClick={handleSubmit}
-                disabled={loading}
-              >
-                {loading ? <><Loader2 className="spin" style={{ marginRight: 8 }} size={18} /> {t("submitProposal.actions.submitting")}</> : t("submitProposal.actions.submit")}
+            <div style={{ display: 'flex', gap: 20, marginTop: 48 }}>
+              <button className="pr-btn pr-btn-submit" onClick={handleSubmit} disabled={loading}>
+                {loading ? <Loader2 className="spin" size={20} /> : t("submitProposal.actions.submit")}
               </button>
-              <button 
-                type="button" 
-                className="proposal-btn-cancel"
-                onClick={() => navigate(-1)}
-              >
+              <button className="pr-btn pr-btn-cancel" onClick={() => navigate(-1)}>
                 {t("submitProposal.actions.cancel")}
               </button>
             </div>
 
           </div>
 
-          {/* Sidebar (Brief Summary) */}
-          <aside className="proposal-sidebar">
-             <div className="sidebar-sticky">
-                <div className="security-shield">
-                   <Lock size={20} />
+          {/* SIDEBAR */}
+          <aside className="pr-sidebar">
+             <div className="pr-sidebar-sticky">
+                <div className="pr-security">
+                   <Lock size={24} />
                    <div>
                      <strong>{t("submitProposal.sidebar.protectionTitle")}</strong>
                      <p>{t("submitProposal.sidebar.protectionDesc")}</p>
                    </div>
                 </div>
 
-                <div className="quick-stats">
-                   <div className="stat-row">
+                <div className="pr-quick-stats">
+                   <div className="pr-stat-row">
                      <span>{t("submitProposal.sidebar.jobType")}</span>
                      <strong>{job?.job_type === 'hourly' ? t("findWork.projectCard.hourly") : t("findWork.projectCard.fixed")}</strong>
                    </div>
-                   <div className="stat-row">
+                   <div className="pr-stat-row">
                      <span>{t("submitProposal.sidebar.experience")}</span>
                      <strong>{job?.experience_level || "Ekspert"}</strong>
                    </div>
