@@ -15,6 +15,7 @@ import "../../../assets/style/FreeNavbar.css";
 import "../../../assets/style/theme.css";
 import NotificationDropdown from "../NotificationDropdown/NotificationDropdown";
 import { Toast } from "../Toast";
+import { getSocket } from "../../../hooks/useSocket";
 
 const getToken = () => localStorage.getItem("accessToken");
 
@@ -375,7 +376,36 @@ function AuthHeader({ i18n, changeLanguage, user }) {
         ]);
         
         if (mounted) {
-          if (msgRes?.success) setUnreadCount(msgRes.data.unread_count);
+          if (msgRes?.success) {
+            setUnreadCount(msgRes.data.unread_count);
+            
+            // O'tkazib yuborilgan xabarlarni tekshirish
+            if (msgRes.data.unread_count > 0 && Notification.permission === "granted") {
+              const chatRes = await import("../../../api/messages").then(m => m.getChats());
+              if (chatRes?.success) {
+                const unreadChats = chatRes.data.chats.filter(c => c.unread_count > 0);
+                const shownIds = JSON.parse(localStorage.getItem('shown_notifications') || '[]');
+                let updated = false;
+
+                unreadChats.slice(0, 3).forEach(chat => {
+                  const msgId = chat.last_message_id || `chat_${chat.chat_id}_${chat.last_message_at}`;
+                  if (!shownIds.includes(msgId)) {
+                    showBrowserNotification(
+                      `Yangi xabar: ${chat.partner.first_name}`,
+                      chat.last_message_content || "Xabar yuborildi",
+                      chat.partner.avatar_url || "/UzWork transparent.png"
+                    );
+                    shownIds.push(msgId);
+                    updated = true;
+                  }
+                });
+
+                if (updated) {
+                  localStorage.setItem('shown_notifications', JSON.stringify(shownIds.slice(-100)));
+                }
+              }
+            }
+          }
           if (propRes?.success) setProposalsCount(propRes.data.unread_count);
         }
       } catch (err) {
@@ -385,69 +415,78 @@ function AuthHeader({ i18n, changeLanguage, user }) {
 
     fetchCounts();
 
-    let socketObj = null;
-    import("../../../hooks/useSocket").then(({ getSocket }) => {
-      socketObj = getSocket();
-      if (!socketObj) return;
+    const socketObj = getSocket();
+    if (!socketObj) return;
 
-      // 1. YANGI CHAT XABARI
-      const handleNewMessage = (msg) => {
-        if (msg.sender_id !== user?.id) {
-          fetchCount();
-          // Ovoz
-          audioRef.current.play().catch(e => console.warn("Audio play blocked:", e));
-          // Brauzer xabari
-          showBrowserNotification(
-            msg.sender_name || "Yangi xabar",
-            msg.content || msg.body || "Sizga yangi xabar keldi"
-          );
-        }
-      };
-
-      // 2. YANGI BILDIRISNOMA (Proposal, Payment, New Job va h.k.)
-      const handleNewNotification = (noti) => {
+    // 1. YANGI CHAT XABARI
+    const handleNewMessage = (msg) => {
+      if (msg.sender_id !== user?.id) {
+        fetchCounts();
         // Ovoz
         audioRef.current.play().catch(e => console.warn("Audio play blocked:", e));
-        // Brauzer xabari
-        showBrowserNotification(noti.title || "Bildirishnoma", noti.message || noti.body || "Yangi bildirishnoma");
-        // Visual Toast
-        if (mounted) {
-          setActiveToast(noti);
-          // Agar taklif bilan bog'liq bo'lsa, sonini yangilaymiz
-          if (noti.type && (noti.type.startsWith('proposal_') || noti.type === 'job_invitation')) {
-            fetchCounts();
-          }
+        
+        // Brauzer xabari (agar hali ko'rsatilmagan bo'lsa)
+        const shownIds = JSON.parse(localStorage.getItem('shown_notifications') || '[]');
+        if (!shownIds.includes(msg.id)) {
+          showBrowserNotification(
+            `Yangi xabar: ${msg.sender_first_name || 'Foydalanuvchi'}`,
+            msg.content,
+            msg.sender_avatar_url || "/UzWork transparent.png"
+          );
+          shownIds.push(msg.id);
+          localStorage.setItem('shown_notifications', JSON.stringify(shownIds.slice(-100)));
         }
-      };
+      }
+    };
 
-      const handleRead = () => fetchCounts();
-      const handleUnreadUpdate = () => fetchCounts();
+    // 2. YANGI BILDIRISNOMA
+    const handleNewNotification = (noti) => {
+      if (mounted) {
+        setActiveToast(noti);
+        
+        // Ovoz
+        audioRef.current.play().catch(e => console.warn("Audio play blocked:", e));
 
-      socketObj.on("newMessage", handleNewMessage);
-      socketObj.on("newNotification", handleNewNotification);
-      socketObj.on("unreadUpdate", handleUnreadUpdate);
-      // 3. BILDIRISHNOMA O'QILGANDA
-      const handleNotifRead = () => {
-        if (mounted) fetchCounts();
-      };
+        // Brauzer xabari
+        const shownIds = JSON.parse(localStorage.getItem('shown_notifications') || '[]');
+        if (!shownIds.includes(noti.id)) {
+          showBrowserNotification(
+            noti.title || "UzWork",
+            noti.message,
+            noti.icon || "/UzWork transparent.png"
+          );
+          shownIds.push(noti.id);
+          localStorage.setItem('shown_notifications', JSON.stringify(shownIds.slice(-100)));
+        }
 
-      socketObj.on("messagesRead", handleRead);
-      socketObj.on("notificationRead", handleNotifRead);
-      socketObj.on("notificationsAllRead", handleNotifRead);
-      socketObj.on("notificationsAllReadByType", handleNotifRead);
-    });
+        // Agar taklif bilan bog'liq bo'lsa, sonini yangilaymiz
+        if (noti.type && (noti.type.startsWith('proposal_') || noti.type === 'job_invitation')) {
+          fetchCounts();
+        }
+      }
+    };
+
+    const handleRead = () => fetchCounts();
+    const handleUnreadUpdate = () => fetchCounts();
+    const handleNotifRead = () => { if (mounted) fetchCounts(); };
+
+    socketObj.on("newMessage", handleNewMessage);
+    socketObj.on("newNotification", handleNewNotification);
+    socketObj.on("unreadUpdate", handleUnreadUpdate);
+    socketObj.on("messagesRead", handleRead);
+    socketObj.on("notificationRead", handleNotifRead);
+    socketObj.on("notificationsAllRead", handleNotifRead);
+    socketObj.on("notificationsAllReadByType", handleNotifRead);
 
     return () => {
       mounted = false;
-      if (socketObj) {
-        socketObj.off("newMessage");
-        socketObj.off("newNotification");
-        socketObj.off("unreadUpdate");
-        socketObj.off("messagesRead");
-        socketObj.off("notificationRead");
-        socketObj.off("notificationsAllRead");
-        socketObj.off("notificationsAllReadByType");
-      }
+      socketObj.off("newMessage", handleNewMessage);
+      socketObj.off("newNotification", handleNewNotification);
+      socketObj.off("unreadUpdate", handleUnreadUpdate);
+      socketObj.off("messagesRead", handleRead);
+      socketObj.off("notificationRead", handleNotifRead);
+      socketObj.off("notificationsAllRead", handleNotifRead);
+      socketObj.off("notificationsAllReadByType", handleNotifRead);
     };
   }, [user?.id]);
 
