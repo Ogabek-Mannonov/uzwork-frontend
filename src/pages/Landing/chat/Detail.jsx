@@ -11,7 +11,10 @@ import {
   uploadFile,
 } from "../../../api/messages";
 import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/useSocket";
-import { Smile, Globe, Settings2, X, MoreVertical, Copy, Trash2, Edit3, User, Phone, ArrowLeft, Send, Mic, Download, Paperclip, FileText, Bell, BellOff, Pin, UserPlus, Settings, ExternalLink, Search, Video, Briefcase } from "lucide-react";
+import { Smile, Globe, Settings2, X, MoreVertical, Copy, Trash2, Edit3, User, Phone, ArrowLeft, Send, Mic, Download, Paperclip, FileText, Bell, BellOff, Pin, UserPlus, Settings, ExternalLink, Search, Video, Briefcase, CheckCircle, AlertCircle } from "lucide-react";
+import SubmissionCard from "./SubmissionCard";
+import { getContractById } from "../../../api/contracts";
+import { submitMilestone, approveMilestone, rejectMilestone } from "../../../api/milestones";
 import i18n from "../../../i18n";
 import { useTranslation } from "react-i18next";
 import { translateToUzbek, translateBatchToUzbek } from "../../../api/translate_service";
@@ -19,14 +22,14 @@ import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 
 // ── constants ────────────────────────────────────────────
-const BACKEND =
-  import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
+const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/api\/?$/, "");
 
 // --- date/image helpers ---
 function avatarSrc(url) {
   if (!url) return null;
   if (url.startsWith("http")) return url;
-  return `${BACKEND}${url}`;
+  const path = url.startsWith("/") ? url : `/${url}`;
+  return `${BACKEND}${path}`;
 }
 
 function isImgPath(url) {
@@ -43,6 +46,32 @@ function isPdfPath(url) {
   if (!url) return false;
   return /\.pdf$/i.test(url);
 }
+
+const handleDownload = async (url, fileName) => {
+  if (!url) return;
+  try {
+    const response = await fetch(url, { mode: 'cors' });
+    if (!response.ok) throw new Error('Network response was not ok');
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = fileName || url.split("/").pop() || "file";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+  } catch (error) {
+    console.error("Download error, falling back to direct link:", error);
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.download = fileName || "";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
 
 const parseUTC = (raw) => {
   if (!raw) return null;
@@ -389,8 +418,13 @@ function MessageBubble({
   allTranslations,
   onReactChip,
   onMediaClick,
+  onApproveSubmission,
+  onRejectSubmission,
+  isApproving,
+  isRejecting
 }) {
   const isDeleted = !!msg.deleted_at;
+  const isSubmission = msg.type === "submission";
   const isImage = msg.type === "image";
   const isVideo = msg.type === "video" || (msg.type === "file" && msg.file_url && /\.(mp4|webm|ogg|mov)$/i.test(msg.file_url));
   const isVoice = msg.type === "voice";
@@ -440,6 +474,19 @@ function MessageBubble({
             onContextMenu(e, msg);
           }}
         >
+          {isSubmission ? (
+            <SubmissionCard
+              msg={msg}
+              isOwn={isOwnVal}
+              onApprove={onApproveSubmission}
+              onReject={onRejectSubmission}
+              isApproving={isApproving}
+              isRejecting={isRejecting}
+              currentUser={currentUser}
+              onMediaClick={onMediaClick}
+            />
+          ) : (
+            <>
           {repliedMsg && (
             <div className={`msg-reply-preview ${isOwnVal ? "sent" : "received"}`}>
               <div className="msg-reply-sender">{repliedSenderName}</div>
@@ -548,6 +595,12 @@ function MessageBubble({
                       target="_blank"
                       rel="noreferrer"
                       className="file-action-link"
+                      onClick={(e) => {
+                        if (!isPdf) {
+                          e.preventDefault();
+                          handleDownload(avatarSrc(msg.file_url), msg.content || msg.file_url.split("/").pop());
+                        }
+                      }}
                     >
                       {isPdf ? i18n.t("chat.openWith", "OTKRIT S POMOSHYU") : i18n.t("chat.downloadAction", "YUKLAB OLISH")}
                     </a>
@@ -616,6 +669,28 @@ function MessageBubble({
               )}
             </div>
           )}
+        </>
+      )}
+
+      {isSubmission && (
+        <div className="msg-time-inline">
+               <span className="inline-time-text">{formatMsgTime(msg.created_at)}</span>
+               {isOwnVal && (
+                <span className={`msg-read-icon ${msg.is_read ? "read" : "sent"}`}>
+                  {msg.is_read ? (
+                    <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
+                      <path d="M1 6L4.5 9.5L10.5 1.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M5 6L8.5 9.5L14.5 1.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                      <path d="M1 5.5L4.5 9L11 1" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Reactions row - Faqat media yoki long messages uchun? Yo'q, shortda inline bo'ldi, endi faqat kerak bo'lsa show qilamiz */}
           {/* Hozircha text xabarlarda ham inline bo'lgani uchun buni faqat media/doc larda caption bo'lsa ishlatishimiz mumkin */}
@@ -660,9 +735,12 @@ function MediaLightbox({ media, onClose }) {
         <div className="lightbox-actions">
           <a
             href={fullUrl}
-            download
             className="lightbox-btn"
-            onClick={e => e.stopPropagation()}
+            onClick={e => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleDownload(fullUrl, fileName);
+            }}
             title={i18n.t("chat.download", "Yuklab olish")}
           >
             <Download size={22} />
@@ -842,6 +920,16 @@ export default function ChatDetail() {
   const [captionText, setCaptionText] = useState("");
   const [isCompressMode, setIsCompressMode] = useState(true);
 
+  // --- Submission State ---
+  const [milestones, setMilestones] = useState([]);
+  const [showSubmissionModal, setShowSubmissionModal] = useState(false);
+  const [submissionDesc, setSubmissionDesc] = useState("");
+  const [submissionFiles, setSubmissionFiles] = useState([]);
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState("");
+  const [isApproving, setIsApproving] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
+
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
   const messagesAreaRef = useRef(null);
@@ -998,11 +1086,135 @@ export default function ChatDetail() {
       if (data?.chat) setChatInfo(data.chat);
       if (data?.job) setJobInfo(data.job);
     } catch (e) {
-      setError(i18n.t("chat.failLoadMsgs", "Xabarlarni yuklab bo'lmadi"));
+      console.error("loadHistory error:", e);
     } finally {
       setLoading(false);
     }
-  }, [chatId, currentUser?.id]);
+  }, [chatId, currentUser?.id, reloadList]);
+
+  // Load contract/milestones if chat has a contract
+  useEffect(() => {
+    if (chatId && chatInfo?.contract_id) {
+      getContractById(chatInfo.contract_id).then(res => {
+        if (res?.success) {
+          setMilestones(res.data.milestones || []);
+          const pending = res.data.milestones?.filter(m => m.status === 'pending');
+          if (pending?.length > 0) {
+            setSelectedMilestoneId(pending[0].id);
+          }
+        }
+      });
+    }
+  }, [chatId, chatInfo?.contract_id]);
+
+  const handleApproveSubmission = async (msg) => {
+    const metadata = typeof msg.metadata === 'string' ? JSON.parse(msg.metadata) : msg.metadata;
+    if (!metadata?.milestone_id) return notify("Milestone ID topilmadi", "error");
+
+    setIsApproving(true);
+    const res = await approveMilestone(metadata.milestone_id);
+    if (res?.success) {
+      notify(i18n.t("chat.approvedSuccess", "Ish muvaffaqiyatli qabul qilindi"));
+      // Update local message state
+      setMessages(prev => prev.map(m => {
+        if (m.id === msg.id) {
+          const newMeta = { ...metadata, status: 'approved' };
+          return { ...m, metadata: JSON.stringify(newMeta) };
+        }
+        return m;
+      }));
+    } else {
+      notify(res.message || "Approve qilishda xato", "error");
+    }
+    setIsApproving(false);
+  };
+
+  const handleRejectSubmission = async (msg) => {
+    const metadata = typeof msg.metadata === 'string' ? JSON.parse(msg.metadata) : msg.metadata;
+    if (!metadata?.milestone_id) return notify("Milestone ID topilmadi", "error");
+
+    setIsRejecting(true);
+    const res = await rejectMilestone(metadata.milestone_id, { reason: "Tuzatish so'raldi" });
+    
+    if (res?.success) {
+      notify(i18n.t("chat.revisionRequestedNotify", "Tuzatish so'raldi"), "info");
+      
+      setMessages(prev => prev.map(m => {
+        if (m.id === msg.id) {
+          const newMeta = { ...metadata, status: 'rejected' };
+          return { ...m, metadata: JSON.stringify(newMeta) };
+        }
+        return m;
+      }));
+    } else {
+      notify(res.message || "Xato yuz berdi", "error");
+    }
+    setIsRejecting(false);
+  };
+
+  const handleFinalWorkSubmission = async () => {
+    if (!submissionDesc.trim()) return notify("Tavsif kiriting", "error");
+    if (!selectedMilestoneId) return notify("Bosqichni tanlang", "error");
+
+    setSending(true);
+    const subRes = await submitMilestone(selectedMilestoneId, { description: submissionDesc });
+    if (!subRes?.success) {
+      setSending(false);
+      return notify(subRes?.message || "Submitda xato", "error");
+    }
+
+    const msgRes = await sendMessage({
+      chat_id: chatId,
+      type: 'submission',
+      message_text: 'Ish topshirildi',
+      metadata: {
+        description: submissionDesc,
+        milestone_id: selectedMilestoneId,
+        status: 'submitted',
+        files: submissionFiles
+      }
+    });
+
+    setSending(false);
+    setShowSubmissionModal(false);
+    setSubmissionDesc("");
+    setSubmissionFiles([]);
+    if (msgRes?.success) {
+      loadHistory();
+    }
+  };
+
+  const handleSubFilesChange = async (e) => {
+    const selected = Array.from(e.target.files);
+    if (selected.length === 0) return;
+
+    setIsUploadingFiles(true);
+    const uploaded = [];
+
+    for (const file of selected) {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await uploadFile(formData);
+      if (res?.success) {
+        uploaded.push({
+          name: file.name,
+          url: res.data?.url || res.file_url || res.url,
+          size: file.size,
+          type: file.type
+        });
+      } else {
+        notify(`Failed to upload ${file.name}`, "error");
+      }
+    }
+
+    setSubmissionFiles(prev => [...prev, ...uploaded]);
+    setIsUploadingFiles(false);
+    e.target.value = ""; // Reset input
+  };
+
+  const removeSubFile = (index) => {
+    setSubmissionFiles(prev => prev.filter((_, i) => i !== index));
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -1160,11 +1372,11 @@ export default function ChatDetail() {
       }
     };
 
-    const onEdited = ({ messageId, content, updated_at }) => {
+    const onEdited = ({ messageId, content, updated_at, metadata }) => {
       setMessages((prev) =>
         prev.map((m) =>
           m.id === messageId
-            ? { ...m, content, updated_at, is_edited: true }
+            ? { ...m, content, updated_at, is_edited: true, metadata: metadata || m.metadata }
             : m
         )
       );
@@ -2020,6 +2232,10 @@ export default function ChatDetail() {
                         allTranslations={translations}
                         onMediaClick={setViewingMedia}
                         onReactChip={(msgToReact, emoji) => toggleReaction(msgToReact, emoji)}
+                        onApproveSubmission={handleApproveSubmission}
+                        onRejectSubmission={handleRejectSubmission}
+                        isApproving={isApproving}
+                        isRejecting={isRejecting}
                       />
                     </div>
                   );
@@ -2166,6 +2382,16 @@ export default function ChatDetail() {
                   />
                   <Paperclip size={24} />
                 </label>
+
+                {chatInfo?.contract_id && currentUser?.role === 'freelancer' && (
+                  <button 
+                    className="chat-attach-btn" 
+                    onClick={() => setShowSubmissionModal(true)}
+                    title={i18n.t("chat.submitWork", "Ish topshirish")}
+                  >
+                    <Briefcase size={24} color="var(--accent)" />
+                  </button>
+                )}
               </div>
             )}
 
@@ -2486,6 +2712,103 @@ export default function ChatDetail() {
           media={viewingMedia}
           onClose={() => setViewingMedia(null)}
         />
+      )}
+
+      {showSubmissionModal && (
+        <div className="file-preview-overlay">
+          <div className="file-preview-modal submission-modal glassmorphism">
+            <div className="file-preview-header submission-modal-header">
+              <h3>{i18n.t("chat.submitWork", "Ish topshirish")}</h3>
+              <button className="icon-btn" onClick={() => setShowSubmissionModal(false)}><X size={20} /></button>
+            </div>
+            <div className="submission-modal-container">
+              <div className="submission-field-group">
+                <label className="submission-field-label">
+                  {i18n.t("chat.chooseMilestone", "Bosqichni tanlang")}
+                </label>
+                  {milestones.filter(m => m.status === 'pending').length === 0 ? (
+                    <div className="submission-empty-milestones" style={{ padding: '12px', background: 'var(--hover-bg)', borderRadius: '8px', fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                      {i18n.t("chat.noPendingMilestones", "Hozircha topshiriladigan bosqichlar yo'q.")}
+                    </div>
+                  ) : (
+                    <select 
+                      className="submission-input-control" 
+                      value={selectedMilestoneId}
+                      onChange={(e) => setSelectedMilestoneId(e.target.value)}
+                    >
+                      <option value="">-- {i18n.t("chat.select", "Tanlang")} --</option>
+                      {milestones.filter(m => m.status === 'pending').map(m => (
+                        <option key={m.id} value={m.id}>{m.title} ({Number(m.amount).toLocaleString()} UZS)</option>
+                      ))}
+                    </select>
+                  )}
+              </div>
+              <div className="submission-field-group">
+                <label className="submission-field-label">
+                  {i18n.t("chat.submissionDescription", "Topshiriq tavsifi")}
+                </label>
+                <textarea 
+                  className="submission-input-control" 
+                  rows={4}
+                  placeholder={i18n.t("chat.submissionPlaceholder", "Nimalar bajarilgani haqida qisqacha...")}
+                  value={submissionDesc}
+                  onChange={(e) => setSubmissionDesc(e.target.value)}
+                />
+              </div>
+
+              <div className="submission-field-group">
+                <label className="submission-field-label">
+                  {i18n.t("chat.attachments", "Fayllar")}
+                </label>
+                
+                <div className="submission-files-list">
+                  {submissionFiles.map((file, idx) => (
+                    <div key={idx} className="submission-file-item">
+                      <div className="file-icon-square">
+                        <FileText size={16} color="#fff" />
+                      </div>
+                      <div className="sub-file-info">
+                        <span className="sub-file-name">{file.name}</span>
+                        <span className="sub-file-size">{(file.size / 1024).toFixed(1)} KB</span>
+                      </div>
+                      <button className="sub-file-remove" onClick={() => removeSubFile(idx)}>
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <button 
+                  className="add-sub-file-btn"
+                  onClick={() => document.getElementById('submission-file-input').click()}
+                  disabled={isUploadingFiles}
+                >
+                  {isUploadingFiles ? <div className="btn-spinner" /> : <Paperclip size={16} />}
+                  {i18n.t("chat.addMore", "Fayl biriktirish")}
+                </button>
+                <input 
+                  type="file" 
+                  id="submission-file-input" 
+                  hidden 
+                  multiple 
+                  onChange={handleSubFilesChange} 
+                />
+              </div>
+            </div>
+            <div className="submission-modal-footer">
+              <button className="footer-btn text" onClick={() => setShowSubmissionModal(false)}>
+                {i18n.t("chat.cancel", "BEKOR QILISH")}
+              </button>
+              <button 
+                className="footer-btn primary" 
+                onClick={handleFinalWorkSubmission}
+                disabled={sending}
+              >
+                {sending ? <div className="btn-spinner" /> : i18n.t("chat.submit", "TOPSHIRISH")}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

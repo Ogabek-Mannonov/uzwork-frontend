@@ -552,7 +552,21 @@
     "justNow": "Just now",
     "minsAgo": "{{n}}m ago",
     "hoursAgo": "{{n}}h ago",
-    "daysAgo": "{{n}}d ago"
+    "daysAgo": "{{n}}d ago",
+    "submitWork": "Submit Work",
+    "chooseMilestone": "Select Milestone",
+    "submissionDescription": "Work Description",
+    "submissionPlaceholder": "Briefly describe what you've done...",
+    "approvedSuccess": "Work approved successfully",
+    "workSubmitted": "Work Submitted",
+    "pending": "Pending",
+    "approved": "Approved",
+    "revisionRequested": "Revision Requested",
+    "revisionRequestedNotify": "Revision requested",
+    "select": "Select",
+    "approveWork": "Approve",
+    "requestRevision": "Request Revision",
+    "attachments": "Files"
   },
   "auth": {
     "enterEmailPhone": "Please enter your email or phone number",

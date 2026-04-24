@@ -541,7 +541,21 @@
     "justNow": "Только что",
     "minsAgo": "{{n}} мин. назад",
     "hoursAgo": "{{n}} ч. назад",
-    "daysAgo": "{{n}} дн. назад"
+    "daysAgo": "{{n}} дн. назад",
+    "submitWork": "Сдать работу",
+    "chooseMilestone": "Выберите этап",
+    "submissionDescription": "Описание работы",
+    "submissionPlaceholder": "Кратко опишите, что было сделано...",
+    "approvedSuccess": "Работа успешно принята",
+    "workSubmitted": "Работа сдана",
+    "pending": "Ожидает",
+    "approved": "Одобрено",
+    "revisionRequested": "Требуется доработка",
+    "revisionRequestedNotify": "Запрошена доработка",
+    "select": "Выбрать",
+    "approveWork": "Одобрить",
+    "requestRevision": "На доработку",
+    "attachments": "Файлы"
   },
   "auth": {
     "enterEmailPhone": "Пожалуйста, введите email или номер телефона",

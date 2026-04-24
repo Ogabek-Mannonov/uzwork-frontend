@@ -636,7 +636,21 @@
     "justNow": "Hozirgina",
     "minsAgo": "{{n}} daqiqa oldin",
     "hoursAgo": "{{n}} soat oldin",
-    "daysAgo": "{{n}} kun oldin"
+    "daysAgo": "{{n}} kun oldin",
+    "submitWork": "Ish topshirish",
+    "chooseMilestone": "Bosqichni tanlang",
+    "submissionDescription": "Topshiriq tavsifi",
+    "submissionPlaceholder": "Nimalar bajarilgani haqida qisqacha...",
+    "approvedSuccess": "Ish muvaffaqiyatli qabul qilindi",
+    "workSubmitted": "Ish topshirildi",
+    "pending": "Kutilmoqda",
+    "approved": "Tasdiqlangan",
+    "revisionRequested": "Tuzatish so'ralgan",
+    "revisionRequestedNotify": "Tuzatish so'raldi",
+    "select": "Tanlang",
+    "approveWork": "Tasdiqlash",
+    "requestRevision": "Tuzatish so'rash",
+    "attachments": "Fayllar"
   },
   "auth": {
     "enterEmailPhone": "Iltimos, email yoki telefon raqamni kiriting",
