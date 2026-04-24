@@ -22,17 +22,17 @@ import {
 import "./contracts.css";
 
 const STATUS_CONFIG = {
-  active:    { class: "status--active", label: "Faol", icon: <Clock size={16} /> },
-  completed: { class: "status--completed", label: "Yakunlangan", icon: <CheckCircle size={16} /> },
-  cancelled: { class: "status--cancelled", label: "Bekor qilingan", icon: <XCircle size={16} /> },
-  disputed:  { class: "status--disputed", label: "Nizo", icon: <AlertCircle size={16} /> },
+  active:    { class: "cd-status--active", label: "Faol", icon: <Clock size={16} /> },
+  completed: { class: "cd-status--completed", label: "Yakunlangan", icon: <CheckCircle size={16} /> },
+  cancelled: { class: "cd-status--cancelled", label: "Bekor qilingan", icon: <XCircle size={16} /> },
+  disputed:  { class: "cd-status--disputed", label: "Nizo", icon: <AlertCircle size={16} /> },
 };
 
 const MILESTONE_STATUS = {
-  pending:   { label: "Kutilmoqda", class: "status--pending" },
-  submitted: { label: "Ko'rib chiqilmoqda", class: "status--submitted" },
-  approved:  { label: "Tasdiqlangan", class: "status--approved" },
-  released:  { label: "To'langan", class: "status--released" },
+  pending:   { label: "Kutilmoqda", class: "cd-status--pending" },
+  submitted: { label: "Ko'rib chiqilmoqda", class: "cd-status--submitted" },
+  approved:  { label: "Tasdiqlangan", class: "cd-status--approved" },
+  released:  { label: "To'langan", class: "cd-status--released" },
 };
 
 export default function ContractDetail() {
@@ -137,7 +137,7 @@ export default function ContractDetail() {
           color: "#fff", padding: "16px 24px", borderRadius: 12, fontWeight: 700,
           boxShadow: "0 10px 40px rgba(0,0,0,0.2)", display: "flex", alignItems: "center", gap: 12
         }}>
-          {toast.type === "error" ? <AlertCircle size={20} /> : <CheckCircle size={20} />}
+          {toast.type === "error" ? <AlertCircle size={20} /> : <CheckCircle2 size={20} />}
           {toast.msg}
         </div>
       )}
@@ -202,7 +202,7 @@ export default function ContractDetail() {
             <h3 className="cd-section-title">
               <FileText size={22} style={{ color: 'var(--brand)' }} /> Loyiha haqida
             </h3>
-            <div className="cd-section-content">
+            <div className="cd-section-content" style={{ color: 'var(--text-2)', lineHeight: '1.8', fontSize: '16px' }}>
               {contract.description || contract.job_description || "Ushbu kontrakt bo'yicha batafsil ma'lumot kiritilmagan."}
             </div>
           </div>

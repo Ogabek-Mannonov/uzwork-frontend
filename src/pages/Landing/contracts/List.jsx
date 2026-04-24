@@ -16,10 +16,10 @@ import {
 import "./contracts.css";
 
 const STATUS_CONFIG = {
-  active:    { class: "status--active", label: "Faol", icon: <Clock size={14} /> },
-  completed: { class: "status--completed", label: "Yakunlangan", icon: <CheckCircle size={14} /> },
-  cancelled: { class: "status--cancelled", label: "Bekor qilingan", icon: <XCircle size={14} /> },
-  disputed:  { class: "status--disputed", label: "Nizo", icon: <AlertCircle size={14} /> },
+  active:    { class: "cl-status--active", label: "Faol", icon: <Clock size={14} /> },
+  completed: { class: "cl-status--completed", label: "Yakunlangan", icon: <CheckCircle size={14} /> },
+  cancelled: { class: "cl-status--cancelled", label: "Bekor qilingan", icon: <XCircle size={14} /> },
+  disputed:  { class: "cl-status--disputed", label: "Nizo", icon: <AlertCircle size={14} /> },
 };
 
 export default function ContractsList() {
