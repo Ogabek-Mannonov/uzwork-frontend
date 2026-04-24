@@ -7,7 +7,11 @@ import { useTranslation } from "react-i18next";
 import "./authcss/login.css";
 
 import { Toast } from "../components/Toast";
-import { login as loginRequest, googleLogin as googleLoginRequest } from "../../api/auth"; // sizdagi auth helper
+import { 
+  login as loginRequest, 
+  googleLogin as googleLoginRequest,
+  verify2FALogin as verify2FALoginRequest
+} from "../../api/auth"; 
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,6 +24,8 @@ const Login = () => {
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [twoFactorToken, setTwoFactorToken] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
 
   const [showToast, setShowToast] = useState(false);
 
@@ -110,6 +116,13 @@ const Login = () => {
         return;
       }
 
+      if (res?.requires_2fa) {
+        setTwoFactorToken(res.twoFactorToken);
+        setStep("2fa");
+        setLoading(false);
+        return;
+      }
+
       // ✅ ENG MUHIM: user ham token ham localStorage ga yoziladi
       const { token, role } = persistAuth(res);
 
@@ -120,6 +133,40 @@ const Login = () => {
 
       // ✅ Role bo‘yicha yo‘naltirish
       // Siz hozir hammani /profile ga yuboryapsiz, lekin freelancer bo'lsa /jobs ga ham bo'lishi mumkin
+      if (role === "freelancer") navigate("/find-work", { replace: true });
+      else if (role === "client") navigate("/profile/client", { replace: true });
+      else if (role === "admin") navigate("/home", { replace: true });
+      else navigate("/find-work", { replace: true });
+    } catch (err) {
+      setError(err?.message || t("auth.serverError", "Server bilan ulanishda xato"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handle2FAVerify = async (e) => {
+    e.preventDefault();
+    if (verificationCode.length !== 6) {
+      setError(t("auth.enter6DigitCode", "Iltimos, 6 xonali kodni kiriting"));
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await verify2FALoginRequest({
+        twoFactorToken,
+        code: verificationCode
+      });
+
+      if (!res?.success) {
+        setError(res?.message || t("auth.2faError", "Tasdiqlashda xatolik"));
+        return;
+      }
+
+      const { role } = persistAuth(res);
+      
       if (role === "freelancer") navigate("/find-work", { replace: true });
       else if (role === "client") navigate("/profile/client", { replace: true });
       else if (role === "admin") navigate("/home", { replace: true });
@@ -308,6 +355,45 @@ return (
           <div className="not-you">
             <a href="#" onClick={handleBack} className="not-you-link">
               {t("auth.notYou", "Bu siz emassizmi?")}
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* 3-bosqich: 2FA */}
+      {step === "2fa" && (
+        <div className="soft-fade-in">
+          <p className="subtitle-login" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            {t("auth.2faInstruction", "Sizning email manzilingizga 6 xonali tasdiqlash kodi yuborildi.")}
+          </p>
+
+          <form onSubmit={handle2FAVerify}>
+            <div className="input-group">
+              <label>{t("auth.verificationCode", "Tasdiqlash kodi")}</label>
+              <input
+                type="text"
+                className="login-input"
+                placeholder="000000"
+                maxLength="6"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                autoFocus
+                style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.5rem' }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="cont-btn"
+              disabled={loading || verificationCode.length !== 6}
+            >
+              {loading ? t("auth.verifying", "Tasdiqlanmoqda...") : t("auth.verifyLogin", "Tasdiqlash va kirish")}
+            </button>
+          </form>
+
+          <div className="not-you">
+            <a href="#" onClick={handleBack} className="not-you-link">
+              {t("auth.backToLogin", "Login sahifasiga qaytish")}
             </a>
           </div>
         </div>
