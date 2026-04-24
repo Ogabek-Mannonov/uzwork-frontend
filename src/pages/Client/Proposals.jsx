@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   Users, Search, Filter, MessageSquare, Star, 
   CheckCircle, Clock, Briefcase, ArrowLeft,
-  ChevronDown, ExternalLink, MoreVertical,
+  ChevronDown, MoreVertical,
   XCircle, UserCheck, AlertCircle, MapPin
 } from "lucide-react";
 import { getMyJobs } from "../../api/jobs";
@@ -487,13 +487,6 @@ const Proposals = () => {
                 <Briefcase size={18} color="#3b82f6" />
                 <h2>{group.job.title}</h2>
                 <span className="cp-job-count">{group.proposals.length}</span>
-                <button 
-                  className="cp-btn-msg" 
-                  style={{ marginLeft: "auto", border: "none", padding: "4px 8px", width: "auto" }}
-                  onClick={() => navigate(`/client/job/${group.job.id}?tab=proposals`)}
-                >
-                  Hammasini ko'rish <ExternalLink size={14} style={{ marginLeft: 6 }} />
-                </button>
               </div>
 
               <div className="cp-grid">
