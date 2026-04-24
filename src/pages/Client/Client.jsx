@@ -1235,7 +1235,6 @@ const Settings = () => {
                   <h2>{t('clientProfile.billing.recentTransactions')}</h2>
                   <button className="btn-link" onClick={() => fetchSectionData('billing')}>{t('common.retry')}</button>
                 </div>
- Riverside content in Client.jsx:
                 
                 <div className="transactions-list">
                   {transactions.length > 0 ? (
@@ -1314,22 +1313,27 @@ const Settings = () => {
                       </button>
                     </div>
 
-                    {passwordForm.newPassword && (
-                      <div className="password-strength">
-                        <div className="strength-meter">
-                          <div className="strength-fill" style={{ width: `${passwordStrength.percentage}%`, backgroundColor: passwordStrength.color }} />
+                    {passwordForm.newPassword && (() => {
+                      const strength = calculatePasswordStrength(passwordForm.newPassword);
+                      return (
+                        <div className="password-strength">
+                          <div className="strength-meter">
+                            <div className="strength-fill" style={{ width: `${strength.percentage}%`, backgroundColor: strength.color }} />
+                          </div>
+                          <span className="strength-label" style={{ color: strength.color }}>
+                            {strength.label === 'Weak' ? t('findWork.drawer.experienceLevel_entry') : strength.label} {t('clientProfile.security.updatePassword').split(' ')[0]}
+                          </span>
                         </div>
-                        <span className="strength-label" style={{ color: passwordStrength.color }}>
-                          {passwordStrength.label === 'Weak' ? t('findWork.drawer.experienceLevel_entry') : passwordStrength.label} {t('clientProfile.security.updatePassword').split(' ')[0]}
-                        </span>
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     <div className="password-requirements">
+                      {passwordStrengthChecks.map((check) => (
                         <div key={check.id} className={`requirement ${passwordValidations[check.id] ? "valid" : ""}`}>
                           {passwordValidations[check.id] ? <CheckCircle size={14} className="valid-icon" /> : <div className="dot" />}
                           <span>{t(`clientProfile.security.requirements.${check.id}`)}</span>
                         </div>
+                      ))}
                       <div className={`requirement ${passwordValidations.match ? "valid" : ""}`}>
                         {passwordValidations.match ? <CheckCircle size={14} className="valid-icon" /> : <div className="dot" />}
                         <span>{t('clientProfile.security.requirements.match')}</span>
@@ -1497,7 +1501,6 @@ const Settings = () => {
                   <Award size={32} />
                   <div>
                     <h2>{t('clientProfile.membership.free')} Membership</h2>
- Riverside content in Client.jsx:
                     <p>{t('clientProfile.membership.free')} • {t('clientProfile.membership.active')}</p>
                   </div>
                 </div>
