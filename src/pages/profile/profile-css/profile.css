@@ -7737,4 +7737,88 @@ input:disabled + .toggle-slider {
   font-size: 24px;
   font-weight: 700;
 }
-
+
+/* Active Sessions Styles */
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.active-session-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+  background: var(--input-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  transition: var(--transition);
+}
+
+.active-session-item:hover {
+  border-color: var(--brand);
+  transform: translateX(5px);
+}
+
+.session-device-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.session-device-info svg {
+  color: var(--brand);
+  background: var(--brand-light);
+  padding: 10px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+.session-device-info h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.session-device-info p {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.current-badge {
+  background: #10b981;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.fr-sec-revoke-btn {
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.fr-sec-revoke-btn:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

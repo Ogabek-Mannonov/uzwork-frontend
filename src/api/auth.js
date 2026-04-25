@@ -240,13 +240,9 @@ export const resetPassword = async (payload) => {
 export const changePassword = async (payload) => {
   try {
     const res = await api.post("/auth/change-password", payload);
-    return unwrap(res);
+    return res.data;
   } catch (err) {
-    const msg =
-      err?.response?.data?.message ||
-      err?.message ||
-      "Change-password request failed";
-    return { success: false, message: msg };
+    return err.response?.data || { success: false, message: "Server error" };
   }
 };
 

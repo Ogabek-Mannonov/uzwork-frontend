@@ -477,10 +477,17 @@
       "deviceManagement": "Qurilmalarni boshqarish",
       "deviceManagementDesc": "Hisobingizga kirish huquqiga ega qurilmalarni ko'rib chiqing va boshqaring",
       "passwordExpiry": "Parolning amal qilish muddati",
-      "passwordExpiryDesc": "Xavfsizlikni oshirish uchun har 90 kunda parolni o'zgartirishni talab qilish",
+      "passwordExpiryDesc": "Xavfsizlik uchun har 90 kunda parolni yangilashni talab qilish",
+      "activeSessions": "Faol seanslar",
       "enabled": "Yoqilgan",
       "disabled": "O'chirilgan",
-      "setup2fa": "2FA-ni o'rnatish"
+      "setup2fa": "2FA-ni o'rnatish",
+      "refresh": "Yangilash",
+      "revokeAccess": "Kirishni bekor qilish",
+      "currentSession": "Joriy",
+      "lastActive": "Oxirgi faollik",
+      "noSessions": "Faol seanslar topilmadi.",
+      "revokeConfirm": "Haqiqatan ham ushbu qurilmadan chiqmoqchimisiz?"
     },
     "notifications": {
       "title": "Bildirishnoma sozlamalari",
