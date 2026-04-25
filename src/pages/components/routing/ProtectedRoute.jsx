@@ -32,7 +32,7 @@ export default function ProtectedRoute({ redirectTo = "/login" }) {
 
   // 4. Freelancer with category visiting /onboarding → redirect away
   if (!needsOnboarding && isOnOnboarding) {
-    return <Navigate to="/find-work" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   return <Outlet />;

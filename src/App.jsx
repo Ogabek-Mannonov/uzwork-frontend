@@ -8,6 +8,7 @@ import AuthLayout from "./layouts/AuthLayout.jsx";
 /* Routing guards */
 import ProtectedRoute from "./pages/components/routing/ProtectedRoute.jsx";
 import RoleRoute from "./pages/components/routing/RoleRoute.jsx";
+import HomeRedirect from "./pages/components/routing/HomeRedirect.jsx";
 
 /* Pages */
 import Signup from "./pages/auth/Signup.jsx";
@@ -91,8 +92,7 @@ function App() {
           <Route path="/jobs" element={<JobsList />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/profile/:id" element={<PublicProfile />} />
-          <Route path="/profile/client" element={<Client />} />
-          <Route path="/client/landing" element={<Landing />} />
+          <Route path="/home" element={<HomeRedirect />} />
           
 
           {/* Protected area */}
@@ -110,19 +110,21 @@ function App() {
               <Route path="/reports" element={<Reports />} />
             </Route>
 
-            {/* Create Job (client) */}
+            {/* Client specific area */}
             <Route element={<RoleRoute allow={["client"]} />}>
               <Route path="/jobs/create" element={<CreateJob />} />
+              <Route path="/client/landing" element={<Landing />} />
+              <Route path="/profile/client" element={<Client />} />
+              <Route path="/client/job/:id" element={<ClientHome />} />
+              <Route path="/client/talent" element={<FindTalent />} />
+              <Route path="/client/postjob" element={<PostJob />} />
+              <Route path="/client/my-jobs" element={<MyJobs />} />
+              <Route path="/client/proposals" element={<Proposals />} />
+              <Route path="/client/payments" element={<Wallet />} />  
+              <Route path="/client/management" element={<ContractManagement />} />
+              <Route path="/client/security" element={<SecuritySettings />} />
+              <Route path="/client/escrow" element={<Escrow />} />
             </Route>
-            <Route path="/client/job/:id" element={<ClientHome />} />
-            <Route path="/client/talent" element={<FindTalent />} />
-            <Route path="/client/postjob" element={<PostJob />} />
-            <Route path="/client/my-jobs" element={<MyJobs />} />
-            <Route path="/client/proposals" element={<Proposals />} />
-            <Route path="/client/payments" element={<Wallet />} />  
-            <Route path="/client/management" element={<ContractManagement />} />
-            <Route path="/client/security" element={<SecuritySettings />} />
-            <Route path="/client/escrow" element={<Escrow />} />
 
             {/* Contracts */}
             <Route path="/contracts" element={<ContractsList />} />
