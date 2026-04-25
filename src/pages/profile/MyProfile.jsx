@@ -90,7 +90,9 @@ import {
   enable2FA, 
   confirm2FA, 
   disable2FA,
-  changePassword
+  changePassword,
+  getSessions,
+  revokeSession
 } from "../../api/auth";
 import { getCategories } from "../../api/profile";
 
@@ -1120,6 +1122,72 @@ const MyProfile = () => {
 
   const togglePasswordVisibility = (field) => {
     setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+
+  const [sessions, setSessions] = useState([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+
+  const fetchSessions = async () => {
+    setSessionsLoading(true);
+    try {
+      const res = await getSessions();
+      if (res.success) {
+        setSessions(res.data || []);
+      }
+    } catch (err) {
+      console.error("Fetch sessions error:", err);
+    } finally {
+      setSessionsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeSection === 'security') {
+      fetchSessions();
+    }
+  }, [activeSection]);
+
+  const handleRevokeSession = async (sessionId) => {
+    if (!window.confirm("Haqiqatan ham ushbu qurilmadan chiqmoqchimisiz?")) return;
+    
+    setIsLoading(true);
+    try {
+      const res = await revokeSession(sessionId);
+      if (res.success) {
+        showMessage("success", "Sessiya muvaffaqiyatli yopildi");
+        fetchSessions();
+      } else {
+        showMessage("error", res.message);
+      }
+    } catch (err) {
+      showMessage("error", "Xatolik yuz berdi");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const parseUA = (ua) => {
+    if (!ua || ua.includes("Eski seans")) {
+      return { browser: "Eski seans", os: "Noma'lum qurilma", device: "desktop" };
+    }
+    const lower = ua.toLowerCase();
+    let browser = "Brauzer";
+    let os = "Operatsion tizim";
+    let device = "desktop";
+
+    if (lower.includes("chrome")) browser = "Chrome";
+    else if (lower.includes("firefox")) browser = "Firefox";
+    else if (lower.includes("safari") && !lower.includes("chrome")) browser = "Safari";
+    else if (lower.includes("edge")) browser = "Edge";
+    else if (lower.includes("opera") || lower.includes("opr")) browser = "Opera";
+
+    if (lower.includes("win")) os = "Windows";
+    else if (lower.includes("mac")) os = "macOS";
+    else if (lower.includes("linux")) os = "Linux";
+    else if (lower.includes("android")) { os = "Android"; device = "mobile"; }
+    else if (lower.includes("iphone") || lower.includes("ipad")) { os = "iOS"; device = "mobile"; }
+
+    return { browser, os, device };
   };
 
   const toggleSecurity = async (id) => {
@@ -2529,22 +2597,63 @@ const MyProfile = () => {
               <div className="password-card">
                 <div className="password-card-header">
                   <div>
-                    <h3>Active Sessions</h3>
-                    <p>MacBook Pro</p>
+                    <h3>{t("profile.security.activeSessions", "Faol seanslar")}</h3>
+                    <p>{t("profile.security.deviceManagementDesc", "Siz tizimga kirgan barcha faol qurilmalar ro'yxati")}</p>
                   </div>
-                  <button className="btn-outline" disabled={isLoading}>
-                    <RefreshCw size={14} />Refresh
+                  <button 
+                    className="btn-outline" 
+                    onClick={fetchSessions} 
+                    disabled={sessionsLoading}
+                  >
+                    <RefreshCw size={14} className={sessionsLoading ? "spinning" : ""} />
+                    {sessionsLoading ? t("common.loading", "Yuklanmoqda...") : t("profile.security.refresh", "Yangilash")}
                   </button>
                 </div>
-                <div className="active-session-item">
-                  <div className="session-device-info">
-                    <Laptop size={18} />
-                    <div>
-                      <h4>Chrome 120.0 on macOS</h4>
-                      <p>Tashkent, UZ • Last active: now</p>
-                    </div>
-                  </div>
-                  <span className="current-badge">Current</span>
+                
+                <div className="sessions-list">
+                  {sessions.length === 0 && !sessionsLoading && (
+                    <p style={{ textAlign: 'center', padding: '20px', color: 'var(--muted)' }}>
+                      {t("profile.security.noSessions", "Faol seanslar topilmadi.")}
+                    </p>
+                  )}
+                  
+                  {sessions.map((session) => {
+                    const ua = parseUA(session.user_agent);
+                    const isCurrent = session.token === localStorage.getItem("refreshToken"); // Approximate check
+                    
+                    return (
+                      <div className="active-session-item" key={session.id}>
+                        <div className="session-device-info">
+                          {ua.device === "mobile" ? <Smartphone size={18} /> : <Laptop size={18} />}
+                          <div>
+                            <h4>{ua.browser} on {ua.os}</h4>
+                            <p>
+                              {session.ip_address || "Noma'lum IP"} • 
+                              {t("profile.security.lastActive", "Oxirgi faollik")}: {new Date(session.last_active).toLocaleString('uz-UZ', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                day: '2-digit',
+                                month: 'short'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="session-actions">
+                          {isCurrent ? (
+                            <span className="current-badge">{t("profile.security.currentSession", "Joriy")}</span>
+                          ) : (
+                            <button 
+                              className="fr-sec-revoke-btn" 
+                              onClick={() => handleRevokeSession(session.id)}
+                              disabled={isLoading}
+                            >
+                              {t("profile.security.revokeAccess", "Kirishni bekor qilish")}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>

@@ -394,9 +394,16 @@
       "deviceManagementDesc": "Manage and review devices that have access to your account",
       "passwordExpiry": "Password expiry",
       "passwordExpiryDesc": "Require password change every 90 days for enhanced security",
+      "activeSessions": "Active sessions",
       "enabled": "Enabled",
       "disabled": "Disabled",
-      "setup2fa": "Set up 2FA"
+      "setup2fa": "Set up 2FA",
+      "refresh": "Refresh",
+      "revokeAccess": "Revoke Access",
+      "currentSession": "Current",
+      "lastActive": "Last Active",
+      "noSessions": "No active sessions found.",
+      "revokeConfirm": "Are you sure you want to log out from this device?"
     },
     "notifications": {
       "title": "Notification Settings",
