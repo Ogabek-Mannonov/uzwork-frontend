@@ -67,7 +67,9 @@ import {
   ArrowDownLeft,
   UserCheck,
   UserX,
-  Users
+  Users,
+  Key,
+  ShieldCheck
 } from "lucide-react";
 import "../profile/profile-css/profile.css";
 import { 
@@ -81,6 +83,15 @@ import {
   markNotificationRead,
   markAllNotificationsRead
 } from "../../api/common";
+import { 
+  logout,
+  forgotPassword, 
+  resetPassword, 
+  enable2FA, 
+  confirm2FA, 
+  disable2FA,
+  changePassword
+} from "../../api/auth";
 import { getCategories } from "../../api/profile";
 
 // Notification icon helper (same as dropdown)
@@ -109,7 +120,6 @@ const getNotifIcon = (type) => {
 };
 
 
-import { logout } from "../../api/auth";
 import { getMyPortfolio, createPortfolioItem, updatePortfolioItem, deletePortfolioItem, addPortfolioMedia, deletePortfolioMedia, getMyCertifications, createCertification, updateCertification, deleteCertification } from "../../api/freelancer";
 import { PROFESSIONAL_SKILLS } from "../../utils/skills";
 
@@ -248,6 +258,18 @@ const MyProfile = () => {
 
   const [allNotifications, setAllNotifications] = useState([]);
   const [notifLoading, setNotifLoading] = useState(false);
+
+  // Forgot Password States
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotStep, setForgotStep] = useState("email"); // email, reset
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotCode, setForgotCode] = useState("");
+  const [forgotNewPassword, setForgotNewPassword] = useState("");
+
+  // 2FA Modal States
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [faStep, setFaStep] = useState("select"); // select, verify
+  const [verificationCode, setVerificationCode] = useState("");
   const showMessage = (type, text) => {
     setMessage({ type, text });
   };
@@ -1100,22 +1122,161 @@ const MyProfile = () => {
     setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
   };
 
-  const toggleSecurity = (key) => {
-    setSecurityToggles(prev => ({ ...prev, [key]: !prev[key] }));
-    showMessage("success", `${key} ${!securityToggles[key] ? "enabled" : "disabled"}`);
+  const toggleSecurity = async (id) => {
+    if (id === "twoFactor") {
+      if (securityToggles.twoFactor) {
+        // Disable 2FA
+        if (window.confirm("Ikki bosqichli tasdiqlashni o'chirmoqchimisiz?")) {
+          setIsLoading(true);
+          try {
+            const res = await disable2FA();
+            if (res.success) {
+              setSecurityToggles(prev => ({ ...prev, twoFactor: false }));
+              const user = JSON.parse(localStorage.getItem("user") || "{}");
+              user.two_factor_enabled = false;
+              localStorage.setItem("user", JSON.stringify(user));
+              showMessage("success", "Ikki bosqichli tasdiqlash o'chirildi");
+            } else {
+              showMessage("error", res.message);
+            }
+          } catch (err) {
+            showMessage("error", "Xatolik yuz berdi");
+          } finally {
+            setIsLoading(false);
+          }
+        }
+      } else {
+        // Enable 2FA - Open Modal
+        setFaStep("select");
+        setVerificationCode("");
+        setShow2FAModal(true);
+      }
+      return;
+    }
+    setSecurityToggles(prev => ({ ...prev, [id]: !prev[id] }));
+    showMessage("success", `${id} updated successfully`);
   };
 
-  const handlePasswordSubmit = () => {
+  // 2FA Handlers
+  const handleVerify2FA = async () => {
+    if (verificationCode.length !== 6) {
+      showMessage("error", "6 xonali kodni kiriting");
+      return;
+    }
     setIsLoading(true);
-    setTimeout(() => {
-      if (Object.values(passwordValidations).every(Boolean)) {
-        showMessage("success", "Password updated successfully!");
+    const res = await confirm2FA(verificationCode);
+    setIsLoading(false);
+    if (res.success) {
+      setShow2FAModal(false);
+      setSecurityToggles(prev => ({ ...prev, twoFactor: true }));
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      user.two_factor_enabled = true;
+      localStorage.setItem("user", JSON.stringify(user));
+      showMessage("success", "Ikki bosqichli tasdiqlash yoqildi!");
+    } else {
+      showMessage("error", res.message);
+    }
+  };
+
+  const handleSend2FACode = async () => {
+    setIsLoading(true);
+    const res = await enable2FA("email");
+    setIsLoading(false);
+    if (res.success) {
+      setFaStep("verify");
+      showMessage("success", "Tasdiqlash kodi emailingizga yuborildi");
+    } else {
+      showMessage("error", res.message);
+    }
+  };
+
+  // Forgot Password Handlers
+  const handleOpenForgotModal = () => {
+    setForgotEmail(userData.email || "");
+    setForgotStep("email");
+    setForgotCode("");
+    setForgotNewPassword("");
+    setShowForgotModal(true);
+  };
+
+  const handleSendForgotCode = async () => {
+    if (!forgotEmail) {
+      showMessage("error", "Email kiritilmadi");
+      return;
+    }
+    setIsLoading(true);
+    const res = await forgotPassword({ identifier: forgotEmail });
+    setIsLoading(false);
+    if (res.success) {
+      setForgotStep("reset");
+      showMessage("success", "Tasdiqlash kodi emailingizga yuborildi");
+    } else {
+      showMessage("error", res.message);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!forgotCode || !forgotNewPassword) {
+      showMessage("error", "Kod va yangi parolni kiriting");
+      return;
+    }
+    if (forgotNewPassword.length < 8) {
+      showMessage("error", "Parol kamida 8 ta belgidan iborat bo'lishi kerak");
+      return;
+    }
+    setIsLoading(true);
+    const res = await resetPassword({
+      identifier: forgotEmail,
+      code: forgotCode,
+      new_password: forgotNewPassword
+    });
+    setIsLoading(false);
+    if (res.success) {
+      setShowForgotModal(false);
+      showMessage("success", "Parol muvaffaqiyatli yangilandi! Endi yangi parol bilan kiring.");
+    } else {
+      showMessage("error", res.message);
+    }
+  };
+
+  const handlePasswordSubmit = async () => {
+    if (!passwordForm.current || !passwordForm.new || !passwordForm.confirm) {
+      showMessage("error", "Barcha maydonlarni to'ldiring");
+      return;
+    }
+
+    if (!Object.values(passwordValidations).every(Boolean)) {
+      showMessage("error", "Parol talablarga javob bermaydi");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await changePassword({
+        current_password: passwordForm.current,
+        new_password: passwordForm.new,
+        confirm_password: passwordForm.confirm
+      });
+      
+      if (res.success) {
+        showMessage("success", "Parol muvaffaqiyatli yangilandi!");
         setPasswordForm({ current: "", new: "", confirm: "" });
+        setPasswordValidations({
+          minLength: false,
+          uppercase: false,
+          lowercase: false,
+          number: false,
+          special: false,
+          match: false
+        });
       } else {
-        showMessage("error", "Please meet all password requirements");
+        showMessage("error", res.message || "Parolni yangilashda xatolik");
       }
+    } catch (err) {
+      showMessage("error", "Xatolik yuz berdi");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const getPasswordStrengthColor = () => {
@@ -2157,6 +2318,15 @@ const MyProfile = () => {
                         {showPasswords.current ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
+                    <div className="fr-sec-forgot-link-wrapper">
+                      <button 
+                        type="button" 
+                        onClick={handleOpenForgotModal}
+                        className="fr-sec-forgot-btn"
+                      >
+                        Parolni unutdingizmi?
+                      </button>
+                    </div>
                   </div>
                   <div className="form-group">
                     <label>{t("profile.security.newPassword")}</label>
@@ -2262,11 +2432,6 @@ const MyProfile = () => {
                       <span className="toggle-slider"></span>
                     </label>
                   </div>
-                  {!securityToggles.twoFactor && (
-                    <button className="setup-btn" onClick={() => toggleSecurity("twoFactor")} disabled={isLoading}>
-                      <Shield size={14} />{t("profile.security.setup2fa")}
-                    </button>
-                  )}
                 </div>
 
                 {/* Login Notifications */}
@@ -3351,6 +3516,151 @@ const MyProfile = () => {
                   {isLoading ? <RefreshCw size={16} className="spinning" /> : t("profile.save", "Save")}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2FA Modal */}
+      {show2FAModal && (
+        <div className="fr-sec-modal-overlay" onClick={() => !isLoading && setShow2FAModal(false)}>
+          <div className="fr-sec-modal-content" onClick={e => e.stopPropagation()}>
+            <button onClick={() => !isLoading && setShow2FAModal(false)} className="fr-sec-close-btn" disabled={isLoading}>
+              <X size={18} />
+            </button>
+
+            <div className="fr-sec-modal-header">
+              <div className="fr-sec-modal-icon-wrapper">
+                <ShieldCheck size={32} />
+              </div>
+              <h3>{faStep === "select" ? "Usulni tanlang" : "Kodni kiriting"}</h3>
+            </div>
+
+            <div className="fr-sec-modal-body">
+              {faStep === "select" ? (
+                <div className="fr-sec-2fa-selection">
+                  <p className="fr-sec-2fa-info">Xavfsizlik kodini qayerga yuboraylik?</p>
+                  <div className="fr-sec-method-options">
+                    <div 
+                      className={`fr-sec-method-card active`}
+                    >
+                      <div className="fr-sec-method-icon"><Mail size={24} /></div>
+                      <div className="fr-sec-method-details">
+                        <h4>Email manzil</h4>
+                        <p>{userData.email}</p>
+                      </div>
+                      <div className="fr-sec-method-check"><CheckCircle size={20} /></div>
+                    </div>
+                  </div>
+                  <button className="fr-sec-primary-btn" onClick={handleSend2FACode} disabled={isLoading}>
+                    {isLoading ? <RefreshCw size={18} className="spinning" /> : <Shield size={18} />}
+                    <span>{isLoading ? "Yuborilmoqda..." : "Davom etish"}</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="fr-sec-2fa-verify">
+                  <p className="fr-sec-2fa-info">Emailingizga yuborilgan 6 xonali kodni kiriting.</p>
+                  <div className="fr-sec-otp-input-container">
+                    <input 
+                      type="text" 
+                      maxLength="6"
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                      className="fr-sec-otp-input"
+                      placeholder="000000"
+                      autoFocus
+                    />
+                  </div>
+                  <button className="fr-sec-primary-btn" onClick={handleVerify2FA} disabled={isLoading || verificationCode.length !== 6}>
+                    {isLoading ? <RefreshCw size={18} className="spinning" /> : <Check size={18} />}
+                    <span>{isLoading ? "Tasdiqlanmoqda..." : "Tasdiqlash"}</span>
+                  </button>
+                  <button className="fr-sec-secondary-btn" onClick={() => setFaStep("select")} disabled={isLoading}>
+                    Orqaga qaytish
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="fr-sec-modal-overlay" onClick={() => !isLoading && setShowForgotModal(false)}>
+          <div className="fr-sec-modal-content" onClick={e => e.stopPropagation()}>
+            <button onClick={() => !isLoading && setShowForgotModal(false)} className="fr-sec-close-btn" disabled={isLoading}>
+              <X size={18} />
+            </button>
+
+            <div className="fr-sec-modal-header">
+              <div className="fr-sec-modal-icon-wrapper forgot-icon">
+                <Key size={32} />
+              </div>
+              <h3>{forgotStep === "email" ? "Parolni tiklash" : "Yangi parol"}</h3>
+            </div>
+
+            <div className="fr-sec-modal-body">
+              {forgotStep === "email" ? (
+                <div className="fr-sec-forgot-email-step">
+                  <p className="fr-sec-2fa-info">
+                    Tasdiqlash kodini quyidagi pochtaga yuboramizmi?
+                  </p>
+                  <div className="fr-sec-input-group">
+                    <input 
+                      type="email" 
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      className="fr-sec-premium-input"
+                      placeholder="Email manzilingiz"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <button 
+                    className="fr-sec-primary-btn" 
+                    onClick={handleSendForgotCode}
+                    disabled={isLoading || !forgotEmail}
+                  >
+                    {isLoading ? <RefreshCw size={18} className="spinning" /> : <Mail size={18} />}
+                    <span>{isLoading ? "Yuborilmoqda..." : "Kodni yuborish"}</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="fr-sec-forgot-reset-step">
+                  <p className="fr-sec-2fa-info">
+                    Emailingizga yuborilgan 6 xonali kodni va yangi parolni kiriting.
+                  </p>
+                  <div className="fr-sec-input-group">
+                    <label className="fr-sec-input-label">Tasdiqlash kodi</label>
+                    <input 
+                      type="text" 
+                      maxLength="6"
+                      value={forgotCode}
+                      onChange={(e) => setForgotCode(e.target.value.replace(/\D/g, ''))}
+                      className="fr-sec-premium-input otp-input"
+                      placeholder="000000"
+                    />
+                  </div>
+                  <div className="fr-sec-input-group reset-pass-group">
+                    <label className="fr-sec-input-label">Yangi parol</label>
+                    <input 
+                      type="password" 
+                      value={forgotNewPassword}
+                      onChange={(e) => setForgotNewPassword(e.target.value)}
+                      className="fr-sec-premium-input"
+                      placeholder="Kamida 8 ta belgi"
+                    />
+                  </div>
+                  <button 
+                    className="fr-sec-primary-btn" 
+                    onClick={handleResetPassword}
+                    disabled={isLoading || forgotCode.length !== 6 || forgotNewPassword.length < 8}
+                  >
+                    {isLoading ? <RefreshCw size={18} className="spinning" /> : <CheckCircle size={18} />}
+                    <span>{isLoading ? "Saqlanmoqda..." : "Parolni yangilash"}</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
