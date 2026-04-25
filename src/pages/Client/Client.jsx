@@ -1390,14 +1390,14 @@ const Settings = () => {
                 </div>
               </div>
 
-              <div className="password-change-card" style={{ background: 'var(--card-bg)', borderRadius: '24px', padding: '40px', border: '1px solid var(--light-border)', marginBottom: '30px' }}>
+              <div className="password-change-card" style={{ background: darkMode ? 'var(--dark-card)' : 'var(--light-surface)', borderRadius: '24px', padding: '40px', border: `1px solid ${darkMode ? 'var(--dark-border)' : 'var(--light-border)'}`, marginBottom: '30px' }}>
                 <div className="password-header" style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '40px' }}>
                   <div className="password-icon-wrapper" style={{ width: '64px', height: '64px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifycenter: 'center', color: '#3b82f6', flexShrink: 0, justifyContent: 'center' }}>
                     <Lock size={32} />
                   </div>
                   <div className="password-title-info">
-                    <h2 style={{ fontSize: '24px', fontWeight: '700', margin: '0 0 8px 0', color: 'white' }}>Parolni o'zgartirish</h2>
-                    <p style={{ fontSize: '15px', color: 'rgba(255, 255, 255, 0.6)', margin: 0 }}>
+                    <h2 style={{ fontSize: '24px', fontWeight: '700', margin: '0 0 8px 0', color: 'var(--text)' }}>Parolni o'zgartirish</h2>
+                    <p style={{ fontSize: '15px', color: 'var(--muted)', margin: 0 }}>
                       Parolingiz kamida 8 ta belgidan iborat bo'lishi va harflar, raqamlar hamda belgilarni o'z ichiga olishi kerak
                     </p>
                   </div>
@@ -1405,7 +1405,7 @@ const Settings = () => {
 
                 <form onSubmit={handleUpdatePassword} className="password-form">
                   <div className="form-group" style={{ marginBottom: '25px' }}>
-                    <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: 'rgba(255, 255, 255, 0.8)' }}>Joriy parol</label>
+                    <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: 'var(--text)' }}>Joriy parol</label>
                     <div className="password-input-wrapper" style={{ position: 'relative' }}>
                       <input
                         type={showCurrentPassword ? "text" : "password"}
@@ -1413,13 +1413,13 @@ const Settings = () => {
                         onChange={(e) => handlePasswordChange("currentPassword", e.target.value)}
                         placeholder="Eski parolingizni kiriting"
                         className="ps-premium-input"
-                        style={{ width: '100%', padding: '14px 50px 14px 20px', background: 'rgba(15, 23, 42, 0.5)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', color: 'white', fontSize: '16px' }}
+                        style={{ width: '100%', padding: '14px 50px 14px 20px', background: 'var(--input-bg)', border: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'var(--light-border)'}`, borderRadius: '14px', color: 'var(--text)', fontSize: '16px' }}
                         disabled={isLoading}
                       />
                       <button 
                         type="button" 
                         onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                        style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.4)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                        style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                       >
                         {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                       </button>
@@ -1436,7 +1436,7 @@ const Settings = () => {
                   </div>
 
                   <div className="form-group" style={{ marginBottom: '25px' }}>
-                    <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: 'rgba(255, 255, 255, 0.8)' }}>Yangi parol</label>
+                    <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: 'var(--text)' }}>Yangi parol</label>
                     <div className="password-input-wrapper" style={{ position: 'relative' }}>
                       <input
                         type={showNewPassword ? "text" : "password"}
@@ -1444,13 +1444,13 @@ const Settings = () => {
                         onChange={(e) => handlePasswordChange("newPassword", e.target.value)}
                         placeholder="Yangi parolni kiriting"
                         className="ps-premium-input"
-                        style={{ width: '100%', padding: '14px 50px 14px 20px', background: 'rgba(15, 23, 42, 0.5)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', color: 'white', fontSize: '16px' }}
+                        style={{ width: '100%', padding: '14px 50px 14px 20px', background: 'var(--input-bg)', border: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'var(--light-border)'}`, borderRadius: '14px', color: 'var(--text)', fontSize: '16px' }}
                         disabled={isLoading}
                       />
                       <button 
                         type="button" 
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.4)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                        style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                       >
                         {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                       </button>
@@ -1460,7 +1460,7 @@ const Settings = () => {
                       const strength = calculatePasswordStrength(passwordForm.newPassword);
                       return (
                         <div className="password-strength" style={{ marginTop: '15px' }}>
-                          <div className="strength-meter" style={{ height: '6px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '10px', overflow: 'hidden', marginBottom: '8px' }}>
+                          <div className="strength-meter" style={{ height: '6px', background: 'var(--border)', borderRadius: '10px', overflow: 'hidden', marginBottom: '8px' }}>
                             <div className="strength-fill" style={{ width: `${strength.percentage}%`, backgroundColor: strength.color, height: '100%', transition: 'all 0.3s' }} />
                           </div>
                           <span className="strength-label" style={{ color: strength.color, fontSize: '12px', fontWeight: '600' }}>
@@ -1470,14 +1470,14 @@ const Settings = () => {
                       );
                     })()}
 
-                    <div className="password-requirements" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '15px', padding: '15px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '14px' }}>
+                    <div className="password-requirements" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '15px', padding: '15px', background: 'var(--surface-2)', borderRadius: '14px' }}>
                       {passwordStrengthChecks.map((check) => (
-                        <div key={check.id} className={`requirement ${passwordValidations[check.id] ? "valid" : ""}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: passwordValidations[check.id] ? '#10b981' : 'rgba(255, 255, 255, 0.4)' }}>
+                        <div key={check.id} className={`requirement ${passwordValidations[check.id] ? "valid" : ""}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: passwordValidations[check.id] ? '#10b981' : 'var(--muted)' }}>
                           {passwordValidations[check.id] ? <CheckCircle size={14} /> : <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'currentColor' }} />}
                           <span>{t(`clientProfile.security.requirements.${check.id}`)}</span>
                         </div>
                       ))}
-                      <div className={`requirement ${passwordValidations.match ? "valid" : ""}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: passwordValidations.match ? '#10b981' : 'rgba(255, 255, 255, 0.4)' }}>
+                      <div className={`requirement ${passwordValidations.match ? "valid" : ""}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: passwordValidations.match ? '#10b981' : 'var(--muted)' }}>
                         {passwordValidations.match ? <CheckCircle size={14} /> : <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'currentColor' }} />}
                         <span>{t('clientProfile.security.requirements.match')}</span>
                       </div>
@@ -1485,7 +1485,7 @@ const Settings = () => {
                   </div>
 
                   <div className="form-group" style={{ marginBottom: '35px' }}>
-                    <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: 'rgba(255, 255, 255, 0.8)' }}>Yangi parolni tasdiqlash</label>
+                    <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: 'var(--text)' }}>Yangi parolni tasdiqlash</label>
                     <div className="password-input-wrapper" style={{ position: 'relative' }}>
                       <input
                         type={showConfirmPassword ? "text" : "password"}
@@ -1493,13 +1493,13 @@ const Settings = () => {
                         onChange={(e) => handlePasswordChange("confirmPassword", e.target.value)}
                         placeholder="Yangi parolni qayta kiriting"
                         className="ps-premium-input"
-                        style={{ width: '100%', padding: '14px 50px 14px 20px', background: 'rgba(15, 23, 42, 0.5)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', color: 'white', fontSize: '16px' }}
+                        style={{ width: '100%', padding: '14px 50px 14px 20px', background: 'var(--input-bg)', border: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'var(--light-border)'}`, borderRadius: '14px', color: 'var(--text)', fontSize: '16px' }}
                         disabled={isLoading}
                       />
                       <button 
                         type="button" 
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.4)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                        style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                       >
                         {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                       </button>
