@@ -63,7 +63,8 @@
 
 .pc-dislike:hover {
   color: #ef4444;
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 .pc-heart {
@@ -72,13 +73,14 @@
 
 .pc-heart:hover {
   color: #ef4444;
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 .pc-heart.is-liked {
   color: #ef4444;
-  background: #fef2f2;
-  border-color: #fee2e2;
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .pc-title {
@@ -91,7 +93,7 @@
 }
 
 .pc-card:hover .pc-title {
-  color: #2563eb;
+  color: var(--brand);
 }
 
 .pc-meta {
@@ -134,7 +136,8 @@
 }
 
 .pc-card:hover .pc-tag {
-  background: #dbeafe;
+  background: var(--brand-light);
+  color: var(--brand);
 }
 
 .pc-bottom {
