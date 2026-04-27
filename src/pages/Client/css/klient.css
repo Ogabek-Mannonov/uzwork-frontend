@@ -1889,6 +1889,16 @@ body.dark-mode {
   color: #0f172a;
 }
 
+.dark .tahrirlash-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dark .tahrirlash-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
 .tahrirlash-btn.small {
   width: 24px;
   height: 24px;

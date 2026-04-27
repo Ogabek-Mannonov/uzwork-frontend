@@ -952,7 +952,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="settings-container">
+    <div className={`settings-container ${darkMode ? 'dark' : 'light'}`}>
       
       {/* HEADER
       <header className="settings-header">
@@ -1083,16 +1083,55 @@ const Settings = () => {
 
           {activeSection === "my-info" && (
             <div className="content-section soft-fade-in" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-              <div className="section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-                <h1 className="section-title" style={{ margin: 0, textTransform: 'uppercase', fontSize: '24px', lineHeight: '1', display: 'flex', alignItems: 'center' }}>
+              <div className="section-header" style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'space-between', 
+                marginBottom: '24px',
+                paddingBottom: '16px',
+                borderBottom: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : '#e2e8f0'}`,
+                position: 'relative'
+              }}>
+                <h1 className="section-title" style={{ 
+                  margin: 0, 
+                  textTransform: 'uppercase', 
+                  fontSize: '24px', 
+                  fontWeight: '800',
+                  lineHeight: '1', 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  color: darkMode ? '#ffffff' : '#0f172a',
+                  letterSpacing: '0.5px'
+                }}>
                   {t('clientProfile.title')}
                 </h1>
-
+                <div style={{ 
+                  position: 'absolute', 
+                  bottom: '-1px', 
+                  left: 0, 
+                  width: '60px', 
+                  height: '3px', 
+                  background: 'var(--blue)', 
+                  borderRadius: '3px' 
+                }} />
               </div>
 
               <div className="profile-card soft-fade-in stagger-1">
                 <div className="profile-cover">
-                  <span className="section-badge" style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 10, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', padding: '6px 16px', borderRadius: '20px', fontWeight: '700', fontSize: '12px' }}>
+                  <span className="section-badge" style={{ 
+                    position: 'absolute', top: '16px', left: '16px', zIndex: 10, 
+                    background: darkMode ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255, 255, 255, 0.92)', 
+                    backdropFilter: 'blur(8px)', 
+                    padding: '6px 16px', 
+                    borderRadius: '20px', 
+                    fontWeight: '700', 
+                    fontSize: '12px',
+                    color: darkMode ? '#60a5fa' : '#1e40af',
+                    border: darkMode ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(59, 130, 246, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    boxShadow: darkMode ? '0 4px 12px rgba(0,0,0,0.2)' : '0 4px 12px rgba(59, 130, 246, 0.1)'
+                  }}>
                     <ShieldCheck size={14} style={{ marginRight: '6px' }} /> {t('clientProfile.verifiedClient')}
                   </span>
                   <img src={avatarSrc(userData.coverPhoto) || "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1400"} alt="Cover" className="cover-image" />
@@ -1142,8 +1181,19 @@ const Settings = () => {
                       )}
                     </div>
 
-                    <div className="profile-badges-row" style={{ marginTop: '60px' }}>
-                      <span className="profile-badge-item profile-badge-membership">
+                    <div className="profile-badges-row" style={{ marginTop: '60px', display: 'flex', gap: '12px' }}>
+                      <span className="profile-badge-item profile-badge-membership" style={{
+                        background: darkMode ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.1)',
+                        color: darkMode ? '#fbbf24' : '#b45309',
+                        padding: '6px 16px',
+                        borderRadius: '20px',
+                        fontWeight: '700',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        border: `1px solid ${darkMode ? 'rgba(245, 158, 11, 0.3)' : 'rgba(245, 158, 11, 0.2)'}`
+                      }}>
                         <Award size={14} /> {t('clientProfile.premiumClient')}
                       </span>
                     </div>
@@ -1183,41 +1233,94 @@ const Settings = () => {
                           </button>
                         </div>
                         <div>
-                          <span className="lux-label" style={{ display: 'block', marginBottom: '8px', fontSize: '11px', fontWeight: '700', letterSpacing: '1px', color: darkMode ? '#ffffff' : '' }}>{t('clientProfile.companyBio')}</span>
-                          <div className="profile-bio-text" style={darkMode ? { background: '#1e293b', color: 'rgba(255, 255, 255, 0.8)', borderColor: 'rgba(255, 255, 255, 0.1)' } : {}}>
+                          <span className="lux-label" style={{ 
+                            display: 'block', 
+                            marginBottom: '8px', 
+                            fontSize: '11px', 
+                            fontWeight: '700', 
+                            letterSpacing: '1.2px', 
+                            textTransform: 'uppercase',
+                            color: darkMode ? 'rgba(255, 255, 255, 0.5)' : '#64748b' 
+                          }}>
+                            {t('clientProfile.companyBio')}
+                          </span>
+                          <div className="profile-bio-text" style={{
+                            background: darkMode ? 'rgba(255, 255, 255, 0.03)' : '#f8fafc',
+                            color: darkMode ? 'rgba(255, 255, 255, 0.85)' : '#475569',
+                            borderColor: darkMode ? 'rgba(255, 255, 255, 0.08)' : '#f1f5f9',
+                            padding: '24px',
+                            borderRadius: '16px',
+                            fontSize: '15px',
+                            lineHeight: '1.8',
+                            border: '1px solid'
+                          }}>
                             {userData.bio || t('clientProfile.noBio')}
                           </div>
                         </div>
                       </>
                     )}
 
-                    <div className="profile-meta-row" style={darkMode ? { background: '#1e293b', borderColor: 'rgba(255, 255, 255, 0.1)' } : {}}>
-                      <span className="profile-meta-item" style={darkMode ? { color: 'rgba(255, 255, 255, 0.8)' } : {}}>
+                    <div className="profile-meta-row" style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '24px',
+                      marginTop: '32px',
+                      padding: '20px 24px',
+                      background: darkMode ? 'rgba(255, 255, 255, 0.02)' : 'rgba(59, 130, 246, 0.03)',
+                      borderRadius: '16px',
+                      border: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(59, 130, 246, 0.1)'}`
+                    }}>
+                      <span className="profile-meta-item" style={{ color: darkMode ? 'rgba(255, 255, 255, 0.7)' : '#64748b', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500' }}>
                         <MapPin size={16} color="var(--blue)" /> {userData.location || "O'zbekiston"}
                       </span>
-                      <span className="profile-meta-item" style={darkMode ? { color: 'rgba(255, 255, 255, 0.8)' } : {}}>
+                      <span className="profile-meta-item" style={{ color: darkMode ? 'rgba(255, 255, 255, 0.7)' : '#64748b', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500' }}>
                         <Star size={16} color="#f59e0b" fill="#f59e0b" /> {userData.rating || "5.0"} {t('clientProfile.clientRating')}
                       </span>
-                      <span className="profile-meta-item" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: darkMode ? 'rgba(255, 255, 255, 0.8)' : '' }} onClick={() => handleSectionEdit('contact', { phone: userData.phone, location: userData.location, timezone: userData.timezone })}>
+                      <span className="profile-meta-item" style={{ 
+                        cursor: 'pointer', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px', 
+                        color: darkMode ? 'rgba(255, 255, 255, 0.7)' : '#64748b',
+                        fontSize: '14px',
+                        fontWeight: '500' 
+                      }} onClick={() => handleSectionEdit('contact', { phone: userData.phone, location: userData.location, timezone: userData.timezone })}>
                         <Phone size={16} color="var(--blue)" /> {userData.phone || "+998 -- --- -- --"}
-                        <button className="tahrirlash-btn small">
+                        <button className="tahrirlash-btn small" style={{ marginLeft: '4px' }}>
                           <Edit size={12} />
                         </button>
                       </span>
                       {editingSection === 'contact' && (
-                        <div className="inline-edit-container" style={{ width: '100%', marginTop: '16px', background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-                            <input type="text" value={editFormData.phone} onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})} className="inline-edit-input" placeholder="Telefon" />
-                            <input type="text" value={editFormData.location} onChange={(e) => setEditFormData({...editFormData, location: e.target.value})} className="inline-edit-input" placeholder="Manzil" />
+                        <div className="inline-edit-container" style={{ 
+                          width: '100%', 
+                          marginTop: '16px', 
+                          background: darkMode ? 'var(--dark-card)' : 'white', 
+                          padding: '24px', 
+                          borderRadius: '16px', 
+                          border: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : '#e2e8f0'}`,
+                          boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                        }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                            <div className="edit-field">
+                              <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: darkMode ? 'rgba(255,255,255,0.5)' : '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>Telefon</label>
+                              <input type="text" value={editFormData.phone} onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})} className="inline-edit-input" style={{ marginBottom: 0 }} />
+                            </div>
+                            <div className="edit-field">
+                              <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: darkMode ? 'rgba(255,255,255,0.5)' : '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>Manzil</label>
+                              <input type="text" value={editFormData.location} onChange={(e) => setEditFormData({...editFormData, location: e.target.value})} className="inline-edit-input" style={{ marginBottom: 0 }} />
+                            </div>
                           </div>
-                          <input type="text" value={editFormData.timezone} onChange={(e) => setEditFormData({...editFormData, timezone: e.target.value})} className="inline-edit-input" style={{ marginBottom: '12px' }} placeholder="Vaqt mintaqasi" />
+                          <div className="edit-field" style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: darkMode ? 'rgba(255,255,255,0.5)' : '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>Vaqt mintaqasi</label>
+                            <input type="text" value={editFormData.timezone} onChange={(e) => setEditFormData({...editFormData, timezone: e.target.value})} className="inline-edit-input" style={{ marginBottom: 0 }} />
+                          </div>
                           <div className="inline-edit-actions">
                             <button className="btn-cancel-inline" onClick={handleSectionCancel}>Bekor qilish</button>
                             <button className="btn-save-inline" onClick={() => handleSectionSave('contact')}>Saqlash</button>
                           </div>
                         </div>
                       )}
-                      <span className="profile-meta-item" style={darkMode ? { color: 'rgba(255, 255, 255, 0.8)' } : {}}>
+                      <span className="profile-meta-item" style={{ color: darkMode ? 'rgba(255, 255, 255, 0.7)' : '#64748b', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500' }}>
                         <Clock size={16} color="var(--blue)" /> {userData.timezone || "Tashkent (UTC+5)"}
                       </span>
                     </div>
