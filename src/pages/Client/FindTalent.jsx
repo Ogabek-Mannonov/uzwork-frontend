@@ -8,7 +8,7 @@ import {
   SlidersHorizontal, ArrowUpDown, Check,
 } from "lucide-react";
 import "../Client/css/find.css";
-import { getFreelancers } from "../../api/freelancer";
+import { getFreelancers, saveFreelancer } from "../../api/freelancer";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { inviteFreelancer } from "../../api/proposals";
@@ -61,10 +61,11 @@ const FtFilterSection = ({ title, info, children, defaultOpen = true }) => {
 /* ================================================================
    FREELANCER CARD
    ================================================================ */
-const FtFreelancerCard = ({ fl, onInvite, targetJobId }) => {
+const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [invited, setInvited] = useState(false);
-  const [liked,   setLiked]   = useState(false);
+  const [isSaved, setIsSaved] = useState(fl.is_saved || false);
 
   const handleInvite = async () => {
     if (invited) return;
@@ -88,8 +89,20 @@ const FtFreelancerCard = ({ fl, onInvite, targetJobId }) => {
         onInvite("Server xatosi", false);
       }
     } else {
-      // If no job ID, we just show a local toast for now (mock)
       onInvite(fl.name, true);
+    }
+  };
+
+  const handleSave = async (e) => {
+    e.stopPropagation();
+    try {
+      const res = await saveFreelancer(fl.id);
+      if (res?.success) {
+        setIsSaved(!isSaved);
+        onSaveToggle?.(fl.name, !isSaved);
+      }
+    } catch (err) {
+      console.error("Save error:", err);
     }
   };
 
@@ -125,10 +138,10 @@ const FtFreelancerCard = ({ fl, onInvite, targetJobId }) => {
 
           <div className="ft-card-actions">
             <button
-              className={`ft-heart-btn ${liked ? "liked" : ""}`}
-              onClick={() => setLiked(l => !l)}
+              className={`ft-heart-btn ${isSaved ? "liked" : ""}`}
+              onClick={handleSave}
               title={t("findTalent.card.save")}>
-              <Heart size={17} fill={liked ? "currentColor" : "none"} />
+              <Heart size={17} fill={isSaved ? "currentColor" : "none"} />
             </button>
             <button
               className={`ft-invite-btn ${invited ? "invited" : ""}`}
@@ -212,9 +225,11 @@ const FtFreelancerCard = ({ fl, onInvite, targetJobId }) => {
       {/* Card footer */}
       <div className="ft-card-divider" />
       <div className="ft-card-footer">
-        <button className="ft-card-footer-link">{t("findTalent.card.viewProfile")}</button>
-        <button className="ft-card-footer-link">{t("findTalent.card.sendMessage")}</button>
-        <button className="ft-card-footer-link">{t("findTalent.card.saveAction")}</button>
+        <button className="ft-card-footer-link" onClick={() => navigate(`/profile/${fl.id}`)}>{t("findTalent.card.viewProfile")}</button>
+        <button className="ft-card-footer-link" onClick={() => navigate(`/messages?userId=${fl.id}`)}>{t("findTalent.card.sendMessage")}</button>
+        <button className="ft-card-footer-link" onClick={handleSave}>
+          {isSaved ? "Saqlangan" : t("findTalent.card.saveAction")}
+        </button>
       </div>
     </div>
   );
@@ -274,6 +289,7 @@ const FindTalent = () => {
             bio: item.bio || "",
             online: item.availability_status === 'available',
             boosted: false,
+            is_saved: !!item.is_saved,
           };
         });
         setFreelancers(mapped);
@@ -286,6 +302,10 @@ const FindTalent = () => {
     };
     fetch();
   }, [search, location, minRate, maxRate, successRate, t]);
+
+  const onSaveToggle = (name, saved) => {
+    notify(saved ? `${name} saqlandi` : `${name} saqlanganlardan olib tashlandi`);
+  };
 
   // Sync search from URL
   useEffect(() => {
@@ -525,6 +545,7 @@ const FindTalent = () => {
                 key={fl.id}
                 fl={fl}
                 targetJobId={targetJobId}
+                onSaveToggle={onSaveToggle}
                 onInvite={(name, isSuccess) => {
                   if (isSuccess) {
                     notify(targetJobId ? `${name} ga ushbu loyiha uchun taklif yuborildi!` : `${name} ga taklif yubarildi!`);
