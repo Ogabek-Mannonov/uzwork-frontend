@@ -331,7 +331,7 @@ export default function FindWork() {
           {/* Profile Card */}
           <div className="fw-card fw-profile-card">
             <div className="fw-profile-header">
-              <img src={userData?.avatar_url || "https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff"} alt="Avatar" className="fw-profile-avatar" />
+              <img src={userData?.avatar_url || `https://ui-avatars.com/api/?name=${userData?.first_name || 'User'}+${userData?.last_name || ''}&background=3b82f6&color=fff`} alt="Avatar" className="fw-profile-avatar" />
               <div className="fw-profile-info">
                 <a href="/profile" className="fw-profile-name">{userData?.first_name} {userData?.last_name || "M."}</a>
                 <p className="fw-profile-role">{userData?.title || "Freelancer"}</p>

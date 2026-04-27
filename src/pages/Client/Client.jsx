@@ -105,6 +105,53 @@ function avatarSrc(url) {
   return `${BACKEND}${cleanUrl}`;
 }
 
+function getInitials(name) {
+  if (!name) return "";
+  const parts = name.split(" ").filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return parts[0] ? parts[0][0].toUpperCase() : "";
+}
+
+function AvatarImage({ src, name, size = 40, className = "" }) {
+  const [error, setError] = React.useState(false);
+  
+  if (!src || error) {
+    const initials = getInitials(name);
+    return (
+      <div 
+        className={`${className} initials-avatar`} 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          background: 'linear-gradient(135deg, var(--blue, #3b82f6), var(--blue-dark, #2563eb))', 
+          color: '#fff', 
+          fontWeight: '700',
+          fontSize: size > 100 ? '3rem' : size > 60 ? '2.2rem' : size > 40 ? '1.5rem' : '1rem',
+          borderRadius: '50%',
+          aspectRatio: '1/1',
+          width: `${size}px`,
+          height: `${size}px`
+        }}
+      >
+        {initials || <User size={size * 0.5} />}
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={avatarSrc(src)} 
+      alt={name || "Avatar"} 
+      className={className}
+      onError={() => setError(true)}
+      style={{ objectFit: 'cover', borderRadius: '50%', width: `${size}px`, height: `${size}px` }}
+    />
+  );
+}
+
 const Settings = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -976,11 +1023,7 @@ const Settings = () => {
               
               <div className="user-profile" onClick={() => setShowUserMenu(!showUserMenu)}>
                 <div className="user-avatar-wrapper">
-                  <img 
-                    src={userData.profilePicture} 
-                    alt="Profile" 
-                    className="user-avatar" 
-                  />
+                  <AvatarImage src={userData.profilePicture} name={userData.fullName} className="user-avatar" size={40} />
                   <span className="user-status online"></span>
                 </div>
                 <div className="user-details">
@@ -993,7 +1036,7 @@ const Settings = () => {
               {showUserMenu && (
                 <div className="user-dropdown">
                   <div className="dropdown-header">
-                    <img src={userData.profilePicture} alt={userData.name} className="dropdown-avatar" />
+                    <AvatarImage src={userData.profilePicture} name={userData.fullName} className="dropdown-avatar" size={40} />
                     <div>
                       <h4>{userData.fullName}</h4>
                       <p>{userData.email}</p>
@@ -1062,7 +1105,7 @@ const Settings = () => {
                 <div className="profile-content">
                   <div className="profile-avatar-section">
                     <div className="avatar-wrapper">
-                      <img src={avatarSrc(userData.profilePicture) || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300"} alt="Avatar" className="profile-avatar" />
+                      <AvatarImage src={userData.profilePicture} name={userData.fullName} className="profile-avatar" size={120} />
                       <button className="change-avatar-btn" onClick={() => document.getElementById('avatar-upload-input').click()}>
                         <Camera size={14} />
                       </button>
@@ -1608,7 +1651,7 @@ const Settings = () => {
                   </div>
                   <div className="team-members">
                     <div className="member-item">
-                      <img src={userData.profilePicture} alt={userData.name} className="member-avatar" />
+                      <AvatarImage src={userData.profilePicture} name={userData.fullName} className="member-avatar" size={32} />
                       <div className="member-info">
                         <h3>{userData.fullName}</h3>
                         <p>{t('clientProfile.teams.owner')} • {userData.email}</p>

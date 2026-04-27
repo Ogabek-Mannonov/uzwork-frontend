@@ -11,7 +11,7 @@ import {
   FiBriefcase, FiAward, FiFileText, FiExternalLink,
   FiShield, FiCalendar, FiGlobe, FiShare2,
   FiLink, FiSend, FiLinkedin, FiPhone, FiMail,
-  FiClock, FiCheckCircle, FiTerminal, FiCpu
+  FiClock, FiCheckCircle, FiTerminal, FiCpu, FiUser
 } from "react-icons/fi";
 import { FaQuoteLeft } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
@@ -27,17 +27,49 @@ function avatarSrc(url) {
   return `${BACKEND}${cleanUrl}`;
 }
 
-function AvatarImage({ src, size = 16, className = "", alt = "Avatar" }) {
-  const [error, setError] = useState(false);
-  if (!src || error) {
-    return <div className={className} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-secondary, #f1f5f9)', color: 'var(--text-muted, #64748b)', fontSize: size / 2 }}>{alt[0]?.toUpperCase() || "?"}</div>;
+function getInitials(name) {
+  if (!name) return "";
+  const parts = name.split(" ").filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
   }
+  return parts[0] ? parts[0][0].toUpperCase() : "";
+}
+
+function AvatarImage({ src, size = 40, className = "", alt = "Avatar" }) {
+  const [error, setError] = useState(false);
+  
+  if (!src || error) {
+    const initials = getInitials(alt);
+    return (
+      <div 
+        className={`${className} initials-avatar`} 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          background: 'linear-gradient(135deg, var(--blue, #3b82f6), var(--blue-dark, #2563eb))', 
+          color: '#fff', 
+          fontWeight: '700',
+          fontSize: size > 100 ? '3rem' : size > 60 ? '2.2rem' : size > 40 ? '1.5rem' : '1rem',
+          borderRadius: '50%',
+          aspectRatio: '1/1',
+          width: `${size}px`,
+          height: `${size}px`
+        }}
+      >
+        {initials || <FiUser size={size * 0.5} />}
+      </div>
+    );
+  }
+
   return (
     <img 
       src={avatarSrc(src)} 
       alt={alt} 
       className={className}
       onError={() => setError(true)}
+      style={{ objectFit: 'cover', borderRadius: '50%', width: `${size}px`, height: `${size}px` }}
     />
   );
 }
@@ -199,7 +231,7 @@ export default function PublicProfile() {
 
         <div className="profile-main-info">
           <div className="public-avatar-wrapper">
-            <AvatarImage src={profile.avatar_url} alt={profile.fullName} size={100} className="public-avatar-img" />
+            <AvatarImage src={profile.avatar_url} alt={profile.fullName} size={170} className="public-avatar-img" />
             <div className="online-indicator"></div>
           </div>
 

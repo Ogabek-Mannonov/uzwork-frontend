@@ -28,19 +28,49 @@ function avatarSrc(url) {
   return `${BACKEND}${url}`;
 }
 
-function AvatarImage({ src, size = 16, className = "" }) {
+function getInitials(name) {
+  if (!name) return "";
+  const parts = name.split(" ").filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return parts[0] ? parts[0][0].toUpperCase() : "";
+}
+
+function AvatarImage({ src, name, size = 40, className = "" }) {
   const [error, setError] = React.useState(false);
   
   if (!src || error) {
-    return <User size={size} className={className} />;
+    const initials = getInitials(name);
+    return (
+      <div 
+        className={`${className} initials-avatar`} 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          background: 'linear-gradient(135deg, var(--blue, #3b82f6), var(--blue-dark, #2563eb))', 
+          color: '#fff', 
+          fontWeight: '700',
+          fontSize: size > 100 ? '3rem' : size > 60 ? '2.2rem' : size > 40 ? '1.5rem' : '1rem',
+          borderRadius: '50%',
+          aspectRatio: '1/1',
+          width: `${size}px`,
+          height: `${size}px`
+        }}
+      >
+        {initials || <User size={size * 0.5} />}
+      </div>
+    );
   }
 
   return (
     <img 
       src={avatarSrc(src)} 
-      alt="Avatar" 
+      alt={name || "Avatar"} 
       className={className}
       onError={() => setError(true)}
+      style={{ objectFit: 'cover', borderRadius: '50%', width: `${size}px`, height: `${size}px` }}
     />
   );
 }
@@ -742,7 +772,11 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                 title="Profile" 
                 onClick={() => setProfileOpen(!profileOpen)}
               >
-                <AvatarImage src={user?.avatar_url} />
+                <AvatarImage 
+                  src={user?.avatar_url} 
+                  name={user?.first_name + " " + user?.last_name} 
+                  size={36}
+                />
               </button>
               {profileOpen && (
                 <div className="profile-dropdown-menu" style={{

@@ -141,17 +141,49 @@ function avatarSrc(url) {
   return `${BACKEND}${cleanUrl}`;
 }
 
-function AvatarImage({ src, size = 16, className = "" }) {
-  const [error, setError] = useState(false);
-  if (!src || error) {
-    return <User size={size} className={className} />;
+function getInitials(name) {
+  if (!name) return "";
+  const parts = name.split(" ").filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
   }
+  return parts[0] ? parts[0][0].toUpperCase() : "";
+}
+
+function AvatarImage({ src, name, size = 40, className = "" }) {
+  const [error, setError] = useState(false);
+  
+  if (!src || error) {
+    const initials = getInitials(name);
+    return (
+      <div 
+        className={`${className} initials-avatar`} 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          background: 'linear-gradient(135deg, var(--blue, #3b82f6), var(--blue-dark, #2563eb))', 
+          color: '#fff', 
+          fontWeight: '700',
+          fontSize: size > 100 ? '3rem' : size > 60 ? '2.2rem' : size > 40 ? '1.5rem' : '1rem',
+          borderRadius: '50%',
+          aspectRatio: '1/1',
+          width: `${size}px`,
+          height: `${size}px`
+        }}
+      >
+        {initials || <User size={size * 0.5} />}
+      </div>
+    );
+  }
+
   return (
     <img 
       src={avatarSrc(src)} 
-      alt="Avatar" 
+      alt={name || "Avatar"} 
       className={className}
       onError={() => setError(true)}
+      style={{ objectFit: 'cover', borderRadius: '50%', width: `${size}px`, height: `${size}px` }}
     />
   );
 }
@@ -1714,7 +1746,7 @@ const MyProfile = () => {
                   {/* Avatar va ism qismi */}
                   <div className="profile-avatar-section">
                     <div className="avatar-wrapper">
-                      <AvatarImage src={userData.profilePicture} size={80} className="profile-avatar" />
+                      <AvatarImage src={userData.profilePicture} name={userData.fullName} size={150} className="profile-avatar" />
                       <button className="change-avatar-btn" onClick={() => document.getElementById('avatar-upload-input').click()} disabled={isLoading}>
                         <Camera size={14} />
                       </button>

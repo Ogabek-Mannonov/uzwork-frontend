@@ -263,7 +263,7 @@ const FindTalent = () => {
         const mapped = list.map(item => {
           return {
             id: item.id,
-            avatar: item.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.first_name || "U")}&background=random`,
+            avatar: item.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.first_name || "U")}+${encodeURIComponent(item.last_name || "")}&background=random`,
             name: `${item.first_name || t("findTalent.card.mutaxassis")} ${item.last_name || ""}`.trim(),
             title: item.title || "Freelancer",
             rate: item.hourly_rate ? `$${item.hourly_rate}/hr` : t("findTalent.card.negotiable"),
