@@ -287,9 +287,8 @@ const Proposals = () => {
       // Mening takliflarim: Client tomonidan yuborilgan taklifnomalar
       return proposals.filter(p => p.is_invitation === true || p.status === "invited");
     } else {
-      // Kelib tushgan takliflar: Barcha takliflar (arizalar + taklifnomalar)
-      // Mijoz hamma narsani bir joyda ko'rishi uchun buni cheklamaymiz
-      return proposals;
+      // Kelib tushgan takliflar: Faqat freelancerlar tomonidan yuborilgan arizalar
+      return proposals.filter(p => p.is_invitation !== true && p.status !== "invited");
     }
   }, [proposals, mainTab]);
 

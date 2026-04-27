@@ -76,6 +76,21 @@
       "native": "Ona tili"
     }
   },
+  "savedTalent": {
+    "title": "Saqlangan mutaxassislar",
+    "subtitle": "{{count}} ta mutaxassis saqlangan",
+    "searchPlaceholder": "Saqlanganlar ichidan qidirish...",
+    "viewProfile": "Profilni ko'rish",
+    "sendMessage": "Xabar yozish",
+    "empty": "Saqlangan mutaxassislar yo'q",
+    "emptySearch": "Hech narsa topilmadi",
+    "emptySub": "Sizga yoqqan mutaxassislarni keyinchalik topish uchun saqlab qo'ying",
+    "emptySearchSub": "Qidiruv so'rovini o'zgartirib ko'ring",
+    "browseTalent": "Mutaxassislarni qidirish",
+    "unsavedToast": "{{name}} saqlanganlardan olib tashlandi",
+    "errorToast": "Xatolik yuz berdi",
+    "loading": "Yuklanmoqda..."
+  },
   "navbar": {
     "findWork": "Ish izlash",
     "savedJobs": "Saqlangan ishlar",

@@ -60,6 +60,7 @@ import ContractManagement from "./pages/Client/ContractManegment.jsx";
 import SecuritySettings from "./pages/Client/Security.jsx";
 import Escrow from "./pages/Client/Escrow.jsx";
 import Proposals from "./pages/Client/Proposals.jsx";
+import SavedTalent from "./pages/Client/SavedTalent.jsx";
 import Reports from "./pages/Freelancer/Reports.jsx";
 
 function App() {
@@ -120,6 +121,7 @@ function App() {
               <Route path="/client/postjob" element={<PostJob />} />
               <Route path="/client/my-jobs" element={<MyJobs />} />
               <Route path="/client/proposals" element={<Proposals />} />
+              <Route path="/client/saved" element={<SavedTalent />} />
               <Route path="/client/payments" element={<Wallet />} />  
               <Route path="/client/management" element={<ContractManagement />} />
               <Route path="/client/security" element={<SecuritySettings />} />

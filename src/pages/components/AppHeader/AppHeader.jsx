@@ -650,7 +650,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                           </span>
                         )}
                       </NavLink>
-                      <NavLink to="/client/talent" className={({ isActive }) => "dropdown__link" + (isActive ? " is-active" : "")}>
+                      <NavLink to="/client/saved" className={({ isActive }) => "dropdown__link" + (isActive ? " is-active" : "")}>
                         <Star size={16} />
                         <span>{t("navbar.saved")}</span>
                       </NavLink>
