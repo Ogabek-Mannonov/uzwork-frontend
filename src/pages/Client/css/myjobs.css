@@ -274,6 +274,28 @@
 .mj-status-badge.mj-closed { background: #fee2e2; color: #b91c1c; }
 .mj-status-badge.mj-info { background: #e0f2fe; color: #0369a1; }
 
+/* Dark Mode Status Badges */
+.mj-dark .mj-status-badge.mj-active { 
+  background: rgba(16, 185, 129, 0.15) !important; 
+  color: #34d399 !important; 
+  border: 1px solid rgba(16, 185, 129, 0.25) !important; 
+}
+.mj-dark .mj-status-badge.mj-draft { 
+  background: rgba(245, 158, 11, 0.15) !important; 
+  color: #fbbf24 !important; 
+  border: 1px solid rgba(245, 158, 11, 0.25) !important; 
+}
+.mj-dark .mj-status-badge.mj-closed { 
+  background: rgba(239, 68, 68, 0.15) !important; 
+  color: #f87171 !important; 
+  border: 1px solid rgba(239, 68, 68, 0.25) !important; 
+}
+.mj-dark .mj-status-badge.mj-info { 
+  background: rgba(14, 165, 233, 0.15) !important; 
+  color: #38bdf8 !important; 
+  border: 1px solid rgba(14, 165, 233, 0.25) !important; 
+}
+
 .mj-card-actions { display: flex; gap: 8px; }
 .mj-action-btn {
   width: 36px;
