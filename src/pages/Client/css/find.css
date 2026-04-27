@@ -290,6 +290,16 @@ body { font-family: var(--ft-font); color: var(--ft-text); background: var(--ft-
 }
 .ft-rate-input:focus { border-color: var(--ft-blue); background: var(--ft-surface); box-shadow: 0 0 0 2px var(--ft-blue-glow); }
 
+/* Remove Arrows/Spinners */
+.ft-rate-input::-webkit-outer-spin-button,
+.ft-rate-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.ft-rate-input {
+  -moz-appearance: textfield; /* Firefox */
+}
+
 .ft-location-select {
   width: 100%; padding: 9px 32px 9px 12px;
   border: 1.5px solid var(--ft-border); border-radius: var(--ft-radius-sm);
