@@ -594,6 +594,33 @@
 
 .glass-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px var(--w-primary-glow); }
 
+.currency-select-v3 {
+  background: var(--w-glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--w-glass-border);
+  padding: 12px 20px;
+  border-radius: 14px;
+  color: var(--w-text-main);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+  min-width: 130px;
+  box-shadow: var(--shadow-sm);
+}
+
+.currency-select-v3:hover {
+  background: var(--w-luxury-bg);
+  border-color: var(--w-primary);
+}
+
+.dark .currency-select-v3 option,
+.dark-theme .currency-select-v3 option {
+  background: #1e293b;
+  color: white;
+}
+
 @media (max-width: 1100px) {
   .wallet-v3-grid { grid-template-columns: 1fr; }
   .luxury-balance-card { height: auto; }

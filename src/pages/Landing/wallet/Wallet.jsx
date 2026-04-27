@@ -66,6 +66,10 @@ export default function Wallet() {
   const [processing, setProcessing] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [toast, setToast] = useState({ msg: "", type: "" });
+  
+  // Currency State
+  const [selectedCurrency, setSelectedCurrency] = useState("USD");
+  const [rates, setRates] = useState({ usd: 1, uzs: 12600, rub: 92 });
 
   const notify = (msg, type = "success") => {
     setToast({ msg, type });
@@ -94,7 +98,42 @@ export default function Wallet() {
     }
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { 
+    loadData(); 
+    // Fetch exchange rates
+    fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json")
+      .then(res => res.json())
+      .then(data => {
+        if (data.usd) {
+          setRates({
+            usd: 1,
+            uzs: data.usd.uzs || 12600,
+            rub: data.usd.rub || 92
+          });
+        }
+      })
+      .catch(err => console.error("Exchange rates fetch error:", err));
+  }, []);
+
+  const formatMoney = (amountInUzs) => {
+    const val = Number(amountInUzs || 0);
+    const uzsRate = rates.uzs || 12600;
+    const rubRate = rates.rub || 92; // rates are USD based: 1 USD = uzsRate UZS, 1 USD = rubRate RUB
+    
+    let converted = val;
+    if (selectedCurrency === "USD") {
+      converted = val / uzsRate;
+      return `$${converted.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
+    if (selectedCurrency === "RUB") {
+      // UZS -> USD -> RUB
+      converted = (val / uzsRate) * rubRate;
+      return `${converted.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ₽`;
+    }
+    
+    // Default UZS
+    return `${val.toLocaleString()} UZS`;
+  };
 
   const handleAddCard = async (e) => {
     e.preventDefault();
@@ -122,8 +161,19 @@ export default function Wallet() {
   const handleDeposit = async () => {
     if (!amount || Number(amount) <= 0) return;
     setProcessing(true);
+    // Convert input to UZS (Base currency for backend)
+    let amountInUzs = Number(amount);
+    if (selectedCurrency === "USD") {
+      amountInUzs = Math.round(Number(amount) * rates.uzs);
+    } else if (selectedCurrency === "RUB") {
+      // RUB -> USD -> UZS
+      amountInUzs = Math.round((Number(amount) / rates.rub) * rates.uzs);
+    }
+    
     const res = await deposit({ 
-      amount: Number(amount),
+      amount: amountInUzs,
+      currency: selectedCurrency,
+      originalAmount: Number(amount),
       card_id: selectedCard?.id,
       gateway: selectedCard?.card_type || "demo"
     });
@@ -146,8 +196,30 @@ export default function Wallet() {
     }
     
     setProcessing(true);
+    // Convert input to UZS (Base currency for backend)
+    let amountInUzs = Number(withdrawAmount);
+    const uzsRate = rates.uzs || 12600;
+    const rubRate = rates.rub || 92;
+
+    if (selectedCurrency === "USD") {
+      amountInUzs = Math.round(Number(withdrawAmount) * uzsRate);
+    } else if (selectedCurrency === "RUB") {
+      // RUB -> USD -> UZS
+      amountInUzs = Math.round((Number(withdrawAmount) / rubRate) * uzsRate);
+    }
+
+    // Frontend validation: Check against available balance
+    const currentBalanceUzs = Number(balance?.available_balance || 0);
+    if (amountInUzs > currentBalanceUzs) {
+      setProcessing(false);
+      notify(t("wallet.insufficientBalance") || "Balansda mablag' yetarli emas", "error");
+      return;
+    }
+
     const res = await withdraw({
-      amount: Number(withdrawAmount),
+      amount: amountInUzs,
+      currency: selectedCurrency,
+      originalAmount: Number(withdrawAmount),
       card_id: selectedCard.id
     });
     setProcessing(false);
@@ -227,6 +299,15 @@ export default function Wallet() {
         </div>
 
         <div className="header-v3-actions">
+           <select 
+             className="currency-select-v3" 
+             value={selectedCurrency} 
+             onChange={(e) => setSelectedCurrency(e.target.value)}
+           >
+             <option value="USD">USD ($)</option>
+             <option value="UZS">SUM (UZS)</option>
+             <option value="RUB">RUB (₽)</option>
+           </select>
            <button className="glass-btn secondary" onClick={() => setShowWithdraw(true)}>
              <TrendingUp size={18} /> {t("wallet.withdraw")}
            </button>
@@ -247,8 +328,7 @@ export default function Wallet() {
                     <div className="balance-info">
                        <span className="info-label">{t("wallet.availableBalance")}</span>
                        <h2 className="amount-display">
-                         <span className="curr">$</span>
-                         {Number(balance?.available_balance || 0).toLocaleString()}
+                         {formatMoney(balance?.available_balance)}
                        </h2>
                     </div>
                     <div className="elite-badge">
@@ -264,12 +344,12 @@ export default function Wallet() {
                  <div className="card-bottom-v3">
                     <div className="mini-stat">
                        <span className="m-label">{t("wallet.lockedBalance")}</span>
-                       <span className="m-value">${Number(balance?.escrow_balance || 0).toLocaleString()}</span>
+                       <span className="m-value">{formatMoney(balance?.escrow_balance)}</span>
                     </div>
                     <div className="v-divider"></div>
                     <div className="mini-stat">
                        <span className="m-label">{t("wallet.totalEarned")}</span>
-                       <span className="m-value">${Number(balance?.total_earned || 0).toLocaleString()}</span>
+                       <span className="m-value">{formatMoney(balance?.total_earned)}</span>
                     </div>
                     <div className="card-logo-v3">
                        <span className="l-text">UzWork</span>
@@ -338,7 +418,7 @@ export default function Wallet() {
                               <span className="tx-v3-meta">{tx.gateway?.toUpperCase() || 'SYSTEM'} • {new Date(tx.created_at).toLocaleDateString()}</span>
                            </div>
                            <div className={`tx-v3-amount ${['deposit', 'escrow_release', 'refund'].includes(tx.type) ? 'pos' : 'neg'}`}>
-                              {['deposit', 'escrow_release', 'refund'].includes(tx.type) ? '+' : '-'}${Number(tx.amount).toLocaleString()}
+                              {['deposit', 'escrow_release', 'refund'].includes(tx.type) ? '+' : '-'}{formatMoney(tx.amount)}
                            </div>
                         </div>
                       ))
@@ -375,7 +455,7 @@ export default function Wallet() {
                           </td>
                           <td className="desc-text">{tx.job_title || "-"}</td>
                           <td className={`amount-text ${['deposit', 'escrow_release', 'refund'].includes(tx.type) ? 'pos' : 'neg'}`}>
-                             {['deposit', 'escrow_release', 'refund'].includes(tx.type) ? '+' : '-'}${Number(tx.amount).toLocaleString()}
+                             {['deposit', 'escrow_release', 'refund'].includes(tx.type) ? '+' : '-'}{formatMoney(tx.amount)}
                           </td>
                        </tr>
                     ))}
@@ -484,9 +564,9 @@ export default function Wallet() {
             </div>
             <div className="v3-modal-body">
                <div className="v3-field">
-                  <label>{t("wallet.amountPlaceholder")}</label>
+                  <label>{t("wallet.amountPlaceholder")} ({selectedCurrency})</label>
                   <div className="amount-input-box">
-                    <span className="unit">$</span>
+                    <span className="unit">{selectedCurrency === "USD" ? "$" : selectedCurrency === "RUB" ? "₽" : "UZS"}</span>
                     <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" />
                   </div>
                </div>
@@ -516,12 +596,12 @@ export default function Wallet() {
             <div className="v3-modal-body">
                <div className="v3-available-badge">
                   <span>{t("wallet.availableBalance")}: </span>
-                  <strong>${Number(balance?.available_balance || 0).toLocaleString()}</strong>
+                  <strong>{formatMoney(balance?.available_balance)}</strong>
                </div>
                <div className="v3-field">
-                  <label>{t("wallet.amountPlaceholder")}</label>
+                  <label>{t("wallet.amountPlaceholder")} ({selectedCurrency})</label>
                   <div className="amount-input-box">
-                    <span className="unit">$</span>
+                    <span className="unit">{selectedCurrency === "USD" ? "$" : selectedCurrency === "RUB" ? "₽" : "UZS"}</span>
                     <input type="number" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} placeholder="0.00" />
                   </div>
                </div>
