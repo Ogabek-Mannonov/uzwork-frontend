@@ -616,22 +616,32 @@ function AuthHeader({ i18n, changeLanguage, user }) {
             <nav className="nav__menu">
               {isClient ? (
                 <>
-                  <Link to="/client/talent" className="nav__link">
+                  <NavLink 
+                    to="/client/talent" 
+                    className={({ isActive }) => "nav__link" + (isActive ? " is-active" : "")}
+                  >
                     {t("navbar.findTalent")}
-                  </Link>
+                  </NavLink>
 
                   {/* My Jobs Dropdown */}
                   <div className="nav__item-with-dropdown">
-                    <Link to="/client/my-jobs" className="nav__link">
+                    <NavLink 
+                      to="/client/my-jobs" 
+                      className={({ isActive }) => {
+                        const isSubActive = location.pathname.startsWith('/client/proposals') || 
+                                          location.pathname.startsWith('/client/my-jobs');
+                        return "nav__link" + (isActive || isSubActive ? " is-active" : "");
+                      }}
+                    >
                       {t("navbar.myJobs")}
                       <ChevronDown size={14} className="nav__chevron" />
-                    </Link>
+                    </NavLink>
                     <div className="nav__dropdown">
-                      <Link to="/client/my-jobs" className="dropdown__link">
+                      <NavLink to="/client/my-jobs" className={({ isActive }) => "dropdown__link" + (isActive ? " is-active" : "")}>
                         <Briefcase size={16} />
                         <span>{t("navbar.myJobs")}</span>
-                      </Link>
-                      <Link to="/client/proposals" className="dropdown__link" style={{ display: 'flex', alignItems: 'center' }}>
+                      </NavLink>
+                      <NavLink to="/client/proposals" className={({ isActive }) => "dropdown__link" + (isActive ? " is-active" : "")} style={{ display: 'flex', alignItems: 'center' }}>
                         <Users size={16} />
                         <span>{t("navbar.proposals")}</span>
                         {proposalsCount > 0 && (
@@ -639,21 +649,24 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                             {proposalsCount > 99 ? "99+" : proposalsCount}
                           </span>
                         )}
-                      </Link>
-                      <Link to="/client/talent" className="dropdown__link">
+                      </NavLink>
+                      <NavLink to="/client/talent" className={({ isActive }) => "dropdown__link" + (isActive ? " is-active" : "")}>
                         <Star size={16} />
                         <span>{t("navbar.saved")}</span>
-                      </Link>
+                      </NavLink>
                     </div>
                   </div>
 
-                  <Link to="/client/management" className="nav__link">
+                  <NavLink 
+                    to="/client/management" 
+                    className={({ isActive }) => "nav__link" + (isActive ? " is-active" : "")}
+                  >
                     {t("navbar.contracts")}
-                  </Link>
+                  </NavLink>
 
-                  <Link
+                  <NavLink
                     to="/messages"
-                    className="nav__link"
+                    className={({ isActive }) => "nav__link" + (isActive ? " is-active" : "")}
                     style={{ position: "relative" }}
                   >
                     {t("navbar.messages")}
@@ -662,7 +675,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                         {unreadCount > 99 ? "99+" : unreadCount}
                       </span>
                     )}
-                  </Link>
+                  </NavLink>
                 </>
               ) : (
                 <>
