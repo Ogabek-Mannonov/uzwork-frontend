@@ -234,8 +234,8 @@ const Settings = () => {
           phone: u.phone || "",
           location: p.location || "",
           company: p.company_name || "",
-          companyDetails: p.company_description || "",
-          bio: p.company_description || p.bio || "",
+          companyDetails: p.bio || "",
+          bio: p.bio || "",
           profilePicture: p.avatar_url || u.avatar_url || "",
           coverPhoto: p.cover_url || "",
           accountType: u.role || "",
@@ -807,7 +807,7 @@ const Settings = () => {
         case 'bio':
           payload = { 
             company_name: editFormData.company,
-            company_description: editFormData.bio 
+            bio: editFormData.bio 
           };
           break;
         case 'contact':
