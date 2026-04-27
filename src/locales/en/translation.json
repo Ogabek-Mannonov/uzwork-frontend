@@ -476,7 +476,11 @@
       "saveError": "Error saving",
       "deleteConfirm": "Are you sure you want to delete?",
       "deleteError": "Error deleting"
-    }
+    },
+    "contactUpdateConfirmTitle": "Do you want to confirm the changes?",
+    "contactUpdateConfirmDesc": "Changing contact information may affect the security of your profile.",
+    "contactUpdateNotice": "Changes will take effect immediately on all devices.",
+    "confirm": "Confirm and Save"
   },
   "skills": {
     "React": "React",

@@ -304,6 +304,9 @@ const MyProfile = () => {
   const [show2FAModal, setShow2FAModal] = useState(false);
   const [faStep, setFaStep] = useState("select"); // select, verify
   const [verificationCode, setVerificationCode] = useState("");
+
+  // Contact Confirmation Modal States
+  const [contactUpdatePending, setContactUpdatePending] = useState(null); // stores payload when modal is open
   const showMessage = (type, text) => {
     setMessage({ type, text });
   };
@@ -1407,39 +1410,47 @@ const MyProfile = () => {
   };
 
   const handleSectionSave = async (section) => {
+    let payload = {};
+    
+    switch(section) {
+      case 'name':
+        payload = {
+          first_name: editFormData.fullName.split(' ')[0] || "",
+          last_name: editFormData.fullName.split(' ').slice(1).join(' ') || "",
+          title: editFormData.title,
+          category_id: editFormData.category_id
+        };
+        break;
+      case 'bio':
+        payload = { bio: editFormData.bio };
+        break;
+      case 'rate':
+        payload = { hourly_rate: Number(editFormData.hourlyRate) || 0 };
+        break;
+      case 'contact':
+        payload = {
+          location: editFormData.location,
+          email: editFormData.email,
+          phone: editFormData.phone
+        };
+        // Use a small timeout to ensure the state update doesn't conflict with the current click event
+        setTimeout(() => {
+          setContactUpdatePending(payload);
+        }, 10);
+        return;
+      case 'skills':
+        payload = { skills: skills };
+        break;
+      default:
+        payload = editFormData;
+    }
+
+    await performSave(section, payload);
+  };
+
+  const performSave = async (section, payload) => {
     setIsLoading(true);
     try {
-      let payload = {};
-      
-      switch(section) {
-        case 'name':
-          payload = {
-            first_name: editFormData.fullName.split(' ')[0] || "",
-            last_name: editFormData.fullName.split(' ').slice(1).join(' ') || "",
-            title: editFormData.title,
-            category_id: editFormData.category_id
-          };
-          break;
-        case 'bio':
-          payload = { bio: editFormData.bio };
-          break;
-        case 'rate':
-          payload = { hourly_rate: Number(editFormData.hourlyRate) || 0 };
-          break;
-        case 'contact':
-          payload = {
-            location: editFormData.location,
-            email: editFormData.email,
-            phone: editFormData.phone
-          };
-          break;
-        case 'skills':
-          payload = { skills: skills };
-          break;
-        default:
-          payload = editFormData;
-      }
-
       const res = await updateMyProfile(payload);
       if (res?.success === false) throw new Error(res.error || res.message);
 
@@ -1448,7 +1459,6 @@ const MyProfile = () => {
       
       // [SYNC]: Update localStorage for header consistency
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      // Pick common fields that might be in the 'user' object
       const updatedUser = { ...storedUser };
       if (payload.first_name !== undefined) updatedUser.first_name = payload.first_name;
       if (payload.last_name !== undefined) updatedUser.last_name = payload.last_name;
@@ -1459,12 +1469,19 @@ const MyProfile = () => {
       window.dispatchEvent(new Event("authChange"));
 
       setEditingSection(null);
-      showMessage("success", `${section.charAt(0).toUpperCase() + section.slice(1)} updated successfully!`);
+      showMessage("success", `${section.charAt(0).toUpperCase() + section.slice(1)} muvaffaqiyatli yangilandi!`);
     } catch (err) {
       showMessage("error", err.message || `Failed to update ${section}`);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const confirmContactSave = async () => {
+    if (!contactUpdatePending) return;
+    const payload = contactUpdatePending;
+    setContactUpdatePending(null);
+    await performSave('contact', payload);
   };
 
   const handleSave = async () => {
@@ -2160,7 +2177,7 @@ const MyProfile = () => {
                         </div>
                         <div className="inline-edit-actions">
                           <button className="btn-cancel-inline" onClick={handleSectionCancel}>{t("profile.cancel", "Cancel")}</button>
-                          <button className="btn-save-inline" onClick={() => handleSectionSave('contact')}>
+                          <button className="btn-save-inline" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleSectionSave('contact'); }}>
                             {isLoading ? <RefreshCw size={14} className="spinning" /> : <Save size={14} />}
                             {t("profile.save", "Save")}
                           </button>
@@ -3802,6 +3819,73 @@ const MyProfile = () => {
                   </button>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* CONTACT CONFIRMATION MODAL */}
+      {contactUpdatePending && (
+        <div className="contact-confirm-modal-overlay" onClick={() => !isLoading && setContactUpdatePending(null)}>
+          <div className="contact-confirm-modal-card" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-premium" onClick={() => setContactUpdatePending(null)} disabled={isLoading}>
+              <X size={20} />
+            </button>
+
+            <div className="modal-header-premium">
+              <div className="modal-icon-badge">
+                <ShieldCheck size={32} />
+              </div>
+              <h2>{t("profile.contactUpdateConfirmTitle", "Tasdiqlash kerak")}</h2>
+              <p>{t("profile.contactUpdateConfirmDesc", "Aloqa ma'lumotlarini o'zgartirish profilingiz xavfsizligiga ta'sir qilishi mumkin.")}</p>
+            </div>
+            
+            <div className="modal-body-premium">
+              <div className="comparison-stack">
+                {/* Email Comparison */}
+                <div className="comparison-item">
+                  <span className="comp-label">{t("profile.email", "Email")}</span>
+                  <div className="comp-values">
+                    <span className="comp-old">{userData.email}</span>
+                    <ArrowUpRight size={14} className="comp-arrow" />
+                    <span className="comp-new">{contactUpdatePending?.email}</span>
+                  </div>
+                </div>
+
+                {/* Phone Comparison */}
+                <div className="comparison-item">
+                  <span className="comp-label">{t("profile.phone", "Telefon")}</span>
+                  <div className="comp-values">
+                    <span className="comp-old">{userData.phone}</span>
+                    <ArrowUpRight size={14} className="comp-arrow" />
+                    <span className="comp-new">{contactUpdatePending?.phone}</span>
+                  </div>
+                </div>
+
+                {/* Location Comparison */}
+                <div className="comparison-item">
+                  <span className="comp-label">{t("profile.location", "Joylashuv")}</span>
+                  <div className="comp-values">
+                    <span className="comp-old">{userData.location}</span>
+                    <ArrowUpRight size={14} className="comp-arrow" />
+                    <span className="comp-new">{contactUpdatePending?.location}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-notice-premium">
+                <Info size={18} style={{ flexShrink: 0 }} />
+                <p>{t("profile.contactUpdateNotice", "O'zgarishlar darhol barcha qurilmalarda kuchga kiradi.")}</p>
+              </div>
+
+              <div className="modal-actions-premium">
+                <button className="btn-confirm-premium" onClick={confirmContactSave} disabled={isLoading}>
+                  {isLoading ? <RefreshCw size={18} className="spinning" /> : <CheckCircle size={18} />}
+                  <span>{t("profile.confirm", "Tasdiqlash va saqlash")}</span>
+                </button>
+                <button className="btn-cancel-premium" onClick={() => setContactUpdatePending(null)} disabled={isLoading}>
+                  {t("profile.cancel", "Bekor qilish")}
+                </button>
+              </div>
             </div>
           </div>
         </div>

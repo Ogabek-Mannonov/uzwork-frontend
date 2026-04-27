@@ -560,7 +560,11 @@
       "saveError": "Saqlashda xatolik",
       "deleteConfirm": "Haqiqatan ham o'chirmoqchimisiz?",
       "deleteError": "O'chirishda xatolik"
-    }
+    },
+    "contactUpdateConfirmTitle": "Ma'lumotlarni o'zgartirishni tasdiqlaysizmi?",
+    "contactUpdateConfirmDesc": "Aloqa ma'lumotlarini o'zgartirish profilingiz xavfsizligiga ta'sir qilishi mumkin.",
+    "contactUpdateNotice": "O'zgarishlar darhol barcha qurilmalarda kuchga kiradi.",
+    "confirm": "Tasdiqlash va saqlash"
   },
   "skills": {
     "React": "React",
