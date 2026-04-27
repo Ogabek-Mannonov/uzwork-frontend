@@ -308,11 +308,20 @@
 }
 
 .cp-dark .cp-details-row {
-  background: #21262d;
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 .cp-dark .cp-detail-item {
-  color: #8b949e;
+  color: #cbd5e1;
+}
+
+.cp-dark .cp-job-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.cp-dark .cp-job-header h2 {
+  color: #fff;
 }
 
 .cp-price span:first-child {
@@ -486,20 +495,62 @@
 
 /* Night Mode adaptation */
 .cp-dark {
-  --surface: #1a1d23;
-  --border: #2d333b;
-  --text: #f0f6fc;
-  --text-secondary: #8b949e;
-  --bg: #0d1117;
+  --surface: rgba(30, 41, 59, 0.7);
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #f8fafc;
+  --text-secondary: #94a3b8;
+  --bg: #0f172a;
 }
 
-.cp-dark .cp-stat-card { background: #1a1d23; border-color: #2d333b; }
-.cp-dark .cp-card { background: #1a1d23; border-color: #2d333b; }
-.cp-dark .cp-btn-msg { background: #1a1d23; border-color: #2d333b; color: #f0f6fc; }
-.cp-dark .cp-star-btn { background: #1a1d23; border-color: #2d333b; }
-.cp-dark .cp-tag { background: #21262d; }
-.cp-dark .cp-tab-btn.active { background: #2d333b; color: #58a6ff; }
-.cp-dark .cp-search-box input { background: #0d1117; border-color: #2d333b; color: #f0f6fc; }
+.cp-page {
+  background: #f4f6f9;
+}
+
+.cp-dark.cp-page {
+  background: transparent !important;
+}
+
+.cp-dark .cp-stat-card { 
+  background: var(--surface); 
+  border-color: var(--border); 
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.cp-dark .cp-card { 
+  background: var(--surface); 
+  border-color: var(--border); 
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.cp-dark .cp-btn-msg { 
+  background: rgba(255, 255, 255, 0.05); 
+  border-color: var(--border); 
+  color: var(--text); 
+}
+
+.cp-dark .cp-star-btn { 
+  background: rgba(255, 255, 255, 0.05); 
+  border-color: var(--border); 
+}
+
+.cp-dark .cp-tag { 
+  background: rgba(255, 255, 255, 0.06); 
+  color: #94a3b8;
+}
+
+.cp-dark .cp-tab-btn.active { 
+  background: #2d333b; 
+  color: #3b82f6; 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.cp-dark .cp-search-box input { 
+  background: rgba(0, 0, 0, 0.2); 
+  border-color: var(--border); 
+  color: var(--text); 
+}
 
 /* Toast Notifications */
 .cp-toast {

@@ -368,7 +368,7 @@ const Proposals = () => {
   }
 
   return (
-    <div className={`cp-page ${isDark ? "cp-dark" : ""}`} style={{ backgroundColor: isDark ? "#0a0c10" : "#f4f6f9" }}>
+    <div className={`cp-page ${isDark ? "cp-dark" : ""}`}>
       <div className="cp-container">
         {/* Header */}
         <div className="cp-header">
