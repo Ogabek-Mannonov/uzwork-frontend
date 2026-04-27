@@ -41,7 +41,9 @@
 [data-theme="dark"] .login-card {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
 .title-login {
@@ -158,9 +160,11 @@
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
+  transition: var(--transition);
 }
 
 .forgot-link:hover {
+  color: var(--brand-dark);
   text-decoration: underline;
 }
 
@@ -229,8 +233,10 @@
 }
 
 .google-btn:hover, .apple-btn:hover {
-  background: var(--surface-2);
+  background: var(--brand-light);
   border-color: var(--brand);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .text-center {
