@@ -96,7 +96,7 @@ import {
 } from "../../api/payments";
 import { changePassword, enable2FA, confirm2FA, disable2FA, forgotPassword, resetPassword } from "../../api/auth";
 
-const BACKEND = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
+const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/api\/?$/, "");
 
 function avatarSrc(url) {
   if (!url) return null;

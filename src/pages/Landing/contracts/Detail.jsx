@@ -50,6 +50,36 @@ export default function ContractDetail() {
     setTimeout(() => setToast({ msg: "", type: "" }), 4000);
   }, []);
 
+  const BACKEND = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const avatarSrc = (url) => {
+    if (!url) return null;
+    if (url.startsWith("http")) return url;
+    const path = url.startsWith("/") ? url : `/${url}`;
+    return `${BACKEND}${path}`;
+  };
+
+  const PartnerAvatar = ({ src, name }) => {
+    const [error, setError] = useState(false);
+    const initials = name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
+    
+    if (!src || error) {
+      return (
+        <div className="cd-partner-ava" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "var(--brand-light, rgba(37, 99, 235, 0.1))", color: "var(--brand, #2563eb)", fontWeight: "bold" }}>
+          {initials}
+        </div>
+      );
+    }
+
+    return (
+      <img 
+        src={avatarSrc(src)} 
+        alt="" 
+        className="cd-partner-ava" 
+        onError={() => setError(true)}
+      />
+    );
+  };
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -178,9 +208,12 @@ export default function ContractDetail() {
             <div className="cd-meta-card">
               <div className="cd-meta-label">{isClient ? "Mutaxassis" : "Mijoz"}</div>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)' }}>
-                  <User size={20} />
-                </div>
+                <PartnerAvatar 
+                  src={isClient ? contract.freelancer_avatar_url : contract.client_avatar_url} 
+                  name={isClient 
+                    ? `${contract.freelancer_first_name || ""} ${contract.freelancer_last_name || ""}`.trim() || contract.freelancer_email
+                    : `${contract.client_first_name || ""} ${contract.client_last_name || ""}`.trim() || contract.client_email} 
+                />
                 <div className="cd-meta-value" style={{ fontSize: 18 }}>
                   {isClient 
                     ? `${contract.freelancer_first_name || ""} ${contract.freelancer_last_name || ""}`.trim() || contract.freelancer_email
