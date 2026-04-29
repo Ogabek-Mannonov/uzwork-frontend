@@ -106,10 +106,15 @@ const NotificationDropdown = () => {
         setUnreadCount(0);
       });
 
+      socket.on('notificationsAllReadByType', () => {
+        fetchNotifications();
+      });
+
       return () => {
         socket.off('newNotification', handleNewNotification);
         socket.off('notificationRead');
         socket.off('notificationsAllRead');
+        socket.off('notificationsAllReadByType');
       };
     });
 
