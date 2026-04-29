@@ -8,12 +8,13 @@ import i18n from "../../../i18n";
 import "./chat.css";
 
 // ── helpers ──────────────────────────────────────────────
-const BACKEND = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
+const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/api\/?$/, "");
 
 function avatarSrc(url) {
   if (!url) return null;
   if (url.startsWith("http")) return url;
-  return `${BACKEND}${url}`;
+  const path = url.startsWith("/") ? url : `/${url}`;
+  return `${BACKEND}${path}`;
 }
 
 const parseUTC = (raw) => {
@@ -64,6 +65,7 @@ function formatTime(dateStr) {
 }
 
 function Avatar({ user, size = "md" }) {
+  const [imgError, setImgError] = useState(false);
   const name = user
     ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "?"
     : "?";
@@ -77,10 +79,14 @@ function Avatar({ user, size = "md" }) {
 
   return (
     <div className={`avatar-circle ${size}`}>
-      {src ? (
-        <img src={src} alt={name} onError={(e) => (e.target.style.display = "none")} />
+      {src && !imgError ? (
+        <img 
+          src={src} 
+          alt={name} 
+          onError={() => setImgError(true)} 
+        />
       ) : (
-        initials
+        <span className="avatar-initials">{initials}</span>
       )}
     </div>
   );

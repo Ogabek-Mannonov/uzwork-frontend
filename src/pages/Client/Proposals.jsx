@@ -22,7 +22,7 @@ import { useThemeContext } from "../components/Theme/ThemeContext";
 import { useTranslation } from "react-i18next";
 import "./css/proposals.css";
 
-const BACKEND = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
+const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/api\/?$/, "");
 
 function avatarSrc(url) {
   if (!url) return null;

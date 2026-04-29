@@ -94,18 +94,19 @@ const SubmissionCard = ({ msg, isOwn, onApprove, onReject, isApproving, isReject
                          href={fullUrl} 
                          target="_blank" 
                          rel="noreferrer" 
-                         className="attachment-item"
+                         className={`attachment-item ${currentUser?.role === "client" ? "view-only" : ""}`}
                          onClick={async (e) => {
-                           e.preventDefault();
-                           if (isImage && onMediaClick) {
-                             onMediaClick({ type: 'image', url: fileUri });
-                           } else {
-                             // Har doim handleDownload'ni chaqiramiz
-                             await handleDownload(fullUrl, file.name);
-                           }
-                         }}
+                            if (currentUser?.role === 'client' && !isImage) return;
+                            e.preventDefault();
+                            if (isImage && onMediaClick) {
+                              onMediaClick({ type: 'image', url: fileUri });
+                            } else {
+                              // Har doim handleDownload'ni chaqiramiz
+                              await handleDownload(fullUrl, file.name);
+                            }
+                          }}
                        >
-                         {isImage ? <ExternalLink size={14} /> : <Download size={14} />}
+                         {isImage || currentUser?.role === 'client' ? <ExternalLink size={14} /> : <Download size={14} />}
                          <span className="attachment-name">{file.name || 'Hujjat'}</span>
                        </a>
                      </div>

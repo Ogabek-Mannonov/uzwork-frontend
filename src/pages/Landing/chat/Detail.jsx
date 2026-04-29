@@ -199,6 +199,7 @@ function scrollToMessage(msgId) {
 
 // ── Avatar ───────────────────────────────────────────────
 function Avatar({ user, size = "sm" }) {
+  const [imgError, setImgError] = useState(false);
   const name = user
     ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || "?"
     : "?";
@@ -212,14 +213,14 @@ function Avatar({ user, size = "sm" }) {
 
   return (
     <div className={`avatar-circle ${size}`}>
-      {src ? (
+      {src && !imgError ? (
         <img
           src={src}
           alt={name}
-          onError={(e) => (e.currentTarget.style.display = "none")}
+          onError={() => setImgError(true)}
         />
       ) : (
-        initials
+        <span className="avatar-initials">{initials}</span>
       )}
     </div>
   );
@@ -596,13 +597,13 @@ function MessageBubble({
                       rel="noreferrer"
                       className="file-action-link"
                       onClick={(e) => {
-                        if (!isPdf) {
+                        if (!isPdf && currentUser?.role !== 'client') {
                           e.preventDefault();
                           handleDownload(avatarSrc(msg.file_url), msg.content || msg.file_url.split("/").pop());
                         }
                       }}
                     >
-                      {isPdf ? i18n.t("chat.openWith", "OTKRIT S POMOSHYU") : i18n.t("chat.downloadAction", "YUKLAB OLISH")}
+                      {isPdf || currentUser?.role === 'client' ? i18n.t("chat.openWith", "KO'RISH") : i18n.t("chat.downloadAction", "YUKLAB OLISH")}
                     </a>
                   </div>
                 </div>
@@ -718,7 +719,7 @@ function MessageBubble({
 }
 
 // ── Media Lightbox (Full Screen View) ──────────────────
-function MediaLightbox({ media, onClose }) {
+function MediaLightbox({ media, onClose, currentUser }) {
   if (!media) return null;
 
   const fileUrl = media.file_url || media.url || "";
@@ -733,18 +734,20 @@ function MediaLightbox({ media, onClose }) {
           <span className="lightbox-filename">{fileName}</span>
         </div>
         <div className="lightbox-actions">
-          <a
-            href={fullUrl}
-            className="lightbox-btn"
-            onClick={e => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleDownload(fullUrl, fileName);
-            }}
-            title={i18n.t("chat.download", "Yuklab olish")}
-          >
-            <Download size={22} />
-          </a>
+          {currentUser?.role !== 'client' && (
+            <a
+              href={fullUrl}
+              className="lightbox-btn"
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleDownload(fullUrl, fileName);
+              }}
+              title={i18n.t("chat.download", "Yuklab olish")}
+            >
+              <Download size={22} />
+            </a>
+          )}
           <button className="lightbox-btn" onClick={onClose}>
             <X size={24} />
           </button>
@@ -2711,6 +2714,7 @@ export default function ChatDetail() {
         <MediaLightbox
           media={viewingMedia}
           onClose={() => setViewingMedia(null)}
+          currentUser={currentUser}
         />
       )}
 
