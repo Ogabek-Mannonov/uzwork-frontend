@@ -69,7 +69,9 @@ function AvatarImage({ src, size = 40, className = "", alt = "Avatar" }) {
       alt={alt} 
       className={className}
       onError={() => setError(true)}
-      style={{ objectFit: 'cover', borderRadius: '50%', width: `${size}px`, height: `${size}px` }}
+      onContextMenu={(e) => e.preventDefault()}
+      draggable="false"
+      style={{ objectFit: 'cover', borderRadius: '50%', width: `${size}px`, height: `${size}px`, userSelect: 'none', WebkitUserDrag: 'none' }}
     />
   );
 }
@@ -482,6 +484,9 @@ export default function PublicProfile() {
                               "https://via.placeholder.com/600x400?text=No+Media"
                             } 
                             alt={item.title} 
+                            onContextMenu={(e) => e.preventDefault()}
+                            draggable="false"
+                            style={{ userSelect: 'none', WebkitUserDrag: 'none' }}
                           />
                           <div className="portfolio-media-count">
                             {item.media?.length || 0} <FiBriefcase size={10} />
