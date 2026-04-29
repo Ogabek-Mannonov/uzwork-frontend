@@ -818,24 +818,46 @@ const PostJob = () => {
     if (editId) {
       getJobById(editId).then(res => {
         const data = res?.data?.project || res?.project || res?.data;
-        if (data) setForm({
-          title: data.title || "",
-          category: data.category || "",
-          description: data.description || "",
-          jobType: data.job_type || "fixed",
-          experience: data.experience_level || "mid",
-          skills: Array.isArray(data.required_skills) ? data.required_skills : [],
-          budgetType: data.budget_type || "fixed",
-          budgetFixed: data.budget_amount || data.budget_max || "",
-          budgetMin: data.budget_min || "",
-          budgetMax: data.budget_max || "",
-          hourlyMin: data.hourly_rate_min || "",
-          hourlyMax: data.hourly_rate_max || "",
-          duration: data.project_duration || data.duration || "1to3",
-          scope: data.scope || "medium",
-          freelancers: data.freelancers_needed?.toString() || "1",
-          visibility: data.visibility || "public",
-        });
+        if (data) {
+          const loadedForm = {
+            title: data.title || "",
+            category: data.category || "",
+            description: data.description || "",
+            jobType: data.job_type || "fixed",
+            experience: data.experience_level || "mid",
+            skills: Array.isArray(data.required_skills) ? data.required_skills : [],
+            budgetType: data.budget_type || "fixed",
+            budgetFixed: data.budget_amount || data.budget_max || "",
+            budgetMin: data.budget_min || "",
+            budgetMax: data.budget_max || "",
+            hourlyMin: data.hourly_rate_min || "",
+            hourlyMax: data.hourly_rate_max || "",
+            duration: data.project_duration || data.duration || "1to3",
+            scope: data.scope || "medium",
+            freelancers: data.freelancers_needed?.toString() || "1",
+            visibility: data.visibility || "public",
+          };
+          setForm(loadedForm);
+
+          let targetStep = 1;
+          const s1Valid = loadedForm.title.trim().length >= 10 && loadedForm.category && loadedForm.description.trim().length >= 50 && loadedForm.experience;
+          if (s1Valid) {
+            targetStep = 2;
+            const s2Valid = loadedForm.skills.length > 0;
+            if (s2Valid) {
+              targetStep = 3;
+              let s3Valid = false;
+              if (loadedForm.budgetType === "fixed" && loadedForm.budgetFixed) s3Valid = true;
+              if (loadedForm.budgetType === "range" && loadedForm.budgetMin && loadedForm.budgetMax) s3Valid = true;
+              if (loadedForm.budgetType === "hourly" && loadedForm.hourlyMin && loadedForm.hourlyMax) s3Valid = true;
+              
+              if (s3Valid && loadedForm.duration) {
+                targetStep = 4;
+              }
+            }
+          }
+          setStep(targetStep);
+        }
       });
     }
   }, [editId]);

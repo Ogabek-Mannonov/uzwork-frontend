@@ -301,7 +301,7 @@ const MyJobs = () => {
                     <button className="mj-action-btn" title="Ko'rish" onClick={() => navigate(`/client/landing/${job.id}`)}>
                       <Eye size={18} />
                     </button>
-                    <button className="mj-action-btn" title="Tahrirlash" onClick={() => navigate(`/client/edit-job/${job.id}`)}>
+                    <button className="mj-action-btn" title="Tahrirlash" onClick={() => navigate(`/client/postjob?edit=${job.id}`)}>
                       <Edit size={18} />
                     </button>
                     <button className="mj-action-btn" title="Nusxalash" onClick={() => handleDuplicateJob(job)}>
@@ -368,7 +368,7 @@ const MyJobs = () => {
                   )}
                   {job.status === "draft" && (
                     <>
-                      <button className="mj-footer-btn mj-primary" onClick={() => navigate(`/client/edit-job/${job.id}`)}>
+                      <button className="mj-footer-btn mj-primary" onClick={() => navigate(`/client/postjob?edit=${job.id}`)}>
                         <Edit size={18} /> {t('myJobs.card.edit')}
                       </button>
                       <button className="mj-footer-btn mj-outline" onClick={() => navigate(`/client/landing/${job.id}`)}>
