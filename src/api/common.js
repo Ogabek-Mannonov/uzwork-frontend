@@ -50,6 +50,18 @@ export const search = async (query) => {
   }
 };
 
+// ===================== SKILLS =====================
+
+/** Get Skills */
+export const getSkills = async (search = "") => {
+  try {
+    const res = await api.get("/skills", { params: { search } });
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message, skills: [] };
+  }
+};
+
 // ===================== NOTIFICATIONS =====================
 
 /** Bildirishnomalar */

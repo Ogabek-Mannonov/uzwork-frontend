@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import "../Client/css/post.css";
 import { createJob, getJobById, updateJob } from "../../api/jobs";
-import { uploadFile } from "../../api/common";
+import { uploadFile, getSkills } from "../../api/common";
 
 /* ================================================================
    CONSTANTS
@@ -29,24 +29,7 @@ const SUGGESTED_SKILLS = {
   marketing:   ["Social Media", "Email Marketing", "Google Ads", "SEO", "Content Strategy"],
 };
 
-const COMMON_SKILLS = [
-  "React", "Node.js", "TypeScript", "PostgreSQL", "Docker", "AWS", "GraphQL", "Python", "REST API", "MongoDB",
-  "JavaScript", "HTML5", "CSS3", "Next.js", "Vue.js", "Angular", "PHP", "Laravel", "MySQL", "Redis",
-  "Flutter", "React Native", "Swift", "Kotlin", "Java", "C#", "C++", "Unity", "Unreal Engine",
-  "Go", "Rust", "Ruby on Rails", "Django", "Flask", "Spring Boot", "ASP.NET", "Kubernetes", "Azure", "Google Cloud",
-  "Figma", "UI/UX Design", "Prototyping", "Adobe XD", "Webflow", "Sketch", "Design Systems",
-  "Photoshop", "Illustrator", "Indesign", "After Effects", "Premiere Pro", "3D Modeling", "Blender",
-  "Motion Graphics", "Logo Design", "Branding", "Typography", "Color Theory", "Vector Art",
-  "Social Media Marketing", "Email Marketing", "Google Ads", "Facebook Ads", "Instagram Marketing", 
-  "SEO", "SEM", "Content Strategy", "Growth Hacking", "Affiliate Marketing",
-  "SEO Writing", "Copywriting", "Blog Posts", "Technical Writing", "Proofreading", "Translation", 
-  "Transcription", "Creative Writing", "Grant Writing", "Ghostwriting",
-  "Machine Learning", "Data Science", "Artificial Intelligence", "Natural Language Processing", "Computer Vision",
-  "Data Analysis", "Big Data", "Pandas", "NumPy", "TensorFlow", "PyTorch", "Tableau", "Power BI",
-  "Project Management", "Agile", "Scrum", "Product Management", "QA Testing", "Cyber Security",
-  "Data Entry", "Virtual Assistant", "Customer Support", "Sales", "Business Analysis", "Financial Modeling",
-  "Blockchain", "Solidity", "Web3", "Smart Contracts", "Crypto", "Toptal", "Upwork Skills"
-].sort();
+// COMMON_SKILLS has been replaced by a dynamic backend API fetch
 
 const CATEGORIES = [
   "Web Development", "Mobile Development", "Design & Creative",
@@ -295,14 +278,21 @@ const PjStep2 = ({ form, setForm, errors }) => {
     setForm(p => ({ ...p, skills: p.skills.filter(x => x !== sk) }));
   }, [setForm]);
 
-  const suggested = SUGGESTED_SKILLS[activeCat] || [];
+  const [dynamicSkills, setDynamicSkills] = useState([]);
 
-  const filtered = input.trim().length > 0 
-    ? COMMON_SKILLS.filter(s => 
-        s.toLowerCase().includes(input.toLowerCase()) && 
-        !form.skills.includes(s)
-      ).slice(0, 10)
-    : [];
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      getSkills(input).then(res => {
+        if (res?.success) {
+          setDynamicSkills(res.skills || []);
+        }
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [input]);
+
+  const suggested = SUGGESTED_SKILLS[activeCat] || [];
+  const filtered = dynamicSkills.filter(s => !form.skills.includes(s));
 
   return (
     <div className="pj-card-body">
@@ -836,11 +826,16 @@ const PostJob = () => {
             scope: data.scope || "medium",
             freelancers: data.freelancers_needed?.toString() || "1",
             visibility: data.visibility || "public",
+            attachments: Array.isArray(data.attachments) ? data.attachments : [],
           };
           setForm(loadedForm);
 
+          // Highest valid step will be calculated dynamically on render
+          // but we want to set the initial step to the highest one available.
           let targetStep = 1;
-          const s1Valid = loadedForm.title.trim().length >= 10 && loadedForm.category && loadedForm.description.trim().length >= 50 && loadedForm.experience;
+          const titleStr = typeof loadedForm.title === 'string' ? loadedForm.title : '';
+          const descStr = typeof loadedForm.description === 'string' ? loadedForm.description : '';
+          const s1Valid = titleStr.trim().length >= 10 && loadedForm.category && descStr.trim().length >= 50 && loadedForm.experience;
           if (s1Valid) {
             targetStep = 2;
             const s2Valid = loadedForm.skills.length > 0;
@@ -910,8 +905,38 @@ const PostJob = () => {
     }
   };
 
+  const getHighestValidStep = () => {
+    let target = 1;
+    const titleStr = typeof form?.title === 'string' ? form.title : '';
+    const descStr = typeof form?.description === 'string' ? form.description : '';
+    const s1Valid = titleStr.trim().length >= 10 && form?.category && descStr.trim().length >= 50 && form?.experience;
+    if (s1Valid) {
+      target = 2;
+      const s2Valid = form?.skills?.length > 0;
+      if (s2Valid) {
+        target = 3;
+        let s3Valid = false;
+        if (form?.budgetType === "fixed" && form?.budgetFixed) s3Valid = true;
+        if (form?.budgetType === "range" && form?.budgetMin && form?.budgetMax) s3Valid = true;
+        if (form?.budgetType === "hourly" && form?.hourlyMin && form?.hourlyMax) s3Valid = true;
+        
+        if (s3Valid && form?.duration) {
+          target = 4;
+        }
+      }
+    }
+    return target;
+  };
+
+  const highestValidStep = getHighestValidStep();
+
   const handleStepClick = (num) => {
-    if (num < step) { setStep(num); setErrors({}); }
+    if (num <= highestValidStep && num !== step) {
+      setStep(num);
+      setErrors({});
+    } else if (num > highestValidStep && num !== step) {
+      notify(t('postJob.errors.fillAll'), "error");
+    }
   };
 
   const buildPayload = (status = "active") => {
@@ -1051,21 +1076,31 @@ const PostJob = () => {
 
       <div className="pj-stepper">
         <div className="pj-steps">
-          {STEPS.map(s => (
-            <div
-              key={s.id}
-              className={`pj-step ${step === s.id ? "active" : step > s.id ? "done" : ""}`}
-              onClick={() => handleStepClick(s.id)}
-            >
-              <div className="pj-step-num">
-                {step > s.id ? <Check size={14} /> : s.id}
+          {STEPS.map(s => {
+            // A step is considered "done" if it's less than the current step,
+            // OR if it's less than or equal to highestValidStep but not currently active.
+            // This ensures completed steps are always visually distinct and clickable.
+            const isCompleted = s.id < step || (s.id <= highestValidStep && s.id !== step);
+            const isActive = step === s.id;
+            const isClickable = s.id <= highestValidStep;
+
+            return (
+              <div
+                key={s.id}
+                className={`pj-step ${isActive ? "active" : isCompleted ? "done" : ""}`}
+                style={{ cursor: isClickable ? 'pointer' : 'default', opacity: isClickable ? 1 : 0.6 }}
+                onClick={() => handleStepClick(s.id)}
+              >
+                <div className="pj-step-num">
+                  {isCompleted ? <Check size={14} /> : s.id}
+                </div>
+                <div className="pj-step-info">
+                  <span className="pj-step-label">{t(`postJob.steps.${s.key}.label`)}</span>
+                  <span className="pj-step-sub">{t(`postJob.steps.${s.key}.sub`)}</span>
+                </div>
               </div>
-              <div className="pj-step-info">
-                <span className="pj-step-label">{t(`postJob.steps.${s.key}.label`)}</span>
-                <span className="pj-step-sub">{t(`postJob.steps.${s.key}.sub`)}</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
