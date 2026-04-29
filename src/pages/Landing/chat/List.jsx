@@ -84,6 +84,9 @@ function Avatar({ user, size = "md" }) {
           src={src} 
           alt={name} 
           onError={() => setImgError(true)} 
+          onContextMenu={(e) => e.preventDefault()}
+          draggable="false"
+          style={{ userSelect: 'none', WebkitUserDrag: 'none' }}
         />
       ) : (
         <span className="avatar-initials">{initials}</span>

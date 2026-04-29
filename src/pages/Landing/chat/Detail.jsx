@@ -13,6 +13,7 @@ import {
 import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/useSocket";
 import { Smile, Globe, Settings2, X, MoreVertical, Copy, Trash2, Edit3, User, Phone, ArrowLeft, Send, Mic, Download, Paperclip, FileText, Bell, BellOff, Pin, UserPlus, Settings, ExternalLink, Search, Video, Briefcase, CheckCircle, AlertCircle } from "lucide-react";
 import SubmissionCard from "./SubmissionCard";
+import ScreenshotGuard from "../../components/ScreenshotGuard";
 import { getContractById } from "../../../api/contracts";
 import { submitMilestone, approveMilestone, rejectMilestone } from "../../../api/milestones";
 import i18n from "../../../i18n";
@@ -218,6 +219,9 @@ function Avatar({ user, size = "sm" }) {
           src={src}
           alt={name}
           onError={() => setImgError(true)}
+          onContextMenu={(e) => e.preventDefault()}
+          draggable="false"
+          style={{ userSelect: 'none', WebkitUserDrag: 'none' }}
         />
       ) : (
         <span className="avatar-initials">{initials}</span>
@@ -502,63 +506,72 @@ function MessageBubble({
           ) : (
             <>
               {(isImage || isVideo) && msg.file_url && (
-                <div className="media-container" onClick={() => onMediaClick?.({ type: isImage ? 'image' : 'video', url: msg.file_url })}>
-                  {isImage ? (
-                    <img src={avatarSrc(msg.file_url)} alt="rasm" className="img-bubble" />
-                  ) : (
-                    <div className="video-wrapper">
-                      <video src={avatarSrc(msg.file_url)} className="video-bubble" />
-                      <div className="video-play-overlay">
-                        <div className="play-icon-circle">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z" /></svg>
+                <ScreenshotGuard enabled={true}>
+                  <div className="media-container" onClick={() => onMediaClick?.({ type: isImage ? 'image' : 'video', url: msg.file_url })}>
+                    {isImage ? (
+                      <img 
+                        src={avatarSrc(msg.file_url)} 
+                        alt="rasm" 
+                        className="img-bubble" 
+                        onContextMenu={(e) => e.preventDefault()}
+                        draggable="false"
+                        style={{ userSelect: 'none', WebkitUserDrag: 'none' }}
+                      />
+                    ) : (
+                      <div className="video-wrapper">
+                        <video src={avatarSrc(msg.file_url)} className="video-bubble" />
+                        <div className="video-play-overlay">
+                          <div className="play-icon-circle">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z" /></svg>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {!getMsgText(msg) && !translation && (
-                    <div className="msg-time-floating">
-                      {(msg.reactions || []).length > 0 && (
-                        <div className="msg-floating-reactions">
-                          {(msg.reactions || []).map((r, i) => {
-                            const hasMyReaction = r.user_ids && r.user_ids.map(String).includes(String(currentUser?.id));
-                            return (
-                              <span
-                                key={i}
-                                className={`floating-reaction-item ${hasMyReaction ? "mine" : ""}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onReactChip?.(msg, r.emoji);
-                                }}
-                                title={r.user_ids ? `${r.user_ids.length} reactions` : ""}
-                              >
-                                <span className="reaction-emoji">{r.emoji}</span>
-                                {(r.count > 1 || (r.user_ids && r.user_ids.length > 1)) && (
-                                  <span className="reaction-count">{r.user_ids ? r.user_ids.length : r.count}</span>
-                                )}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      )}
-                      <span className="floating-time-text">{formatMsgTime(msg.created_at)}</span>
-                      {isOwnVal && (
-                        <span className={`msg-read-icon ${msg.is_read ? "read" : "sent"}`}>
-                          {msg.is_read ? (
-                            <svg width="15" height="11" viewBox="0 0 16 11" fill="none">
-                              <path d="M1 6L4.5 9.5L10.5 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                              <path d="M5 6L8.5 9.5L14.5 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          ) : (
-                            <svg width="11" height="10" viewBox="0 0 12 10" fill="none">
-                              <path d="M1 5.5L4.5 9L11 1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
+                    {!getMsgText(msg) && !translation && (
+                      <div className="msg-time-floating">
+                        {(msg.reactions || []).length > 0 && (
+                          <div className="msg-floating-reactions">
+                            {(msg.reactions || []).map((r, i) => {
+                              const hasMyReaction = r.user_ids && r.user_ids.map(String).includes(String(currentUser?.id));
+                              return (
+                                <span
+                                  key={i}
+                                  className={`floating-reaction-item ${hasMyReaction ? "mine" : ""}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onReactChip?.(msg, r.emoji);
+                                  }}
+                                  title={r.user_ids ? `${r.user_ids.length} reactions` : ""}
+                                >
+                                  <span className="reaction-emoji">{r.emoji}</span>
+                                  {(r.count > 1 || (r.user_ids && r.user_ids.length > 1)) && (
+                                    <span className="reaction-count">{r.user_ids ? r.user_ids.length : r.count}</span>
+                                  )}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                        <span className="floating-time-text">{formatMsgTime(msg.created_at)}</span>
+                        {isOwnVal && (
+                          <span className={`msg-read-icon ${msg.is_read ? "read" : "sent"}`}>
+                            {msg.is_read ? (
+                              <svg width="15" height="11" viewBox="0 0 16 11" fill="none">
+                                <path d="M1 6L4.5 9.5L10.5 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M5 6L8.5 9.5L14.5 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            ) : (
+                              <svg width="11" height="10" viewBox="0 0 12 10" fill="none">
+                                <path d="M1 5.5L4.5 9L11 1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </ScreenshotGuard>
               )}
 
               {isFile && msg.file_url && (
@@ -755,11 +768,20 @@ function MediaLightbox({ media, onClose, currentUser }) {
       </div>
 
       <div className="lightbox-content" onClick={e => e.stopPropagation()}>
-        {isVideo ? (
-          <video src={fullUrl} controls autoPlay className="lightbox-media" />
-        ) : (
-          <img src={fullUrl} alt="full-view" className="lightbox-media" />
-        )}
+        <ScreenshotGuard enabled={true}>
+          {isVideo ? (
+            <video src={fullUrl} controls autoPlay className="lightbox-media" />
+          ) : (
+            <img 
+              src={fullUrl} 
+              alt="full-view" 
+              className="lightbox-media" 
+              onContextMenu={(e) => e.preventDefault()}
+              draggable="false"
+              style={{ userSelect: 'none', WebkitUserDrag: 'none' }}
+            />
+          )}
+        </ScreenshotGuard>
       </div>
     </div>
   );
@@ -792,7 +814,13 @@ function FilePreviewModal({
         <div className="file-preview-content">
           {isImage ? (
             <div className="preview-image-container">
-              <img src={previewUrl} alt="preview" />
+              <img 
+                src={previewUrl} 
+                alt="preview" 
+                onContextMenu={(e) => e.preventDefault()}
+                draggable="false"
+                style={{ userSelect: 'none', WebkitUserDrag: 'none' }}
+              />
               <div className="preview-actions-overlay">
                 <button className="preview-overlay-btn" onClick={onCancel} title={i18n.t("chat.delete", "O'chirish")}>
                   <Trash2 size={20} />
@@ -1097,7 +1125,7 @@ export default function ChatDetail() {
 
   // Load contract/milestones if chat has a contract
   useEffect(() => {
-    if (chatId && chatInfo?.contract_id) {
+    if (chatId && chatInfo?.contract_id && (chatInfo.contract_id || showSubmissionModal)) {
       getContractById(chatInfo.contract_id).then(res => {
         if (res?.success) {
           setMilestones(res.data.milestones || []);
@@ -1108,7 +1136,7 @@ export default function ChatDetail() {
         }
       });
     }
-  }, [chatId, chatInfo?.contract_id]);
+  }, [chatId, chatInfo?.contract_id, showSubmissionModal]);
 
   const handleApproveSubmission = async (msg) => {
     const metadata = typeof msg.metadata === 'string' ? JSON.parse(msg.metadata) : msg.metadata;
@@ -1126,6 +1154,7 @@ export default function ChatDetail() {
         }
         return m;
       }));
+      loadHistory();
     } else {
       notify(res.message || "Approve qilishda xato", "error");
     }
@@ -1149,6 +1178,7 @@ export default function ChatDetail() {
         }
         return m;
       }));
+      loadHistory();
     } else {
       notify(res.message || "Xato yuz berdi", "error");
     }
@@ -1408,6 +1438,14 @@ export default function ChatDetail() {
       setMessages((prev) => prev.map((m) => ({ ...m, is_read: true })));
     };
 
+    const onChatUpdated = (data) => {
+      if (data && data.id && String(data.id) === String(chatId)) {
+        setChatInfo(data);
+        // loadHistory will also update chatInfo, but we can do it immediately
+        loadHistory();
+      }
+    };
+
     const reactionEvents = ["reactionAdded", "reactionRemoved", "reactionDeleted", "reactionUpdate"];
 
     socket.off("newMessage", onNew);
@@ -1417,6 +1455,7 @@ export default function ChatDetail() {
     socket.off("userStoppedTyping", onStopTyping);
     reactionEvents.forEach(ev => socket.off(ev));
     socket.off("messagesRead", onRead);
+    socket.off("chat_info_updated", onChatUpdated);
 
     socket.on("newMessage", onNew);
     socket.on("messageEdited", onEdited);
@@ -1424,6 +1463,7 @@ export default function ChatDetail() {
     socket.on("userTyping", onTyping);
     socket.on("userStoppedTyping", onStopTyping);
     socket.on("messagesRead", onRead);
+    socket.on("chat_info_updated", onChatUpdated);
     reactionEvents.forEach(ev => socket.on(ev, handleReactionUpdate));
 
     return () => {
@@ -1433,6 +1473,7 @@ export default function ChatDetail() {
       socket.off("userTyping", onTyping);
       socket.off("userStoppedTyping", onStopTyping);
       socket.off("messagesRead", onRead);
+      socket.off("chat_info_updated", onChatUpdated);
       reactionEvents.forEach(ev => socket.off(ev));
       readyCleanup?.();
     };
@@ -2388,11 +2429,11 @@ export default function ChatDetail() {
 
                 {chatInfo?.contract_id && currentUser?.role === 'freelancer' && (
                   <button 
-                    className="chat-attach-btn" 
+                    className="chat-job-action-btn" 
                     onClick={() => setShowSubmissionModal(true)}
                     title={i18n.t("chat.submitWork", "Ish topshirish")}
                   >
-                    <Briefcase size={24} color="var(--accent)" />
+                    <Briefcase size={20} />
                   </button>
                 )}
               </div>

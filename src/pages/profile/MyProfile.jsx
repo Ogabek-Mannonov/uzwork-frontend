@@ -183,7 +183,9 @@ function AvatarImage({ src, name, size = 40, className = "" }) {
       alt={name || "Avatar"} 
       className={className}
       onError={() => setError(true)}
-      style={{ objectFit: 'cover', borderRadius: '50%', width: `${size}px`, height: `${size}px` }}
+      onContextMenu={(e) => e.preventDefault()}
+      draggable="false"
+      style={{ objectFit: 'cover', borderRadius: '50%', width: `${size}px`, height: `${size}px`, userSelect: 'none', WebkitUserDrag: 'none' }}
     />
   );
 }
