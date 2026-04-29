@@ -853,9 +853,9 @@ function AuthHeader({ user }) {
                       { id: "password", label: t("profile.password"), icon: <Shield size={14} /> },
                       { id: "teams", label: t("profile.teams"), icon: <Users size={14} /> },
                       { id: "membership", label: t("profile.membership"), icon: <Award size={14} /> },
-                      { id: "notifications", label: t("profile.notifications"), icon: <Bell size={14} /> },
+                      { id: "notifications", label: t("profile.notifications.title"), icon: <Bell size={14} /> },
                       { id: "tax", label: t("profile.taxInfo"), icon: <FileText size={14} /> },
-                      { id: "appeals", label: t("profile.appeals"), icon: <AlertTriangle size={14} /> }
+                      { id: "appeals", label: t("profile.appeals.title"), icon: <AlertTriangle size={14} /> }
                     ].map(item => (
                       <button key={item.id} onClick={() => handleProfileNav(item.id)} style={{
                         display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "9px 12px",
@@ -874,8 +874,8 @@ function AuthHeader({ user }) {
                       { id: "billing", label: t("profile.billing"), icon: <CreditCard size={14} /> },
                       { id: "password", label: t("profile.password"), icon: <Shield size={14} /> },
                       { id: "membership", label: t("profile.membership"), icon: <Award size={14} /> },
-                      { id: "notifications", label: t("profile.notifications"), icon: <Bell size={14} /> },
-                      { id: "appeals", label: t("profile.appeals"), icon: <AlertTriangle size={14} /> }
+                      { id: "notifications", label: t("profile.notifications.title"), icon: <Bell size={14} /> },
+                      { id: "appeals", label: t("profile.appeals.title"), icon: <AlertTriangle size={14} /> }
                     ].map(item => (
                       <button key={item.id} onClick={() => handleProfileNav(item.id)} style={{
                         display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "9px 12px",
