@@ -38,7 +38,7 @@ export default function JobDetail() {
       setToast("Barcha maydonlarni to'ldiring!"); setTimeout(() => setToast(""), 3000); return;
     }
     setSubmitting(true);
-    const res = await createProposal({ project_id: id, ...proposal });
+    const res = await createProposal({ job_id: id, ...proposal });
     setSubmitting(false);
     if (res?.success === false) {
       setToast(res?.message || "Xato yuz berdi");
@@ -64,7 +64,7 @@ export default function JobDetail() {
         }}>{toast}</div>
       )}
 
-      <button onClick={() => navigate("/jobs")} style={{ marginBottom: 20, background: "none", border: "none", color: "#14a800", cursor: "pointer", fontWeight: 600 }}>
+      <button onClick={() => navigate("/find-work")} style={{ marginBottom: 20, background: "none", border: "none", color: "#14a800", cursor: "pointer", fontWeight: 600 }}>
         ← Barcha ishlarga
       </button>
 

@@ -20,7 +20,6 @@ import Info from "./pages/info/Info.jsx";
 import CategoryPage from "./pages/hire/CategoryPage.jsx";
 
 
-import JobsList from "./pages/Landing/jobs/List.jsx";
 import JobDetail from "./pages/Landing/jobs/Detail.jsx";
 import CreateJob from "./pages/Landing/jobs/Create.jsx";
 
@@ -90,7 +89,6 @@ function App() {
           <Route path="/app" element={<Navigate to="/home" replace />} />
 
           {/* Public-ish inside app */}
-          <Route path="/jobs" element={<JobsList />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/profile/:id" element={<PublicProfile />} />
           <Route path="/home" element={<HomeRedirect />} />

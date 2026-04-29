@@ -556,10 +556,8 @@ function AuthHeader({ user }) {
       const q = encodeURIComponent(searchValue.trim());
       if (searchCat === "Talent") {
         navigate(`/client/talent?q=${q}`);
-      } else if (searchCat === "Jobs") {
-        navigate(`/find-work?q=${q}`);
       } else {
-        navigate(`/jobs?q=${q}`);
+        navigate(`/find-work?q=${q}`);
       }
       setJobsOpen(false);
     }
@@ -567,8 +565,7 @@ function AuthHeader({ user }) {
 
   const categories = [
     { key: "Jobs",     label: t("navbar.searchJobs") },
-    { key: "Talent",   label: t("navbar.searchTalent") },
-    { key: "Projects", label: t("navbar.searchProjects") }
+    { key: "Talent",   label: t("navbar.searchTalent") }
   ];
 
   const handleProfileNav = (section) => {

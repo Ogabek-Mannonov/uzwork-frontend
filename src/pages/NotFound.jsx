@@ -15,12 +15,6 @@ export default function NotFound() {
           >
             Home
           </Link>
-          <Link
-            to="/jobs"
-            className="px-4 py-2 rounded-xl bg-gray-100"
-          >
-            Jobs
-          </Link>
         </div>
       </div>
     </div>
