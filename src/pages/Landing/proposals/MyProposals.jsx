@@ -102,6 +102,36 @@ export default function MyProposals() {
     archived: proposals.filter(p => p.status === "rejected" || p.status === "withdrawn").length,
   }), [proposals]);
 
+  const BACKEND = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const avatarSrc = (url) => {
+    if (!url) return null;
+    if (url.startsWith("http")) return url;
+    const path = url.startsWith("/") ? url : `/${url}`;
+    return `${BACKEND}${path}`;
+  };
+
+  const ClientAvatar = ({ src, name }) => {
+    const [error, setError] = useState(false);
+    const initials = name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
+    
+    if (!src || error) {
+      return (
+        <div className="fprop-client-ava" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "var(--brand-light, rgba(37, 99, 235, 0.1))", color: "var(--brand, #2563eb)", fontWeight: "bold", fontSize: "10px" }}>
+          {initials}
+        </div>
+      );
+    }
+
+    return (
+      <img 
+        src={avatarSrc(src)} 
+        alt="" 
+        className="fprop-client-ava" 
+        onError={() => setError(true)}
+      />
+    );
+  };
+
   if (loading) {
     return (
       <div className="fprop-container">
@@ -160,13 +190,7 @@ export default function MyProposals() {
                   </h3>
                   
                   <div className="fprop-client-badge">
-                    {p.client_avatar ? (
-                      <img src={p.client_avatar} alt="" className="fprop-client-ava" />
-                    ) : (
-                      <div className="fprop-client-ava" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "var(--fprop-surface-2)" }}>
-                        <User size={12} color="var(--fprop-text-3)" />
-                      </div>
-                    )}
+                    <ClientAvatar src={p.client_avatar} name={`${p.client_first_name} ${p.client_last_name}`} />
                     <span className="fprop-client-name">{p.client_first_name} {p.client_last_name}</span>
                   </div>
                 </div>

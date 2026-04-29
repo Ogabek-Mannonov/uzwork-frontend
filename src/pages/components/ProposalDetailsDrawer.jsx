@@ -40,6 +40,36 @@ export default function ProposalDetailsDrawer({ proposal, isOpen, onClose }) {
   if (!isOpen && !isAnimating) return null;
   if (!proposal) return null;
 
+  const BACKEND = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const avatarSrc = (url) => {
+    if (!url) return null;
+    if (url.startsWith("http")) return url;
+    const path = url.startsWith("/") ? url : `/${url}`;
+    return `${BACKEND}${path}`;
+  };
+
+  const ClientAvatar = ({ src, name }) => {
+    const [error, setError] = useState(false);
+    const initials = name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
+    
+    if (!src || error) {
+      return (
+        <div style={{ width: 48, height: 48, borderRadius: "50%", background: "var(--brand-light, rgba(37, 99, 235, 0.1))", color: "var(--brand, #2563eb)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" }}>
+          {initials}
+        </div>
+      );
+    }
+
+    return (
+      <img 
+        src={avatarSrc(src)} 
+        alt="" 
+        style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover" }} 
+        onError={() => setError(true)}
+      />
+    );
+  };
+
   const isInvited = proposal.status === "invited";
   const postedDate = new Date(proposal.created_at).toLocaleDateString(
     i18n.language === 'uz' ? 'uz-UZ' : (i18n.language === 'ru' ? 'ru-RU' : 'en-US')
@@ -139,13 +169,7 @@ export default function ProposalDetailsDrawer({ proposal, isOpen, onClose }) {
               <h3 style={{ marginBottom: "20px" }}>{t("findWork.drawer.aboutClient")}</h3>
               
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-                {proposal.client_avatar ? (
-                  <img src={proposal.client_avatar} alt="" style={{ width: 48, height: 48, borderRadius: "50%" }} />
-                ) : (
-                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: "var(--fprop-surface-2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <User size={24} color="var(--fprop-text-3)" />
-                  </div>
-                )}
+                <ClientAvatar src={proposal.client_avatar} name={`${proposal.client_first_name} ${proposal.client_last_name}`} />
                 <div>
                   <div style={{ fontWeight: "600", color: "var(--fprop-text-1)" }}>
                     {proposal.client_first_name} {proposal.client_last_name}

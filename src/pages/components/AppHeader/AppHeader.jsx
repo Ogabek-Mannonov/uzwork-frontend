@@ -19,13 +19,13 @@ import { getSocket } from "../../../hooks/useSocket";
 
 const getToken = () => localStorage.getItem("accessToken");
 
-const BACKEND =
-  import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
+const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/api\/?$/, "");
 
 function avatarSrc(url) {
   if (!url) return null;
   if (url.startsWith("http")) return url;
-  return `${BACKEND}${url}`;
+  const path = url.startsWith("/") ? url : `/${url}`;
+  return `${BACKEND}${path}`;
 }
 
 function getInitials(name) {
