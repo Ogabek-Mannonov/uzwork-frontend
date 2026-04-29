@@ -12,6 +12,7 @@ import { getFreelancers, saveFreelancer } from "../../api/freelancer";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { inviteFreelancer } from "../../api/proposals";
+import InviteDrawer from "../components/InviteDrawer";
 
 /* ================================================================
    MOCK DATA
@@ -61,7 +62,7 @@ const FtFilterSection = ({ title, info, children, defaultOpen = true }) => {
 /* ================================================================
    FREELANCER CARD
    ================================================================ */
-const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle }) => {
+const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle, onOpenInviteDrawer }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [invited, setInvited] = useState(false);
@@ -70,8 +71,8 @@ const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle }) => {
   const handleInvite = async () => {
     if (invited) return;
     
-    setInvited(true);
     if (targetJobId) {
+      setInvited(true);
       try {
         const res = await inviteFreelancer({
           job_id: targetJobId,
@@ -89,7 +90,11 @@ const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle }) => {
         onInvite("Server xatosi", false);
       }
     } else {
-      onInvite(fl.name, true);
+      if (onOpenInviteDrawer) {
+        onOpenInviteDrawer(fl, setInvited);
+      } else {
+        onInvite(fl.name, true);
+      }
     }
   };
 
@@ -254,6 +259,10 @@ const FindTalent = () => {
   const [toast,       setToast]       = useState("");
   const [targetJobId, setTargetJobId] = useState(searchParams.get("jobId"));
   const [targetJobTitle, setTargetJobTitle] = useState("");
+
+  const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
+  const [selectedFreelancerForInvite, setSelectedFreelancerForInvite] = useState(null);
+  const [activeSetInvitedCb, setActiveSetInvitedCb] = useState(null);
 
   const [freelancers, setFreelancers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -546,6 +555,11 @@ const FindTalent = () => {
                 fl={fl}
                 targetJobId={targetJobId}
                 onSaveToggle={onSaveToggle}
+                onOpenInviteDrawer={(freelancer, setInvitedCb) => {
+                  setSelectedFreelancerForInvite(freelancer);
+                  setActiveSetInvitedCb(() => setInvitedCb);
+                  setInviteDrawerOpen(true);
+                }}
                 onInvite={(name, isSuccess) => {
                   if (isSuccess) {
                     notify(targetJobId ? `${name} ga ushbu loyiha uchun taklif yuborildi!` : `${name} ga taklif yubarildi!`);
@@ -597,6 +611,23 @@ const FindTalent = () => {
       </div>
 
       <FtToast msg={toast} onClose={() => setToast("")} />
+      <InviteDrawer 
+        isOpen={inviteDrawerOpen} 
+        onClose={() => {
+          setInviteDrawerOpen(false);
+          setSelectedFreelancerForInvite(null);
+          setActiveSetInvitedCb(null);
+        }} 
+        freelancer={selectedFreelancerForInvite}
+        onInviteSuccess={(msgOrName, isSuccess) => {
+          if (isSuccess) {
+            notify(`${msgOrName} ga ushbu loyiha uchun taklif yuborildi!`);
+            if (activeSetInvitedCb) activeSetInvitedCb(true);
+          } else {
+            notify(msgOrName);
+          }
+        }}
+      />
     </div>
   );
 };

@@ -1,0 +1,356 @@
+.id-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.id-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.id-drawer {
+  width: 100%;
+  max-width: 480px;
+  height: 100%;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.08);
+}
+
+body.dark-mode .id-drawer {
+  background: #0f172a;
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.id-drawer.is-open {
+  transform: translateX(0);
+}
+
+.id-header {
+  padding: 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+body.dark-mode .id-header {
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.id-close-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.id-close-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+body.dark-mode .id-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+.id-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+body.dark-mode .id-header h2 {
+  color: #f8fafc;
+}
+
+.id-freelancer-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.dark-mode .id-freelancer-info {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.id-freelancer-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .id-freelancer-avatar {
+  border-color: #1e293b;
+}
+
+.id-freelancer-name {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 15px;
+}
+
+body.dark-mode .id-freelancer-name {
+  color: #f8fafc;
+}
+
+.id-freelancer-title {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+body.dark-mode .id-freelancer-title {
+  color: #94a3b8;
+}
+
+.id-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.id-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+body.dark-mode .id-section-title {
+  color: #94a3b8;
+}
+
+.id-job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.id-job-card {
+  padding: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+body.dark-mode .id-job-card {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.id-job-card:hover {
+  border-color: #cbd5e1;
+}
+
+body.dark-mode .id-job-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.id-job-card.selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+body.dark-mode .id-job-card.selected {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.id-job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.id-job-title {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+body.dark-mode .id-job-title {
+  color: #f8fafc;
+}
+
+.id-job-radio {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+body.dark-mode .id-job-radio {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.id-job-card.selected .id-job-radio {
+  border-color: #3b82f6;
+  background: #3b82f6;
+}
+
+.id-job-radio-inner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.2s ease;
+}
+
+.id-job-card.selected .id-job-radio-inner {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.id-job-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+body.dark-mode .id-job-meta {
+  color: #94a3b8;
+}
+
+.id-job-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.id-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+}
+
+body.dark-mode .id-empty-state {
+  color: #94a3b8;
+}
+
+.id-empty-icon {
+  margin-bottom: 16px;
+  opacity: 0.5;
+  display: flex;
+  justify-content: center;
+}
+
+.id-empty-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+body.dark-mode .id-empty-title {
+  color: #f8fafc;
+}
+
+.id-footer {
+  padding: 24px;
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+body.dark-mode .id-footer {
+  border-top-color: rgba(255, 255, 255, 0.05);
+  background: #0f172a;
+}
+
+.id-submit-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.id-submit-btn:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.id-submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.id-submit-btn:disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+body.dark-mode .id-submit-btn:disabled {
+  background: rgba(255, 255, 255, 0.05);
+  color: #475569;
+}
+
+.id-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #3b82f6;
+}
+
+.id-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
