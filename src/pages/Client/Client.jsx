@@ -336,10 +336,8 @@ const Settings = () => {
         { id: "my-info", label: t('clientProfile.nav.myInfo'), icon: <User size={18} />, badge: null },
         { id: "billing", label: t('clientProfile.nav.billing'), icon: <CreditCard size={18} />, badge: null },
         { id: "password", label: t('clientProfile.nav.password'), icon: <Shield size={18} />, badge: null },
-        { id: "teams", label: t('clientProfile.nav.teams'), icon: <Users size={18} />, badge: "2" },
         { id: "membership", label: t('clientProfile.nav.membership'), icon: <Award size={18} />, badge: "Basic" },
         { id: "notifications", label: t('clientProfile.nav.notifications'), icon: <Bell size={18} />, badge: null },
-        { id: "tax", label: t('clientProfile.nav.tax'), icon: <FileText size={18} />, badge: null },
         { id: "services", label: t('clientProfile.nav.services'), icon: <Link size={18} />, badge: "3" },
         { id: "appeals", label: t('clientProfile.nav.appeals'), icon: <AlertTriangle size={18} />, badge: null }
       ]
@@ -1735,53 +1733,6 @@ const Settings = () => {
             </div>
           )}
 
-          {/* TEAMS & MEMBERS SECTION */}
-          {activeSection === "teams" && (
-            <div className="content-section">
-              <div className="section-header">
-                <h1 className="section-title">{t('clientProfile.teams.title')}</h1>
-                <button className="btn-primary" onClick={() => handleUserMenuClick("Invite member")}>
-                  <Plus size={16} />
-                  {t('clientProfile.teams.invite')}
-                </button>
-              </div>
-              
-              <div className="teams-grid">
-                <div className="team-card">
-                  <div className="team-header">
-                    <Users size={24} />
-                    <h2>{t('clientProfile.teams.yourTeam')}</h2>
-                  </div>
-                  <div className="team-members">
-                    <div className="member-item">
-                      <AvatarImage src={userData.profilePicture} name={userData.fullName} className="member-avatar" size={32} />
-                      <div className="member-info">
-                        <h3>{userData.fullName}</h3>
-                        <p>{t('clientProfile.teams.owner')} • {userData.email}</p>
-                      </div>
-                      <span className="owner-badge">{t('clientProfile.teams.owner')}</span>
-                    </div>
-                    <div className="member-item">
-                      <div className="member-avatar-placeholder">JD</div>
-                      <div className="member-info">
-                        <h3>John Doe</h3>
-                        <p>{t('clientProfile.teams.admin')} • john@example.com</p>
-                      </div>
-                      <span className="role-badge">{t('clientProfile.teams.admin')}</span>
-                    </div>
-                    <div className="member-item">
-                      <div className="member-avatar-placeholder">JS</div>
-                      <div className="member-info">
-                        <h3>Jane Smith</h3>
-                        <p>{t('clientProfile.teams.member')} • jane@example.com</p>
-                      </div>
-                      <span className="role-badge">{t('clientProfile.teams.member')}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* MEMBERSHIP SECTION */}
           {activeSection === "membership" && (
@@ -2021,21 +1972,6 @@ const Settings = () => {
             </div>
           )}
 
-          {/* TAX INFORMATION SECTION */}
-          {activeSection === "tax" && (
-            <div className="content-section">
-              <h1 className="section-title">{t('clientProfile.placeholders.taxTitle')}</h1>
-              <div className="placeholder-card">
-                <FileText size={48} />
-                <h2>{t('clientProfile.placeholders.taxComingSoon')}</h2>
-                <p>{t('clientProfile.placeholders.taxDesc')}</p>
-                <button className="btn-primary" onClick={() => handleUserMenuClick("Upload tax documents")}>
-                  <Upload size={16} />
-                  {t('clientProfile.placeholders.uploadDocs')}
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* CONNECTED SERVICES SECTION */}
           {activeSection === "services" && (
