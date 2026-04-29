@@ -347,8 +347,8 @@ function LandingHeader({ i18n, changeLanguage }) {
 // ══════════════════════════════════════════════════════════
 // AUTH HEADER (logged in — freelancer navbar)
 // ══════════════════════════════════════════════════════════
-function AuthHeader({ i18n, changeLanguage, user }) {
-  const { t } = useTranslation();
+function AuthHeader({ user }) {
+  const { t, i18n } = useTranslation();
   const { isDark, toggle } = useThemeContext();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [jobsOpen, setJobsOpen] = useState(false);
@@ -801,7 +801,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                   {/* ── User title ── */}
                   <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border, #e2e8f0)", marginBottom: "8px" }}>
                     <span style={{ fontWeight: 600, fontSize: "14px", display: "block", color: "var(--text)" }}>
-                      {isClient ? "Mijoz sozlamalari" : "Sozlamalar"}
+                      {isClient ? t("profile.clientSettings") : t("profile.settings")}
                     </span>
                   </div>
 
@@ -832,7 +832,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                     <span style={{ display: "flex", alignItems: "center", color: isDark ? "#f59e0b" : "#64748b" }}>
                       {isDark ? <Sun size={15} /> : <Moon size={15} />}
                     </span>
-                    {isDark ? "Kunduzgi rejim" : "Tungi rejim"}
+                    {isDark ? t("profile.lightMode") : t("profile.darkMode")}
                     <span style={{
                       marginLeft: "auto", width: "32px", height: "18px", borderRadius: "9px",
                       background: isDark ? "#3b82f6" : "#cbd5e1", position: "relative", transition: "background 0.2s", flexShrink: 0
@@ -848,14 +848,14 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                   {/* ── Menu items ── */}
                   {isClient ? (
                     [
-                      { id: "my-info", label: "Mening ma'lumotlarim", icon: <User size={14} /> },
-                      { id: "billing", label: "To'lovlar va hisob-kitob", icon: <CreditCard size={14} /> },
-                      { id: "password", label: "Parol va xavfsizlik", icon: <Shield size={14} /> },
-                      { id: "teams", label: "Jamoalar va a'zolar", icon: <Users size={14} /> },
-                      { id: "membership", label: "A'zolik", icon: <Award size={14} /> },
-                      { id: "notifications", label: "Bildirishnoma sozlamalari", icon: <Bell size={14} /> },
-                      { id: "tax", label: "Soliq ma'lumotlari", icon: <FileText size={14} /> },
-                      { id: "appeals", label: "Shikoyatlar markazi", icon: <AlertTriangle size={14} /> }
+                      { id: "my-info", label: t("profile.myInfo"), icon: <User size={14} /> },
+                      { id: "billing", label: t("profile.billing"), icon: <CreditCard size={14} /> },
+                      { id: "password", label: t("profile.password"), icon: <Shield size={14} /> },
+                      { id: "teams", label: t("profile.teams"), icon: <Users size={14} /> },
+                      { id: "membership", label: t("profile.membership"), icon: <Award size={14} /> },
+                      { id: "notifications", label: t("profile.notifications"), icon: <Bell size={14} /> },
+                      { id: "tax", label: t("profile.taxInfo"), icon: <FileText size={14} /> },
+                      { id: "appeals", label: t("profile.appeals"), icon: <AlertTriangle size={14} /> }
                     ].map(item => (
                       <button key={item.id} onClick={() => handleProfileNav(item.id)} style={{
                         display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "9px 12px",
@@ -869,13 +869,13 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                     ))
                   ) : (
                     [
-                      { id: "my-info", label: "Mening ma'lumotlarim", icon: <User size={14} /> },
-                      { id: "cv-upload", label: "CV Yuklash", icon: <FileText size={14} /> },
-                      { id: "billing", label: "To'lovlar", icon: <CreditCard size={14} /> },
-                      { id: "password", label: "Parol va Xavfsizlik", icon: <Shield size={14} /> },
-                      { id: "membership", label: "A'zolik", icon: <Award size={14} /> },
-                      { id: "notifications", label: "Xabarnoma sozlamalari", icon: <Bell size={14} /> },
-                      { id: "appeals", label: "Shikoyatlar markazi", icon: <AlertTriangle size={14} /> }
+                      { id: "my-info", label: t("profile.myInfo"), icon: <User size={14} /> },
+                      { id: "cv-upload", label: t("profile.cvUpload"), icon: <FileText size={14} /> },
+                      { id: "billing", label: t("profile.billing"), icon: <CreditCard size={14} /> },
+                      { id: "password", label: t("profile.password"), icon: <Shield size={14} /> },
+                      { id: "membership", label: t("profile.membership"), icon: <Award size={14} /> },
+                      { id: "notifications", label: t("profile.notifications"), icon: <Bell size={14} /> },
+                      { id: "appeals", label: t("profile.appeals"), icon: <AlertTriangle size={14} /> }
                     ].map(item => (
                       <button key={item.id} onClick={() => handleProfileNav(item.id)} style={{
                         display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "9px 12px",
@@ -895,7 +895,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                     fontSize: "14px", color: "var(--blue)", fontWeight: 600, transition: "0.2s"
                   }} onMouseOver={e => e.currentTarget.style.background = "var(--blue-light, #dbeafe)"} onMouseOut={e => e.currentTarget.style.background = "var(--bg, #f1f5f9)"}>
                     <span style={{ display: 'flex', alignItems: 'center' }}><RefreshCw size={14} /></span>
-                    {isClient ? "Freelancer rejimiga o'tish" : "Mijoz rejimiga o'tish"}
+                    {isClient ? t("profile.switchToFreelancer") : t("profile.switchToClient")}
                   </button>
                   <button onClick={() => handleProfileNav("help")} style={{
                     display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "10px 12px",
@@ -903,7 +903,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                     fontSize: "14px", color: "var(--text, #1e293b)", transition: "0.2s"
                   }} onMouseOver={e => e.currentTarget.style.background = "var(--bg, #f1f5f9)"} onMouseOut={e => e.currentTarget.style.background = "none"}>
                     <span style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary, #64748b)' }}><HelpCircle size={14} /></span>
-                    Yordam va qo'llab quvvatlash
+                    {t("profile.helpSupport")}
                   </button>
                   <button onClick={handleLogout} style={{
                     display: "flex", alignItems: "center", gap: "10px", width: "100%", textAlign: "left", padding: "10px 12px",
@@ -911,7 +911,7 @@ function AuthHeader({ i18n, changeLanguage, user }) {
                     fontSize: "14px", color: "#ef4444", transition: "0.2s"
                   }} onMouseOver={e => e.currentTarget.style.background = "var(--bg, #f1f5f9)"} onMouseOut={e => e.currentTarget.style.background = "none"}>
                     <span style={{ display: 'flex', alignItems: 'center', color: '#ef4444' }}><LogOut size={14} /></span>
-                    Chiqish
+                    {t("profile.signOut")}
                   </button>
                 </div>
               )}
@@ -995,14 +995,14 @@ function AuthHeader({ i18n, changeLanguage, user }) {
           </nav>
           <div className="drawer-nav" style={{ borderBottom: "none" }}>
             <button className="drawer-icon-row" onClick={toggle}>
-              {isDark ? <Sun size={16} /> : <Moon size={16} />} {isDark ? "Light mode" : "Dark mode"}
+              {isDark ? <Sun size={16} /> : <Moon size={16} />} {isDark ? t("profile.lightMode") : t("profile.darkMode")}
             </button>
-            <button className="drawer-icon-row" onClick={() => { setDrawerOpen(false); /* notifications logic */ }}><Bell size={16} /> Notifications</button>
-            <button className="drawer-icon-row" onClick={() => { setDrawerOpen(false); navigate("/help"); }}><HelpCircle size={16} /> Help</button>
-            <button className="drawer-icon-row" onClick={() => { setDrawerOpen(false); handleProfileNav("my-info"); }}><Settings size={16} /> Settings</button>
-            <button className="drawer-icon-row" onClick={() => { setDrawerOpen(false); navigate(isClient ? "/profile/client" : "/profile"); }}><User size={16} /> Profile</button>
+            <button className="drawer-icon-row" onClick={() => { setDrawerOpen(false); /* notifications logic */ }}><Bell size={16} /> {t("profile.notificationsList")}</button>
+            <button className="drawer-icon-row" onClick={() => { setDrawerOpen(false); navigate("/help"); }}><HelpCircle size={16} /> {t("profile.help")}</button>
+            <button className="drawer-icon-row" onClick={() => { setDrawerOpen(false); handleProfileNav("my-info"); }}><Settings size={16} /> {t("profile.settings")}</button>
+            <button className="drawer-icon-row" onClick={() => { setDrawerOpen(false); navigate(isClient ? "/profile/client" : "/profile"); }}><User size={16} /> {t("profile.profile")}</button>
             <button className="drawer-icon-row" onClick={handleSwitchRole} style={{ color: "var(--blue)", fontWeight: 600 }}>
-              <RefreshCw size={16} /> {isClient ? "Switch to Freelancer" : "Switch to Client"}
+              <RefreshCw size={16} /> {isClient ? t("profile.switchToFreelancer") : t("profile.switchToClient")}
             </button>
           </div>
         </div>
@@ -1047,7 +1047,7 @@ export default function AppHeader() {
   }
 
   if (isLoggedIn) {
-    return <AuthHeader i18n={i18n} changeLanguage={changeLanguage} user={user} />;
+    return <AuthHeader user={user} />;
   }
 
   return <LandingHeader i18n={i18n} changeLanguage={changeLanguage} />;
