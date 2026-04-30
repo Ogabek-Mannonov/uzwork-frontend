@@ -747,7 +747,7 @@ function MediaLightbox({ media, onClose, currentUser }) {
           <span className="lightbox-filename">{fileName}</span>
         </div>
         <div className="lightbox-actions">
-          {currentUser?.role !== 'client' && (
+          {(currentUser?.role !== 'client' || media.canDownload) && (
             <a
               href={fullUrl}
               className="lightbox-btn"
