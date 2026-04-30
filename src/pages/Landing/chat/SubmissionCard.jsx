@@ -88,25 +88,26 @@ const SubmissionCard = ({ msg, isOwn, onApprove, onReject, isApproving, isReject
                    const fileUri = file.url || file.file_url;
                    const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(fileUri || '');
                    const fullUrl = getFullUrl(fileUri);
+                   const canDownload = isOwn || status === 'approved';
+
                    return (
                      <div key={i} className="attachment-item-wrapper">
                        <a 
                          href={fullUrl} 
                          target="_blank" 
                          rel="noreferrer" 
-                         className={`attachment-item ${currentUser?.role === "client" ? "view-only" : ""}`}
+                         className={`attachment-item ${(!canDownload && currentUser?.role === "client") ? "view-only" : ""}`}
                          onClick={async (e) => {
-                            if (currentUser?.role === 'client' && !isImage) return;
+                            if (currentUser?.role === 'client' && !isImage && !canDownload) return;
                             e.preventDefault();
                             if (isImage && onMediaClick) {
-                              onMediaClick({ type: 'image', url: fileUri });
+                              onMediaClick({ type: 'image', url: fileUri, canDownload });
                             } else {
-                              // Har doim handleDownload'ni chaqiramiz
                               await handleDownload(fullUrl, file.name);
                             }
                           }}
                        >
-                         {isImage || currentUser?.role === 'client' ? <ExternalLink size={14} /> : <Download size={14} />}
+                         {canDownload ? <Download size={14} /> : <ExternalLink size={14} />}
                          <span className="attachment-name">{file.name || 'Hujjat'}</span>
                        </a>
                      </div>
