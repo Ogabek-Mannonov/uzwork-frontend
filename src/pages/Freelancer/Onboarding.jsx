@@ -10,7 +10,10 @@ import {
   FaDollarSign,
   FaMapMarkerAlt
 } from "react-icons/fa";
+import { ChevronDown } from "lucide-react";
 import { getCategories, updateMyProfile } from "../../api/profile";
+import { getSkills } from "../../api/common";
+import { PROFESSIONAL_SKILLS } from "../../utils/skills";
 import "./onboarding.css";
 
 const Onboarding = () => {
@@ -22,7 +25,6 @@ const Onboarding = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   
-  // Form State
   const [formData, setFormData] = useState({
     category_id: null,
     title: "",
@@ -31,20 +33,31 @@ const Onboarding = () => {
     location: "",
     skills: [],
   });
+
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
+
+  const countries = [
+    { value: "Uzbekistan", label: "O'zbekiston" },
+    { value: "Kazakhstan", label: "Qozog'iston" },
+    { value: "Kyrgyzstan", label: "Qirg'iziston" },
+    { value: "Tajikistan", label: "Tojikiston" },
+    { value: "Turkmenistan", label: "Turkmaniston" },
+    { value: "Russia", label: "Rossiya" },
+    { value: "Turkey", label: "Turkiya" },
+    { value: "UAE", label: "BAA" },
+    { value: "USA", label: "AQSH" },
+    { value: "Germany", label: "Germaniya" },
+    { value: "China", label: "Xitoy" },
+    { value: "United Kingdom", label: "Buyuk Britaniya" },
+    { value: "South Korea", label: "Janubiy Koreya" },
+    { value: "Japan", label: "Yaponiya" }
+  ];
   
   const [skillInput, setSkillInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
 
-  const commonSkills = [
-    "JavaScript", "TypeScript", "React", "Node.js", "Python", "Django", "Flask", 
-    "Java", "Spring Boot", "C#", ".NET", "PHP", "Laravel", "Swift", "Kotlin", 
-    "Flutter", "React Native", "Vue.js", "Angular", "Next.js", "Express.js",
-    "PostgreSQL", "MongoDB", "Redis", "Docker", "Kubernetes", "AWS", "Azure",
-    "Figma", "Adobe Photoshop", "Adobe Illustrator", "After Effects", "Premiere Pro",
-    "UI Design", "UX Design", "Copywriting", "SEO", "SMM", "Google Ads",
-    "English", "Russian", "Uzbek", "Excel", "Data Entry", "Project Management"
-  ];
+  const commonSkills = PROFESSIONAL_SKILLS;
 
   useEffect(() => {
     fetchCategories();
@@ -75,12 +88,14 @@ const Onboarding = () => {
     const value = e.target.value;
     setSkillInput(value);
     if (value.trim()) {
-      const filtered = commonSkills.filter(s => 
-        s.toLowerCase().includes(value.toLowerCase()) && 
-        !formData.skills.includes(s)
-      ).slice(0, 8);
-      setFilteredSuggestions(filtered);
-      setShowSuggestions(true);
+      // Dynamic fetch from backend
+      getSkills(value).then(res => {
+        if (res?.success) {
+          const filtered = (res.skills || []).filter(s => !formData.skills.includes(s));
+          setFilteredSuggestions(filtered);
+          setShowSuggestions(true);
+        }
+      });
     } else {
       setShowSuggestions(false);
     }
@@ -234,15 +249,32 @@ const Onboarding = () => {
 
               <div className="onboarding-input-group">
                 <label className="onboarding-label">{t("profile.location", "Manzil")}</label>
-                <div style={{ position: 'relative' }}>
-                   <FaMapMarkerAlt style={{ position: 'absolute', left: 16, top: 18, color: 'var(--muted)' }} />
-                   <input 
-                    className="onboarding-input"
-                    placeholder="Tashkent, Uzbekistan"
-                    style={{ paddingLeft: 44 }}
-                    value={formData.location}
-                    onChange={(e) => setFormData({...formData, location: e.target.value})}
-                  />
+                <div className={`custom-dropdown ${isLocationOpen ? 'open' : ''}`}>
+                  <div 
+                    className="dropdown-selected" 
+                    onClick={() => setIsLocationOpen(!isLocationOpen)}
+                  >
+                    <FaMapMarkerAlt className="dropdown-icon" />
+                    <span>{formData.location ? countries.find(c => c.value === formData.location)?.label : t("profile.selectLocation", "Joylashuvni tanlang")}</span>
+                    <ChevronDown className={`dropdown-arrow ${isLocationOpen ? 'rotate' : ''}`} size={18} />
+                  </div>
+                  
+                  {isLocationOpen && (
+                    <div className="dropdown-options">
+                      {countries.map((country) => (
+                        <div 
+                          key={country.value} 
+                          className={`dropdown-option ${formData.location === country.value ? 'active' : ''}`}
+                          onClick={() => {
+                            setFormData({...formData, location: country.value});
+                            setIsLocationOpen(false);
+                          }}
+                        >
+                          {country.label}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -311,6 +343,23 @@ const Onboarding = () => {
                     <FaTimes className="skill-remove" onClick={() => removeSkill(skill)} />
                   </div>
                 ))}
+              </div>
+
+              <div className="onboarding-suggested-skills">
+                <p className="suggested-label">{t("onboarding.popularSkills", "Ommabop ko'nikmalar:")}</p>
+                <div className="suggested-tags-wrap">
+                  {commonSkills.slice(0, 15).map(s => (
+                    !formData.skills.includes(s) && (
+                      <button 
+                        key={s} 
+                        className="btn-suggest-skill"
+                        onClick={() => addSkill(s)}
+                      >
+                        + {s}
+                      </button>
+                    )
+                  ))}
+                </div>
               </div>
             </div>
           )}

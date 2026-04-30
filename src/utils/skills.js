@@ -28,7 +28,16 @@ export const PROFESSIONAL_SKILLS = [
   "SQL", "Power BI", "Tableau", "Data Engineering", "NLP", "Computer Vision",
   "OpenAI", "LLMs", "Prompt Engineering",
 
-  // Project Management & Soft Skills
-  "Agile", "Scrum", "Kanban", "Project Management", "Jira", "Trello", "Asana",
-  "Public Speaking", "Technical Writing", "Leadership", "Teamwork", "Problem Solving"
+  // Video & Animation
+  "Video Editing", "Motion Graphics", "After Effects", "Premiere Pro", "DaVinci Resolve", "2D Animation", "3D Animation", "Blender", "Maya", "Voice Over", "Video Production",
+
+  // Writing & Translation
+  "Translation", "English-Uzbek Translation", "Russian-Uzbek Translation", "English-Russian Translation", "Uzbek-Russian Translation",
+  "Content Writing", "Copywriting", "Technical Writing", "Creative Writing", "Proofreading", "Editing", "SEO Writing", "Blog Writing",
+
+  // Admin & Customer Support
+  "Virtual Assistant", "Data Entry", "Customer Support", "Microsoft Excel", "Google Sheets", "Google Docs", "Data Scraping", "Transcription",
+
+  // Business & Consulting
+  "Business Analysis", "Financial Modeling", "Market Research", "Project Management", "Agile", "Scrum", "Business Strategy", "Legal Consulting"
 ].sort();
