@@ -14,7 +14,7 @@
       "hourlyRate": "Soatlik ish haqi",
       "under": "${{min}} dan kam",
       "location": "Joylashuv",
-      "searchLocation": "Shahar, mamlakat yoki hudud",
+      "searchLocation": "Hudud bo'yicha qidirish",
       "jobSuccess": "Muvaffaqiyat ko'rsatkichi",
       "jobSuccessInfo": "Minimal ishdagi muvaffaqiyat foizi",
       "successUp": "{{percent}}% va undan yuqori",
@@ -61,11 +61,16 @@
     },
     "nations": {
       "uz": "O'zbekiston",
-      "tashkent": "Toshkent",
-      "samarkand": "Samarqand",
-      "bukhara": "Buxoro",
       "kz": "Qozog'iston",
       "kg": "Qirg'iziston",
+      "tj": "Tojikiston",
+      "tm": "Turkmaniston",
+      "ru": "Rossiya",
+      "tr": "Turkiya",
+      "ae": "BAA",
+      "us": "AQSH",
+      "de": "Germaniya",
+      "cn": "Xitoy",
       "remote": "Masofadan (Istalgan joy)"
     },
     "englishLevels": {

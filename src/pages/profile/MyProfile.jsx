@@ -2176,7 +2176,27 @@ const MyProfile = () => {
                           </div>
                           <div className="form-group">
                             <label><MapPin size={14} /> {t("profile.location", "Location")}</label>
-                            <input type="text" value={editFormData.location} onChange={(e) => handleEditInputChange('location', e.target.value)} className="inline-edit-input" />
+                            <select 
+                              value={editFormData.location} 
+                              onChange={(e) => handleEditInputChange('location', e.target.value)} 
+                              className="inline-edit-select"
+                            >
+                              <option value="">{t("profile.selectLocation", "Joylashuvni tanlang")}</option>
+                              <option value="Uzbekistan">O'zbekiston</option>
+                              <option value="Kazakhstan">Qozog'iston</option>
+                              <option value="Kyrgyzstan">Qirg'iziston</option>
+                              <option value="Tajikistan">Tojikiston</option>
+                              <option value="Turkmenistan">Turkmaniston</option>
+                              <option value="Russia">Rossiya</option>
+                              <option value="Turkey">Turkiya</option>
+                              <option value="UAE">BAA</option>
+                              <option value="USA">AQSH</option>
+                              <option value="Germany">Germaniya</option>
+                              <option value="China">Xitoy</option>
+                              <option value="United Kingdom">Buyuk Britaniya</option>
+                              <option value="South Korea">Janubiy Koreya</option>
+                              <option value="Japan">Yaponiya</option>
+                            </select>
                           </div>
                         </div>
                         <div className="inline-edit-actions">

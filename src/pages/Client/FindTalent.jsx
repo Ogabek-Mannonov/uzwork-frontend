@@ -465,11 +465,16 @@ const FindTalent = () => {
               value={location} onChange={e => setLocation(e.target.value)}>
               <option value="">{t("findTalent.filter.searchLocation")}</option>
               <option value="Uzbekistan">{t("findTalent.nations.uz")}</option>
-              <option value="Tashkent">{t("findTalent.nations.tashkent")}</option>
-              <option value="Samarkand">{t("findTalent.nations.samarkand")}</option>
-              <option value="Bukhara">{t("findTalent.nations.bukhara")}</option>
               <option value="Kazakhstan">{t("findTalent.nations.kz")}</option>
               <option value="Kyrgyzstan">{t("findTalent.nations.kg")}</option>
+              <option value="Tajikistan">{t("findTalent.nations.tj")}</option>
+              <option value="Turkmenistan">{t("findTalent.nations.tm")}</option>
+              <option value="Russia">{t("findTalent.nations.ru")}</option>
+              <option value="Turkey">{t("findTalent.nations.tr")}</option>
+              <option value="UAE">{t("findTalent.nations.ae")}</option>
+              <option value="USA">{t("findTalent.nations.us")}</option>
+              <option value="Germany">{t("findTalent.nations.de")}</option>
+              <option value="China">{t("findTalent.nations.cn")}</option>
               <option value="Remote">{t("findTalent.nations.remote")}</option>
             </select>
           </FtFilterSection>
