@@ -17,8 +17,10 @@ import {
   FileText,
   User,
   ShieldCheck,
-  XCircle
+  XCircle,
+  CheckCircle2
 } from "lucide-react";
+import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/useSocket";
 import "./contracts.css";
 
 const STATUS_CONFIG = {
@@ -58,25 +60,35 @@ export default function ContractDetail() {
     return `${BACKEND}${path}`;
   };
 
+  const [partnerStatus, setPartnerStatus] = useState({ isOnline: false, lastSeen: null });
+
   const PartnerAvatar = ({ src, name }) => {
     const [error, setError] = useState(false);
     const initials = name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
     
     if (!src || error) {
       return (
-        <div className="cd-partner-ava" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "var(--brand-light, rgba(37, 99, 235, 0.1))", color: "var(--brand, #2563eb)", fontWeight: "bold" }}>
-          {initials}
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <div className="cd-partner-ava" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "var(--brand-light, rgba(37, 99, 235, 0.1))", color: "var(--brand, #2563eb)", fontWeight: "bold" }}>
+            {initials}
+          </div>
+          <span className={`cd-status-dot ${partnerStatus.isOnline ? 'online' : 'offline'}`} 
+                style={{ position: 'absolute', bottom: -2, right: -2 }}></span>
         </div>
       );
     }
 
     return (
-      <img 
-        src={avatarSrc(src)} 
-        alt="" 
-        className="cd-partner-ava" 
-        onError={() => setError(true)}
-      />
+      <div style={{ position: 'relative', display: 'inline-block' }}>
+        <img 
+          src={avatarSrc(src)} 
+          alt="" 
+          className="cd-partner-ava" 
+          onError={() => setError(true)}
+        />
+        <span className={`cd-status-dot ${partnerStatus.isOnline ? 'online' : 'offline'}`} 
+              style={{ position: 'absolute', bottom: -2, right: -2 }}></span>
+      </div>
     );
   };
 
@@ -95,6 +107,31 @@ export default function ContractDetail() {
   }, [id, notify]);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    if (!data?.contract) return;
+    const partnerId = isClient ? data.contract.freelancer_id : data.contract.client_id;
+    if (!partnerId) return;
+
+    const cleanup = onSocketReady((socket) => {
+      socket.emit("checkStatus", partnerId);
+
+      const handleStatus = (data) => {
+        const status = normalizeUserStatus(data);
+        if (String(status.userId) === String(partnerId)) {
+          setPartnerStatus({
+            isOnline: status.isOnline,
+            lastSeen: status.lastSeen
+          });
+        }
+      };
+
+      socket.on("userStatus", handleStatus);
+      return () => socket.off("userStatus", handleStatus);
+    });
+
+    return cleanup;
+  }, [data?.contract?.id, isClient]);
 
   const handleMilestoneAction = async (milestoneId, newStatus) => {
     setActionLoading(milestoneId);

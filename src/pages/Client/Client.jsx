@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useThemeContext } from "../components/Theme/ThemeContext";
+import { getSocket } from "../../hooks/useSocket";
 import {
   User,
   Settings as SettingsIcon,
@@ -1022,7 +1023,7 @@ const Settings = () => {
               <div className="user-profile" onClick={() => setShowUserMenu(!showUserMenu)}>
                 <div className="user-avatar-wrapper">
                   <AvatarImage src={userData.profilePicture} name={userData.fullName} className="user-avatar" size={40} />
-                  <span className="user-status online"></span>
+                  <span className={`user-status ${getSocket()?.connected ? 'online' : 'offline'}`}></span>
                 </div>
                 <div className="user-details">
                   <span className="user-display-name">{userData.name}</span>
@@ -1147,7 +1148,7 @@ const Settings = () => {
                         <Camera size={14} />
                       </button>
                       <input type="file" id="avatar-upload-input" style={{ display: 'none' }} accept="image/*" onChange={(e) => handleImageUpload(e, 'avatar')} />
-                      <span className="avatar-status online" />
+                      <span className={`avatar-status ${getSocket()?.connected ? 'online' : 'offline'}`} />
                     </div>
 
                     <div className="profile-name-section">

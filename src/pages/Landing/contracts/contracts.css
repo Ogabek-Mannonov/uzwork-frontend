@@ -154,6 +154,19 @@
   border: 2px solid var(--border);
   flex-shrink: 0;
 }
+.cd-meta-card { position: relative; } /* Ensure dot is positioned relative to card or wrap */
+.cd-status-dot {
+  position: absolute;
+  bottom: 0px;
+  right: 12px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  z-index: 2;
+}
+.cd-status-dot.online { background: #10b981; }
+.cd-status-dot.offline { background: #94a3b8; }
 
 /* ══════════════════════════════════════════════════════════
    3. SHARED COMPONENTS (Buttons, Unique Statuses)

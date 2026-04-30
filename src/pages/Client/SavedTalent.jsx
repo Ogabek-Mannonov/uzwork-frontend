@@ -9,6 +9,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useThemeContext } from "../components/Theme/ThemeContext";
 import { getSavedFreelancers, saveFreelancer } from "../../api/freelancer";
+import { getSocket, onSocketReady, normalizeUserStatus } from "../../hooks/useSocket";
 import "./css/saved.css";
 
 const SavedTalent = () => {
@@ -26,7 +27,8 @@ const SavedTalent = () => {
     try {
       const res = await getSavedFreelancers();
       if (res?.success) {
-        setFreelancers(res.data?.freelancers || []);
+        const list = (res.data?.freelancers || []).map(f => ({ ...f, isOnline: false }));
+        setFreelancers(list);
       }
     } catch (err) {
       console.error("Failed to fetch saved freelancers:", err);
@@ -38,6 +40,31 @@ const SavedTalent = () => {
   useEffect(() => {
     fetchSaved();
   }, [fetchSaved]);
+
+  useEffect(() => {
+    if (freelancers.length === 0) return;
+
+    const cleanup = onSocketReady((socket) => {
+      freelancers.forEach((fl) => {
+        if (fl.id) socket.emit("checkStatus", fl.id);
+      });
+
+      const handleStatus = (data) => {
+        const status = normalizeUserStatus(data);
+        setFreelancers(prev => prev.map(f => {
+          if (String(f.id) === String(status.userId)) {
+            return { ...f, isOnline: status.isOnline };
+          }
+          return f;
+        }));
+      };
+
+      socket.on("userStatus", handleStatus);
+      return () => socket.off("userStatus", handleStatus);
+    });
+
+    return cleanup;
+  }, [freelancers.length]);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -109,7 +136,7 @@ const SavedTalent = () => {
                           <User size={30} />
                         </div>
                       )}
-                      {fl.availability_status === 'available' && <span className="st-status-dot"></span>}
+                      <span className={`st-status-dot ${fl.isOnline || fl.availability_status === 'available' ? 'online' : 'offline'}`}></span>
                     </div>
                     <button 
                       className="st-unsave-btn" 

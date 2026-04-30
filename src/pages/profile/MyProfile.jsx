@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { getSocket } from "../../hooks/useSocket";
 
 import {
   User,
@@ -657,6 +658,7 @@ const MyProfile = () => {
       setIsLoading(true);
       try {
         await logout();
+        window.dispatchEvent(new Event("authChange"));
         navigate("/login");
       } catch (err) {
         showMessage("error", "Logout failed. Please try again.");
@@ -1668,7 +1670,7 @@ const MyProfile = () => {
               <div className="user-profile" onClick={() => setShowUserDropdown(!showUserDropdown)}>
                 <div className="user-avatar-wrapper">
                   <img src={userData.profilePicture} alt="User" className="user-avatar" />
-                  <span className="user-status online"></span>
+                  <span className={`user-status ${getSocket()?.connected ? 'online' : 'offline'}`}></span>
                 </div>
                 <div className="user-details">
                   <span className="user-display-name">{userData.name}</span>
@@ -1776,7 +1778,7 @@ const MyProfile = () => {
                         accept="image/*" 
                         onChange={handleAvatarUpload} 
                       />
-                      <span className="avatar-status online" />
+                      <span className={`avatar-status ${getSocket()?.connected ? 'online' : 'offline'}`} />
                     </div>
 
                     <div className="profile-name-section">

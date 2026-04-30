@@ -412,6 +412,10 @@ body { font-family: var(--ft-font); color: var(--ft-text); background: var(--ft-
   border-radius: 50%; border: 2.5px solid var(--ft-surface);
   box-shadow: 0 0 0 1px rgba(16,185,129,.3);
 }
+.ft-online-dot.offline {
+  background: var(--ft-text-4);
+  box-shadow: none;
+}
 
 .ft-card-info { flex: 1; min-width: 0; }
 .ft-card-name-row {

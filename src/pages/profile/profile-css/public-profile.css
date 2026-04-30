@@ -130,10 +130,20 @@
   right: 12px;
   width: 18px;
   height: 18px;
-  background: #22c55e;
+  background-color: #64748b !important; /* Steel Gray - clearly visible as offline */
   border: 3px solid var(--surface);
   border-radius: 50%;
   z-index: 5;
+  transition: all 0.3s ease;
+}
+
+.online-indicator.online {
+  background-color: #10b981 !important; /* Strong Green */
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+}
+
+.online-indicator.offline {
+  background-color: #64748b !important;
 }
 
 [data-theme="dark"] .online-indicator {

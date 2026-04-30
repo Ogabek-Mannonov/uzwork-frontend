@@ -9,10 +9,12 @@ import {
 } from "lucide-react";
 import "../Client/css/find.css";
 import { getFreelancers, saveFreelancer } from "../../api/freelancer";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { inviteFreelancer } from "../../api/proposals";
 import InviteDrawer from "../components/InviteDrawer";
+import { getSocket, onSocketReady, normalizeUserStatus } from "../../hooks/useSocket";
+import { useUsersPresence } from "../../hooks/useUserPresence";
 
 /* ================================================================
    MOCK DATA
@@ -62,7 +64,7 @@ const FtFilterSection = ({ title, info, children, defaultOpen = true }) => {
 /* ================================================================
    FREELANCER CARD
    ================================================================ */
-const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle, onOpenInviteDrawer }) => {
+const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle, onOpenInviteDrawer, presence }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [invited, setInvited] = useState(false);
@@ -125,7 +127,7 @@ const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle, onOpenInvit
         <div className="ft-card-top">
           <div className="ft-ava-wrap">
             <img src={fl.avatar} alt={fl.name} className="ft-ava" />
-            {fl.online && <span className="ft-online-dot" />}
+            {presence?.isOnline && <span className="ft-online-dot" />}
           </div>
 
           <div className="ft-card-info">
@@ -296,7 +298,7 @@ const FindTalent = () => {
             location: item.location || t("findTalent.nations.uz"),
             skills: Array.isArray(item.skills) ? item.skills : [],
             bio: item.bio || "",
-            online: item.availability_status === 'available',
+            online: false, 
             boosted: false,
             is_saved: !!item.is_saved,
           };
@@ -311,6 +313,8 @@ const FindTalent = () => {
     };
     fetch();
   }, [search, location, minRate, maxRate, successRate, t]);
+
+  const presenceMap = useUsersPresence(freelancers.map(f => f.id));
 
   const onSaveToggle = (name, saved) => {
     notify(saved ? `${name} saqlandi` : `${name} saqlanganlardan olib tashlandi`);
@@ -553,6 +557,7 @@ const FindTalent = () => {
               <FtFreelancerCard
                 key={fl.id}
                 fl={fl}
+                presence={presenceMap[String(fl.id).toLowerCase()]}
                 targetJobId={targetJobId}
                 onSaveToggle={onSaveToggle}
                 onOpenInviteDrawer={(freelancer, setInvitedCb) => {

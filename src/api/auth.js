@@ -1,5 +1,6 @@
 // src/api/auth.js
 import axios from "axios";
+import { disconnectSocket } from "../hooks/useSocket";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "";
 
@@ -190,6 +191,7 @@ export const logout = async () => {
     // ignore
   } finally {
     clearAuth();
+    disconnectSocket();
   }
 };
 

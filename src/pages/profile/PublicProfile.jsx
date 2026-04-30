@@ -15,6 +15,8 @@ import {
 } from "react-icons/fi";
 import { FaQuoteLeft } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import { getSocket, onSocketReady, normalizeUserStatus } from "../../hooks/useSocket";
+import { useUserPresence } from "../../hooks/useUserPresence";
 import "./profile-css/public-profile.css";
 import "../../assets/style/theme.css";
 
@@ -34,6 +36,22 @@ function getInitials(name) {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
   return parts[0] ? parts[0][0].toUpperCase() : "";
+}
+
+function formatLastSeen(dateStr, t) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  const now = new Date();
+  const diffMs = now - d;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+
+  if (diffMins < 1) return t("chat.justNow", "Hozirgina");
+  if (diffMins < 60) return t("chat.minsAgo", "{{count}} daqiqa oldin", { count: diffMins });
+  if (diffHours < 24) return t("chat.hoursAgo", "{{count}} soat oldin", { count: diffHours });
+  
+  return d.toLocaleDateString();
 }
 
 function AvatarImage({ src, size = 40, className = "", alt = "Avatar" }) {
@@ -127,6 +145,7 @@ export default function PublicProfile() {
             cover_url: p.cover_url || "",
             phone: u.phone || p.phone || rawData.phone || "",
             availability_status: p.availability_status || t("profile.status.available", "Hozir band emas"),
+            isOnline: false,
           });
         } else {
           setProfile(null);
@@ -152,6 +171,8 @@ export default function PublicProfile() {
     };
     fetch();
   }, [id]);
+
+  const presence = useUserPresence(id);
   
   const handleShare = (platform) => {
     const url = window.location.href;
@@ -234,7 +255,7 @@ export default function PublicProfile() {
         <div className="profile-main-info">
           <div className="public-avatar-wrapper">
             <AvatarImage src={profile.avatar_url} alt={profile.fullName} size={170} className="public-avatar-img" />
-            <div className="online-indicator"></div>
+            <div className={`online-indicator ${presence.isOnline ? 'online' : 'offline'}`}></div>
           </div>
 
           <div className="profile-header-details">
@@ -272,7 +293,18 @@ export default function PublicProfile() {
             </div>
             
             {profile.username && <p className="public-username">@{profile.username}</p>}
-            {profile.title && <p className="public-title">{profile.title}</p>}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {profile.title && <p className="public-title" style={{ margin: 0 }}>{profile.title}</p>}
+              {presence.isOnline ? (
+                <span className="status-text online" style={{ color: '#10b981', fontSize: '13px', fontWeight: '600' }}>
+                   • {t("chat.online", "Online")}
+                </span>
+              ) : (presence.lastSeen || profile.lastSeen) ? (
+                <span className="status-text offline" style={{ color: '#6b7280', fontSize: '13px' }}>
+                   • {formatLastSeen(presence.lastSeen || profile.lastSeen, t)}
+                </span>
+              ) : null}
+            </div>
 
             <div className="header-meta-grid">
               <div className="stats-dashboard">
