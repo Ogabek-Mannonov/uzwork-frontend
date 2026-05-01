@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Bell, Briefcase, DollarSign, MoreHorizontal, CheckCircle, Info, AlertTriangle, AlertCircle, UserCheck, UserX, Lock, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Bell, Briefcase, DollarSign, MoreHorizontal, CheckCircle, Info, AlertTriangle, AlertCircle, UserCheck, UserX, Lock, ArrowUpRight, ArrowDownLeft, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../../../api/common';
@@ -420,13 +420,17 @@ const NotificationDropdown = () => {
           </div>
 
           <div className="uzwork-notif-footer">
-            <button onClick={() => { 
-              setIsOpen(false); 
-              const user = JSON.parse(localStorage.getItem('user') || '{}');
-              const isClientRole = user?.role === 'client';
-              navigate(isClientRole ? '/profile/client?section=all-notifications' : '/profile?section=all-notifications'); 
-            }}>
-              {t('notifications.allNotifications')}
+            <button 
+              className="view-all-btn"
+              onClick={() => { 
+                setIsOpen(false); 
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const isClientRole = user?.role === 'client';
+                navigate(isClientRole ? '/profile/client?section=all-notifications' : '/profile?section=all-notifications'); 
+              }}
+            >
+              <span>{t('notifications.allNotifications')}</span>
+              <ExternalLink size={14} />
             </button>
           </div>
         </div>

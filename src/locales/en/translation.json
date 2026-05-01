@@ -628,7 +628,10 @@
     "select": "Select",
     "approveWork": "Approve",
     "requestRevision": "Request Revision",
-    "attachments": "Files"
+    "attachments": "Files",
+    "file": "File",
+    "videoCall": "Video Call",
+    "system": "System"
   },
   "auth": {
     "enterEmailPhone": "Please enter your email or phone number",

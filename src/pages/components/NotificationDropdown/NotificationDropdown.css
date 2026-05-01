@@ -377,36 +377,57 @@
 }
 
 .uzwork-notif-footer {
-  padding: 15px 20px;
-  background: #f8fafc;
+  padding: 12px 16px;
+  background: #ffffff;
   text-align: center;
   border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: center;
 }
 
 [data-theme='dark'] .uzwork-notif-footer {
-  background: rgba(255, 255, 255, 0.02);
+  background: #1e293b;
   border-color: rgba(255, 255, 255, 0.05);
 }
 
-.uzwork-notif-footer button {
-  background: none;
-  border: none;
+.view-all-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   color: #475569;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-[data-theme='dark'] .uzwork-notif-footer button {
-  color: #ffffff;
+[data-theme='dark'] .view-all-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
 }
 
-.uzwork-notif-footer button:hover {
-  color: #1e293b;
-  text-decoration: underline;
+.view-all-btn:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
 }
 
-[data-theme='dark'] .uzwork-notif-footer button:hover {
-  color: #fff;
+[data-theme='dark'] .view-all-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+  color: #60a5fa;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.view-all-btn:active {
+  transform: translateY(0) scale(0.98);
 }
