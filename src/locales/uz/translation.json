@@ -733,7 +733,23 @@
     "attachments": "Fayllar",
     "file": "Fayl",
     "videoCall": "Video qo'ng'iroq",
-    "system": "Tizim"
+    "system": "Tizim",
+    "invalidId": "Noto'g'ri xabar identifikatori",
+    "messageNotFound": "Xabar topilmadi",
+    "noPermissionToEdit": "Bu xabarni o'zgartirishga ruxsatingiz yo'q",
+    "noPermissionToDelete": "Bu xabarni o'chirishga ruxsatingiz yo'q",
+    "editSuccess": "Xabar o'zgartirildi",
+    "deleteSuccess": "Xabar o'chirildi",
+    "onlyTextEditable": "Faqat matnli xabarlarni tahrirlash mumkin",
+    "alreadyDeleted": "Xabar allaqachon o'chirilgan",
+    "confirmDelete": "Ushbu xabarni o'chirishni xohlaysizmi?",
+    "submissionAccepted": "Topshiriq qabul qilindi",
+    "submissionRejected": "Topshiriq rad etildi",
+    "selectMilestone": "Bosqichni tanlang",
+    "workDescription": "Ish tavsifi",
+    "attachFile": "Fayl biriktirish",
+    "info": "Ma'lumot",
+    "stickers": "Stikerlar"
   },
   "auth": {
     "enterEmailPhone": "Iltimos, email yoki telefon raqamni kiriting",
@@ -1260,7 +1276,16 @@
     "status": {
       "active": "Aktiv",
       "completed": "Tugatilgan",
-      "cancelled": "Bekor qilingan"
+      "cancelled": "Bekor qilingan",
+      "security_update": "Security update",
+      "job_invitation_body": "{{clientName}} invited you to the project \"{{jobTitle}}\".",
+      "job_invitation_generic": "You have been invited to the project \"{{jobTitle}}\".",
+      "proposal_accepted_body": "Your proposal for \"{{jobTitle}}\" has been accepted.",
+      "proposal_rejected_body": "Your proposal for \"{{jobTitle}}\" has been rejected.",
+      "new_job_posted_body": "A new job matching your skills: \"{{jobTitle}}\"",
+      "contract_started_body": "Contract for \"{{jobTitle}}\" started!",
+      "contract_completed_body": "Contract for \"{{jobTitle}}\" completed.",
+      "contract_cancelled_body": "Contract for \"{{jobTitle}}\" cancelled."
     }
   },
   "myJobs": {
@@ -1762,7 +1787,15 @@
       "contract_started": "Shartnoma boshlandi",
       "payment_received": "Hisob to'ldirildi",
       "message": "Yangi xabar",
-      "security_update": "Xavfsizlik ogohlantirishi"
+      "security_update": "Xavfsizlik ogohlantirishi",
+      "job_invitation_body": "{{clientName}} sizni \"{{jobTitle}}\" loyihasiga taklif qildi.",
+      "job_invitation_generic": "\"{{jobTitle}}\" loyihasiga taklif qabul qildingiz.",
+      "proposal_accepted_body": "\"{{jobTitle}}\" loyihasiga taklifingiz qabul qilindi.",
+      "proposal_rejected_body": "\"{{jobTitle}}\" loyihasiga taklifingiz rad etildi.",
+      "new_job_posted_body": "Ko'nikmalaringizga mos yangi loyiha: \"{{jobTitle}}\"",
+      "contract_started_body": "\"{{jobTitle}}\" shartnomasi boshlandi!",
+      "contract_completed_body": "\"{{jobTitle}}\" shartnomasi yakunlandi.",
+      "contract_cancelled_body": "\"{{jobTitle}}\" shartnomasi bekor qilindi."
     }
   },
   "myJobsFreelancer": {

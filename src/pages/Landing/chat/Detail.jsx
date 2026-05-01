@@ -898,6 +898,37 @@ function FilePreviewModal({
   );
 }
 
+function ConfirmModal({ title, message, onConfirm, onCancel, confirmText, cancelText, isDanger = false }) {
+  const { t } = useTranslation();
+  return (
+    <div className="file-preview-overlay" onClick={onCancel}>
+      <div className="file-preview-modal glassmorphism confirm-modal" onClick={e => e.stopPropagation()}>
+        <div className="file-preview-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+             {isDanger && <AlertCircle size={20} color="#ef4444" />}
+             <h3>{title}</h3>
+          </div>
+          <button className="icon-btn" onClick={onCancel}><X size={20} /></button>
+        </div>
+        <div className="confirm-modal-content">
+          <p>{message}</p>
+        </div>
+        <div className="confirm-modal-footer">
+          <button className="confirm-btn-cancel" onClick={onCancel}>
+            {cancelText || t("chat.no", "No")}
+          </button>
+          <button 
+            className={`confirm-btn-action ${isDanger ? 'danger' : ''}`} 
+            onClick={onConfirm}
+          >
+            {confirmText || t("chat.yes", "Yes")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ───────────────────────────────────────
 export default function ChatDetail() {
   const { id: chatId } = useParams();
@@ -980,6 +1011,7 @@ export default function ChatDetail() {
   const [isApproving, setIsApproving] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
 
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
@@ -1924,6 +1956,7 @@ export default function ChatDetail() {
 
   const openContextMenu = (e, msg) => {
     if (msg.deleted_at) return;
+    if (String(msg.id).startsWith("temp-")) return; // Prevent actions on sending messages
     const x = Math.min(e.clientX, window.innerWidth - 150);
     const y = Math.min(e.clientY, window.innerHeight - 200);
     setContextMenu({ x, y, msg });
@@ -1953,10 +1986,21 @@ export default function ChatDetail() {
     }, 50);
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     const msg = contextMenu?.msg;
+    if (!msg) {
+      setContextMenu(null);
+      return;
+    }
+    setShowDeleteConfirm(msg);
     setContextMenu(null);
+  };
+
+  const confirmDeleteMessage = async () => {
+    const msg = showDeleteConfirm;
+    setShowDeleteConfirm(null);
     if (!msg) return;
+
     const res = await deleteMessage(msg.id);
     if (res?.success === false) notify(res.message || t("chat.deleteFail", "O'chirib bo'lmadi"), "error");
     else {
@@ -2410,7 +2454,7 @@ export default function ChatDetail() {
                       setShowInfo(false);
                       setShowEmojiPicker(false);
                     }}
-                    title="Emojis"
+                    title={t("chat.stickers", "Emojis")}
                   >
                     <Smile size={26} />
                   </button>
@@ -2848,7 +2892,7 @@ export default function ChatDetail() {
       )}
 
       {toast && (
-        <div className={`chat-toast ${toast.type || ""}`}>{toast.msg}</div>
+        <div className={`chat-toast ${toast.type || ""}`}>{t(toast.msg)}</div>
       )}
 
       {pendingFile && (
@@ -2872,6 +2916,18 @@ export default function ChatDetail() {
           media={viewingMedia}
           onClose={() => setViewingMedia(null)}
           currentUser={currentUser}
+        />
+      )}
+
+      {showDeleteConfirm && (
+        <ConfirmModal
+          title={t("chat.delete", "Delete")}
+          message={t("chat.confirmDelete", "Do you want to delete this message?")}
+          onConfirm={confirmDeleteMessage}
+          onCancel={() => setShowDeleteConfirm(null)}
+          confirmText={t("chat.delete", "Delete")}
+          cancelText={t("chat.cancel", "Cancel")}
+          isDanger={true}
         />
       )}
 

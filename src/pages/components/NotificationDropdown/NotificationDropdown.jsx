@@ -30,15 +30,17 @@ const NotificationDropdown = () => {
 
       new Notification(title, {
         body: body,
-        icon: "/logo192.png"
+        icon: "/logo192.png",
+        tag: notif.id,
+        renotify: true
       });
 
       // Mark as shown
       shownIds.push(notif.id);
-      // Keep only last 50 to avoid storage bloat
-      localStorage.setItem('shown_notifications', JSON.stringify(shownIds.slice(-50)));
+      // Keep only last 100 to avoid storage bloat
+      localStorage.setItem('shown_notifications', JSON.stringify(shownIds.slice(-100)));
     }
-  }, []);
+  }, [i18n.language]);
 
   // Show missed notifications on mount
   const checkMissedNotifications = useCallback((notifs) => {
@@ -48,9 +50,10 @@ const NotificationDropdown = () => {
     if (unread.length === 0) return;
 
     // Faqat eng oxirgi 3 ta o'qilmagan xabarni ko'rsatamiz (foydalanuvchini bezovta qilmaslik uchun)
-    const missed = unread.slice(0, 3).reverse(); 
-    missed.forEach(n => {
-      showBrowserNotification(n);
+    const missed = unread.slice(0, 10).reverse();     missed.forEach((n, idx) => {
+      setTimeout(() => {
+        showBrowserNotification(n);
+      }, idx * 500);
     });
   }, [showBrowserNotification]);
 
@@ -304,67 +307,30 @@ const NotificationDropdown = () => {
 
                 // Helper: get the best available body text, with real names from data field
                 const getBody = () => {
-                  // Parse stored data field (contains clientName, jobTitle etc.)
                   let d = {};
                   try {
                     d = typeof notif.data === 'string' ? JSON.parse(notif.data || '{}') : (notif.data || {});
                   } catch {}
 
                   const clientName = d.clientName || d.client_name || notif.sender_name || notif.senderName;
-                  const jobTitle   = d.jobTitle   || d.job_title;
-                  const amount     = d.amount;
+                  const jobTitle = d.jobTitle || d.job_title;
 
-                  const lang = i18n.language;
-
-                  // For job_invitation: ALWAYS reconstruct with clientName if available
                   if (notif.type === 'job_invitation') {
-                    if (clientName && jobTitle) {
-                      if (lang === 'ru') return `${clientName} пригласил вас в проект "${jobTitle}".`;
-                      if (lang === 'en') return `${clientName} invited you to the project "${jobTitle}".`;
-                      return `${clientName} sizni "${jobTitle}" loyihasiga taklif qildi.`;
-                    }
-                    if (jobTitle) {
-                      if (lang === 'ru') return `Вы получили приглашение в проект "${jobTitle}".`;
-                      if (lang === 'en') return `You have been invited to the project "${jobTitle}".`;
-                      return `"${jobTitle}" loyihasiga taklif qabul qildingiz.`;
-                    }
+                    if (clientName && jobTitle) return t('notifications.types.job_invitation_body', { clientName, jobTitle });
+                    if (jobTitle) return t('notifications.types.job_invitation_generic', { jobTitle });
                   }
 
-                  // For proposal_accepted: reconstruct with jobTitle if available
-                  if (notif.type === 'proposal_accepted' && jobTitle) {
-                    if (lang === 'ru') return `Ваше предложение по проекту "${jobTitle}" было принято.`;
-                    if (lang === 'en') return `Your proposal for "${jobTitle}" has been accepted.`;
-                    return `"${jobTitle}" loyihasiga taklifingiz qabul qilindi.`;
-                  }
+                  if (notif.type === 'proposal_accepted' && jobTitle) return t('notifications.types.proposal_accepted_body', { jobTitle });
+                  if (notif.type === 'proposal_rejected' && jobTitle) return t('notifications.types.proposal_rejected_body', { jobTitle });
+                  if (notif.type === 'new_job_posted' && jobTitle) return t('notifications.types.new_job_posted_body', { jobTitle });
 
-                  // For proposal_rejected: reconstruct with jobTitle if available
-                  if (notif.type === 'proposal_rejected' && jobTitle) {
-                    if (lang === 'ru') return `Ваше предложение по проекту "${jobTitle}" было отклонено.`;
-                    if (lang === 'en') return `Your proposal for "${jobTitle}" has been rejected.`;
-                    return `"${jobTitle}" loyihasiga taklifingiz rad etildi.`;
-                  }
-
-                  // For new_job_posted: reconstruct with jobTitle if available
-                  if (notif.type === 'new_job_posted' && jobTitle) {
-                    if (lang === 'ru') return `Размещена новая вакансия по вашим навыкам: "${jobTitle}"`;
-                    if (lang === 'en') return `A new job matching your skills: "${jobTitle}"`;
-                    return `Ko'nikmalaringizga mos yangi loyiha: "${jobTitle}"`;
-                  }
-
-                  // For contract_started/completed: reconstruct with jobTitle
                   if (['contract_started', 'contract_completed', 'contract_cancelled'].includes(notif.type) && jobTitle) {
-                    const msgs = {
-                      contract_started:   { ru: `Контракт по "${jobTitle}" начат!`, en: `Contract for "${jobTitle}" started!`, uz: `"${jobTitle}" shartnomasi boshlandi!` },
-                      contract_completed: { ru: `Контракт по "${jobTitle}" завершён.`, en: `Contract for "${jobTitle}" completed.`, uz: `"${jobTitle}" shartnomasi yakunlandi.` },
-                      contract_cancelled: { ru: `Контракт по "${jobTitle}" отменён.`, en: `Contract for "${jobTitle}" cancelled.`, uz: `"${jobTitle}" shartnomasi bekor qilindi.` },
-                    };
-                    const m = msgs[notif.type];
-                    if (m) return lang === 'ru' ? m.ru : lang === 'en' ? m.en : m.uz;
+                    return t(`notifications.types.${notif.type}_body`, { jobTitle });
                   }
 
-                  // Default: use stored translated body
-                  const stored = lang === 'en' && notif.body_en ? notif.body_en
-                               : lang === 'ru' && notif.body_ru ? notif.body_ru
+                  // Fallback: use stored translated body
+                  const stored = i18n.language === 'en' && notif.body_en ? notif.body_en
+                               : i18n.language === 'ru' && notif.body_ru ? notif.body_ru
                                : notif.message;
                   return stored || '';
                 };
