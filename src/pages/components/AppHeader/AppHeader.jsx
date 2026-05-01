@@ -766,10 +766,19 @@ function AuthHeader({ user }) {
                         <FileText size={16} />
                         <span>{t("navbar.contracts")}</span>
                       </NavLink>
+                      <NavLink to="/my-proposals" className={({ isActive }) => "dropdown__link" + (isActive ? " is-active" : "")} style={{ display: 'flex', alignItems: 'center' }}>
+                        <Users size={16} />
+                        <span>{t("navbar.proposals")}</span>
+                        {proposalsCount > 0 && (
+                          <span className="nav__badge unread-badge" style={{ marginLeft: 'auto', position: 'static', transform: 'none' }}>
+                            {proposalsCount > 99 ? "99+" : proposalsCount}
+                          </span>
+                        )}
+                      </NavLink>
                     </div>
                   </div>
 
-                  {links.filter(l => l.to !== "/find-work" && l.to !== "/my-jobs").map((l) => (
+                  {links.filter(l => l.to !== "/find-work" && l.to !== "/my-jobs" && l.to !== "/my-proposals").map((l) => (
                     <NavLink
                       key={l.to}
                       to={l.to}
