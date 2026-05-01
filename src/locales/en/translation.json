@@ -631,7 +631,23 @@
     "attachments": "Files",
     "file": "File",
     "videoCall": "Video Call",
-    "system": "System"
+    "system": "System",
+    "invalidId": "Invalid message ID",
+    "messageNotFound": "Message not found",
+    "noPermissionToEdit": "You don't have permission to edit this message",
+    "noPermissionToDelete": "You don't have permission to delete this message",
+    "editSuccess": "Message updated successfully",
+    "deleteSuccess": "Message deleted successfully",
+    "onlyTextEditable": "Only text messages can be edited",
+    "alreadyDeleted": "Message already deleted",
+    "confirmDelete": "Are you sure you want to delete this message?",
+    "submissionAccepted": "Submission accepted",
+    "submissionRejected": "Submission rejected",
+    "selectMilestone": "Select Milestone",
+    "workDescription": "Work Description",
+    "attachFile": "Attach File",
+    "info": "Information",
+    "stickers": "Stickers"
   },
   "auth": {
     "enterEmailPhone": "Please enter your email or phone number",
@@ -1639,7 +1655,15 @@
       "contract_started": "Contract started",
       "payment_received": "Payment received",
       "message": "New message received",
-      "security_update": "Security alert"
+      "security_update": "Security update",
+      "job_invitation_body": "{{clientName}} invited you to the project \"{{jobTitle}}\".",
+      "job_invitation_generic": "You have been invited to the project \"{{jobTitle}}\".",
+      "proposal_accepted_body": "Your proposal for \"{{jobTitle}}\" has been accepted.",
+      "proposal_rejected_body": "Your proposal for \"{{jobTitle}}\" has been rejected.",
+      "new_job_posted_body": "A new job matching your skills: \"{{jobTitle}}\"",
+      "contract_started_body": "Contract for \"{{jobTitle}}\" started!",
+      "contract_completed_body": "Contract for \"{{jobTitle}}\" completed.",
+      "contract_cancelled_body": "Contract for \"{{jobTitle}}\" cancelled."
     }
   }
 }

@@ -401,9 +401,14 @@ function AuthHeader({ user }) {
   const audioRef = useRef(new Audio("https://cdn.freesound.org/previews/235/235911_2391266-lq.mp3"));
 
   // Brauzer bildirishnomasi funksiyasi
-  const showBrowserNotification = (title, body, icon = "/UzWork transparent.png", url = null) => {
+  const showBrowserNotification = (title, body, icon = "/UzWork transparent.png", url = null, tag = null) => {
     if (Notification.permission === "granted") {
-      const notif = new Notification(title, { body, icon });
+      const notif = new Notification(title, { 
+        body, 
+        icon,
+        tag: tag || undefined,
+        renotify: !!tag 
+      });
       notif.onclick = (e) => {
         e.preventDefault();
         window.focus();
@@ -442,7 +447,7 @@ function AuthHeader({ user }) {
                 const shownIds = JSON.parse(localStorage.getItem('shown_notifications') || '[]');
                 let updated = false;
 
-                unreadChats.slice(0, 3).forEach(chat => {
+                unreadChats.slice(0, 10).forEach((chat, idx) => {
                   const msgId = chat.last_message_id || `chat_${chat.chat_id}_${chat.last_message_at}`;
                   if (!shownIds.includes(msgId)) {
                     // Chat ob'ektidan xabar previewini yasaymiz
@@ -451,12 +456,18 @@ function AuthHeader({ user }) {
                       content: chat.last_message_content
                     };
 
-                    showBrowserNotification(
-                      `Yangi xabar: ${chat.partner?.first_name || 'Foydalanuvchi'}`,
-                      getPreviewText(chatMsgObj, t),
-                      chat.partner?.avatar_url || "/UzWork transparent.png",
-                      `/messages/${chat.chat_id}?msgId=${chat.last_message_id}`
-                    );
+                    const countPrefix = chat.unread_count > 1 ? `(${chat.unread_count}) ` : "";
+
+                    setTimeout(() => {
+                      showBrowserNotification(
+                        `${countPrefix}Yangi xabar: ${chat.partner?.first_name || 'Foydalanuvchi'}`,
+                        getPreviewText(chatMsgObj, t),
+                        chat.partner?.avatar_url || "/UzWork transparent.png",
+                        `/messages/${chat.chat_id}?msgId=${chat.last_message_id}`,
+                        msgId
+                      );
+                    }, idx * 1000);
+
                     shownIds.push(msgId);
                     updated = true;
                   }
@@ -499,7 +510,8 @@ function AuthHeader({ user }) {
             `Yangi xabar: ${msg.sender_first_name || 'Foydalanuvchi'}`,
             getPreviewText(msg, t),
             msg.sender_avatar_url || "/UzWork transparent.png",
-            `/messages/${msg.chat_id}?msgId=${msg.id}`
+            `/messages/${msg.chat_id}?msgId=${msg.id}`,
+            msg.id
           );
           
           shownIds.push(msg.id);
