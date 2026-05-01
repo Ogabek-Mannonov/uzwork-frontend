@@ -1,4 +1,10 @@
 {
+  "common": {
+    "loading": "Yuklanmoqda...",
+    "error": "Xatolik yuz berdi",
+    "next": "Keyingi",
+    "back": "Orqaga"
+  },
   "findTalent": {
     "badges": {
       "top_rated_plus": "Yuqori baholangan+",
@@ -832,6 +838,15 @@
     "signupDesc_freelancer": "Karyerangizni yangi bosqichga olib chiqing",
     "signupSuccessDesc_freelancer": "Hisobingiz muvaffaqiyatli yaratildi. Karyerangizni boshlash uchun profilingizni sozlang."
   },
+  "jobDetail": {
+    "backToAll": "← Barcha ishlarga",
+    "description": "Tavsif",
+    "requiredSkills": "Kerakli ko'nikmalar",
+    "save": "Saqlash",
+    "saved": "Saqlangan",
+    "hour": "soat",
+    "negotiable": "Kelishiladi"
+  },
   "findWork": {
     "layout": {
       "bannerSub": "To'g'ridan-to'g'ri shartnomalar",
@@ -1023,8 +1038,18 @@
     "overview": "Umumiy ko'rinish",
     "methods": "Mening kartalarim",
     "successWithdraw": "Pul yechish so'rovi yuborildi!",
-    "errorCardNumber": "Karta raqami noto'g'ri"
+    "errorCardNumber": "Karta raqami noto'g'ri",
+    "insufficientBalance": "Balansda mablag' yetarli emas",
+    "lockedBalanceLow": "Muzlatilgan balans yetarli emas"
   },
+  "wallet.insufficientBalance": "Balansda mablag' yetarli emas",
+  "wallet.lockedBalanceLow": "Muzlatilgan balans yetarli emas",
+  "proposals.error.freelancerOnly": "Faqat freelancerlar taklif yaratishi mumkin.",
+  "proposals.error.missingFields": "Barcha majburiy maydonlarni to'ldiring.",
+  "proposals.error.ownJob": "O'zingizning loyihangizga taklif yubora olmaysiz.",
+  "proposals.error.jobNotOpen": "Faqat ochiq loyihalarga taklif yuborish mumkin.",
+  "proposals.error.alreadySubmitted": "Siz bu loyihaga allaqachon taklif yuborgansiz.",
+  "proposals.success.created": "Taklif muvaffaqiyatli yuborildi!",
   "clientProfile": {
     "title": "Mening ma'lumotlarim",
     "viewPublicProfile": "Ochiq profilda ko'rish",
@@ -1729,7 +1754,22 @@
     },
     "loading": "Yuklanmoqda..."
   },
+  "job": {
+    "error": {
+      "notFound": "Loyiha topilmadi."
+    }
+  },
   "proposals": {
+    "error": {
+      "freelancerOnly": "Faqat freelancerlar taklif yaratishi mumkin.",
+      "missingFields": "Barcha majburiy maydonlarni to'ldiring.",
+      "ownJob": "O'zingizning loyihangizga taklif yubora olmaysiz.",
+      "jobNotOpen": "Faqat ochiq loyihalarga taklif yuborish mumkin.",
+      "alreadySubmitted": "Siz bu loyihaga allaqachon taklif yuborgansiz."
+    },
+    "success": {
+      "created": "Taklif muvaffaqiyatli yuborildi!"
+    },
     "received": "Kelib tushgan takliflar",
     "sent": "Mening takliflarim",
     "receivedSubtitle": "Mutaxassislardan kelgan arizalarni ko'rib chiqing",

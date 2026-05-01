@@ -1,4 +1,10 @@
 {
+  "common": {
+    "loading": "Загрузка...",
+    "error": "Произошла ошибка",
+    "next": "Далее",
+    "back": "Назад"
+  },
   "findTalent": {
     "badges": {"top_rated_plus": "Высокий рейтинг+","top_rated": "Высокий рейтинг","rising_talent": "Восходящий талант"},
     "filter": {"title": "Фильтры","clearAll": "Очистить все","clearAllCount": "Очистить все фильтры ({{count}})","talentBadge": "Уровень таланта","talentBadgeInfo": "Значки присуждаются на основе результатов","hourlyRate": "Почасовая ставка","under": "менее ${{min}}","location": "Локация","searchLocation": "Город, страна или регион","jobSuccess": "Успех работы","jobSuccessInfo": "Минимальный процент успеха","successUp": "{{percent}}% и выше","englishLevel": "Уровень английского"},
@@ -701,6 +707,15 @@
     "signupDesc_freelancer": "Поднимите свою карьеру на новый уровень",
     "signupSuccessDesc_freelancer": "Ваш аккаунт успешно создан. Настройте профиль, чтобы начать карьеру."
   },
+  "jobDetail": {
+    "backToAll": "← Назад ко всем вакансиям",
+    "description": "Описание",
+    "requiredSkills": "Необходимые навыки",
+    "save": "Сохранить",
+    "saved": "Сохранено",
+    "hour": "час",
+    "negotiable": "Договорная"
+  },
   "findWork": {
     "layout": {
       "bannerSub": "Прямые контракты",
@@ -891,8 +906,18 @@
     "topUpDemo": "Демо: Пополнить баланс",
     "successDeposit": "Средства успешно добавлены!",
     "successCard": "Карта успешно добавлена!",
-    "errorGeneric": "Произошла ошибка"
+    "errorGeneric": "Произошла ошибка",
+    "insufficientBalance": "Недостаточно средств на балансе",
+    "lockedBalanceLow": "Недостаточно средств в холде"
   },
+  "wallet.insufficientBalance": "Недостаточно средств на балансе",
+  "wallet.lockedBalanceLow": "Недостаточно средств в холде",
+  "proposals.error.freelancerOnly": "Только фрилансеры могут подавать заявки.",
+  "proposals.error.missingFields": "Пожалуйста, заполните все обязательные поля.",
+  "proposals.error.ownJob": "Вы не можете подать заявку на свой собственный проект.",
+  "proposals.error.jobNotOpen": "Заявки принимаются только на открытые вакансии.",
+  "proposals.error.alreadySubmitted": "Вы уже подали заявку на этот проект.",
+  "proposals.success.created": "Заявка успешно отправлена!",
   "clientProfile": {
     "title": "Моя информация",
     "viewPublicProfile": "Просмотр публичного профиля",
@@ -1520,7 +1545,22 @@
     },
     "loading": "Загрузка..."
   },
+  "job": {
+    "error": {
+      "notFound": "Вакансия не найдена."
+    }
+  },
   "proposals": {
+    "error": {
+      "freelancerOnly": "Только фрилансеры могут подавать заявки.",
+      "missingFields": "Пожалуйста, заполните все обязательные поля.",
+      "ownJob": "Вы не можете подать заявку на свой собственный проект.",
+      "jobNotOpen": "Заявки принимаются только на открытые вакансии.",
+      "alreadySubmitted": "Вы уже подали заявку на этот проект."
+    },
+    "success": {
+      "created": "Заявка успешно отправлена!"
+    },
     "received": "Полученные предложения",
     "sent": "Мои приглашения",
     "receivedSubtitle": "Просмотрите заявки от специалистов",
