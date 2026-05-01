@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { saveJob } from "../../api/jobs";
 import "../../assets/style/JobDetailsDrawer.css";
+import Price from "./Currency/Price";
 
 export default function JobDetailsDrawer({ job, isOpen, onClose, savedIds = [], onSaveToggle }) {
   const { t } = useTranslation();
@@ -46,14 +47,17 @@ export default function JobDetailsDrawer({ job, isOpen, onClose, savedIds = [], 
   // Budget display
   const budgetDisplay = () => {
     if (job.job_type === "hourly") {
-      const min = job.budget_min ? `$${Number(job.budget_min).toLocaleString()}` : "";
-      const max = job.budget_max ? `$${Number(job.budget_max).toLocaleString()}` : "";
-      return min && max ? `${min} – ${max}/soat` : min || max || "Kelishiladi";
+      return (
+        <>
+          <Price amount={job.budget_min} currency={job.currency || 'USD'} /> – <Price amount={job.budget_max} currency={job.currency || 'USD'} /> /soat
+        </>
+      );
     }
-    const max = job.budget_max ? `$${Number(job.budget_max).toLocaleString()}` : null;
-    const min = job.budget_min ? `$${Number(job.budget_min).toLocaleString()}` : null;
-    if (max && min && min !== max) return `${min} – ${max}`;
-    return max || min || "Kelishiladi";
+    return (
+      <>
+        <Price amount={job.budget_min} currency={job.currency || 'USD'} /> {job.budget_min !== job.budget_max && job.budget_max && <> – <Price amount={job.budget_max} currency={job.currency || 'USD'} /></>}
+      </>
+    );
   };
 
   // Handle Apply
@@ -259,7 +263,7 @@ export default function JobDetailsDrawer({ job, isOpen, onClose, savedIds = [], 
                   <span>{job.client_hire_rate || 0}% {t("findWork.drawer.hireRate")}</span>
                 </div>
                 <div className="jd-meta-item">
-                  <strong>${Number(job.client_spent_total || 0).toLocaleString()} {t("findWork.drawer.totalSpent")}</strong>
+                  <strong><Price amount={job.client_spent_total || 0} currency="USD" /> {t("findWork.drawer.totalSpent")}</strong>
                 </div>
               </div>   {job.client_member_since && (
                   <p className="jd-member-since">

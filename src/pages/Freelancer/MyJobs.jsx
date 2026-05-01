@@ -14,6 +14,7 @@ import {
   Calendar
 } from "lucide-react";
 import { getMyContracts } from "../../api/contracts";
+import Price from "../components/Currency/Price";
 import "./MyJobs.css";
 
 const STATUS_MAP = {
@@ -103,7 +104,9 @@ const FreelancerMyJobs = () => {
             </div>
             <div className="f-myjobs__stat-info">
               <span className="f-myjobs__stat-label">{t("myJobsFreelancer.totalEarnings", "Umumiy daromad")}</span>
-              <span className="f-myjobs__stat-value">${stats.totalEarned.toLocaleString()}</span>
+              <span className="f-myjobs__stat-value">
+                <Price amount={stats.totalEarned} currency="USD" />
+              </span>
             </div>
           </div>
         </div>
@@ -173,7 +176,7 @@ const FreelancerMyJobs = () => {
                   <div className="card-stat">
                     <span className="card-stat__label">{t("myJobsFreelancer.contract.amount", "Summa")}</span>
                     <span className="card-stat__value amount">
-                      ${contract.total_amount?.toLocaleString()}
+                      <Price amount={contract.total_amount} currency={contract.currency || contract.job_currency || 'USD'} />
                     </span>
                   </div>
                   <div className="card-stat">

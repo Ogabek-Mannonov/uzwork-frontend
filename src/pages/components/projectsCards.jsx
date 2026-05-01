@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import ProjectCard from "../components/projectCard";
 import { getJobs, getRecommendedJobs, getSavedJobs, saveJob } from "../../api/jobs";
 import "../../assets/style/projectsCards.css";
+import Price from "./Currency/Price";
 
 export default function Projects({ 
   activeTab = "recommended", 
@@ -166,14 +167,21 @@ export default function Projects({
   // Backend'dan kelgan ma'lumotni ProjectCard formatiga moslashtirish
   const mappedJobs = jobs.map((job) => {
     // Determine price representation
-    let priceText = t("findWork.projectCard.recently");
-    if (job.job_type === "fixed" && job.budget_max) {
-      priceText = `${Number(job.budget_max).toLocaleString()} ${job.currency || 'UZS'}`;
-    } else if (job.job_type === "hourly" && job.budget_min) {
-      priceText = `${Number(job.budget_min)}–${Number(job.budget_max)} ${job.currency || 'UZS'}/soat`;
-    }
+    const getBudgetDisplay = () => {
+      if (job.job_type === "hourly") {
+        return (
+          <>
+            <Price amount={job.budget_min} currency={job.currency || 'USD'} /> – <Price amount={job.budget_max} currency={job.currency || 'USD'} /> /soat
+          </>
+        );
+      }
+      return (
+        <>
+          <Price amount={job.budget_min} currency={job.currency || 'USD'} /> {job.budget_min !== job.budget_max && job.budget_max ? <><Price amount={job.budget_max} currency={job.currency || 'USD'} /></> : ""}
+        </>
+      );
+    };
 
-    // Determine tags
     let tagsList = [];
     try {
       if (typeof job.required_skills === 'string') {
@@ -191,7 +199,7 @@ export default function Projects({
       title: job.title,
       description: job.description,
       tags: tagsList,
-      price: priceText,
+      price: getBudgetDisplay(),
       type: job.job_type === 'hourly' ? t("findWork.projectCard.hourly") : t("findWork.projectCard.fixed"),
       experience: t("findWork.projectCard.intermediate"), // experience_level is not in DB yet
       posted: job.created_at ? new Date(job.created_at).toLocaleDateString() : t("findWork.projectCard.recently"),
@@ -206,35 +214,22 @@ export default function Projects({
         </div>
       ) : (
         <div className="projects-grid">
-          {jobs.map((job) => {
-            // Determine price representation for the card
-            let priceText = t("findWork.projectCard.recently");
-            if (job.job_type === "fixed" && job.budget_max) {
-              priceText = `${Number(job.budget_max).toLocaleString()} ${job.currency || 'UZS'}`;
-            } else if (job.job_type === "hourly" && job.budget_min) {
-              priceText = `${Number(job.budget_min)}–${Number(job.budget_max)} ${job.currency || 'UZS'}/soat`;
-            }
-
-            let tagsList = [];
-            try {
-              if (typeof job.required_skills === 'string') tagsList = JSON.parse(job.required_skills);
-              else if (Array.isArray(job.required_skills)) tagsList = job.required_skills;
-            } catch (e) {}
-
+          {mappedJobs.map((jobData, idx) => {
+            const originalJob = jobs[idx]; // To access proposals_count, liked status etc if needed, or just use jobData
             return (
               <ProjectCard
-                key={job.id}
-                img={job.cover_image_url}
-                title={job.title}
-                description={job.description}
-                tags={tagsList}
-                price={priceText}
-                meta={`${job.job_type === 'hourly' ? t("findWork.projectCard.hourly") : t("findWork.projectCard.fixed")} · ${t("findWork.projectCard.intermediate")}`}
-                posted={job.created_at ? new Date(job.created_at).toLocaleDateString() : t("findWork.projectCard.recently")}
-                liked={likedIds.has(job.id)}
-                proposalsCount={job.proposals_count}
-                onToggleLike={() => toggleLike(job.id)}
-                onReadMore={() => onProjectClick && onProjectClick(job)}
+                key={jobData.id}
+                img={jobData.img}
+                title={jobData.title}
+                description={jobData.description}
+                tags={jobData.tags}
+                price={jobData.price}
+                meta={`${jobData.type} · ${jobData.experience}`}
+                posted={jobData.posted}
+                liked={likedIds.has(jobData.id)}
+                proposalsCount={originalJob.proposals_count}
+                onToggleLike={() => toggleLike(jobData.id)}
+                onReadMore={() => onProjectClick && onProjectClick(originalJob)}
               />
             );
           })}

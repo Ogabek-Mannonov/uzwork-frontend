@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getJobById, saveJob } from "../../../api/jobs";
 import { createProposal } from "../../../api/proposals";
+import Price from "../../components/Currency/Price";
+import { useCurrency } from "../../components/Currency/CurrencyContext";
 
 export default function JobDetail() {
   const { id } = useParams();
@@ -76,8 +78,8 @@ export default function JobDetail() {
             background: "#e6f7e6", padding: "6px 16px", borderRadius: 20
           }}>
             {job.budget_type === "hourly"
-              ? `$${job.hourly_rate_min}–$${job.hourly_rate_max}/soat`
-              : job.budget_amount ? `$${job.budget_amount}` : "Kelishiladi"}
+              ? <><Price amount={job.hourly_rate_min} currency={job.currency} /> – <Price amount={job.hourly_rate_max} currency={job.currency} />/soat</>
+              : (job.budget_amount || job.budget_max) ? <Price amount={job.budget_amount || job.budget_max} currency={job.currency} /> : "Kelishiladi"}
           </span>
         </div>
 
@@ -142,7 +144,7 @@ export default function JobDetail() {
             />
             <input
               type="number"
-              placeholder="Taklif narx ($)"
+              placeholder={`Taklif narx (${job.currency || 'USD'})`}
               value={proposal.proposed_price}
               onChange={e => setProposal(p => ({ ...p, proposed_price: e.target.value }))}
               style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 14, marginBottom: 12, boxSizing: "border-box" }}

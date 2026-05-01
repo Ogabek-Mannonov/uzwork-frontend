@@ -15,6 +15,7 @@ import {
 } from "../../api/jobs";
 import { useThemeContext } from "../components/Theme/ThemeContext";
 import "../Client/css/myjobs.css";
+import Price from "../components/Currency/Price";
 
 const MyJobs = () => {
   const { t } = useTranslation();
@@ -323,9 +324,9 @@ const MyJobs = () => {
                     <DollarSign size={16} />
                     <span>
                       {job.budget_max 
-                        ? (job.currency === 'UZS' ? `${Number(job.budget_max).toLocaleString()} UZS` : (job.currency === 'RUB' ? `${job.budget_max} ₽` : `$${job.budget_max}`))
+                        ? <Price amount={job.budget_max} currency={job.currency || 'USD'} />
                         : (job.budget_min 
-                            ? (job.currency === 'UZS' ? `${Number(job.budget_min).toLocaleString()} UZS` : (job.currency === 'RUB' ? `${job.budget_min} ₽` : `$${job.budget_min}`))
+                            ? <Price amount={job.budget_min} currency={job.currency || 'USD'} />
                             : t('myJobs.negotiable'))
                       }
                     </span>

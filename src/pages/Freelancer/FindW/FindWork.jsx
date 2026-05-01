@@ -7,9 +7,11 @@ import JobDetailsDrawer from "../../components/JobDetailsDrawer";
 import { useTranslation } from "react-i18next";
 import { getMyProfile } from "../../../api/profile";
 import { getMyPortfolio, getMyCertifications } from "../../../api/freelancer";
+import { useCurrency } from "../../components/Currency/CurrencyContext";
 
 export default function FindWork() {
   const { t } = useTranslation();
+  const { currency, formatAmount } = useCurrency();
   const [searchParams] = useSearchParams();
   
   // States
@@ -233,10 +235,10 @@ export default function FindWork() {
             <h4>{t("findWork.layout.filters.budget")}</h4>
             <select className="fw-filter-select-full" value={budgetRange} onChange={(e) => setBudgetRange(e.target.value)}>
               <option value="all">{t("findWork.layout.filters.anyAmount")}</option>
-              <option value="0-100">{t("findWork.layout.filters.upTo100")}</option>
-              <option value="100-500">$100 - $500</option>
-              <option value="500-1000">$500 - $1K</option>
-              <option value="1000+">$1K +</option>
+              <option value="0-100">{formatAmount(0, 'USD')} - {formatAmount(100, 'USD')}</option>
+              <option value="100-500">{formatAmount(100, 'USD')} - {formatAmount(500, 'USD')}</option>
+              <option value="500-1000">{formatAmount(500, 'USD')} - {formatAmount(1000, 'USD')}</option>
+              <option value="1000+">{formatAmount(1000, 'USD')} +</option>
             </select>
           </div>
 

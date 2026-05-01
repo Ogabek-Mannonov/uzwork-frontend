@@ -15,6 +15,7 @@ import { inviteFreelancer } from "../../api/proposals";
 import InviteDrawer from "../components/InviteDrawer";
 import { getSocket, onSocketReady, normalizeUserStatus } from "../../hooks/useSocket";
 import { useUsersPresence } from "../../hooks/useUserPresence";
+import Price from "../components/Currency/Price";
 
 /* ================================================================
    MOCK DATA
@@ -160,7 +161,9 @@ const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle, onOpenInvit
 
         {/* Stats row */}
         <div className="ft-stats-row">
-          <span className="ft-stat">{fl.rate}</span>
+          <span className="ft-stat">
+            <Price amount={fl.rate_value} currency="USD" />/soat
+          </span>
           <span className="ft-stat-sep" />
           <span className={`ft-success-badge ${successClass}`}>
             {fl.jobSuccess >= 95
@@ -292,6 +295,7 @@ const FindTalent = () => {
             avatar: item.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.first_name || "U")}+${encodeURIComponent(item.last_name || "")}&background=random`,
             name: `${item.first_name || t("findTalent.card.mutaxassis")} ${item.last_name || ""}`.trim(),
             title: item.title || "Freelancer",
+            rate_value: item.hourly_rate || 0,
             rate: item.hourly_rate ? `$${item.hourly_rate}/hr` : t("findTalent.card.negotiable"),
             jobSuccess: item.rating || 0,
             earned: item.completed_jobs ? `${item.completed_jobs} ${t("findTalent.card.jobsDone")}` : t("findTalent.card.newFreelancer"),

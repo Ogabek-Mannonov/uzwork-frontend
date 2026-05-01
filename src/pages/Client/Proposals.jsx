@@ -20,6 +20,7 @@ import { getUserProfile, markAllNotificationsReadByType } from "../../api/common
 import { findOrCreateProposalChat } from "../../api/messages";
 import { useThemeContext } from "../components/Theme/ThemeContext";
 import { useTranslation } from "react-i18next";
+import Price from "../components/Currency/Price";
 import "./css/proposals.css";
 
 const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/api\/?$/, "");
@@ -519,7 +520,7 @@ const Proposals = () => {
                         </div>
                       </div>
                       <div className="cp-price">
-                        <span>${proposal.proposed_price || proposal.budget_amount || 0}</span>
+                        <Price amount={proposal.proposed_price || proposal.budget_amount || 0} currency={proposal.currency || proposal.job_currency || 'USD'} />
                         <span>{proposal.payment_type || "FIXED"}</span>
                       </div>
                     </div>

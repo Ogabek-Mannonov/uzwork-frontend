@@ -14,6 +14,7 @@ import HomeRedirect from "./pages/components/routing/HomeRedirect.jsx";
 import Signup from "./pages/auth/Signup.jsx";
 import Login from "./pages/auth/Login.jsx";
 import { ThemeProvider } from "./pages/components/Theme/ThemeContext.jsx";
+import { CurrencyProvider } from "./pages/components/Currency/CurrencyContext.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 
 import Info from "./pages/info/Info.jsx";
@@ -65,92 +66,94 @@ import Reports from "./pages/Freelancer/Reports.jsx";
 function App() {
   return (
     <ThemeProvider>
-      <Router>
-        <Routes>
-        {/* Public landing */}
-        <Route path="/" element={<Info />} />
-        <Route path="/hire/cold-callers" element={<CategoryPage />} />
+      <CurrencyProvider>
+        <Router>
+          <Routes>
+          {/* Public landing */}
+          <Route path="/" element={<Info />} />
+          <Route path="/hire/cold-callers" element={<CategoryPage />} />
 
-        {/* Auth pages (separate layout) */}
-        <Route element={<AuthLayout />}>
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-        </Route>
-
-        {/* Standalone Protected Routes (Onboarding, etc.) */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/onboarding" element={<Onboarding />} />
-        </Route>
-
-        {/* Main app layout */}
-        <Route element={<MainLayout />}>
-          {/* Default redirect */}
-          <Route path="/app" element={<Navigate to="/home" replace />} />
-
-          {/* Public-ish inside app */}
-          <Route path="/jobs/:id" element={<JobDetail />} />
-          <Route path="/profile/:id" element={<PublicProfile />} />
-          <Route path="/home" element={<HomeRedirect />} />
-          
-
-          {/* Protected area */}
-          <Route element={<ProtectedRoute />}>
-            {/* Profile */}
-            <Route path="/profile" element={<MyProfile />} />
-
-            {/* Proposals (freelancer) */}
-            <Route element={<RoleRoute allow={["freelancer"]} />}>
-              <Route path="/find-work" element={<FindWork />} />
-              <Route path="/my-jobs" element={<MyJobsFreelancer />} />
-              <Route path="/proposals" element={<Proposal />} />
-              <Route path="/my-proposals" element={<MyProposals />} />
-              <Route path="/proposals/new/:jobId" element={<Proposal />} />
-              <Route path="/reports" element={<Reports />} />
-            </Route>
-
-            {/* Client specific area */}
-            <Route element={<RoleRoute allow={["client"]} />}>
-              <Route path="/jobs/create" element={<CreateJob />} />
-              <Route path="/client/landing" element={<Landing />} />
-              <Route path="/profile/client" element={<Client />} />
-              <Route path="/client/job/:id" element={<ClientHome />} />
-              <Route path="/client/talent" element={<FindTalent />} />
-              <Route path="/client/postjob" element={<PostJob />} />
-              <Route path="/client/my-jobs" element={<MyJobs />} />
-              <Route path="/client/proposals" element={<Proposals />} />
-              <Route path="/client/saved" element={<SavedTalent />} />
-              <Route path="/client/payments" element={<Wallet />} />  
-              <Route path="/client/management" element={<ContractManagement />} />
-              <Route path="/client/security" element={<SecuritySettings />} />
-              <Route path="/client/escrow" element={<Escrow />} />
-            </Route>
-
-            {/* Contracts */}
-            <Route path="/contracts" element={<ContractsList />} />
-            <Route path="/contracts/:id" element={<ContractDetail />} />
-
-            {/* Messages */}
-            <Route path="/messages" element={<ChatList />}>
-              <Route path=":id" element={<ChatDetail />} />
-            </Route>
-
-            {/* Wallet */}
-            <Route path="/billing" element={<Wallet />} />
-            <Route path="/payments" element={<Wallet />} />
-            <Route path="/wallet" element={<Wallet />} />
-            <Route path="/wallet/transactions" element={<Transactions />} />
-
-            {/* Disputes */}
-            <Route path="/disputes" element={<DisputesList />} />
-            <Route path="/disputes/:id" element={<DisputeDetail />} />
+          {/* Auth pages (separate layout) */}
+          <Route element={<AuthLayout />}>
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
           </Route>
 
-          {/* 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </Router>
+          {/* Standalone Protected Routes (Onboarding, etc.) */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/onboarding" element={<Onboarding />} />
+          </Route>
+
+          {/* Main app layout */}
+          <Route element={<MainLayout />}>
+            {/* Default redirect */}
+            <Route path="/app" element={<Navigate to="/home" replace />} />
+
+            {/* Public-ish inside app */}
+            <Route path="/jobs/:id" element={<JobDetail />} />
+            <Route path="/profile/:id" element={<PublicProfile />} />
+            <Route path="/home" element={<HomeRedirect />} />
+            
+
+            {/* Protected area */}
+            <Route element={<ProtectedRoute />}>
+              {/* Profile */}
+              <Route path="/profile" element={<MyProfile />} />
+
+              {/* Proposals (freelancer) */}
+              <Route element={<RoleRoute allow={["freelancer"]} />}>
+                <Route path="/find-work" element={<FindWork />} />
+                <Route path="/my-jobs" element={<MyJobsFreelancer />} />
+                <Route path="/proposals" element={<Proposal />} />
+                <Route path="/my-proposals" element={<MyProposals />} />
+                <Route path="/proposals/new/:jobId" element={<Proposal />} />
+                <Route path="/reports" element={<Reports />} />
+              </Route>
+
+              {/* Client specific area */}
+              <Route element={<RoleRoute allow={["client"]} />}>
+                <Route path="/jobs/create" element={<CreateJob />} />
+                <Route path="/client/landing" element={<Landing />} />
+                <Route path="/profile/client" element={<Client />} />
+                <Route path="/client/job/:id" element={<ClientHome />} />
+                <Route path="/client/talent" element={<FindTalent />} />
+                <Route path="/client/postjob" element={<PostJob />} />
+                <Route path="/client/my-jobs" element={<MyJobs />} />
+                <Route path="/client/proposals" element={<Proposals />} />
+                <Route path="/client/saved" element={<SavedTalent />} />
+                <Route path="/client/payments" element={<Wallet />} />  
+                <Route path="/client/management" element={<ContractManagement />} />
+                <Route path="/client/security" element={<SecuritySettings />} />
+                <Route path="/client/escrow" element={<Escrow />} />
+              </Route>
+
+              {/* Contracts */}
+              <Route path="/contracts" element={<ContractsList />} />
+              <Route path="/contracts/:id" element={<ContractDetail />} />
+
+              {/* Messages */}
+              <Route path="/messages" element={<ChatList />}>
+                <Route path=":id" element={<ChatDetail />} />
+              </Route>
+
+              {/* Wallet */}
+              <Route path="/billing" element={<Wallet />} />
+              <Route path="/payments" element={<Wallet />} />
+              <Route path="/wallet" element={<Wallet />} />
+              <Route path="/wallet/transactions" element={<Transactions />} />
+
+              {/* Disputes */}
+              <Route path="/disputes" element={<DisputesList />} />
+              <Route path="/disputes/:id" element={<DisputeDetail />} />
+            </Route>
+
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </Router>
+    </CurrencyProvider>
   </ThemeProvider>
   );
 }

@@ -11,6 +11,7 @@ import {
 import "../Client/css/post.css";
 import { createJob, getJobById, updateJob } from "../../api/jobs";
 import { uploadFile, getSkills } from "../../api/common";
+import { useCurrency } from "../components/Currency/CurrencyContext";
 
 /* ================================================================
    CONSTANTS
@@ -803,6 +804,14 @@ const PostJob = () => {
   const [toast,      setToast]     = useState(null);
   const [success,    setSuccess]   = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const { currency: globalCurrency } = useCurrency();
+
+  useEffect(() => {
+    // Set default currency from global settings if not editing
+    if (!editId && globalCurrency) {
+      setForm(prev => ({ ...prev, currency: globalCurrency }));
+    }
+  }, [globalCurrency, editId]);
 
   useEffect(() => {
     if (editId) {
@@ -952,7 +961,7 @@ const PostJob = () => {
       scope:            form.scope,
       visibility:       form.visibility,
       freelancers_needed: form.freelancers === "1" ? 1 : 2,
-      currency:         "USD",
+      currency:         form.currency,
       status,
       attachments:      form.attachments,
     };

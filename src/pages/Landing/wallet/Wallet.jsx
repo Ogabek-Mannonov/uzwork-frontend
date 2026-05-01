@@ -9,6 +9,7 @@ import {
   deleteCard 
 } from "../../../api/payments";
 import { getSystemRates } from "../../../api/common";
+import { useCurrency } from "../../components/Currency/CurrencyContext";
 import { 
   CreditCard, 
   Plus, 
@@ -68,9 +69,8 @@ export default function Wallet() {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [toast, setToast] = useState({ msg: "", type: "" });
   
-  // Currency State
-  const [selectedCurrency, setSelectedCurrency] = useState("USD");
-  const [rates, setRates] = useState({ usd: 1, uzs: 12600, rub: 92 });
+  // Currency State (using global context)
+  const { currency: selectedCurrency, setCurrency: setSelectedCurrency, formatAmount: globalFormat, convert, rates: globalRates } = useCurrency();
 
   const notify = (msg, type = "success") => {
     setToast({ msg, type });
@@ -101,73 +101,19 @@ export default function Wallet() {
 
   useEffect(() => { 
     loadData(); 
-    
-    // Tizim kurslarini olish (backend dan)
-    getSystemRates().then(res => {
-      if (res?.success && res.data) {
-        // Backend formatiga qarab moslashtiramiz
-        const fetchedRates = res.data.rates;
-        let uzsRate = 12600;
-        let rubRate = 92;
-
-        if (Array.isArray(fetchedRates)) {
-          const usdToUzs = fetchedRates.find(r => r.to_currency === 'UZS' || r.to_currency === 'uzs');
-          const usdToRub = fetchedRates.find(r => r.to_currency === 'RUB' || r.to_currency === 'rub');
-          if (usdToUzs) uzsRate = Number(usdToUzs.rate);
-          if (usdToRub) rubRate = Number(usdToRub.rate);
-        } else if (fetchedRates.USD) {
-          uzsRate = fetchedRates.USD.UZS || 12600;
-          rubRate = fetchedRates.USD.RUB || 92;
-        } else if (fetchedRates.uzs) {
-          uzsRate = fetchedRates.uzs;
-          rubRate = fetchedRates.rub || 92;
-        }
-
-        setRates({ usd: 1, uzs: uzsRate, rub: rubRate });
-      } else {
-        // Fallback: Agar backenddan olish imkoni bo'lmasa, tashqi API dan olamiz
-        fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json")
-          .then(res => res.json())
-          .then(data => {
-            if (data.usd) {
-              setRates({
-                usd: 1,
-                uzs: data.usd.uzs || 12600,
-                rub: data.usd.rub || 92
-              });
-            }
-          })
-          .catch(err => console.error("External rates fetch error:", err));
-      }
-    });
   }, []);
 
   // tx (transaction object) ni ham qabul qiladi — metadata.amount_usd bo'lsa shu aniq USD summani ishlatadi
   const formatMoney = (amountInUzs, tx = null) => {
-    const val = Number(amountInUzs || 0);
-    const uzsRate = rates.uzs || 12600;
-    const rubRate = rates.rub || 92;
-
-    if (selectedCurrency === "USD") {
-      // Agar backenddan aniq USD summa saqlangan bo'lsa (escrow_hold, va h.k.) — shu qiymatni ishlatamiz
-      const meta = tx?.metadata ? (typeof tx.metadata === 'string' ? (() => { try { return JSON.parse(tx.metadata); } catch { return {}; } })() : tx.metadata) : null;
-      if (meta?.amount_usd != null) {
-        const usd = Number(meta.amount_usd);
-        return `$${usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      }
-      // Fallback: UZS → USD (real kurs bilan)
-      const converted = val / uzsRate;
-      return `$${converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    }
-    if (selectedCurrency === "RUB") {
-      const meta = tx?.metadata ? (typeof tx.metadata === 'string' ? (() => { try { return JSON.parse(tx.metadata); } catch { return {}; } })() : tx.metadata) : null;
-      const usd = meta?.amount_usd != null ? Number(meta.amount_usd) : val / uzsRate;
-      const converted = usd * rubRate;
-      return `${converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`;
+    const meta = tx?.metadata ? (typeof tx.metadata === 'string' ? (() => { try { return JSON.parse(tx.metadata); } catch { return {}; } })() : tx.metadata) : null;
+    
+    // Agar meta-ma'lumotda USD summa bo'lsa va tanlangan valyuta USD bo'lmasa, uni convert qilishimiz kerak
+    if (meta?.amount_usd != null) {
+      return globalFormat(meta.amount_usd, 'USD');
     }
 
-    // Default UZS
-    return `${val.toLocaleString()} UZS`;
+    // Default: UZS dan global valyutaga
+    return globalFormat(amountInUzs, 'UZS');
   };
 
   const handleAddCard = async (e) => {
@@ -197,13 +143,7 @@ export default function Wallet() {
     if (!amount || Number(amount) <= 0) return;
     setProcessing(true);
     // Convert input to UZS (Base currency for backend)
-    let amountInUzs = Number(amount);
-    if (selectedCurrency === "USD") {
-      amountInUzs = Math.round(Number(amount) * rates.uzs);
-    } else if (selectedCurrency === "RUB") {
-      // RUB -> USD -> UZS
-      amountInUzs = Math.round((Number(amount) / rates.rub) * rates.uzs);
-    }
+    const amountInUzs = Math.round(convert(amount, selectedCurrency) * globalRates.UZS);
     
     const res = await deposit({ 
       amount: amountInUzs,
@@ -232,16 +172,7 @@ export default function Wallet() {
     
     setProcessing(true);
     // Convert input to UZS (Base currency for backend)
-    let amountInUzs = Number(withdrawAmount);
-    const uzsRate = rates.uzs || 12600;
-    const rubRate = rates.rub || 92;
-
-    if (selectedCurrency === "USD") {
-      amountInUzs = Math.round(Number(withdrawAmount) * uzsRate);
-    } else if (selectedCurrency === "RUB") {
-      // RUB -> USD -> UZS
-      amountInUzs = Math.round((Number(withdrawAmount) / rubRate) * uzsRate);
-    }
+    const amountInUzs = Math.round(convert(withdrawAmount, selectedCurrency) * globalRates.UZS);
 
     // Frontend validation: Check against available balance
     const currentBalanceUzs = Number(balance?.available_balance || 0);

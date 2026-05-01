@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { createProposal } from "../../../api/proposals";
 import { getJobById } from "../../../api/jobs";
+import Price from "../../components/Currency/Price";
+import { useCurrency } from "../../components/Currency/CurrencyContext";
 import {
   ArrowLeft,
   Send,
@@ -106,7 +108,8 @@ export default function Proposal() {
       proposed_price: totalPrice,
       proposed_duration: duration,
       milestones: paymentMode === "milestone" ? milestones : [],
-      payment_mode: paymentMode
+      payment_mode: paymentMode,
+      currency: job?.currency || 'USD'
     };
 
     const res = await createProposal(payload);
@@ -205,7 +208,11 @@ export default function Proposal() {
                       <div className="pr-spec-item">
                         <DollarSign size={20} />
                         <div>
-                          <strong>{job?.job_type === 'hourly' ? `$${job?.budget_min}-${job?.budget_max}` : `$${job?.budget_max}`}</strong>
+                          <strong>
+                            {job?.job_type === 'hourly' 
+                              ? <><Price amount={job?.budget_min} currency={job?.currency} /> – <Price amount={job?.budget_max} currency={job?.currency} /></> 
+                              : <Price amount={job?.budget_max} currency={job?.currency} />}
+                          </strong>
                           <span>{job?.job_type === 'hourly' ? t("findWork.projectCard.hourly") : t("findWork.projectCard.fixed")}</span>
                         </div>
                       </div>
@@ -280,12 +287,14 @@ export default function Proposal() {
 
                 {paymentMode === 'project' && (
                   <div className="pr-input-group" style={{ maxWidth: 400 }}>
-                    <label>{t("submitProposal.project.priceLabel")}</label>
+                    <label>{t("submitProposal.project.priceLabel").replace("($)", `(${job?.currency || 'USD'})`)}</label>
                     <div style={{ position: 'relative' }}>
-                      <DollarSign size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--brand)' }} />
+                      <div style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--brand)', fontWeight: 800 }}>
+                        {job?.currency === 'USD' ? '$' : job?.currency === 'RUB' ? '₽' : 'UZ'}
+                      </div>
                       <input 
                         className="pr-input" 
-                        style={{ paddingLeft: 44, fontSize: 20, fontWeight: 800, color: 'var(--brand)' }}
+                        style={{ paddingLeft: job?.currency === 'UZS' ? 52 : 44, fontSize: 20, fontWeight: 800, color: 'var(--brand)' }}
                         type="number" 
                         value={projectPrice} 
                         onChange={e => setProjectPrice(e.target.value)}
@@ -301,14 +310,14 @@ export default function Proposal() {
                       <strong>{t("submitProposal.fee.totalBalance")}</strong>
                       <span>{t("submitProposal.fee.totalDesc")}</span>
                     </div>
-                    <div className="pr-fee-value">${totalPrice.toLocaleString()}</div>
+                    <div className="pr-fee-value"><Price amount={totalPrice} currency={job?.currency} /></div>
                   </div>
                   <div className="pr-fee-line">
                     <div className="pr-fee-label">
                       <strong>{t("submitProposal.fee.serviceFee")}</strong>
                       <span>{t("submitProposal.fee.serviceDesc")}</span>
                     </div>
-                    <div className="pr-fee-value" style={{ color: '#ef4444' }}>-${serviceFee.toLocaleString()}</div>
+                    <div className="pr-fee-value" style={{ color: '#ef4444' }}>-<Price amount={serviceFee} currency={job?.currency} /></div>
                   </div>
                   <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '20px 0' }} />
                   <div className="pr-fee-line pr-fee-total">
@@ -316,7 +325,7 @@ export default function Proposal() {
                       <strong>{t("submitProposal.fee.receive")}</strong>
                       <span>{t("submitProposal.fee.receiveDesc")}</span>
                     </div>
-                    <div className="pr-fee-value">${youReceive.toLocaleString()}</div>
+                    <div className="pr-fee-value"><Price amount={youReceive} currency={job?.currency} /></div>
                   </div>
                 </div>
               </div>
