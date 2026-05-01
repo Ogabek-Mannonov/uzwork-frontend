@@ -64,6 +64,25 @@ function formatTime(dateStr, t) {
   return `${d.getDate()} ${monthList[d.getMonth()]}`;
 }
 
+function getPreviewText(chat, t) {
+  const type = chat.last_message_type || 'text';
+  const rawContent = chat.last_message_content || chat.last_message?.message_text || chat.last_message?.content || "";
+  
+  let text = "";
+  if (type === 'image') text = `🖼️ ${t('chat.photo', 'Photo')}`;
+  else if (type === 'voice') text = `🎤 ${t('chat.voiceMsg', 'Voice message')}`;
+  else if (type === 'submission') text = `💼 ${t('chat.workSubmitted', 'Work Submitted')}`;
+  else if (type === 'file') text = `📄 ${t('chat.file', 'File')}`;
+  else if (type === 'video_call') text = `📹 ${t('chat.videoCall', 'Video Call')}`;
+  else if (type === 'system') text = rawContent || t('chat.system', 'System');
+  else text = rawContent || t("chat.noMessagesOut", "No message");
+
+  if (text.length > 38) {
+    return text.slice(0, 38) + "…";
+  }
+  return text;
+}
+
 function Avatar({ user, size = "md" }) {
   const [imgError, setImgError] = useState(false);
   const name = user
@@ -220,9 +239,14 @@ export default function ChatPage() {
           const cid = chat.chat_id || chat.id;
           if (String(cid) === String(msg.chat_id)) {
             found = true;
+            // Deduplication: if we already processed this message, don't increment unread_count
+            if (chat.last_message_id === msg.id) return chat;
+
             return {
               ...chat,
+              last_message_id: msg.id,
               last_message_content: msg.content || msg.message,
+              last_message_type: msg.type,
               last_message_at: msg.created_at,
               unread_count: isOur ? (chat.unread_count || 0) : (chat.unread_count || 0) + 1
             };
@@ -411,10 +435,7 @@ export default function ChatPage() {
                       </div>
                       <div className="chat-item-bottom">
                         <span className={`chat-item-preview ${hasUnread ? "unread" : ""}`}>
-                          {chat.last_message_content || chat.last_message?.message_text || chat.last_message?.content ? (
-                            (chat.last_message_content || chat.last_message?.message_text || chat.last_message?.content).slice(0, 38) +
-                            ((chat.last_message_content || chat.last_message?.message_text || chat.last_message?.content).length > 38 ? "…" : "")
-                          ) : t("chat.noMessagesOut", "No message")}
+                          {getPreviewText(chat, t)}
                         </span>
                         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                           {isPinned && <Pin size={12} className="pinned-icon" style={{ opacity: 0.6 }} />}

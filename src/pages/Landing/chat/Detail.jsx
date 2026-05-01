@@ -1,6 +1,6 @@
 // src/pages/Landing/chat/Detail.jsx
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useParams, useOutletContext } from "react-router-dom";
+import { useParams, useOutletContext, useLocation } from "react-router-dom";
 import {
   getChatHistory,
   sendMessage,
@@ -509,8 +509,8 @@ function MessageBubble({
           ) : (
             <>
               {(isImage || isVideo) && msg.file_url && (
-                <ScreenshotGuard enabled={true}>
-                  <div className="media-container" onClick={() => onMediaClick?.({ type: isImage ? 'image' : 'video', url: msg.file_url })}>
+                <ScreenshotGuard enabled={false}>
+                  <div className="media-container" onClick={() => onMediaClick?.({ type: isImage ? 'image' : 'video', url: msg.file_url, isSubmission: false })}>
                     {isImage ? (
                       <img 
                         src={avatarSrc(msg.file_url)} 
@@ -736,6 +736,7 @@ function MessageBubble({
 
 // ── Media Lightbox (Full Screen View) ──────────────────
 function MediaLightbox({ media, onClose, currentUser }) {
+  const { t } = useTranslation();
   if (!media) return null;
 
   const fileUrl = media.file_url || media.url || "";
@@ -771,7 +772,7 @@ function MediaLightbox({ media, onClose, currentUser }) {
       </div>
 
       <div className="lightbox-content" onClick={e => e.stopPropagation()}>
-        <ScreenshotGuard enabled={true}>
+        <ScreenshotGuard enabled={!!media.isSubmission}>
           {isVideo ? (
             <video src={fullUrl} controls autoPlay className="lightbox-media" />
           ) : (
@@ -900,6 +901,10 @@ function FilePreviewModal({
 // ── Main Component ───────────────────────────────────────
 export default function ChatDetail() {
   const { id: chatId } = useParams();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const msgIdFromUrl = queryParams.get("msgId");
+
   const ctx = useOutletContext?.() || {};
   const { onBack, reloadList, pinnedChats = [], setPinnedChats, mutedChats = [], setMutedChats } = ctx;
   const { isDark } = useThemeContext();
@@ -921,6 +926,7 @@ export default function ChatDetail() {
   const pickerRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
   const [viewingMedia, setViewingMedia] = useState(null);
+  const [mediaViewType, setMediaViewType] = useState(null); // 'images', 'videos', 'files', 'pdfs', 'links'
 
   const [typingUser, setTypingUser] = useState(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -1358,6 +1364,16 @@ export default function ChatDetail() {
     if (isAtBottomRef.current) scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (!loading && messages.length > 0 && msgIdFromUrl) {
+      // DOM tayyor bo'lishi uchun biroz kutamiz
+      const timer = setTimeout(() => {
+        scrollToMessage(msgIdFromUrl);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, messages, msgIdFromUrl]);
+
   const handleScroll = () => {
     const el = messagesAreaRef.current;
     if (!el) return;
@@ -1666,7 +1682,7 @@ export default function ChatDetail() {
       chat_id: chatId,
       type,
       file_url,
-      message_text: currentCaption, // Include caption
+      message_text: currentCaption || fileToUpload.name, // Use original filename if no caption
       reply_to_id: localReplyId || undefined
     });
 
@@ -2514,6 +2530,82 @@ export default function ChatDetail() {
                 />
               </div>
             </>
+          ) : mediaViewType ? (
+            <>
+              <div className="chat-info-header">
+                <button className="chat-header-btn" onClick={() => setMediaViewType(null)} style={{ marginRight: '8px' }}>
+                  <ArrowLeft size={20} />
+                </button>
+                <h3>
+                  {mediaViewType === 'images' ? t("chat.images", "Images") :
+                   mediaViewType === 'videos' ? t("chat.videos", "Videos") :
+                   mediaViewType === 'pdfs' ? t("chat.pdfs", "PDF Files") :
+                   mediaViewType === 'files' ? t("chat.files", "Files") :
+                   t("chat.links", "Links")}
+                </h3>
+                <button className="chat-header-btn" onClick={() => { setShowInfo(false); setMediaViewType(null); }}>✕</button>
+              </div>
+              <div className="chat-info-body">
+                <div className="media-sidebar-list">
+                  {mediaViewType === 'images' && (
+                    <div className="media-grid">
+                      {messages.filter(m => (m.type === 'image' || m.type === 'file') && isImgPath(m.file_url)).map((m, i) => (
+                        <div key={i} className="media-grid-item" onClick={() => { setViewingMedia(m); }}>
+                          <img src={avatarSrc(m.file_url)} alt="shared" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {mediaViewType === 'videos' && (
+                    <div className="media-grid">
+                      {messages.filter(m => (m.type === 'video' || m.type === 'file') && isVideoPath(m.file_url)).map((m, i) => (
+                        <div key={i} className="media-grid-item video-thumb" onClick={() => { setViewingMedia(m); }}>
+                          <div className="video-thumb-overlay"><Video size={20} /></div>
+                          <video src={avatarSrc(m.file_url)} muted preload="metadata" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {(mediaViewType === 'files' || mediaViewType === 'pdfs') && (
+                    <div className="media-list">
+                      {messages.filter(m => {
+                        if (mediaViewType === 'pdfs') return m.type === 'file' && isPdfPath(m.file_url);
+                        return m.type === 'file' && !isImgPath(m.file_url) && !isVideoPath(m.file_url) && !isPdfPath(m.file_url);
+                      }).map((m, i) => (
+                        <div key={i} className="media-list-item" onClick={() => scrollToMessage(m.id)}>
+                          <div className={`list-item-icon ${isPdfPath(m.file_url) ? 'pdf' : 'file'}`}>
+                            <FileText size={18} />
+                          </div>
+                          <div className="list-item-info">
+                            <div className="list-item-name">{m.content || m.file_url?.split('/').pop()}</div>
+                            <div className="list-item-meta">{m.file_size ? `${(m.file_size / 1024).toFixed(1)} KB` : "Document"} • {new Date(m.created_at).toLocaleDateString()}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {mediaViewType === 'links' && (
+                    <div className="media-list">
+                      {messages.filter(m => (m.content || '').match(/https?:\/\/[^\s]+/)).map((m, i) => {
+                        const urlMatch = m.content.match(/https?:\/\/[^\s]+/);
+                        const url = urlMatch ? urlMatch[0] : '#';
+                        return (
+                          <a key={i} href={url} target="_blank" rel="noreferrer" className="media-list-item">
+                            <div className="list-item-icon link">
+                              <ExternalLink size={18} />
+                            </div>
+                            <div className="list-item-info">
+                              <div className="list-item-name" style={{ wordBreak: 'break-all' }}>{url}</div>
+                              <div className="list-item-meta">{new Date(m.created_at).toLocaleDateString()}</div>
+                            </div>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
           ) : (
             <>
               <div className="chat-info-header">
@@ -2587,7 +2679,9 @@ export default function ChatDetail() {
                   <div className="chat-info-media-section">
                     <div className="section-header">
                       <h4>{t("chat.images", "Images")}</h4>
-                      <button className="view-all-btn">{t("chat.viewAll", "View All")}</button>
+                      <span className="view-all-link" onClick={() => setMediaViewType('images')}>
+                        {t("chat.viewAll", "View All")}
+                      </span>
                     </div>
                     <div className="media-grid">
                       {messages
@@ -2610,7 +2704,9 @@ export default function ChatDetail() {
                   <div className="chat-info-media-section">
                     <div className="section-header">
                       <h4>{t("chat.videos", "Videos")}</h4>
-                      <button className="view-all-btn">{t("chat.viewAll", "View All")}</button>
+                      <span className="view-all-link" onClick={() => setMediaViewType('videos')}>
+                        {t("chat.viewAll", "View All")}
+                      </span>
                     </div>
                     <div className="media-grid">
                       {messages
@@ -2639,7 +2735,9 @@ export default function ChatDetail() {
                   <div className="chat-info-media-section">
                     <div className="section-header">
                       <h4>{t("chat.pdfs", "PDF Files")}</h4>
-                      <button className="view-all-btn">{t("chat.viewAll", "View All")}</button>
+                      <span className="view-all-link" onClick={() => setMediaViewType('pdfs')}>
+                        {t("chat.viewAll", "View All")}
+                      </span>
                     </div>
                     <div className="media-list">
                       {messages
@@ -2665,7 +2763,9 @@ export default function ChatDetail() {
                   <div className="chat-info-media-section">
                     <div className="section-header">
                       <h4>{t("chat.files", "Other Files")}</h4>
-                      <button className="view-all-btn">{t("chat.viewAll", "View All")}</button>
+                      <span className="view-all-link" onClick={() => setMediaViewType('files')}>
+                        {t("chat.viewAll", "View All")}
+                      </span>
                     </div>
                     <div className="media-list">
                       {messages
@@ -2696,7 +2796,9 @@ export default function ChatDetail() {
                   <div className="chat-info-media-section">
                     <div className="section-header">
                       <h4>{t("chat.links", "Links")}</h4>
-                      <button className="view-all-btn">{t("chat.viewAll", "View All")}</button>
+                      <span className="view-all-link" onClick={() => setMediaViewType('links')}>
+                        {t("chat.viewAll", "View All")}
+                      </span>
                     </div>
                     <div className="media-list">
                       {messages

@@ -730,7 +730,10 @@
     "select": "Tanlang",
     "approveWork": "Tasdiqlash",
     "requestRevision": "Tuzatish so'rash",
-    "attachments": "Fayllar"
+    "attachments": "Fayllar",
+    "file": "Fayl",
+    "videoCall": "Video qo'ng'iroq",
+    "system": "Tizim"
   },
   "auth": {
     "enterEmailPhone": "Iltimos, email yoki telefon raqamni kiriting",

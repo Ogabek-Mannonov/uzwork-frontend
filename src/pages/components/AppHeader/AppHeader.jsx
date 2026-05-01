@@ -37,6 +37,20 @@ function getInitials(name) {
   return parts[0] ? parts[0][0].toUpperCase() : "";
 }
 
+function getPreviewText(msg, t) {
+  const type = msg.type || 'text';
+  const content = msg.content || msg.message || "";
+  
+  if (type === 'image') return `🖼️ ${t('chat.photo', 'Photo')}`;
+  if (type === 'voice') return `🎤 ${t('chat.voiceMsg', 'Voice message')}`;
+  if (type === 'submission') return `💼 ${t('chat.workSubmitted', 'Work Submitted')}`;
+  if (type === 'file') return `📄 ${t('chat.file', 'File')}`;
+  if (type === 'video_call') return `📹 ${t('chat.videoCall', 'Video Call')}`;
+  if (type === 'system') return content || t('chat.system', 'System');
+  
+  return content || t("chat.noMessagesOut", "No message");
+}
+
 function AvatarImage({ src, name, size = 40, className = "" }) {
   const [error, setError] = React.useState(false);
   
@@ -387,9 +401,17 @@ function AuthHeader({ user }) {
   const audioRef = useRef(new Audio("https://cdn.freesound.org/previews/235/235911_2391266-lq.mp3"));
 
   // Brauzer bildirishnomasi funksiyasi
-  const showBrowserNotification = (title, body, icon = "/UzWork transparent.png") => {
+  const showBrowserNotification = (title, body, icon = "/UzWork transparent.png", url = null) => {
     if (Notification.permission === "granted") {
-      new Notification(title, { body, icon });
+      const notif = new Notification(title, { body, icon });
+      notif.onclick = (e) => {
+        e.preventDefault();
+        window.focus();
+        if (url) {
+          navigate(url);
+        }
+        notif.close();
+      };
     }
   };
 
@@ -423,10 +445,17 @@ function AuthHeader({ user }) {
                 unreadChats.slice(0, 3).forEach(chat => {
                   const msgId = chat.last_message_id || `chat_${chat.chat_id}_${chat.last_message_at}`;
                   if (!shownIds.includes(msgId)) {
+                    // Chat ob'ektidan xabar previewini yasaymiz
+                    const chatMsgObj = {
+                      type: chat.last_message_type,
+                      content: chat.last_message_content
+                    };
+
                     showBrowserNotification(
                       `Yangi xabar: ${chat.partner?.first_name || 'Foydalanuvchi'}`,
-                      chat.last_message_content || "Xabar yuborildi",
-                      chat.partner?.avatar_url || "/UzWork transparent.png"
+                      getPreviewText(chatMsgObj, t),
+                      chat.partner?.avatar_url || "/UzWork transparent.png",
+                      `/messages/${chat.chat_id}?msgId=${chat.last_message_id}`
                     );
                     shownIds.push(msgId);
                     updated = true;
@@ -456,20 +485,23 @@ function AuthHeader({ user }) {
     // 1. YANGI CHAT XABARI
     const handleNewMessage = (msg) => {
       if (msg.sender_id !== user?.id) {
-        fetchCounts();
-        // Ovoz (Try-catch with muted check)
-        if (audioRef.current) {
-          audioRef.current.play().catch(() => {});
-        }
-        
-        // Brauzer xabari (agar hali ko'rsatilmagan bo'lsa)
+        // Brauzer xabari va count yangilash (agar hali ko'rsatilmagan bo'lsa)
         const shownIds = JSON.parse(localStorage.getItem('shown_notifications') || '[]');
         if (!shownIds.includes(msg.id)) {
+          fetchCounts();
+          
+          // Ovoz (Try-catch with muted check)
+          if (audioRef.current) {
+            audioRef.current.play().catch(() => {});
+          }
+
           showBrowserNotification(
             `Yangi xabar: ${msg.sender_first_name || 'Foydalanuvchi'}`,
-            msg.content,
-            msg.sender_avatar_url || "/UzWork transparent.png"
+            getPreviewText(msg, t),
+            msg.sender_avatar_url || "/UzWork transparent.png",
+            `/messages/${msg.chat_id}?msgId=${msg.id}`
           );
+          
           shownIds.push(msg.id);
           localStorage.setItem('shown_notifications', JSON.stringify(shownIds.slice(-100)));
         }

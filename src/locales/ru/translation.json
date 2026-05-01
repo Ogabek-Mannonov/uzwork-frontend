@@ -615,7 +615,10 @@
     "select": "Выбрать",
     "approveWork": "Одобрить",
     "requestRevision": "На доработку",
-    "attachments": "Файлы"
+    "attachments": "Файлы",
+    "file": "Файл",
+    "videoCall": "Видеозвонок",
+    "system": "Система"
   },
   "auth": {
     "enterEmailPhone": "Пожалуйста, введите email или номер телефона",

@@ -103,7 +103,7 @@ const SubmissionCard = ({ msg, isOwn, onApprove, onReject, isApproving, isReject
                             if (currentUser?.role === 'client' && !isImage && !canDownload) return;
                             e.preventDefault();
                             if (isImage && onMediaClick) {
-                              onMediaClick({ type: 'image', url: fileUri, canDownload });
+                              onMediaClick({ type: 'image', url: fileUri, canDownload, isSubmission: true });
                             } else {
                               await handleDownload(fullUrl, file.name);
                             }
