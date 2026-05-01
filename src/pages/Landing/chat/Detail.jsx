@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { translateToUzbek, translateBatchToUzbek } from "../../../api/translate_service";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
+import { useThemeContext } from "../../components/Theme/ThemeContext";
 
 // ── constants ────────────────────────────────────────────
 const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/api\/?$/, "");
@@ -107,7 +108,7 @@ function formatMsgTime(dateStr) {
   });
 }
 
-function formatDateLabel(dateStr) {
+function formatDateLabel(dateStr, t) {
   const d = parseUTC(dateStr);
   if (!d) return "";
 
@@ -118,8 +119,8 @@ function formatDateLabel(dateStr) {
 
   const msgDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-  if (msgDate.getTime() === today.getTime()) return i18n.t("chat.today", "Bugun");
-  if (msgDate.getTime() === yesterday.getTime()) return i18n.t("chat.yesterday", "Kecha");
+  if (msgDate.getTime() === today.getTime()) return t("chat.today", "Today");
+  if (msgDate.getTime() === yesterday.getTime()) return t("chat.yesterday", "Yesterday");
 
   const months = {
     uz: ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"],
@@ -133,12 +134,12 @@ function formatDateLabel(dateStr) {
   const month = monthList[d.getMonth()];
   const year = d.getFullYear();
 
-  if (lang === 'uz') return `${day}-${month}, ${year}-yil`;
-  if (lang === 'ru') return `${day} ${month} ${year} г.`;
+  if (lang === 'uz') return `${day}-${month}, ${year}${t("chat.yearSuffix", "-yil")}`;
+  if (lang === 'ru') return `${day} ${month} ${year}${t("chat.yearSuffix", " г.")}`;
   return `${month} ${day}, ${year}`;
 }
 
-function formatLastSeen(dateStr) {
+function formatLastSeen(dateStr, t) {
   const d = parseUTC(dateStr);
   if (!d || isNaN(d.getTime())) return "";
 
@@ -149,9 +150,9 @@ function formatLastSeen(dateStr) {
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
 
-  if (diffMins < 1) return "Hozirgina online edi";
-  if (diffMins < 60) return `${diffMins} daqiqa oldin online edi`;
-  if (diffHours < 24) return `${diffHours} soat oldin online edi`;
+  if (diffMins < 1) return t("chat.justNow", "Just now");
+  if (diffMins < 60) return t("chat.minsAgo", "{{n}}m ago", { n: diffMins });
+  if (diffHours < 24) return t("chat.hoursAgo", "{{n}}h ago", { n: diffHours });
   return "";
 }
 
@@ -164,7 +165,7 @@ function getMsgText(msg) {
   return content?.content || content?.message || content?.text || content?.message_text || "";
 }
 
-function groupMessagesByDate(m) {
+function groupMessagesByDate(m, t) {
   if (!m || m.length === 0) return [];
   // Sort messages to ensure chronological order for grouping
   const sorted = [...m].sort((a, b) => parseUTC(a.created_at) - parseUTC(b.created_at));
@@ -174,7 +175,7 @@ function groupMessagesByDate(m) {
   let currentGroup = null;
 
   sorted.forEach((msg) => {
-    const label = formatDateLabel(msg.created_at);
+    const label = formatDateLabel(msg.created_at, t);
     if (label !== currentDate) {
       currentDate = label;
       currentGroup = {
@@ -234,6 +235,7 @@ function Avatar({ user, size = "sm" }) {
 const QUICK_EMOJIS = ["🤝", "🔥", "❤️", "👌", "😄", "👍"];
 
 function ContextMenu({ x, y, isOwn, onEdit, onDelete, onCopy, onReply, onTranslate, onReact, onClose }) {
+  const { t } = useTranslation();
   const ref = useRef(null);
 
   useEffect(() => {
@@ -266,25 +268,25 @@ function ContextMenu({ x, y, isOwn, onEdit, onDelete, onCopy, onReply, onTransla
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 8 }}>
           <polyline points="9 17 4 12 9 7" /><path d="M20 18v-2a4 4 0 0 0-4-4H4" />
         </svg>
-        {i18n.t("chat.reply", "Reply")}
+        {t("chat.reply", "Reply")}
       </div>
       <div className="msg-context-item" onClick={onCopy}>
         <Copy size={14} strokeWidth={2.2} style={{ marginRight: 8 }} />
-        {i18n.t("chat.copy", "Nusxalash")}
+        {t("chat.copy", "Nusxalash")}
       </div>
       <div className="msg-context-item" onClick={() => { onTranslate?.(); onClose(); }}>
         <Globe size={14} strokeWidth={2.2} style={{ marginRight: 8 }} />
-        {i18n.t("chat.translate", "Tarjima qilish")}
+        {t("chat.translate", "Tarjima qilish")}
       </div>
       {isOwn && (
         <>
           <div className="msg-context-item" onClick={onEdit}>
             <Edit3 size={14} strokeWidth={2.2} style={{ marginRight: 8 }} />
-            {i18n.t("chat.edit", "Tahrirlash")}
+            {t("chat.edit", "Tahrirlash")}
           </div>
           <div className="msg-context-item danger" onClick={onDelete}>
             <Trash2 size={14} strokeWidth={2.2} style={{ marginRight: 8 }} />
-            {i18n.t("chat.delete", "O'chirish")}
+            {t("chat.delete", "O'chirish")}
           </div>
         </>
       )}
@@ -428,6 +430,7 @@ function MessageBubble({
   isApproving,
   isRejecting
 }) {
+  const { t } = useTranslation();
   const isDeleted = !!msg.deleted_at;
   const isSubmission = msg.type === "submission";
   const isImage = msg.type === "image";
@@ -446,13 +449,13 @@ function MessageBubble({
     : msg.replied_message || null;
   const repliedSenderName = repliedMsg
     ? String(repliedMsg.sender_id) === String(currentUser?.id)
-      ? i18n.t("chat.you", "Siz")
+      ? t("chat.you", "You")
       : `${partner?.first_name || ""} ${partner?.last_name || ""}`.trim() || partner?.username
     : null;
   const rawPreview = repliedMsg?.content || repliedMsg?.message || "";
   const repliedPreview = typeof rawPreview === 'string'
-    ? (repliedMsg?.type === "voice" ? i18n.t("chat.voiceMsg", "Ovozli xabar") :
-      repliedMsg?.type === "image" ? i18n.t("chat.photo", "Rasm") : rawPreview).slice(0, 60)
+    ? (repliedMsg?.type === "voice" ? t("chat.voiceMsg", "Voice message") :
+      repliedMsg?.type === "image" ? t("chat.photo", "Photo") : rawPreview).slice(0, 60)
     : "";
 
   return (
@@ -468,7 +471,7 @@ function MessageBubble({
           <div className="msg-sender-name">
             {`${partner.first_name || ""} ${partner.last_name || ""}`.trim() ||
               partner.username ||
-              i18n.t("chat.user", "Foydalanuvchi")}
+              t("chat.user", "User")}
           </div>
         )}
 
@@ -502,7 +505,7 @@ function MessageBubble({
           )}
 
           {isDeleted ? (
-            <span className="msg-deleted">🚫 {i18n.t("chat.msgDeleted", "Xabar o'chirildi")}</span>
+            <span className="msg-deleted">🚫 {t("chat.msgDeleted", "Message deleted")}</span>
           ) : (
             <>
               {(isImage || isVideo) && msg.file_url && (
@@ -511,7 +514,7 @@ function MessageBubble({
                     {isImage ? (
                       <img 
                         src={avatarSrc(msg.file_url)} 
-                        alt="rasm" 
+                        alt={t("chat.photo", "Photo")} 
                         className="img-bubble" 
                         onContextMenu={(e) => e.preventDefault()}
                         draggable="false"
@@ -542,7 +545,7 @@ function MessageBubble({
                                     e.stopPropagation();
                                     onReactChip?.(msg, r.emoji);
                                   }}
-                                  title={r.user_ids ? `${r.user_ids.length} reactions` : ""}
+                                  title={r.user_ids ? t("chat.reactions_count", "{{count}} reactions", { count: r.user_ids.length }) : ""}
                                 >
                                   <span className="reaction-emoji">{r.emoji}</span>
                                   {(r.count > 1 || (r.user_ids && r.user_ids.length > 1)) && (
@@ -601,7 +604,7 @@ function MessageBubble({
                     </div>
                     <div className="file-meta-row">
                       <span className="file-size-text">
-                        {msg.file_size ? `${(msg.file_size / 1024).toFixed(1)} KB` : "Document"}
+                        {msg.file_size ? `${(msg.file_size / 1024).toFixed(1)} KB` : t("chat.files", "Files")}
                       </span>
                     </div>
                     <a
@@ -616,7 +619,7 @@ function MessageBubble({
                         }
                       }}
                     >
-                      {isPdf || currentUser?.role === 'client' ? i18n.t("chat.openWith", "KO'RISH") : i18n.t("chat.downloadAction", "YUKLAB OLISH")}
+                      {isPdf || currentUser?.role === 'client' ? t("chat.openWith", "VIEW") : t("chat.downloadAction", "DOWNLOAD")}
                     </a>
                   </div>
                 </div>
@@ -652,7 +655,7 @@ function MessageBubble({
                           e.stopPropagation();
                           onReactChip?.(msg, r.emoji);
                         }}
-                        title={r.user_ids ? `${r.user_ids.length} reactions` : ""}
+                        title={r.user_ids ? t("chat.reactions_count", "{{count}} reactions", { count: r.user_ids.length }) : ""}
                       >
                         <span className="reaction-emoji">{r.emoji}</span>
                         {(r.count > 1 || (r.user_ids && r.user_ids.length > 1)) && (
@@ -664,7 +667,7 @@ function MessageBubble({
                 </div>
               )}
               {msg.is_edited && (
-                <span className="msg-edited">{i18n.t("chat.edited", "tahrirlangan")}</span>
+                <span className="msg-edited">{t("chat.edited", "edited")}</span>
               )}
               <span className="inline-time-text">{formatMsgTime(msg.created_at)}</span>
               {isOwnVal && (
@@ -714,7 +717,7 @@ function MessageBubble({
                 <span
                   key={i}
                   className="msg-reaction-chip"
-                  title={r.count > 1 ? `${r.count} ta` : ""}
+                  title={r.count > 1 ? t("chat.reactions_count", "{{count}} reactions", { count: r.count }) : ""}
                   onClick={(e) => {
                     e.stopPropagation();
                     onReactChip?.(msg, r.emoji);
@@ -756,7 +759,7 @@ function MediaLightbox({ media, onClose, currentUser }) {
                 e.stopPropagation();
                 handleDownload(fullUrl, fileName);
               }}
-              title={i18n.t("chat.download", "Yuklab olish")}
+              title={t("chat.download", "Download")}
             >
               <Download size={22} />
             </a>
@@ -797,6 +800,7 @@ function FilePreviewModal({
   isCompress,
   onCompressToggle
 }) {
+  const { t } = useTranslation();
   const isImage = file?.type.startsWith("image/");
   const isVideo = file?.type.startsWith("video/");
 
@@ -804,7 +808,7 @@ function FilePreviewModal({
     <div className="file-preview-overlay">
       <div className="file-preview-modal glassmorphism">
         <div className="file-preview-header">
-          <h3>{isImage ? i18n.t("chat.sendImage", "Отправить изображение") : i18n.t("chat.sendFile", "Отправить файл")}</h3>
+          <h3>{isImage ? t("chat.sendImage", "Send Image") : t("chat.sendFile", "Send File")}</h3>
           <div className="file-preview-header-actions">
             <button className="icon-btn"><MoreVertical size={20} /></button>
             <button className="icon-btn" onClick={onCancel}><X size={20} /></button>
@@ -822,7 +826,7 @@ function FilePreviewModal({
                 style={{ userSelect: 'none', WebkitUserDrag: 'none' }}
               />
               <div className="preview-actions-overlay">
-                <button className="preview-overlay-btn" onClick={onCancel} title={i18n.t("chat.delete", "O'chirish")}>
+                <button className="preview-overlay-btn" onClick={onCancel} title={t("chat.delete", "Delete")}>
                   <Trash2 size={20} />
                 </button>
               </div>
@@ -853,7 +857,7 @@ function FilePreviewModal({
                 onChange={onCompressToggle}
               />
               <span className="checkbox-custom"></span>
-              <span className="compress-text">{i18n.t("chat.compressImage", "Сжать изображение")}</span>
+              <span className="compress-text">{t("chat.compressImage", "Compress Image")}</span>
             </label>
           )}
 
@@ -863,7 +867,7 @@ function FilePreviewModal({
               className="caption-input"
               value={caption}
               onChange={(e) => onCaptionChange(e.target.value)}
-              placeholder={i18n.t("chat.captionPlaceholder", "Подпись")}
+              placeholder={t("chat.captionPlaceholder", "Add a caption...")}
               onKeyDown={(e) => {
                 if (e.key === "Enter") onSend();
               }}
@@ -882,11 +886,11 @@ function FilePreviewModal({
             onCancel();
             document.getElementById("chat-file-input")?.click();
           }}>
-            {i18n.t("chat.addMore", "ДОБАВИТЬ")}
+            {t("chat.addMore", "ADD MORE")}
           </button>
           <div style={{ flex: 1 }}></div>
-          <button className="footer-btn text" onClick={onCancel}>{i18n.t("chat.cancel", "BEKOR QILISH")}</button>
-          <button className="footer-btn primary" onClick={onSend}>{i18n.t("chat.send", "YUBORISH")}</button>
+          <button className="footer-btn text" onClick={onCancel}>{t("chat.cancel", "CANCEL")}</button>
+          <button className="footer-btn primary" onClick={onSend}>{t("chat.send", "SEND")}</button>
         </div>
       </div>
     </div>
@@ -897,7 +901,9 @@ function FilePreviewModal({
 export default function ChatDetail() {
   const { id: chatId } = useParams();
   const ctx = useOutletContext?.() || {};
-  const { onBack, reloadList } = ctx;
+  const { onBack, reloadList, pinnedChats = [], setPinnedChats, mutedChats = [], setMutedChats } = ctx;
+  const { isDark } = useThemeContext();
+  const { t } = useTranslation();
 
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -942,8 +948,16 @@ export default function ChatDetail() {
   const [toast, setToast] = useState(null);
   const [micError, setMicError] = useState(false);
 
-  const [isMuted, setIsMuted] = useState(false);
-  const [isPinned, setIsPinned] = useState(false);
+  const isMuted = mutedChats.includes(String(chatId));
+  const isPinned = pinnedChats.includes(String(chatId));
+  
+  const setIsMuted = (val) => {
+    setMutedChats(prev => val ? [...prev, String(chatId)] : prev.filter(id => id !== String(chatId)));
+  };
+  
+  const setIsPinned = (val) => {
+    setPinnedChats(prev => val ? [...prev, String(chatId)] : prev.filter(id => id !== String(chatId)));
+  };
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingFile, setPendingFile] = useState(null);
@@ -1100,7 +1114,7 @@ export default function ChatDetail() {
     try {
       const res = await getChatHistory(chatId);
       if (res?.success === false) {
-        setError(res.message || i18n.t("chat.errorOccurred", "Xato yuz berdi"));
+        setError(res.message || t("chat.errorOccurred", "Xato yuz berdi"));
         setLoading(false);
         return;
       }
@@ -1145,7 +1159,7 @@ export default function ChatDetail() {
     setIsApproving(true);
     const res = await approveMilestone(metadata.milestone_id);
     if (res?.success) {
-      notify(i18n.t("chat.approvedSuccess", "Ish muvaffaqiyatli qabul qilindi"));
+      notify(t("chat.approvedSuccess", "Ish muvaffaqiyatli qabul qilindi"));
       // Update local message state
       setMessages(prev => prev.map(m => {
         if (m.id === msg.id) {
@@ -1169,7 +1183,7 @@ export default function ChatDetail() {
     const res = await rejectMilestone(metadata.milestone_id, { reason: "Tuzatish so'raldi" });
     
     if (res?.success) {
-      notify(i18n.t("chat.revisionRequestedNotify", "Tuzatish so'raldi"), "info");
+      notify(t("chat.revisionRequestedNotify", "Tuzatish so'raldi"), "info");
       
       setMessages(prev => prev.map(m => {
         if (m.id === msg.id) {
@@ -1427,7 +1441,7 @@ export default function ChatDetail() {
 
     const onTyping = (data) => {
       if (data && data.chatId && String(data.chatId) !== String(chatId)) return;
-      if (data.userId !== currentUser?.id) setTypingUser(data.username || i18n.t("chat.typing", "Yozmoqda"));
+      if (data.userId !== currentUser?.id) setTypingUser(data.username || t("chat.typing", "Yozmoqda"));
     };
     const onStopTyping = (data) => {
       if (data && data.chatId && String(data.chatId) !== String(chatId)) return;
@@ -1568,18 +1582,18 @@ export default function ChatDetail() {
     } catch (err) {
       console.error("Mic error:", err);
 
-      let micErrMsg = i18n.t("chat.micError", "Mikrofonga kirish rad etildi");
+      let micErrMsg = t("chat.micError", "Mikrofonga kirish rad etildi");
 
       if (err.name === "NotAllowedError") {
         // Windows tizimi mikrofonga ruxsat bermagan bo'lishi mumkin
-        micErrMsg = i18n.t(
+        micErrMsg = t(
           "chat.micErrorSystem",
           "Mikrofonga ruxsat yo'q. Windows sozlamalarida: Sozlamalar → Maxfiylik → Mikrofon → Brauzerga ruxsat bering"
         );
       } else if (err.name === "NotFoundError") {
-        micErrMsg = i18n.t("chat.micNotFound", "Mikrofon topilmadi. Qurilmangizni tekshiring");
+        micErrMsg = t("chat.micNotFound", "Mikrofon topilmadi. Qurilmangizni tekshiring");
       } else if (err.name === "NotReadableError") {
-        micErrMsg = i18n.t("chat.micInUse", "Mikrofon boshqa dastur tomonidan ishlatilmoqda");
+        micErrMsg = t("chat.micInUse", "Mikrofon boshqa dastur tomonidan ishlatilmoqda");
       }
 
       setMicError(micErrMsg);
@@ -1609,7 +1623,7 @@ export default function ChatDetail() {
   const handleSendFile = (file) => {
     const MAX_SIZE_MB = 50;
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      notify(i18n.t("chat.fileTooLarge", `Fayl hajmi ${MAX_SIZE_MB}MB dan oshmasligi kerak`), "error");
+      notify(t("chat.fileTooLarge", `Fayl hajmi ${MAX_SIZE_MB}MB dan oshmasligi kerak`), "error");
       return;
     }
 
@@ -1636,7 +1650,7 @@ export default function ChatDetail() {
     const uploadRes = await uploadFile(formData);
     if (!uploadRes?.success) {
       setSending(false);
-      notify(uploadRes?.message || i18n.t("chat.fileUploadFail", "Fayl yuklanmadi"), "error");
+      notify(uploadRes?.message || t("chat.fileUploadFail", "Fayl yuklanmadi"), "error");
       return;
     }
 
@@ -1659,7 +1673,7 @@ export default function ChatDetail() {
     setSending(false);
 
     if (res?.success === false) {
-      notify(res.message || i18n.t("chat.sendFail", "Xabar yuborilmadi"), "error");
+      notify(res.message || t("chat.sendFail", "Xabar yuborilmadi"), "error");
     } else {
       const newMsg = res?.data?.message || res?.data || res?.message_obj;
       if (newMsg && localReplyId) {
@@ -1682,7 +1696,7 @@ export default function ChatDetail() {
     const uploadRes = await uploadVoice(formData);
     if (!uploadRes?.success) {
       setSending(false);
-      notify(uploadRes?.message || i18n.t("chat.voiceUploadFail", "Ovoz yuklanmadi"), "error");
+      notify(uploadRes?.message || t("chat.voiceUploadFail", "Ovoz yuklanmadi"), "error");
       return;
     }
 
@@ -1699,7 +1713,7 @@ export default function ChatDetail() {
     setSending(false);
 
     if (res?.success === false) {
-      notify(res.message || i18n.t("chat.sendFail", "Xabar yuborilmadi"), "error");
+      notify(res.message || t("chat.sendFail", "Xabar yuborilmadi"), "error");
     } else {
       const newMsg = res?.data?.message || res?.data || res?.message_obj;
       if (newMsg && voiceReplyId) {
@@ -1783,12 +1797,12 @@ export default function ChatDetail() {
 
     if (!textToTranslate) {
       console.warn("No text found to translate for msg:", msg.id);
-      notify(i18n.t("chat.noTextToTranslate", "Tarjima qilish uchun matn topilmadi"), "error");
+      notify(t("chat.noTextToTranslate", "Tarjima qilish uchun matn topilmadi"), "error");
       return;
     }
 
     try {
-      notify(i18n.t("chat.translating", "Tarjima qilinmoqda..."), "info");
+      notify(t("chat.translating", "Tarjima qilinmoqda..."), "info");
       const translated = await translateToUzbek(textToTranslate, targetLang);
       console.log("Translation result:", translated);
       if (translated) {
@@ -1800,7 +1814,7 @@ export default function ChatDetail() {
       }
     } catch (err) {
       console.error("Single message translation error", err);
-      notify(i18n.t("chat.translationError", "Tarjima qilishda xatolik"), "error");
+      notify(t("chat.translationError", "Tarjima qilishda xatolik"), "error");
     }
   };
 
@@ -1815,7 +1829,7 @@ export default function ChatDetail() {
       if (textareaRef.current) textareaRef.current.style.height = "auto";
 
       const res = await editMessage(targetId, { content });
-      if (res?.success === false) notify(res.message || i18n.t("chat.error", "Xato"), "error");
+      if (res?.success === false) notify(res.message || t("chat.error", "Xato"), "error");
       else {
         setMessages((prev) =>
           prev.map((m) =>
@@ -1857,7 +1871,7 @@ export default function ChatDetail() {
 
       if (res?.success === false) {
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
-        notify(res.message || i18n.t("chat.sendFail", "Xabar yuborilmadi"), "error");
+        notify(res.message || t("chat.sendFail", "Xabar yuborilmadi"), "error");
         setText(content);
         const newMsg = res?.data?.message || res?.data || res?.message_obj;
 
@@ -1879,7 +1893,7 @@ export default function ChatDetail() {
     } catch (err) {
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setSending(false);
-      notify(i18n.t("chat.error", "Xatolik yuz berdi"), "error");
+      notify(t("chat.error", "Xatolik yuz berdi"), "error");
     }
   };
 
@@ -1902,7 +1916,7 @@ export default function ChatDetail() {
   const handleCopy = () => {
     if (contextMenu?.msg?.content) {
       navigator.clipboard.writeText(contextMenu.msg.content);
-      notify(i18n.t("chat.copied", "Nusxalandi ✓"));
+      notify(t("chat.copied", "Nusxalandi ✓"));
     }
     setContextMenu(null);
   };
@@ -1910,7 +1924,7 @@ export default function ChatDetail() {
   const handleEdit = () => {
     const msg = contextMenu?.msg;
     if (!msg || msg.type !== "text") { 
-      notify(i18n.t("chat.onlyTextCanBeEdited", "Faqat matn xabarlarni tahrirlash mumkin"), "error"); 
+      notify(t("chat.onlyTextCanBeEdited", "Faqat matn xabarlarni tahrirlash mumkin"), "error"); 
       setContextMenu(null); 
       return; 
     }
@@ -1928,7 +1942,7 @@ export default function ChatDetail() {
     setContextMenu(null);
     if (!msg) return;
     const res = await deleteMessage(msg.id);
-    if (res?.success === false) notify(res.message || i18n.t("chat.deleteFail", "O'chirib bo'lmadi"), "error");
+    if (res?.success === false) notify(res.message || t("chat.deleteFail", "O'chirib bo'lmadi"), "error");
     else {
       setMessages((prev) =>
         prev.map((m) =>
@@ -1944,12 +1958,12 @@ export default function ChatDetail() {
     const msg = contextMenu?.msg;
     if (!msg) return;
     const senderName = String(msg.sender_id) === String(currentUser?.id)
-      ? i18n.t("chat.you", "Siz")
+      ? t("chat.you", "Siz")
       : `${partner?.first_name || ""} ${partner?.last_name || ""}`.trim() || partner?.username || "";
     const preview = msg.type === "voice"
-      ? i18n.t("chat.voiceMsg", "Ovozli xabar")
+      ? t("chat.voiceMsg", "Ovozli xabar")
       : msg.type === "image"
-        ? i18n.t("chat.photo", "Rasm")
+        ? t("chat.photo", "Rasm")
         : (msg.content || msg.message || "").slice(0, 80);
     setReplyingTo({ id: msg.id, preview, senderName });
     setContextMenu(null);
@@ -2044,7 +2058,7 @@ export default function ChatDetail() {
     )
     : baseFilteredMessages;
 
-  const grouped = groupMessagesByDate(filteredMessages);
+  const grouped = groupMessagesByDate(filteredMessages, t);
 
   if (loading) {
     return (
@@ -2095,7 +2109,7 @@ export default function ChatDetail() {
             fontWeight: 600,
           }}
         >
-          {i18n.t("chat.retry", "Qayta urinish")}
+          {t("chat.retry", "Qayta urinish")}
         </button>
       </div>
     );
@@ -2117,7 +2131,7 @@ export default function ChatDetail() {
               <button
                 className="chat-header-search-back"
                 onClick={() => { setShowSearch(false); setSearchQuery(""); }}
-                title={i18n.t("chat.back", "Orqaga")}
+                title={t("chat.back", "Orqaga")}
               >
                 <ArrowLeft size={22} />
               </button>
@@ -2125,7 +2139,7 @@ export default function ChatDetail() {
                 <Search size={18} className="search-icon" />
                 <input
                   type="text"
-                  placeholder={i18n.t("chat.searchInChat", "Xabarlarni qidirish...")}
+                  placeholder={t("chat.searchInChat", "Xabarlarni qidirish...")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   autoFocus
@@ -2152,12 +2166,12 @@ export default function ChatDetail() {
                     {typingUser ? (
                       <>
                         <span className="chat-header-status-dot" />
-                        <span className="typing">{typingUser} {i18n.t("chat.typingFull", "yozmoqda…")}</span>
+                        <span className="typing">{typingUser} {t("chat.typingFull", "yozmoqda…")}</span>
                       </>
                     ) : isComputedOnline ? (
-                      <span className="online">{i18n.t("chat.online", "Online")}</span>
+                      <span className="online">{t("chat.online", "Online")}</span>
                     ) : canShowOfflineStatus ? (
-                      <span className="offline-status">{formatLastSeen(actualLastSeen)}</span>
+                      <span className="offline-status">{formatLastSeen(actualLastSeen, t)}</span>
                     ) : (
                       <span className="offline-status"></span>
                     )}
@@ -2172,7 +2186,7 @@ export default function ChatDetail() {
                     setShowInfo(!showInfo);
                     setEmojiSidebar(false);
                   }}
-                  title={i18n.t("chat.info", "Ma'lumot")}
+                  title={t("chat.info", "Ma'lumot")}
                   style={{ marginLeft: '12px' }}
                 >
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -2229,10 +2243,10 @@ export default function ChatDetail() {
             >
               <div style={{ fontSize: 52, marginBottom: 14 }}>👋</div>
               <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 6 }}>
-                {i18n.t("chat.startChat", "Suhbat boshlang!")}
+                {t("chat.startChat", "Suhbat boshlang!")}
               </div>
               <div style={{ fontSize: 14 }}>
-                {partnerName} {i18n.t("chat.sendFirstMsg", "bilan birinchi xabarni yuboring")}
+                {partnerName} {t("chat.sendFirstMsg", "bilan birinchi xabarni yuboring")}
               </div>
             </div>
           )}
@@ -2307,7 +2321,7 @@ export default function ChatDetail() {
           <button
             className="scroll-to-bottom"
             onClick={() => scrollToBottom("smooth", true)}
-            title={i18n.t("chat.scrollDown", "Pastga")}
+            title={t("chat.scrollDown", "Pastga")}
           >
             <ArrowLeft size={20} style={{ transform: 'rotate(-90deg)' }} />
             {unreadScrollCount > 0 && (
@@ -2322,7 +2336,7 @@ export default function ChatDetail() {
           {editingMsg && (
             <div className="edit-mode-bar">
               <Edit3 size={16} color="var(--accent)" />
-              <span>{i18n.t("chat.editing", "Tahrirlash:")} {editingMsg.content?.slice(0, 60)}{editingMsg.content?.length > 60 ? "…" : ""}</span>
+              <span>{t("chat.editing", "Tahrirlash:")} {editingMsg.content?.slice(0, 60)}{editingMsg.content?.length > 60 ? "…" : ""}</span>
               <button className="edit-cancel-btn" onClick={() => { setEditingMsg(null); setText(""); }}><X size={18} /></button>
             </div>
           )}
@@ -2353,7 +2367,7 @@ export default function ChatDetail() {
                 <button
                   className="record-cancel-btn"
                   onClick={cancelRecording}
-                  title={i18n.t("chat.cancel", "Bekor qilish")}
+                  title={t("chat.cancel", "Bekor qilish")}
                 >
                   <Trash2 size={22} />
                 </button>
@@ -2390,7 +2404,7 @@ export default function ChatDetail() {
                       <Picker
                         data={data}
                         onEmojiSelect={handleEmojiSelect}
-                        theme="light"
+                        theme={isDark ? "dark" : "light"}
                         previewPosition="none"
                         skinTonePosition="none"
                         navPosition="bottom"
@@ -2409,7 +2423,7 @@ export default function ChatDetail() {
                   value={text}
                   onChange={handleTextChange}
                   onKeyDown={handleKey}
-                  placeholder={i18n.t("chat.typeMsgPlaceholder", "Xabar yozing... ")}
+                  placeholder={t("chat.typeMsgPlaceholder", "Type a message...")}
                   rows={1}
                 />
 
@@ -2431,7 +2445,7 @@ export default function ChatDetail() {
                   <button 
                     className="chat-job-action-btn" 
                     onClick={() => setShowSubmissionModal(true)}
-                    title={i18n.t("chat.submitWork", "Ish topshirish")}
+                    title={t("chat.submitWork", "Submit Work")}
                   >
                     <Briefcase size={20} />
                   </button>
@@ -2445,14 +2459,14 @@ export default function ChatDetail() {
                   <div className="mic-error-tooltip">
                     {typeof micError === "string"
                       ? micError
-                      : i18n.t("chat.noMicrophone", "Mikrofonga ruxsat yo'q")}
+                      : t("chat.noMicrophone", "Microphone permission denied")}
                   </div>
                 )}
                 <button
                   className="chat-action-circle-btn mic"
                   onClick={startRecording}
                   disabled={sending}
-                  title={i18n.t("chat.voiceMsg", "Ovozli xabar")}
+                  title={t("chat.voiceMsg", "Voice message")}
                 >
                   <Mic size={24} />
                 </button>
@@ -2462,7 +2476,7 @@ export default function ChatDetail() {
                 className={`chat-action-circle-btn send ${(text.trim() || editingMsg || recording) ? "active" : ""}`}
                 onClick={recording ? sendRecording : handleSend}
                 disabled={sending || (!text.trim() && !editingMsg && !recording)}
-                title={i18n.t("chat.send", "Yuborish")}
+                title={t("chat.send", "Send")}
               >
                 {sending ? (
                   <div style={{ width: 20, height: 20, border: "2px solid #fff", borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
@@ -2480,7 +2494,7 @@ export default function ChatDetail() {
           {emojiSidebar ? (
             <>
               <div className="chat-info-header">
-                <h3>{i18n.t("chat.stickers", "Emoji & Stickers")}</h3>
+                <h3>{t("chat.stickers", "Stickers")}</h3>
                 <button className="chat-header-btn" onClick={() => setEmojiSidebar(false)}>✕</button>
               </div>
               <div className="chat-info-body emoji-picker-body">
@@ -2489,7 +2503,7 @@ export default function ChatDetail() {
                   onEmojiSelect={(emoji) => {
                     setText(prev => prev + emoji.native);
                   }}
-                  theme="light"
+                  theme={isDark ? "dark" : "light"}
                   navPosition="top"
                   previewPosition="none"
                   skinTonePosition="none"
@@ -2503,7 +2517,7 @@ export default function ChatDetail() {
           ) : (
             <>
               <div className="chat-info-header">
-                <h3>{i18n.t("chat.profile", "User Details")}</h3>
+                <h3>{t("chat.profile", "User Details")}</h3>
                 <button className="chat-header-btn" onClick={() => setShowInfo(false)}>✕</button>
               </div>
 
@@ -2515,11 +2529,11 @@ export default function ChatDetail() {
                   <div className="chat-info-name">{partnerName}</div>
                   <div className="chat-info-status">
                     {typingUser
-                      ? i18n.t("chat.typing", "yozmoqda...")
+                      ? t("chat.typing", "typing...")
                       : isComputedOnline
-                        ? i18n.t("chat.online", "Online")
+                        ? t("chat.online", "Online")
                         : canShowOfflineStatus
-                          ? formatLastSeen(actualLastSeen)
+                          ? formatLastSeen(actualLastSeen, t)
                           : ""}
                   </div>
                   {jobInfo?.title && (
@@ -2535,34 +2549,34 @@ export default function ChatDetail() {
                     className={`info-action-btn ${isMuted ? 'active' : ''}`}
                     onClick={() => {
                       setIsMuted(!isMuted);
-                      notify(isMuted ? "Bildirishnomalar yoqildi" : "Xabarlar ovozsiz rejimga o'tkazildi", "success");
+                      notify(isMuted ? t("chat.notificationsEnabled", "Notifications Enabled") : t("chat.notificationsMuted", "Notifications Muted"), "success");
                     }}
                   >
                     <div className="action-icon-circle">
                       {isMuted ? <BellOff size={18} /> : <Bell size={18} />}
                     </div>
-                    <span>{isMuted ? i18n.t("chat.unmute", "Unmute") : i18n.t("chat.notify", "Mute")}</span>
+                    <span>{isMuted ? t("chat.unmute", "Unmute") : t("chat.mute", "Mute")}</span>
                   </button>
 
                   <button className="info-action-btn" onClick={() => { setShowSearch(true); setShowInfo(false); }}>
                     <div className="action-icon-circle"><Search size={18} /></div>
-                    <span>{i18n.t("chat.search", "Search")}</span>
+                    <span>{t("chat.search", "Search")}</span>
                   </button>
 
                   <button
                     className={`info-action-btn ${isPinned ? 'active' : ''}`}
                     onClick={() => {
                       setIsPinned(!isPinned);
-                      notify(isPinned ? "Chat pin-dan olindi" : "Chat pin qilindi", "success");
+                      notify(isPinned ? t("chat.chatUnpinned", "Chat Unpinned") : t("chat.chatPinned", "Chat Pinned"), "success");
                     }}
                   >
                     <div className="action-icon-circle"><Pin size={18} style={isPinned ? { transform: 'rotate(45deg)', color: '#3390ec' } : {}} /></div>
-                    <span>{isPinned ? i18n.t("chat.unpin", "Unpin") : i18n.t("chat.pin", "Pin")}</span>
+                    <span>{isPinned ? t("chat.unpin", "Unpin") : t("chat.pin", "Pin")}</span>
                   </button>
 
-                  <button className="info-action-btn" onClick={() => notify("Qo'shimcha funksiyalar tez kunda...", "info")}>
+                  <button className="info-action-btn" onClick={() => notify(t("chat.moreSoon", "More features coming soon..."), "info")}>
                     <div className="action-icon-circle"><MoreVertical size={18} /></div>
-                    <span>{i18n.t("chat.more", "More")}</span>
+                    <span>{t("chat.more", "More")}</span>
                   </button>
                 </div>
 
@@ -2572,8 +2586,8 @@ export default function ChatDetail() {
                 {messages.filter(m => (m.type === 'image' || m.type === 'file') && isImgPath(m.file_url)).length > 0 && (
                   <div className="chat-info-media-section">
                     <div className="section-header">
-                      <h4>{i18n.t("chat.images", "Images")}</h4>
-                      <button className="view-all-btn">{i18n.t("chat.viewAll", "View All")}</button>
+                      <h4>{t("chat.images", "Images")}</h4>
+                      <button className="view-all-btn">{t("chat.viewAll", "View All")}</button>
                     </div>
                     <div className="media-grid">
                       {messages
@@ -2595,8 +2609,8 @@ export default function ChatDetail() {
                 {messages.filter(m => (m.type === 'video' || m.type === 'file') && isVideoPath(m.file_url)).length > 0 && (
                   <div className="chat-info-media-section">
                     <div className="section-header">
-                      <h4>{i18n.t("chat.videos", "Videos")}</h4>
-                      <button className="view-all-btn">{i18n.t("chat.viewAll", "View All")}</button>
+                      <h4>{t("chat.videos", "Videos")}</h4>
+                      <button className="view-all-btn">{t("chat.viewAll", "View All")}</button>
                     </div>
                     <div className="media-grid">
                       {messages
@@ -2624,8 +2638,8 @@ export default function ChatDetail() {
                 {messages.filter(m => m.type === 'file' && isPdfPath(m.file_url)).length > 0 && (
                   <div className="chat-info-media-section">
                     <div className="section-header">
-                      <h4>{i18n.t("chat.pdfs", "PDF Files")}</h4>
-                      <button className="view-all-btn">{i18n.t("chat.viewAll", "View All")}</button>
+                      <h4>{t("chat.pdfs", "PDF Files")}</h4>
+                      <button className="view-all-btn">{t("chat.viewAll", "View All")}</button>
                     </div>
                     <div className="media-list">
                       {messages
@@ -2650,8 +2664,8 @@ export default function ChatDetail() {
                 {messages.filter(m => m.type === 'file' && !isImgPath(m.file_url) && !isVideoPath(m.file_url) && !isPdfPath(m.file_url)).length > 0 && (
                   <div className="chat-info-media-section">
                     <div className="section-header">
-                      <h4>{i18n.t("chat.files", "Other Files")}</h4>
-                      <button className="view-all-btn">{i18n.t("chat.viewAll", "View All")}</button>
+                      <h4>{t("chat.files", "Other Files")}</h4>
+                      <button className="view-all-btn">{t("chat.viewAll", "View All")}</button>
                     </div>
                     <div className="media-list">
                       {messages
@@ -2681,8 +2695,8 @@ export default function ChatDetail() {
                 {messages.filter(m => (m.content || '').match(/https?:\/\/[^\s]+/)).length > 0 && (
                   <div className="chat-info-media-section">
                     <div className="section-header">
-                      <h4>{i18n.t("chat.links", "Links")}</h4>
-                      <button className="view-all-btn">{i18n.t("chat.viewAll", "View All")}</button>
+                      <h4>{t("chat.links", "Links")}</h4>
+                      <button className="view-all-btn">{t("chat.viewAll", "View All")}</button>
                     </div>
                     <div className="media-list">
                       {messages
@@ -2708,7 +2722,7 @@ export default function ChatDetail() {
                 )}
 
                 <div className="chat-info-actions">
-                  <button className="chat-info-danger-btn">{i18n.t("chat.blockUser", "Block User")}</button>
+                  <button className="chat-info-danger-btn">{t("chat.blockUser", "Block User")}</button>
                 </div>
               </div>
             </>
@@ -2763,17 +2777,17 @@ export default function ChatDetail() {
         <div className="file-preview-overlay">
           <div className="file-preview-modal submission-modal glassmorphism">
             <div className="file-preview-header submission-modal-header">
-              <h3>{i18n.t("chat.submitWork", "Ish topshirish")}</h3>
+              <h3>{t("chat.submitWork", "Submit Work")}</h3>
               <button className="icon-btn" onClick={() => setShowSubmissionModal(false)}><X size={20} /></button>
             </div>
             <div className="submission-modal-container">
               <div className="submission-field-group">
                 <label className="submission-field-label">
-                  {i18n.t("chat.chooseMilestone", "Bosqichni tanlang")}
+                  {t("chat.chooseMilestone", "Select Milestone")}
                 </label>
                   {milestones.filter(m => m.status === 'pending').length === 0 ? (
                     <div className="submission-empty-milestones" style={{ padding: '12px', background: 'var(--hover-bg)', borderRadius: '8px', fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center' }}>
-                      {i18n.t("chat.noPendingMilestones", "Hozircha topshiriladigan bosqichlar yo'q.")}
+                      {t("chat.noPendingMilestones", "No pending milestones.")}
                     </div>
                   ) : (
                     <select 
@@ -2781,7 +2795,7 @@ export default function ChatDetail() {
                       value={selectedMilestoneId}
                       onChange={(e) => setSelectedMilestoneId(e.target.value)}
                     >
-                      <option value="">-- {i18n.t("chat.select", "Tanlang")} --</option>
+                      <option value="">-- {t("chat.select", "Select")} --</option>
                       {milestones.filter(m => m.status === 'pending').map(m => (
                         <option key={m.id} value={m.id}>{m.title} ({Number(m.amount).toLocaleString()} UZS)</option>
                       ))}
@@ -2790,12 +2804,12 @@ export default function ChatDetail() {
               </div>
               <div className="submission-field-group">
                 <label className="submission-field-label">
-                  {i18n.t("chat.submissionDescription", "Topshiriq tavsifi")}
+                  {t("chat.submissionDescription", "Work Description")}
                 </label>
                 <textarea 
                   className="submission-input-control" 
                   rows={4}
-                  placeholder={i18n.t("chat.submissionPlaceholder", "Nimalar bajarilgani haqida qisqacha...")}
+                  placeholder={t("chat.submissionPlaceholder", "Briefly describe what you've done...")}
                   value={submissionDesc}
                   onChange={(e) => setSubmissionDesc(e.target.value)}
                 />
@@ -2803,7 +2817,7 @@ export default function ChatDetail() {
 
               <div className="submission-field-group">
                 <label className="submission-field-label">
-                  {i18n.t("chat.attachments", "Fayllar")}
+                  {t("chat.attachments", "Attachments")}
                 </label>
                 
                 <div className="submission-files-list">
@@ -2829,7 +2843,7 @@ export default function ChatDetail() {
                   disabled={isUploadingFiles}
                 >
                   {isUploadingFiles ? <div className="btn-spinner" /> : <Paperclip size={16} />}
-                  {i18n.t("chat.addMore", "Fayl biriktirish")}
+                  {t("chat.addMore", "Attach File")}
                 </button>
                 <input 
                   type="file" 
@@ -2842,14 +2856,14 @@ export default function ChatDetail() {
             </div>
             <div className="submission-modal-footer">
               <button className="footer-btn text" onClick={() => setShowSubmissionModal(false)}>
-                {i18n.t("chat.cancel", "BEKOR QILISH")}
+                {t("chat.cancel", "CANCEL")}
               </button>
               <button 
                 className="footer-btn primary" 
                 onClick={handleFinalWorkSubmission}
                 disabled={sending}
               >
-                {sending ? <div className="btn-spinner" /> : i18n.t("chat.submit", "TOPSHIRISH")}
+                {sending ? <div className="btn-spinner" /> : t("chat.submit", "SUBMIT")}
               </button>
             </div>
           </div>
@@ -2870,13 +2884,14 @@ function TranslateBar({
   onToggleSettings,
   onSelectLang
 }) {
+  const { t } = useTranslation();
   const languages = [
-    { id: "uz", label: "O'zbekcha" },
-    { id: "ru", label: "Русский" },
-    { id: "en", label: "English" },
+    { id: "uz", label: t("chat.lang_uz", "Uzbek") },
+    { id: "ru", label: t("chat.lang_ru", "Russian") },
+    { id: "en", label: t("chat.lang_en", "English") },
   ];
 
-  const currentLangLabel = languages.find(l => l.id === targetLang)?.label || "O'zbekcha";
+  const currentLangLabel = languages.find(l => l.id === targetLang)?.label || t("chat.lang_uz", "Uzbek");
 
   return (
     <div className="translate-bar-container">
@@ -2887,10 +2902,10 @@ function TranslateBar({
           </span>
           <span className="translate-text">
             {isTranslating
-              ? i18n.t("chat.translating", "Tarjima qilinmoqda...")
+              ? t("chat.translating", "Translating...")
               : isAutoTranslateOn
-                ? i18n.t("chat.showOriginal", "Aslini ko'rsatish")
-                : i18n.t("chat.translateTo", `{{lang}} tiliga tarjima qilish`, { lang: currentLangLabel })}
+                ? t("chat.showOriginal", "Show Original")
+                : t("chat.translateTo", `Translate to {{lang}}`, { lang: currentLangLabel })}
           </span>
         </div>
         <div className="translate-bar-right">
@@ -2904,7 +2919,7 @@ function TranslateBar({
 
             {showSettings && (
               <div className="translate-langs-menu" onClick={(e) => e.stopPropagation()}>
-                <div className="translate-menu-header">{i18n.t("chat.chooseLang", "Tilni tanlang")}</div>
+                <div className="translate-menu-header">{t("chat.chooseLang", "Choose Language")}</div>
                 {languages.map((lang) => (
                   <div
                     key={lang.id}

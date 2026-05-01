@@ -5,6 +5,7 @@ import { getChats } from "../../../api/messages";
 import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/useSocket";
 import { Search, MessageSquare, Plus, MessageCircle, Pin, PinOff, Bell, BellOff, Volume2, VolumeX, Trash2 } from "lucide-react";
 import i18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 import "./chat.css";
 
 // ── helpers ──────────────────────────────────────────────
@@ -35,7 +36,7 @@ const parseUTC = (raw) => {
   return d;
 };
 
-function formatTime(dateStr) {
+function formatTime(dateStr, t) {
   const d = parseUTC(dateStr);
   if (!d) return "";
   const now = new Date();
@@ -45,12 +46,11 @@ function formatTime(dateStr) {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return i18n.t("chat.now", "Hozir");
-  if (diffMins < 60) return `${diffMins} m.`;
-  if (diffHours < 24) return `${diffHours} s.`;
+  if (diffMins < 1) return t("chat.now", "Now");
+  if (diffMins < 60) return `${diffMins} ${t("chat.min", "m")}`;
+  if (diffHours < 24) return `${diffHours} ${t("chat.hour", "h")}`;
   if (diffDays < 7) {
-    const dayLabel = i18n.language === 'uz' ? 'kun' : (i18n.language === 'ru' ? 'д.' : 'd');
-    return `${diffDays} ${dayLabel}`;
+    return `${diffDays} ${t("chat.day", "d")}`;
   }
 
   const months = {
@@ -96,7 +96,7 @@ function Avatar({ user, size = "md" }) {
 }
 
 // ── Chat Context Menu ─────────────────────────────────────
-function ChatContextMenu({ x, y, chat, isPinned, isMuted, onPin, onMute, onClose }) {
+function ChatContextMenu({ x, y, chat, isPinned, isMuted, isAdmin, onPin, onMute, onClose, t }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -115,23 +115,26 @@ function ChatContextMenu({ x, y, chat, isPinned, isMuted, onPin, onMute, onClose
     <div ref={ref} className="msg-context-menu" style={style}>
       <div className="msg-context-item" onClick={(e) => { e.stopPropagation(); onPin(!isPinned); onClose(); }}>
         {isPinned ? <PinOff size={16} style={{ marginRight: 10 }} /> : <Pin size={16} style={{ marginRight: 10 }} />}
-        {isPinned ? i18n.t("chat.unpin", "Pin-dan olish") : i18n.t("chat.pin", "Pin qilish")}
+        {isPinned ? t("chat.unpin", "Unpin") : t("chat.pin", "Pin")}
       </div>
       <div className="msg-context-item" onClick={(e) => { e.stopPropagation(); onMute(!isMuted); onClose(); }}>
-        {isMuted ? <Bell size={16} style={{ marginRight: 10 }} /> : <BellOff size={16} style={{ marginRight: 10 }} />}
-        {isMuted ? i18n.t("chat.unmute", "Ovozni yoqish") : i18n.t("chat.mute", "Ovozsiz qilish")}
+        {isMuted ? <BellOff size={16} style={{ marginRight: 10 }} /> : <Bell size={16} style={{ marginRight: 10 }} />}
+        {isMuted ? t("chat.unmute", "Unmute") : t("chat.mute", "Mute")}
       </div>
       <div className="msg-context-divider" />
-      <div className="msg-context-item danger" onClick={(e) => { e.stopPropagation(); onClose(); }}>
-        <Trash2 size={16} style={{ marginRight: 10 }} />
-        {i18n.t("chat.deleteChat", "Chatni o'chirish")}
-      </div>
+      {isAdmin && (
+        <div className="msg-context-item danger" onClick={(e) => { e.stopPropagation(); onClose(); }}>
+          <Trash2 size={16} style={{ marginRight: 10 }} />
+          {t("chat.deleteChat", "Delete Chat")}
+        </div>
+      )}
     </div>
   );
 }
 
 // ── Main component ────────────────────────────────────────
 export default function ChatPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id: activeChatId } = useParams();
 
@@ -293,14 +296,14 @@ export default function ChatPage() {
 
   const getPartnerName = (chat) => {
     const p = getPartner(chat);
-    if (!p) return i18n.t("chat.unknown", "Noma'lum");
+    if (!p) return t("chat.unknown", "Unknown");
     const full = `${p.first_name || ""} ${p.last_name || ""}`.trim();
-    return full || p.username || i18n.t("chat.user", "Foydalanuvchi");
+    return full || p.username || t("chat.user", "User");
   };
 
   const getChatType = (chat) => {
-    if (chat.contract_id) return i18n.t("chat.contract", "Shartnoma");
-    if (chat.job_id) return i18n.t("chat.job", "Ish");
+    if (chat.contract_id) return t("chat.contract", "Contract");
+    if (chat.job_id) return t("chat.job", "Job");
     return null;
   };
 
@@ -340,13 +343,13 @@ export default function ChatPage() {
       <aside className={`chat-sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="chat-sidebar-header">
           <h1 className="chat-sidebar-title">
-            {i18n.t("chat.messages", "Xabarlar")}
+            {t("chat.messages", "Messages")}
           </h1>
           <div className="chat-search-box">
             <span className="chat-search-icon"><Search size={18} strokeWidth={2.5} /></span>
             <input
               type="text"
-              placeholder={i18n.t("chat.search", "Qidirish...")}
+              placeholder={t("chat.search", "Search...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -369,7 +372,7 @@ export default function ChatPage() {
           ) : filteredChats.length === 0 ? (
             <div className="chat-list-empty">
               <div className="chat-list-empty-icon"><MessageSquare size={48} strokeWidth={1.5} style={{ opacity: 0.4 }} /></div>
-              <p>{search ? i18n.t("chat.notFound", "Topilmadi") : i18n.t("chat.noChatsYet", "Hali chatlar yo'q")}</p>
+              <p>{search ? t("chat.notFound", "Not found") : t("chat.noChatsYet", "No chats yet")}</p>
             </div>
           ) : (
               filteredChats.map((chat) => {
@@ -403,7 +406,7 @@ export default function ChatPage() {
                           {isMuted && <BellOff size={12} className="muted-icon" style={{ marginLeft: 6, opacity: 0.5 }} />}
                         </span>
                         <span className="chat-item-time">
-                          {formatTime(chat.last_message_at || chat.chat_created_at || chat.last_message?.created_at || chat.created_at)}
+                          {formatTime(chat.last_message_at || chat.chat_created_at || chat.last_message?.created_at || chat.created_at, t)}
                         </span>
                       </div>
                       <div className="chat-item-bottom">
@@ -411,7 +414,7 @@ export default function ChatPage() {
                           {chat.last_message_content || chat.last_message?.message_text || chat.last_message?.content ? (
                             (chat.last_message_content || chat.last_message?.message_text || chat.last_message?.content).slice(0, 38) +
                             ((chat.last_message_content || chat.last_message?.message_text || chat.last_message?.content).length > 38 ? "…" : "")
-                          ) : i18n.t("chat.noMessagesOut", "Xabar yo'q")}
+                          ) : t("chat.noMessagesOut", "No message")}
                         </span>
                         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                           {isPinned && <Pin size={12} className="pinned-icon" style={{ opacity: 0.6 }} />}
@@ -436,8 +439,8 @@ export default function ChatPage() {
             <div className="chat-empty-state-icon">
               <MessageCircle size={64} strokeWidth={1.5} />
             </div>
-            <h2>{i18n.t("chat.selectChat", "Suhbat tanlang")}</h2>
-            <p>{i18n.t("chat.chooseFromLeft", "Chap tarafdan chatni tanlang yoki yangi muloqot boshlang")}</p>
+            <h2>{t("chat.selectChat", "Select a Chat")}</h2>
+            <p>{t("chat.chooseFromLeft", "Select a chat from the left or start a new conversation")}</p>
           </div>
         ) : (
           <Outlet context={{ 
@@ -445,7 +448,11 @@ export default function ChatPage() {
               setSidebarOpen(true); 
               navigate("/messages"); 
             }, 
-            reloadList: loadChats 
+            reloadList: loadChats,
+            pinnedChats,
+            setPinnedChats,
+            mutedChats,
+            setMutedChats
           }} />
         )}
       </main>
@@ -457,6 +464,7 @@ export default function ChatPage() {
           chat={contextMenu.chat}
           isPinned={pinnedChats.includes(String(contextMenu.chat.chat_id || contextMenu.chat.id))}
           isMuted={mutedChats.includes(String(contextMenu.chat.chat_id || contextMenu.chat.id))}
+          isAdmin={currentUser?.role === 'admin' || currentUser?.role === 'superadmin'}
           onPin={(pin) => {
             const cid = String(contextMenu.chat.chat_id || contextMenu.chat.id);
             setPinnedChats(prev => pin ? [...prev, cid] : prev.filter(id => id !== cid));
@@ -466,6 +474,7 @@ export default function ChatPage() {
             setMutedChats(prev => mute ? [...prev, cid] : prev.filter(id => id !== cid));
           }}
           onClose={() => setContextMenu(null)}
+          t={t}
         />
       )}
     </div>

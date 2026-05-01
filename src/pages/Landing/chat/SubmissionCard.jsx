@@ -1,6 +1,7 @@
 import React from 'react';
 import { FileText, CheckCircle, Clock, ExternalLink, AlertCircle, Download } from 'lucide-react';
 import i18n from '../../../i18n';
+import { useTranslation } from 'react-i18next';
 
 const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/api\/?$/, "");
 
@@ -12,17 +13,18 @@ function getFullUrl(url) {
 }
 
 const SubmissionCard = ({ msg, isOwn, onApprove, onReject, isApproving, isRejecting, currentUser, onMediaClick }) => {
+  const { t } = useTranslation();
   const metadata = typeof msg.metadata === 'string' ? JSON.parse(msg.metadata) : (msg.metadata || {});
   const { description, files = [], milestone_id, status = 'pending' } = metadata;
   
   const statusConfig = {
-    submitted: { label: i18n.t("chat.submitted", "Topshirildi"), color: '#3b82f6', icon: <Clock size={16} /> },
-    pending: { label: i18n.t("chat.pending", "Kutilmoqda"), color: '#f59e0b', icon: <Clock size={16} /> },
-    approved: { label: i18n.t("chat.approved", "Tasdiqlangan"), color: '#10b981', icon: <CheckCircle size={16} /> },
+    submitted: { label: t("chat.submitted", "Submitted"), color: '#3b82f6', icon: <Clock size={16} /> },
+    pending: { label: t("chat.pending", "Pending"), color: '#f59e0b', icon: <Clock size={16} /> },
+    approved: { label: t("chat.approved", "Approved"), color: '#10b981', icon: <CheckCircle size={16} /> },
     rejected: { 
       label: isOwn 
-        ? i18n.t("chat.revisionRequested", "Tuzatish so'raldi") 
-        : i18n.t("chat.workReturned", "Ish qaytarildi"), 
+        ? t("chat.revisionRequested", "Revision Requested") 
+        : t("chat.workReturned", "Work Returned"), 
       color: '#ef4444', 
       icon: <AlertCircle size={16} /> 
     }
@@ -66,7 +68,7 @@ const SubmissionCard = ({ msg, isOwn, onApprove, onReject, isApproving, isReject
             <h4 className="submission-label">
               {status === 'rejected' 
                 ? currentStatus.label 
-                : i18n.t("chat.workSubmitted", "Ish topshirildi")}
+                : t("chat.workSubmitted", "Work Submitted")}
             </h4>
             <div className="submission-status" style={{ color: currentStatus.color }}>
               {currentStatus.icon}
@@ -82,7 +84,7 @@ const SubmissionCard = ({ msg, isOwn, onApprove, onReject, isApproving, isReject
           
           {files && files.length > 0 && (
             <div className="submission-attachments">
-              <div className="attachments-title">{i18n.t("chat.attachments", "Fayllar")}:</div>
+              <div className="attachments-title">{t("chat.attachments", "Attachments")}:</div>
               <div className="attachments-list">
                  {files.map((file, i) => {
                    const fileUri = file.url || file.file_url;
@@ -108,7 +110,7 @@ const SubmissionCard = ({ msg, isOwn, onApprove, onReject, isApproving, isReject
                           }}
                        >
                          {canDownload ? <Download size={14} /> : <ExternalLink size={14} />}
-                         <span className="attachment-name">{file.name || 'Hujjat'}</span>
+                         <span className="attachment-name">{file.name || 'Document'}</span>
                        </a>
                      </div>
                    );
@@ -126,7 +128,7 @@ const SubmissionCard = ({ msg, isOwn, onApprove, onReject, isApproving, isReject
             disabled={isApproving}
           >
             {isApproving ? <div className="btn-spinner" /> : <CheckCircle size={16} />}
-            {i18n.t("chat.approveWork", "Tasdiqlash")}
+            {t("chat.approveWork", "Approve")}
           </button>
           <button 
             className="submission-btn reject-btn" 
@@ -134,7 +136,7 @@ const SubmissionCard = ({ msg, isOwn, onApprove, onReject, isApproving, isReject
             disabled={isRejecting}
           >
             {isRejecting ? <div className="btn-spinner" /> : <AlertCircle size={16} />}
-            {i18n.t("chat.requestRevision", "Tuzatish so'rash")}
+            {t("chat.requestRevision", "Request Revision")}
           </button>
         </div>
       )}
