@@ -13,6 +13,7 @@ import { useThemeContext } from "../Theme/ThemeContext";
 import "../header/Header.css";
 import "../../../assets/style/FreeNavbar.css";
 import "../../../assets/style/theme.css";
+import { useCurrency } from "../Currency/CurrencyContext";
 import NotificationDropdown from "../NotificationDropdown/NotificationDropdown";
 import { Toast } from "../Toast";
 import { getSocket } from "../../../hooks/useSocket";
@@ -129,6 +130,49 @@ function LangSwitcher({ i18n, changeLanguage }) {
               <span className="lang-sw__item-flag">{l.flag}</span>
               <span className="lang-sw__item-label">{l.label}</span>
               {cur.code === l.code && <Check size={14} className="lang-sw__item-check" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CurrencySwitcher() {
+  const { currency, setCurrency } = useCurrency();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  const currs = [
+    { code: "USD", symbol: "$" },
+    { code: "UZS", symbol: "UZS" },
+    { code: "RUB", symbol: "₽" },
+  ];
+
+  return (
+    <div ref={ref} className="lang-sw" style={{ marginLeft: 8 }}>
+      <button className="lang-sw__trigger" onClick={() => setOpen(o => !o)} aria-label="Change currency">
+        <span className="lang-sw__code">{currency}</span>
+        <ChevronDown size={13} className={`lang-sw__arrow ${open ? "open" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="lang-sw__panel">
+          {currs.map(c => (
+            <button
+              key={c.code}
+              className={`lang-sw__item ${currency === c.code ? "active" : ""}`}
+              onClick={() => { setCurrency(c.code); setOpen(false); }}
+            >
+              <span className="lang-sw__item-flag" style={{ fontSize: 12 }}>{c.symbol}</span>
+              <span className="lang-sw__item-label">{c.code}</span>
+              {currency === c.code && <Check size={14} className="lang-sw__item-check" />}
             </button>
           ))}
         </div>
@@ -304,6 +348,7 @@ function LandingHeader({ i18n, changeLanguage }) {
         {/* Right actions — NO SEARCH, only lang + dark + login + signup */}
         <div className="uw-actions">
           <LangSwitcher i18n={i18n} changeLanguage={changeLanguage} />
+          <CurrencySwitcher />
 
           <button type="button" onClick={toggle} className="uw-iconbtn" aria-label="Toggle dark mode">
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
@@ -365,6 +410,7 @@ function LandingHeader({ i18n, changeLanguage }) {
 // ══════════════════════════════════════════════════════════
 function AuthHeader({ user }) {
   const { t, i18n } = useTranslation();
+  const { currency, setCurrency } = useCurrency();
   const { isDark, toggle } = useThemeContext();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [jobsOpen, setJobsOpen] = useState(false);
@@ -874,21 +920,43 @@ function AuthHeader({ user }) {
                     </span>
                   </div>
 
-                  {/* ── Language switcher row ── */}
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "6px 12px 10px", borderBottom: "1px solid var(--border, #e2e8f0)", marginBottom: "8px" }}>
-                    <Globe size={14} style={{ color: "var(--text-secondary, #64748b)", flexShrink: 0 }} />
-                    {[
-                      { code: "uz", flag: "🇺🇿", label: "UZ" },
-                      { code: "ru", flag: "🇷🇺", label: "RU" },
-                      { code: "en", flag: "🇬🇧", label: "EN" },
-                    ].map(l => (
-                      <button key={l.code} onClick={() => { i18n.changeLanguage(l.code); localStorage.setItem("appLanguage", l.code); }} style={{
-                        flex: 1, padding: "5px 4px", border: "1px solid var(--border, #e2e8f0)", borderRadius: "6px", cursor: "pointer",
-                        fontSize: "12px", fontWeight: 700, transition: "all 0.15s",
-                        background: i18n.language.startsWith(l.code) ? "var(--blue, #3b82f6)" : "transparent",
-                        color: i18n.language.startsWith(l.code) ? "#fff" : "var(--text, #1e293b)",
-                      }}>{l.flag} {l.label}</button>
-                    ))}
+                  {/* ── Language & Currency switcher row ── */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "6px 12px 10px", borderBottom: "1px solid var(--border, #e2e8f0)", marginBottom: "8px" }}>
+                    {/* Languages */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <Globe size={14} style={{ color: "var(--text-secondary, #64748b)", flexShrink: 0 }} />
+                      {[
+                        { code: "uz", flag: "🇺🇿", label: "UZ" },
+                        { code: "ru", flag: "🇷🇺", label: "RU" },
+                        { code: "en", flag: "🇬🇧", label: "EN" },
+                      ].map(l => (
+                        <button key={l.code} onClick={() => { i18n.changeLanguage(l.code); localStorage.setItem("appLanguage", l.code); }} style={{
+                          flex: 1, padding: "5px 4px", border: "1px solid var(--border, #e2e8f0)", borderRadius: "6px", cursor: "pointer",
+                          fontSize: "12px", fontWeight: 700, transition: "all 0.15s",
+                          background: i18n.language.startsWith(l.code) ? "var(--blue, #3b82f6)" : "transparent",
+                          color: i18n.language.startsWith(l.code) ? "#fff" : "var(--text, #1e293b)",
+                        }}>{l.flag} {l.label}</button>
+                      ))}
+                    </div>
+
+                    {/* Currencies */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <div style={{ width: 14, display: 'flex', justifyContent: 'center' }}>
+                         <span style={{ fontSize: 13, color: "var(--text-secondary, #64748b)", fontWeight: 700 }}>{currency === 'USD' ? '$' : currency === 'RUB' ? '₽' : 'UZ'}</span>
+                      </div>
+                      {[
+                        { code: "USD", label: "USD" },
+                        { code: "UZS", label: "UZS" },
+                        { code: "RUB", label: "RUB" },
+                      ].map(c => (
+                        <button key={c.code} onClick={() => setCurrency(c.code)} style={{
+                          flex: 1, padding: "5px 4px", border: "1px solid var(--border, #e2e8f0)", borderRadius: "6px", cursor: "pointer",
+                          fontSize: "11px", fontWeight: 700, transition: "all 0.15s",
+                          background: currency === c.code ? "var(--blue, #3b82f6)" : "transparent",
+                          color: currency === c.code ? "#fff" : "var(--text, #1e293b)",
+                        }}>{c.label}</button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* ── Night mode toggle row ── */}
