@@ -171,13 +171,13 @@ export default function Projects({
       if (job.job_type === "hourly") {
         return (
           <>
-            <Price amount={job.budget_min} currency={job.currency || 'USD'} /> – <Price amount={job.budget_max} currency={job.currency || 'USD'} /> /soat
+            <Price amount={job.budget_min} currency={job.currency || 'UZS'} /> – <Price amount={job.budget_max} currency={job.currency || 'UZS'} /> /soat
           </>
         );
       }
       return (
         <>
-          <Price amount={job.budget_min} currency={job.currency || 'USD'} /> {job.budget_min !== job.budget_max && job.budget_max ? <><Price amount={job.budget_max} currency={job.currency || 'USD'} /></> : ""}
+          <Price amount={job.budget_min} currency={job.currency || 'UZS'} /> {job.budget_min !== job.budget_max && job.budget_max ? <><Price amount={job.budget_max} currency={job.currency || 'UZS'} /></> : ""}
         </>
       );
     };

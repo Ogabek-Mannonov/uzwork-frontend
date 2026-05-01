@@ -40,7 +40,11 @@ export default function JobDetail() {
       setToast("Barcha maydonlarni to'ldiring!"); setTimeout(() => setToast(""), 3000); return;
     }
     setSubmitting(true);
-    const res = await createProposal({ job_id: id, ...proposal });
+    const res = await createProposal({ 
+      job_id: id, 
+      ...proposal,
+      currency: job.currency || 'UZS'
+    });
     setSubmitting(false);
     if (res?.success === false) {
       setToast(res?.message || "Xato yuz berdi");

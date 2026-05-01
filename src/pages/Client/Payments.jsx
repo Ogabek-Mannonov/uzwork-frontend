@@ -8,6 +8,9 @@ import {
   ChevronRight, TrendingUp, TrendingDown, Lock,
   Building
 } from "lucide-react";
+import Price from "../components/Currency/Price";
+import { useCurrency } from "../components/Currency/CurrencyContext";
+import { getBalance, getPayments } from "../../api/payments";
 import "../Client/css/payments.css";
 
 // Mock data
@@ -107,10 +110,9 @@ const MOCK_TRANSACTIONS = [
 const BillingPayments = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
-  
-  const [balance] = useState(MOCK_BALANCE);
+  const [balance, setBalance] = useState({ available: 0, pending: 0, total_spent: 0 });
+  const [transactions, setTransactions] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState(MOCK_PAYMENT_METHODS);
-  const [transactions] = useState(MOCK_TRANSACTIONS);
   
   const [showAddCard, setShowAddCard] = useState(false);
   const [showAddBank, setShowAddBank] = useState(false);
@@ -119,6 +121,35 @@ const BillingPayments = () => {
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  
+  const { currency: selectedCurrency } = useCurrency();
+
+  const fetchPaymentData = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const [balRes, transRes] = await Promise.all([
+        getBalance(),
+        getPayments({ limit: 50 })
+      ]);
+      
+      if (balRes?.data?.balance) setBalance(balRes.data.balance);
+      else if (balRes?.balance) setBalance(balRes.balance);
+      
+      if (transRes?.data?.transactions) setTransactions(transRes.data.transactions);
+      else if (transRes?.transactions) setTransactions(transRes.transactions);
+      else if (Array.isArray(transRes)) setTransactions(transRes);
+
+    } catch (err) {
+      console.error("Error fetching payment data:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPaymentData();
+  }, [fetchPaymentData]);
 
   const [newCard, setNewCard] = useState({
     cardNumber: "",
@@ -221,11 +252,10 @@ const BillingPayments = () => {
     setTimeout(() => setShowSuccessToast(false), 3000);
   };
 
-  const formatAmount = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(Math.abs(amount));
+
+
+  const formatAmount = (amount, ccy = 'USD') => {
+    return <Price amount={Math.abs(amount)} currency={ccy} />;
   };
 
   const getTransactionIcon = (type) => {
@@ -293,7 +323,9 @@ const BillingPayments = () => {
                   <span className="bp-balance-label">Mavjud balans</span>
                   <span className="bp-balance-sub">Yechib olish mumkin</span>
                 </div>
-                <div className="bp-balance-amount">${balance.available.toLocaleString()}</div>
+                <div className="bp-balance-amount">
+                  <Price amount={balance.available} currency="UZS" />
+                </div>
                 <button 
                   className="bp-withdraw-btn"
                   onClick={() => setShowWithdrawModal(true)}
@@ -307,17 +339,23 @@ const BillingPayments = () => {
                   <span className="bp-balance-label">Kutilayotgan to'lovlar</span>
                   <span className="bp-balance-sub">Tasdiqlanishi kutilmoqda</span>
                 </div>
-                <div className="bp-balance-amount">${balance.pending.toLocaleString()}</div>
+                <div className="bp-balance-amount">
+                  <Price amount={balance.pending} currency="UZS" />
+                </div>
               </div>
 
               <div className="bp-balance-card bp-stats">
                 <div className="bp-stats-row">
                   <span className="bp-stats-label">Umumiy sarflangan</span>
-                  <span className="bp-stats-value">${balance.total_spent.toLocaleString()}</span>
+                  <span className="bp-stats-value">
+                    <Price amount={balance.total_spent} currency="UZS" />
+                  </span>
                 </div>
                 <div className="bp-stats-row">
                   <span className="bp-stats-label">Platforma komissiyasi</span>
-                  <span className="bp-stats-value">${Math.round(balance.total_spent * 0.1).toLocaleString()}</span>
+                  <span className="bp-stats-value">
+                    <Price amount={Math.round(balance.total_spent * 0.1)} currency="UZS" />
+                  </span>
                 </div>
                 <div className="bp-stats-row">
                   <span className="bp-stats-label">Aktiv kontraktlar</span>
@@ -351,7 +389,7 @@ const BillingPayments = () => {
                     </div>
                     <div className="bp-transaction-amount">
                       <span className={transaction.amount > 0 ? "bp-positive" : "bp-negative"}>
-                        {transaction.amount > 0 ? "+" : ""}{formatAmount(transaction.amount)}
+                        {transaction.amount > 0 ? "+" : "-"}{formatAmount(transaction.amount, transaction.currency || 'USD')}
                       </span>
                       {getStatusBadge(transaction.status)}
                     </div>
@@ -472,7 +510,7 @@ const BillingPayments = () => {
                   </div>
                   <div className="bp-cell bp-reference">{transaction.reference}</div>
                   <div className={`bp-cell bp-amount ${transaction.amount > 0 ? "bp-positive" : "bp-negative"}`}>
-                    {transaction.amount > 0 ? "+" : ""}{formatAmount(transaction.amount)}
+                    {transaction.amount > 0 ? "+" : "-"}{formatAmount(transaction.amount, transaction.currency || 'USD')}
                   </div>
                   <div className="bp-cell bp-status">
                     {getStatusBadge(transaction.status)}
@@ -619,7 +657,7 @@ const BillingPayments = () => {
               <div className="bp-modal-body">
                 <div className="bp-available-balance">
                   <span>Mavjud balans:</span>
-                  <strong>${balance.available.toLocaleString()}</strong>
+                  <strong><Price amount={balance.available} currency="UZS" /></strong>
                 </div>
                 <div className="bp-form-group">
                   <label>Summa ($)</label>

@@ -10,6 +10,7 @@ import {
 import "./css/Landing.css";
 import { getJobById, updateJob } from "../../api/jobs";
 import { getProjectProposals, acceptProposal } from "../../api/proposals";
+import Price from "../components/Currency/Price";
 
 // ==================== MOCK DATA ====================
 // ... (rest of mock data)
@@ -46,7 +47,7 @@ const ProposalsPanel = ({ proposals: initial, onHire, actionLoading }) => {
             <div className="client-proposal-top">
               <img src={p.avatar} alt={p.name} className="client-proposal-avatar" />
               <div><div className="client-proposal-name">{p.name}</div><div className="client-proposal-role">{p.role}</div></div>
-              <div className="client-proposal-right"><span className="client-proposal-rate">{p.rate}</span><span className="client-proposal-match">{p.score} Match</span></div>
+              <div className="client-proposal-right"><span className="client-proposal-rate">{typeof p.rate === 'object' ? p.rate : p.rate}</span><span className="client-proposal-match">{p.score} Match</span></div>
             </div>
             <p className="client-proposal-text">{p.text}</p>
             <div className="client-proposal-footer">
@@ -100,9 +101,9 @@ const Landing = () => {
       if(!active) return;
       const fetchedJob = jobRes?.data || jobRes;
       if(!fetchedJob) { setJob(MOCK_JOB); setProposals(MOCK_PROPOSALS); setLoading(false); return; }
-      setJob({ id: fetchedJob.id, title: fetchedJob.title, status: fetchedJob.status || "active", type: fetchedJob.budget_type === "hourly" ? "Hourly" : "Fixed Price", location: "Worldwide", posted: new Date(fetchedJob.created_at).toLocaleDateString(), budget: `$${fetchedJob.budget_amount || fetchedJob.hourly_rate_min}`, budgetMin: fetchedJob.budget_amount || 0, budgetMax: fetchedJob.budget_amount || 0, duration: fetchedJob.project_duration || "N/A", experience: fetchedJob.experience_level || "Any", hiring: 1, proposals: 0, skills: fetchedJob.skills || [], description: fetchedJob.description || "", requirements: [], client: MOCK_JOB.client });
+      setJob({ id: fetchedJob.id, title: fetchedJob.title, status: fetchedJob.status || "active", type: fetchedJob.budget_type === "hourly" ? "Hourly" : "Fixed Price", location: "Worldwide", posted: new Date(fetchedJob.created_at).toLocaleDateString(), budget: <Price amount={fetchedJob.budget_amount || fetchedJob.hourly_rate_min} currency={fetchedJob.currency || 'UZS'} />, budgetMin: fetchedJob.budget_amount || 0, budgetMax: fetchedJob.budget_amount || 0, currency: fetchedJob.currency || 'UZS', duration: fetchedJob.project_duration || "N/A", experience: fetchedJob.experience_level || "Any", hiring: 1, proposals: 0, skills: fetchedJob.skills || [], description: fetchedJob.description || "", requirements: [], client: MOCK_JOB.client });
       setStatus(fetchedJob.status || "active");
-      const mappedProps = (Array.isArray(propRes?.data) ? propRes.data : propRes?.proposals || []).map(p => ({ id: p.id, avatar: p.freelancer_avatar || `https://ui-avatars.com/api/?name=${p.freelancer_name || "F"}`, name: p.freelancer_name || "Freelancer", role: "Freelancer", rate: `$${p.proposed_price || 0}`, score: "N/A", shortlisted: p.status === "shortlisted", text: p.cover_letter || "" }));
+      const mappedProps = (Array.isArray(propRes?.data) ? propRes.data : propRes?.proposals || []).map(p => ({ id: p.id, avatar: p.freelancer_avatar || `https://ui-avatars.com/api/?name=${p.freelancer_name || "F"}`, name: p.freelancer_name || "Freelancer", role: "Freelancer", rate: <Price amount={p.proposed_price || 0} currency={p.currency || fetchedJob.currency || 'UZS'} />, score: "N/A", shortlisted: p.status === "shortlisted", text: p.cover_letter || "" }));
       setProposals(mappedProps.length > 0 ? mappedProps : MOCK_PROPOSALS);
     } catch { if(active) { setJob(MOCK_JOB); setProposals(MOCK_PROPOSALS); } }
     finally { if(active) setLoading(false); }

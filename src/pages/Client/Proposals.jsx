@@ -520,7 +520,7 @@ const Proposals = () => {
                         </div>
                       </div>
                       <div className="cp-price">
-                        <Price amount={proposal.proposed_price || proposal.budget_amount || 0} currency={proposal.currency || proposal.job_currency || 'USD'} />
+                        <Price amount={proposal.proposed_price || proposal.budget_amount || 0} currency={proposal.currency || proposal.job_currency || 'UZS'} />
                         <span>{proposal.payment_type || "FIXED"}</span>
                       </div>
                     </div>

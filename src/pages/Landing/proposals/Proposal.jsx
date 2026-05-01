@@ -109,7 +109,7 @@ export default function Proposal() {
       proposed_duration: duration,
       milestones: paymentMode === "milestone" ? milestones : [],
       payment_mode: paymentMode,
-      currency: job?.currency || 'USD'
+      currency: job?.currency || 'UZS'
     };
 
     const res = await createProposal(payload);
@@ -287,10 +287,10 @@ export default function Proposal() {
 
                 {paymentMode === 'project' && (
                   <div className="pr-input-group" style={{ maxWidth: 400 }}>
-                    <label>{t("submitProposal.project.priceLabel").replace("($)", `(${job?.currency || 'USD'})`)}</label>
+                    <label>{t("submitProposal.project.priceLabel").replace("($)", `(${job?.currency || 'UZS'})`)}</label>
                     <div style={{ position: 'relative' }}>
                       <div style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--brand)', fontWeight: 800 }}>
-                        {job?.currency === 'USD' ? '$' : job?.currency === 'RUB' ? '₽' : 'UZ'}
+                        {job?.currency === 'USD' ? '$' : job?.currency === 'RUB' ? '₽' : 'UZS'}
                       </div>
                       <input 
                         className="pr-input" 

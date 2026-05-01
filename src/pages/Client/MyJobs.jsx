@@ -324,9 +324,9 @@ const MyJobs = () => {
                     <DollarSign size={16} />
                     <span>
                       {job.budget_max 
-                        ? <Price amount={job.budget_max} currency={job.currency || 'USD'} />
+                        ? <Price amount={job.budget_max} currency={job.currency || 'UZS'} />
                         : (job.budget_min 
-                            ? <Price amount={job.budget_min} currency={job.currency || 'USD'} />
+                            ? <Price amount={job.budget_min} currency={job.currency || 'UZS'} />
                             : t('myJobs.negotiable'))
                       }
                     </span>

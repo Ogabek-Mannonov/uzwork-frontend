@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getMyContracts, getContractById } from "../../api/contracts";
+import Price from "../components/Currency/Price";
+import { useCurrency } from "../components/Currency/CurrencyContext";
 import "./css/contractmanegment.css";
 
 const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/api\/?$/, "");
@@ -33,6 +35,7 @@ const ContractManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const { convert, currency: selectedCurrency } = useCurrency();
   
   const loadContracts = useCallback(async () => {
     setLoading(true);
@@ -94,12 +97,21 @@ const ContractManagement = () => {
     return statusMatch && searchMatch;
   });
 
-  const stats = {
-    active: contracts.filter(c => c.status === "active").length,
-    total: contracts.reduce((sum, c) => sum + (Number(c.total_amount) || 0), 0),
-    paid: contracts.reduce((sum, c) => sum + (Number(c.paid_amount) || 0), 0),
-    escrow: contracts.reduce((sum, c) => sum + ((Number(c.total_amount) || 0) - (Number(c.paid_amount) || 0)), 0),
-  };
+  const stats = React.useMemo(() => {
+    let total = 0;
+    let paid = 0;
+    contracts.forEach(c => {
+      const ccy = c.currency || c.job_currency || 'USD';
+      total += convert(Number(c.total_amount) || 0, ccy, selectedCurrency);
+      paid += convert(Number(c.paid_amount) || 0, ccy, selectedCurrency);
+    });
+    return {
+      active: contracts.filter(c => c.status === "active").length,
+      total,
+      paid,
+      escrow: total - paid,
+    };
+  }, [contracts, convert, selectedCurrency]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -169,7 +181,9 @@ const ContractManagement = () => {
               <DollarSign size={20} />
             </div>
             <div className="cm-stat-info">
-              <span className="cm-stat-value">${stats.total.toLocaleString()}</span>
+              <span className="cm-stat-value">
+                <Price amount={stats.total} currency={selectedCurrency} />
+              </span>
               <span className="cm-stat-label">{t('contracts.stats.total')}</span>
             </div>
           </div>
@@ -178,7 +192,9 @@ const ContractManagement = () => {
               <CheckCircle size={20} />
             </div>
             <div className="cm-stat-info">
-              <span className="cm-stat-value">${stats.paid.toLocaleString()}</span>
+              <span className="cm-stat-value">
+                <Price amount={stats.paid} currency={selectedCurrency} />
+              </span>
               <span className="cm-stat-label">{t('contracts.stats.paid')}</span>
             </div>
           </div>
@@ -187,7 +203,9 @@ const ContractManagement = () => {
               <Shield size={20} />
             </div>
             <div className="cm-stat-info">
-              <span className="cm-stat-value">${stats.escrow.toLocaleString()}</span>
+              <span className="cm-stat-value">
+                <Price amount={stats.escrow} currency={selectedCurrency} />
+              </span>
               <span className="cm-stat-label">{t('contracts.stats.escrow')}</span>
             </div>
           </div>
@@ -297,7 +315,7 @@ const ContractManagement = () => {
                 <div className="cm-contract-details">
                   <div className="cm-detail">
                     <DollarSign size={14} />
-                    <span>${Number(contract.total_amount).toLocaleString()}</span>
+                    <span><Price amount={contract.total_amount} currency={contract.currency || contract.job_currency || 'USD'} /></span>
                   </div>
                   <div className="cm-detail">
                     <Clock size={14} />
@@ -401,7 +419,9 @@ const ContractManagement = () => {
                           </div>
                           <div className="info-item">
                             <span className="label">{t('contracts.modal.totalAmount')}</span>
-                            <span className="value-price">${Number(selectedContract.contract?.total_amount).toLocaleString()}</span>
+                            <span className="value-price">
+                              <Price amount={selectedContract.contract?.total_amount || selectedContract.total_amount} currency={selectedContract.contract?.currency || selectedContract.currency || selectedContract.contract?.job_currency || selectedContract.job_currency || 'USD'} />
+                            </span>
                           </div>
                           <div className="info-item">
                             <span className="label">{t('contracts.modal.status')}</span>
@@ -426,7 +446,7 @@ const ContractManagement = () => {
                                 <div className="milestone-content">
                                   <div className="milestone-h">
                                     <span className="title">{m.title}</span>
-                                    <span className="amount">${m.amount}</span>
+                                    <span className="amount"><Price amount={m.amount} currency={selectedContract.contract?.currency || selectedContract.currency || selectedContract.contract?.job_currency || selectedContract.job_currency || 'USD'} /></span>
                                   </div>
                                   <div className="milestone-b">
                                     <span className={`status-pill ${m.status}`}>

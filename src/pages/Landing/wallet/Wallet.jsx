@@ -142,8 +142,11 @@ export default function Wallet() {
   const handleDeposit = async () => {
     if (!amount || Number(amount) <= 0) return;
     setProcessing(true);
+    
     // Convert input to UZS (Base currency for backend)
-    const amountInUzs = Math.round(convert(amount, selectedCurrency) * globalRates.UZS);
+    let amountInUzs = Number(amount);
+    if (selectedCurrency === 'USD') amountInUzs = Math.round(Number(amount) * globalRates.UZS);
+    else if (selectedCurrency === 'RUB') amountInUzs = Math.round((Number(amount) / globalRates.RUB) * globalRates.UZS);
     
     const res = await deposit({ 
       amount: amountInUzs,
@@ -172,7 +175,9 @@ export default function Wallet() {
     
     setProcessing(true);
     // Convert input to UZS (Base currency for backend)
-    const amountInUzs = Math.round(convert(withdrawAmount, selectedCurrency) * globalRates.UZS);
+    let amountInUzs = Number(withdrawAmount);
+    if (selectedCurrency === 'USD') amountInUzs = Math.round(Number(withdrawAmount) * globalRates.UZS);
+    else if (selectedCurrency === 'RUB') amountInUzs = Math.round((Number(withdrawAmount) / globalRates.RUB) * globalRates.UZS);
 
     // Frontend validation: Check against available balance
     const currentBalanceUzs = Number(balance?.available_balance || 0);

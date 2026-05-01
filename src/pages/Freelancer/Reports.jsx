@@ -13,6 +13,7 @@ import {
   Briefcase
 } from "lucide-react";
 import { getPayments } from "../../api/payments";
+import Price from "../components/Currency/Price";
 import "./Reports.css";
 
 export default function Reports() {
@@ -151,7 +152,7 @@ export default function Reports() {
           <div className="stats-info">
             <span className="stats-label">{t("reports.totalEarned")}</span>
             <h2 className="stats-value">
-              {stats.totalEarned.toLocaleString()} <span className="currency">UZS</span>
+              <Price amount={stats.totalEarned} currency="UZS" />
             </h2>
             <div className="stats-trend pos">
               <ArrowUpRight size={14} />
@@ -167,7 +168,7 @@ export default function Reports() {
           <div className="stats-info">
             <span className="stats-label">{t("reports.platformFees")}</span>
             <h2 className="stats-value">
-              {stats.platformFees.toLocaleString()} <span className="currency">UZS</span>
+              <Price amount={stats.platformFees} currency="UZS" />
             </h2>
             <div className="stats-trend neg">
               <ArrowDownRight size={14} />
@@ -183,7 +184,7 @@ export default function Reports() {
           <div className="stats-info">
             <span className="stats-label">{t("reports.netIncome")}</span>
             <h2 className="stats-value">
-              {stats.netIncome.toLocaleString()} <span className="currency">UZS</span>
+              <Price amount={stats.netIncome} currency="UZS" />
             </h2>
             <div className="stats-trend pos">
               <ArrowUpRight size={14} />
@@ -232,7 +233,7 @@ export default function Reports() {
                   </div>
                   <div className={`item-amount ${tx.type === 'escrow_release' ? 'pos' : 'neg'}`}>
                     {tx.type === 'escrow_release' ? '+' : '-'}
-                    {Number(tx.amount).toLocaleString()} UZS
+                    <Price amount={tx.amount} currency="UZS" />
                   </div>
                 </div>
               ))

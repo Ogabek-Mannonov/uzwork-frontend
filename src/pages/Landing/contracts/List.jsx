@@ -13,6 +13,7 @@ import {
   ChevronRight,
   User
 } from "lucide-react";
+import Price from "../../components/Currency/Price";
 import "./contracts.css";
 
 const STATUS_CONFIG = {
@@ -167,7 +168,7 @@ export default function ContractsList() {
                     <div className="cl-info-block">
                       <span className="cl-info-label">Umumiy summa</span>
                       <div className="cl-info-value amount">
-                        ${Number(c.total_amount || 0).toLocaleString()}
+                        <Price amount={c.total_amount || 0} currency={c.currency || 'UZS'} />
                       </div>
                     </div>
                   </div>

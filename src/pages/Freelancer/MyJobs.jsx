@@ -105,7 +105,7 @@ const FreelancerMyJobs = () => {
             <div className="f-myjobs__stat-info">
               <span className="f-myjobs__stat-label">{t("myJobsFreelancer.totalEarnings", "Umumiy daromad")}</span>
               <span className="f-myjobs__stat-value">
-                <Price amount={stats.totalEarned} currency="USD" />
+                <Price amount={stats.totalEarned} currency="UZS" />
               </span>
             </div>
           </div>
@@ -176,7 +176,7 @@ const FreelancerMyJobs = () => {
                   <div className="card-stat">
                     <span className="card-stat__label">{t("myJobsFreelancer.contract.amount", "Summa")}</span>
                     <span className="card-stat__value amount">
-                      <Price amount={contract.total_amount} currency={contract.currency || contract.job_currency || 'USD'} />
+                      <Price amount={contract.total_amount} currency={contract.currency || contract.job_currency || 'UZS'} />
                     </span>
                   </div>
                   <div className="card-stat">

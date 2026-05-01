@@ -21,6 +21,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { getSocket, onSocketReady, normalizeUserStatus } from "../../../hooks/useSocket";
+import Price from "../../components/Currency/Price";
 import "./contracts.css";
 
 const STATUS_CONFIG = {
@@ -239,7 +240,7 @@ export default function ContractDetail() {
           <div className="cd-meta-grid">
             <div className="cd-meta-card">
               <div className="cd-meta-label">Umumiy Budget</div>
-              <div className="cd-meta-value amount">${Number(contract.total_amount).toLocaleString()}</div>
+              <div className="cd-meta-value amount"><Price amount={contract.total_amount} currency={contract.currency || 'UZS'} /></div>
             </div>
             
             <div className="cd-meta-card">
@@ -296,7 +297,7 @@ export default function ContractDetail() {
                         <div style={{ display: 'flex', gap: 20, fontSize: 14, fontWeight: 600, color: 'var(--muted)' }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <DollarSign size={14} style={{ color: 'var(--brand)' }} /> 
-                            {Number(m.amount).toLocaleString()}
+                            <Price amount={m.amount} currency={contract.currency || 'UZS'} />
                           </span>
                           <span className={`milestone-status ${mst.class}`} style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 800 }}>
                             ● {mst.label}
