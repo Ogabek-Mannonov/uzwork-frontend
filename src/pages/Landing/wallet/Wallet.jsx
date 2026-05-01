@@ -135,7 +135,7 @@ export default function Wallet() {
       setNewCard({ card_number: "", card_holder: "", expiry_date: "", card_type: "uzcard" });
       loadData();
     } else {
-      notify(res?.message || t("wallet.errorGeneric"), "error");
+      notify(res?.message ? t(res.message) : t("wallet.errorGeneric"), "error");
     }
   };
 
@@ -162,7 +162,7 @@ export default function Wallet() {
       setAmount("");
       loadData();
     } else {
-      notify(res?.message || t("wallet.errorGeneric"), "error");
+      notify(res?.message ? t(res.message) : t("wallet.errorGeneric"), "error");
     }
   };
 
@@ -201,7 +201,7 @@ export default function Wallet() {
       setWithdrawAmount("");
       loadData();
     } else {
-      notify(res?.message || t("wallet.errorGeneric"), "error");
+      notify(res?.message ? t(res.message) : t("wallet.errorGeneric"), "error");
     }
   };
 
@@ -215,7 +215,7 @@ export default function Wallet() {
       setConfirmDeleteId(null);
       loadData();
     } else {
-      notify(res?.message || t("wallet.errorGeneric"), "error");
+      notify(res?.message ? t(res.message) : t("wallet.errorGeneric"), "error");
     }
   };
 

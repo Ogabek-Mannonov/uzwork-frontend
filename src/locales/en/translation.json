@@ -1,4 +1,10 @@
 {
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "next": "Next",
+    "back": "Back"
+  },
   "findTalent": {
     "badges": {"top_rated_plus": "Top Rated Plus","top_rated": "Top Rated","rising_talent": "Rising Talent"},
     "filter": {"title": "Filters","clearAll": "Clear all","clearAllCount": "Clear all filters ({{count}})","talentBadge": "Talent badge","talentBadgeInfo": "Badges awarded based on performance","hourlyRate": "Hourly rate","under": "under ${{min}}","location": "Location","searchLocation": "City, country or region","jobSuccess": "Job success","jobSuccessInfo": "Minimum job success score","successUp": "{{percent}}% & up","englishLevel": "English level"},
@@ -730,6 +736,15 @@
     "signupDesc_freelancer": "Take your career to the next level",
     "signupSuccessDesc_freelancer": "Your account has been successfully created. Set up your profile to start your career."
   },
+  "jobDetail": {
+    "backToAll": "← Back to all jobs",
+    "description": "Description",
+    "requiredSkills": "Required Skills",
+    "save": "Save",
+    "saved": "Saved",
+    "hour": "hour",
+    "negotiable": "Negotiable"
+  },
   "findWork": {
     "layout": {
       "bannerSub": "Direct Contracts",
@@ -921,8 +936,18 @@
     "successDeposit": "Funds added successfully!",
     "successCard": "Card added successfully!",
     "successDelete": "Card deleted",
-    "errorGeneric": "An error occurred"
+    "errorGeneric": "An error occurred",
+    "insufficientBalance": "Insufficient available balance",
+    "lockedBalanceLow": "Insufficient locked balance"
   },
+  "wallet.insufficientBalance": "Insufficient available balance",
+  "wallet.lockedBalanceLow": "Insufficient locked balance",
+  "proposals.error.freelancerOnly": "Only freelancers can create proposals.",
+  "proposals.error.missingFields": "Please fill in all required fields.",
+  "proposals.error.ownJob": "You cannot apply to your own job.",
+  "proposals.error.jobNotOpen": "You can only apply to open jobs.",
+  "proposals.error.alreadySubmitted": "You have already submitted a proposal for this job.",
+  "proposals.success.created": "Proposal submitted successfully!",
   "clientProfile": {
     "title": "My Info",
     "viewPublicProfile": "View Public Profile",
@@ -1555,7 +1580,22 @@
     },
     "loading": "Loading..."
   },
+  "job": {
+    "error": {
+      "notFound": "Job not found."
+    }
+  },
   "proposals": {
+    "error": {
+      "freelancerOnly": "Only freelancers can create proposals.",
+      "missingFields": "Please fill in all required fields.",
+      "ownJob": "You cannot apply to your own job.",
+      "jobNotOpen": "You can only apply to open jobs.",
+      "alreadySubmitted": "You have already submitted a proposal for this job."
+    },
+    "success": {
+      "created": "Proposal submitted successfully!"
+    },
     "received": "Received Proposals",
     "sent": "My Invitations",
     "receivedSubtitle": "Review applications from specialists",

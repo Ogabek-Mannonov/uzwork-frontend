@@ -4,8 +4,10 @@ import { getJobById, saveJob } from "../../../api/jobs";
 import { createProposal } from "../../../api/proposals";
 import Price from "../../components/Currency/Price";
 import { useCurrency } from "../../components/Currency/CurrencyContext";
+import { useTranslation } from "react-i18next";
 
 export default function JobDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
@@ -21,7 +23,7 @@ export default function JobDetail() {
     const fetch = async () => {
       setLoading(true);
       const res = await getJobById(id);
-      if (res?.success === false) setError(res?.message || "Xato");
+      if (res?.success === false) setError(res?.message ? t(res.message) : t("common.error"));
       else setJob(res?.data || res);
       setLoading(false);
     };
@@ -47,16 +49,16 @@ export default function JobDetail() {
     });
     setSubmitting(false);
     if (res?.success === false) {
-      setToast(res?.message || "Xato yuz berdi");
+      setToast(res?.message ? t(res.message) : t("common.error"));
     } else {
-      setToast("Taklifingiz yuborildi! ✅");
+      setToast(t("submitProposal.success.title") || "Taklifingiz yuborildi! ✅");
       setProposalOpen(false);
       setProposal({ cover_letter: "", proposed_price: "", proposed_duration: "" });
     }
     setTimeout(() => setToast(""), 4000);
   };
 
-  if (loading) return <p style={{ textAlign: "center", padding: 60 }}>Yuklanmoqda...</p>;
+  if (loading) return <p style={{ textAlign: "center", padding: 60 }}>{t("common.loading")}</p>;
   if (error) return <p style={{ textAlign: "center", color: "red", padding: 60 }}>{error}</p>;
   if (!job) return null;
 
@@ -71,7 +73,7 @@ export default function JobDetail() {
       )}
 
       <button onClick={() => navigate("/find-work")} style={{ marginBottom: 20, background: "none", border: "none", color: "#14a800", cursor: "pointer", fontWeight: 600 }}>
-        ← Barcha ishlarga
+        {t("jobDetail.backToAll") || "← Barcha ishlarga"}
       </button>
 
       <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e0e0e0", padding: "28px 32px" }}>
@@ -82,8 +84,8 @@ export default function JobDetail() {
             background: "#e6f7e6", padding: "6px 16px", borderRadius: 20
           }}>
             {job.budget_type === "hourly"
-              ? <><Price amount={job.hourly_rate_min} currency={job.currency} /> – <Price amount={job.hourly_rate_max} currency={job.currency} />/soat</>
-              : (job.budget_amount || job.budget_max) ? <Price amount={job.budget_amount || job.budget_max} currency={job.currency} /> : "Kelishiladi"}
+              ? <><Price amount={job.hourly_rate_min} currency={job.currency} /> – <Price amount={job.hourly_rate_max} currency={job.currency} />/{t("jobDetail.hour")}</>
+              : (job.budget_amount || job.budget_max) ? <Price amount={job.budget_amount || job.budget_max} currency={job.currency} /> : t("jobDetail.negotiable")}
           </span>
         </div>
 
@@ -95,13 +97,13 @@ export default function JobDetail() {
 
         <hr style={{ margin: "20px 0", border: "none", borderTop: "1px solid #f0f0f0" }} />
 
-        <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Tavsif</h3>
+        <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>{t("jobDetail.description")}</h3>
         <p style={{ fontSize: 14, color: "#444", lineHeight: 1.75, whiteSpace: "pre-wrap" }}>{job.description}</p>
 
         {job.skills?.length > 0 && (
           <>
             <hr style={{ margin: "20px 0", border: "none", borderTop: "1px solid #f0f0f0" }} />
-            <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>Kerakli ko'nikmalar</h3>
+            <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>{t("jobDetail.requiredSkills")}</h3>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {job.skills.map((sk, i) => (
                 <span key={i} style={{ fontSize: 13, padding: "4px 12px", background: "#f0f0f0", borderRadius: 20, fontWeight: 600 }}>{sk}</span>
@@ -118,7 +120,7 @@ export default function JobDetail() {
               padding: "10px 28px", background: "#14a800", color: "#fff",
               border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer", fontSize: 14
             }}
-          >Taklif yuborish</button>
+          >{t("submitProposal.actions.submit") || "Taklif yuborish"}</button>
           <button
             onClick={handleSave}
             style={{
@@ -127,7 +129,7 @@ export default function JobDetail() {
               border: `1px solid ${saved ? "#14a800" : "#e0e0e0"}`,
               borderRadius: 8, fontWeight: 600, cursor: "pointer", fontSize: 14
             }}
-          >{saved ? "❤️ Saqlangan" : "🤍 Saqlash"}</button>
+          >{saved ? `❤️ ${t("jobDetail.saved")}` : `🤍 ${t("jobDetail.save")}`}</button>
         </div>
       </div>
 
@@ -138,9 +140,9 @@ export default function JobDetail() {
           display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999
         }}>
           <div style={{ background: "#fff", borderRadius: 12, padding: 28, width: "100%", maxWidth: 500 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 20 }}>Taklif yuborish</h2>
+            <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 20 }}>{t("submitProposal.title")}</h2>
             <textarea
-              placeholder="Qoplov xat (cover letter)..."
+              placeholder={t("submitProposal.additional.placeholder") || "Qoplov xat (cover letter)..."}
               value={proposal.cover_letter}
               onChange={e => setProposal(p => ({ ...p, cover_letter: e.target.value }))}
               rows={5}
@@ -148,14 +150,14 @@ export default function JobDetail() {
             />
             <input
               type="number"
-              placeholder={`Taklif narx (${job.currency || 'USD'})`}
+              placeholder={`${t("submitProposal.project.priceLabel") || "Taklif narx"} (${job.currency || 'USD'})`}
               value={proposal.proposed_price}
               onChange={e => setProposal(p => ({ ...p, proposed_price: e.target.value }))}
               style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 14, marginBottom: 12, boxSizing: "border-box" }}
             />
             <input
               type="text"
-              placeholder="Muddat (masalan: 2 hafta)"
+              placeholder={t("submitProposal.duration.placeholder") || "Muddat (masalan: 2 hafta)"}
               value={proposal.proposed_duration}
               onChange={e => setProposal(p => ({ ...p, proposed_duration: e.target.value }))}
               style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 14, marginBottom: 20, boxSizing: "border-box" }}
@@ -165,11 +167,11 @@ export default function JobDetail() {
                 onClick={handleSubmitProposal}
                 disabled={submitting}
                 style={{ flex: 1, padding: 12, background: "#14a800", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
-              >{submitting ? "Yuborilmoqda..." : "Yuborish"}</button>
+              >{submitting ? t("submitProposal.actions.submitting") : t("submitProposal.actions.submit")}</button>
               <button
                 onClick={() => setProposalOpen(false)}
                 style={{ flex: 1, padding: 12, background: "#f5f5f5", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer" }}
-              >Bekor qilish</button>
+              >{t("submitProposal.actions.cancel")}</button>
             </div>
           </div>
         </div>
