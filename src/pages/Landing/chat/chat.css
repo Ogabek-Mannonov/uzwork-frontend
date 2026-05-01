@@ -489,7 +489,7 @@
 }
 
 .chat-input-bubble.recording {
-  background: #f8fafc;
+  background: var(--input-bubble-bg);
 }
 
 .chat-header {
@@ -1272,13 +1272,12 @@
   bottom: 80px;
   left: 20px;
   z-index: 1000;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   border-radius: 12px;
   overflow: hidden;
   animation: pickerFadeIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  border: none;
 }
 
 @keyframes pickerFadeIn {
@@ -1295,13 +1294,9 @@
 
 .emoji-picker-container em-emoji-picker {
   border-radius: 12px;
-  --background-rgb: 255, 255, 255;
-  --border-radius: 12px;
   --font-family: inherit;
   --shadow: none;
   border: none;
-  height: 400px;
-  width: 320px;
 }
 
 @media (max-width: 480px) {
@@ -1418,7 +1413,7 @@
 }
 
 .chat-attach-btn {
-  color: #8e99a8;
+  color: var(--text-secondary);
   padding: 8px;
   cursor: pointer;
   display: flex;
@@ -1428,7 +1423,7 @@
 }
 
 .chat-attach-btn:hover {
-  color: #64748b;
+  color: var(--accent);
 }
 
 .chat-job-action-btn {
@@ -1438,14 +1433,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid #e2e8f0;
-  background: white;
-  color: #2563eb;
+  border: 1.5px solid var(--border);
+  background: var(--input-bg);
+  color: var(--accent);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   margin-left: 6px;
   flex-shrink: 0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .chat-job-action-btn:hover {
@@ -1492,7 +1487,7 @@
 }
 
 .emoji-toggle-btn {
-  color: #8e99a8;
+  color: var(--text-secondary);
   padding: 8px;
   background: none;
   border: none;
@@ -1521,8 +1516,8 @@
   left: 0;
   margin-bottom: 8px;
   z-index: 1000;
-  background: white;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  background: transparent;
+  box-shadow: var(--shadow-lg);
   border-radius: 12px;
   animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1542,7 +1537,7 @@
 .emoji-picker-body {
   padding: 0 !important;
   height: 100%;
-  background: #fff;
+  background: transparent;
 }
 
 .emoji-picker-body em-emoji-picker {
@@ -2165,12 +2160,19 @@
   align-items: center;
   background: var(--accent-light);
   color: var(--accent);
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 14px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   margin-top: 10px;
   max-width: 90%;
+  border: 1px solid transparent;
+}
+
+[data-theme='dark'] .chat-info-job-pill {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.2);
 }
 
 .chat-info-job-pill span {
@@ -2217,13 +2219,24 @@
 }
 
 .info-action-btn:hover .action-icon-circle {
-  background: #e8eaed;
+  background: var(--hover-bg);
+  color: var(--accent-dark);
 }
 
 .info-action-btn span {
   font-size: 12px;
   font-weight: 600;
-  color: #707579;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+
+[data-theme='dark'] .info-action-btn span {
+  color: #f1f5f9 !important;
+  opacity: 0.9;
+}
+
+.info-action-btn:hover span {
+  color: var(--accent);
 }
 
 .chat-info-divider {
@@ -2278,7 +2291,7 @@
   border-radius: 4px;
   overflow: hidden;
   cursor: pointer;
-  background: #f1f3f4;
+  background: var(--hover-bg);
   transition: opacity 0.2s;
 }
 
@@ -2310,7 +2323,7 @@
 }
 
 .media-list-item:hover {
-  background: #f1f3f4;
+  background: var(--hover-bg);
 }
 
 .list-item-icon {
@@ -2350,7 +2363,11 @@
 
 .list-item-meta {
   font-size: 12px;
-  color: #707579;
+  color: var(--text-muted);
+}
+
+[data-theme='dark'] .list-item-meta {
+  color: #94a3b8;
 }
 
 .chat-info-actions {
@@ -2361,9 +2378,9 @@
 .chat-info-danger-btn {
   width: 100%;
   padding: 12px;
-  background: #fff5f5;
-  color: #d93025;
-  border: 1px solid #ffdad6;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: 12px;
   font-size: 14px;
   font-weight: 700;
@@ -2372,8 +2389,8 @@
 }
 
 .chat-info-danger-btn:hover {
-  background: #ffe4e2;
-  border-color: #ffb4ab;
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
 }
 
 @keyframes slideInRight {
@@ -2841,27 +2858,29 @@
   width: 85%;
   max-width: 400px;
   /* Compact width */
-  background: #ffffff;
+  background: var(--sidebar-bg);
   border-radius: 12px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   animation: modalSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid var(--border);
 }
 
 .file-preview-header {
-  padding: 8px 16px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 1px solid var(--border);
 }
 
 .file-preview-header h3 {
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #222;
+  color: var(--text-primary);
 }
 
 .file-preview-header-actions {
@@ -2872,7 +2891,7 @@
 .file-preview-header-actions .icon-btn {
   background: none;
   border: none;
-  color: #666;
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 4px;
   border-radius: 50%;
@@ -2880,7 +2899,7 @@
 }
 
 .file-preview-header-actions .icon-btn:hover {
-  background: #f0f2f5;
+  background: var(--hover-bg);
 }
 
 .file-preview-content {
@@ -2989,7 +3008,7 @@
 
 .compress-text {
   font-size: 13px;
-  color: #222;
+  color: var(--text-primary);
 }
 
 .caption-input-wrapper {
@@ -3006,13 +3025,14 @@
   outline: none;
   padding: 6px 0;
   font-size: 14px;
-  color: #222;
+  color: var(--text-primary);
   background: transparent;
 }
 
 .caption-input::placeholder {
-  color: #3390ec;
+  color: var(--text-secondary);
   font-weight: 500;
+  opacity: 0.6;
 }
 
 .caption-emoji-btn {
@@ -3024,9 +3044,11 @@
 }
 
 .file-preview-footer {
-  padding: 8px 14px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
+  border-top: 1px solid var(--border);
+  gap: 12px;
 }
 
 .footer-btn {
@@ -3042,11 +3064,12 @@
 }
 
 .footer-btn.primary {
-  color: #3390ec;
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .footer-btn.secondary {
-  color: #3390ec;
+  color: var(--text-muted);
 }
 
 .footer-btn.text {
