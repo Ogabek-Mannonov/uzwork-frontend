@@ -675,8 +675,14 @@ function AuthHeader({ user }) {
                                           location.pathname.startsWith('/client/my-jobs');
                         return "nav__link" + (isActive || isSubActive ? " is-active" : "");
                       }}
+                      style={{ position: 'relative' }}
                     >
                       {t("navbar.myJobs")}
+                      {proposalsCount > 0 && (
+                        <span className="nav__badge unread-badge" style={{ top: '-4px', right: '12px' }}>
+                          {proposalsCount > 99 ? "99+" : proposalsCount}
+                        </span>
+                      )}
                       <ChevronDown size={14} className="nav__chevron" />
                     </NavLink>
                     <div className="nav__dropdown">
@@ -731,22 +737,33 @@ function AuthHeader({ user }) {
                     {t("navbar.findWork")}
                   </NavLink>
 
-                  {/* My Jobs Dropdown (Freelancer) */}
+                   {/* My Jobs Dropdown (Freelancer) */}
                   <div className="nav__item-with-dropdown">
                     <NavLink
                       to="/my-jobs"
-                      className={({ isActive }) =>
-                        "nav__link" + (isActive ? " is-active" : "")
-                      }
+                      className={({ isActive }) => {
+                        const isSubActive = location.pathname.startsWith('/contracts') || 
+                                          location.pathname.startsWith('/my-proposals') ||
+                                          location.pathname.startsWith('/saved-jobs');
+                        return "nav__link" + (isActive || isSubActive ? " is-active" : "");
+                      }}
+                      style={{ position: 'relative' }}
                     >
                       {t("navbar.myJobs")}
+                      {proposalsCount > 0 && (
+                        <span className="nav__badge unread-badge" style={{ top: '-4px', right: '12px' }}>
+                          {proposalsCount > 99 ? "99+" : proposalsCount}
+                        </span>
+                      )}
                       <ChevronDown size={14} className="nav__chevron" />
                     </NavLink>
                     <div className="nav__dropdown">
-                      <NavLink to="/my-jobs" className="dropdown__link">
+                      <NavLink to="/my-jobs" className={({ isActive }) => "dropdown__link" + (isActive ? " is-active" : "")}>
+                        <Briefcase size={16} />
                         <span>{t("navbar.myJobs")}</span>
                       </NavLink>
-                      <NavLink to="/contracts" className="dropdown__link">
+                      <NavLink to="/contracts" className={({ isActive }) => "dropdown__link" + (isActive ? " is-active" : "")}>
+                        <FileText size={16} />
                         <span>{t("navbar.contracts")}</span>
                       </NavLink>
                     </div>
