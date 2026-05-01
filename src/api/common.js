@@ -244,3 +244,14 @@ export const getSecuritySettings = async () => {
   };
 };
 
+// ===================== CURRENCY =====================
+
+/** Tizim kurslarini olish */
+export const getSystemRates = async () => {
+  try {
+    const res = await api.get("/currencies/rates");
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
