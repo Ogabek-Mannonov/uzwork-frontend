@@ -10,7 +10,7 @@ export const CurrencyProvider = ({ children }) => {
     return localStorage.getItem('userCurrency') || 'USD';
   });
 
-  const [rates, setRates] = useState({ USD: 1, UZS: 12100, RUB: 90 });
+  const [rates, setRates] = useState({ USD: 1, UZS: 12200, RUB: 93 });
   const [loading, setLoading] = useState(true);
 
   // Valyutani o'zgartirish va saqlash
@@ -25,8 +25,8 @@ export const CurrencyProvider = ({ children }) => {
         const res = await getSystemRates();
         if (res?.success && res.data) {
           const fetchedRates = res.data.rates;
-          let uzsRate = 12600;
-          let rubRate = 92;
+          let uzsRate = 12200;
+          let rubRate = 93;
 
           if (Array.isArray(fetchedRates)) {
             const usdToUzs = fetchedRates.find(r => r.to_currency === 'UZS' || r.to_currency === 'uzs');
@@ -34,8 +34,8 @@ export const CurrencyProvider = ({ children }) => {
             if (usdToUzs) uzsRate = Number(usdToUzs.rate);
             if (usdToRub) rubRate = Number(usdToRub.rate);
           } else if (fetchedRates.USD) {
-            uzsRate = fetchedRates.USD.UZS || 12600;
-            rubRate = fetchedRates.USD.RUB || 92;
+            uzsRate = fetchedRates.USD.UZS || 12200;
+            rubRate = fetchedRates.USD.RUB || 93;
           }
 
           setRates({ USD: 1, UZS: uzsRate, RUB: rubRate });
