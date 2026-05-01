@@ -1039,7 +1039,7 @@ const PostJob = () => {
             <button className="pj-success-btn-secondary" onClick={() => { setSuccess(false); setForm(INITIAL); setStep(1); }}>
               {t('postJob.success.postAnother')}
             </button>
-            <button className="pj-success-btn-secondary" onClick={() => navigate("/client/find")}>
+            <button className="pj-success-btn-secondary" onClick={() => navigate("/client/talent")}>
               {t('postJob.success.browseTalent')}
             </button>
           </div>
