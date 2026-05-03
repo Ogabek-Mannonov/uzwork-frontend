@@ -218,38 +218,86 @@ function LandingHeader({ i18n, changeLanguage }) {
   const closeMegas = () => { megaTimer.current = setTimeout(() => { setHireOpen(false); setWorkOpen(false); }, 200); };
   const closeMore  = () => { moreTimer.current = setTimeout(() => setMoreOpen(false), 180); };
 
+  // Top skillslarni backend dan olish (mega menu uchun)
+  const [popularSkills, setPopularSkills] = useState([]);
+  useEffect(() => {
+    import("../../../api/common").then(({ getSkills }) => {
+      getSkills("").then((res) => {
+        if (res?.success !== false && Array.isArray(res?.skills)) {
+          setPopularSkills(res.skills.slice(0, 12));
+        }
+      });
+    }).catch(() => {});
+  }, []);
+
   const hireCategories = [
     { title: "Admin & qo'llab-quvvatlash", items: [
-      { label: "Virtual yordamchilar", to: "/talent/virtual-assistant" },
-      { label: "Ma'lumot kiritish",    to: "/talent/data-entry" },
-      { label: "Mijozlar qo'llab-quvvatlash", to: "/talent/customer-support" },
-      { label: "Loyiha menejerlari",   to: "/talent/project-manager" },
+      { label: "Virtual yordamchilar", to: "/hire?q=virtual+assistant" },
+      { label: "Ma'lumot kiritish",    to: "/hire?q=data+entry" },
+      { label: "Mijozlar qo'llab-quvvatlash", to: "/hire?q=customer+support" },
+      { label: "Loyiha menejerlari",   to: "/hire?q=project+manager" },
     ]},
     { title: "Dizayn & kreativlik", items: [
-      { label: "Grafik dizaynerlar",  to: "/talent/graphic-design" },
-      { label: "UI/UX dizaynerlar",   to: "/talent/ui-ux" },
-      { label: "Illyustratorlar",     to: "/talent/illustration" },
-      { label: "Video montajchilar",  to: "/talent/video-editing" },
+      { label: "Grafik dizaynerlar",  to: "/hire?q=graphic+design" },
+      { label: "UI/UX dizaynerlar",   to: "/hire?q=ui+ux" },
+      { label: "Illyustratorlar",     to: "/hire?q=illustration" },
+      { label: "Video montajchilar",  to: "/hire?q=video+editing" },
     ]},
     { title: "Dasturlash & texnologiyalar", items: [
-      { label: "Veb dasturchilar",    to: "/talent/web-dev" },
-      { label: "Mobil dasturchilar",  to: "/talent/mobile-dev" },
-      { label: "Backend dasturchilar",to: "/talent/nodejs" },
-      { label: "QA & Testing",        to: "/talent/qa" },
+      { label: "Veb dasturchilar",    to: "/hire?q=web+development" },
+      { label: "Mobil dasturchilar",  to: "/hire?q=mobile" },
+      { label: "Backend dasturchilar",to: "/hire?q=nodejs" },
+      { label: "QA & Testing",        to: "/hire?q=qa" },
     ]},
     { title: "Marketing", items: [
-      { label: "SMM menejerlar",         to: "/talent/smm" },
-      { label: "SEO mutaxassislari",     to: "/talent/seo" },
-      { label: "Reklama mutaxassislari", to: "/talent/ads" },
-      { label: "Email marketing",        to: "/talent/email-marketing" },
+      { label: "SMM menejerlar",         to: "/hire?q=smm" },
+      { label: "SEO mutaxassislari",     to: "/hire?q=seo" },
+      { label: "Reklama mutaxassislari", to: "/hire?q=advertising" },
+      { label: "Email marketing",        to: "/hire?q=email+marketing" },
     ]},
     { title: "Matn yozish & kontent", items: [
-      { label: "Kontent yozuvchilar",to: "/talent/content-writing" },
-      { label: "Kopirayterlar",      to: "/talent/copywriting" },
-      { label: "Tarjimonlar",        to: "/talent/translation" },
-      { label: "Muharrirlar",        to: "/talent/editing" },
+      { label: "Kontent yozuvchilar",to: "/hire?q=content+writing" },
+      { label: "Kopirayterlar",      to: "/hire?q=copywriting" },
+      { label: "Tarjimonlar",        to: "/hire?q=translation" },
+      { label: "Muharrirlar",        to: "/hire?q=editing" },
     ]},
   ];
+
+  const workCategories = [
+    { title: "Admin & qo'llab-quvvatlash", items: [
+      { label: "Virtual yordamchilar", to: "/jobs?q=virtual+assistant" },
+      { label: "Ma'lumot kiritish",    to: "/jobs?q=data+entry" },
+      { label: "Mijozlar qo'llab-quvvatlash", to: "/jobs?q=customer+support" },
+      { label: "Loyiha menejerlari",   to: "/jobs?q=project+manager" },
+    ]},
+    { title: "Dizayn & kreativlik", items: [
+      { label: "Grafik dizaynerlar",  to: "/jobs?q=graphic+design" },
+      { label: "UI/UX dizaynerlar",   to: "/jobs?q=ui+ux" },
+      { label: "Illyustratorlar",     to: "/jobs?q=illustration" },
+      { label: "Video montajchilar",  to: "/jobs?q=video+editing" },
+    ]},
+    { title: "Dasturlash & texnologiyalar", items: [
+      { label: "Veb dasturchilar",    to: "/jobs?q=web+development" },
+      { label: "Mobil dasturchilar",  to: "/jobs?q=mobile" },
+      { label: "Backend dasturchilar",to: "/jobs?q=nodejs" },
+      { label: "QA & Testing",        to: "/jobs?q=qa" },
+    ]},
+    { title: "Marketing", items: [
+      { label: "SMM menejerlar",         to: "/jobs?q=smm" },
+      { label: "SEO mutaxassislari",     to: "/jobs?q=seo" },
+      { label: "Reklama mutaxassislari", to: "/jobs?q=advertising" },
+      { label: "Email marketing",        to: "/jobs?q=email+marketing" },
+    ]},
+    { title: "Matn yozish & kontent", items: [
+      { label: "Kontent yozuvchilar",to: "/jobs?q=content+writing" },
+      { label: "Kopirayterlar",      to: "/jobs?q=copywriting" },
+      { label: "Tarjimonlar",        to: "/jobs?q=translation" },
+      { label: "Muharrirlar",        to: "/jobs?q=editing" },
+    ]},
+  ];
+
+
+
 
   return (
     <header className={`uw-header ${scrolled ? "uw-header--scrolled" : ""}`}>
@@ -306,7 +354,7 @@ function LandingHeader({ i18n, changeLanguage }) {
               </button>
               <div className={`uw-mega__panel ${workOpen ? "open" : ""}`} onMouseEnter={openWork} onMouseLeave={closeMegas}>
                 <div className="uw-mega__grid">
-                  {hireCategories.map(col => (
+                  {workCategories.map(col => (
                     <div key={col.title} className="uw-mega__col">
                       <div className="uw-mega__title">{col.title}</div>
                       {col.items.map(it => (

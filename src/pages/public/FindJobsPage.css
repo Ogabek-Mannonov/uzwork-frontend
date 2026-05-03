@@ -1,0 +1,301 @@
+/* src/pages/public/FindJobsPage.css */
+
+.fjp-root {
+  min-height: 100vh;
+  background: var(--bg, #f8fafc);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Hero Section ────────────────────────────────────────── */
+.fjp-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  padding: 80px 0 60px;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+}
+.fjp-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -20%;
+  width: 140%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.fjp-hero__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  text-align: center;
+}
+.fjp-hero__title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  margin-bottom: 20px;
+  line-height: 1.1;
+}
+.fjp-hero__title span {
+  background: linear-gradient(90deg, #3b82f6, #0ea5e9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.fjp-hero__sub {
+  font-size: 1.2rem;
+  color: #94a3b8;
+  max-width: 650px;
+  margin: 0 auto 40px;
+}
+
+/* Search Box */
+.fjp-search {
+  max-width: 800px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  padding: 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+.fjp-search__input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+.fjp-search__input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  width: 100%;
+  padding: 12px 0;
+  font-size: 1rem;
+  outline: none;
+}
+.fjp-search__btn {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.fjp-search__btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+}
+
+/* ── Content Area ────────────────────────────────────────── */
+.fjp-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 32px;
+}
+
+/* Sidebar Filters */
+.fjp-sidebar {
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+.fjp-sidebar__group {
+  margin-bottom: 32px;
+}
+.fjp-sidebar__title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.fjp-sidebar__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fjp-cat-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.fjp-cat-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+.fjp-cat-btn.active {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
+  border-color: rgba(37, 99, 235, 0.1);
+}
+
+/* Main Feed */
+.fjp-feed__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.fjp-feed__stats {
+  font-size: 0.95rem;
+  color: #64748b;
+}
+.fjp-feed__stats strong { color: #1e293b; }
+
+.fjp-sort-select {
+  padding: 8px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Job Cards */
+.fjp-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.fjp-job-card {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 24px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.fjp-job-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+.fjp-job-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.fjp-job-card__time {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+.fjp-job-card__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.fjp-job-card__desc {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-bottom: 20px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.6;
+}
+.fjp-job-card__meta {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+  padding: 12px 0;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+}
+.fjp-meta-item {
+  display: flex;
+  flex-direction: column;
+}
+.fjp-meta-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.fjp-meta-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.fjp-job-card__skills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.fjp-skill-tag {
+  padding: 6px 12px;
+  background: #f1f5f9;
+  color: #475569;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Client Info */
+.fjp-job-card__client {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+.fjp-client-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* Empty State */
+.fjp-empty {
+  text-align: center;
+  padding: 60px 0;
+}
+.fjp-empty__icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+/* Dark Mode */
+.dark-mode .fjp-root { background: #0b0f1a; }
+.dark-mode .fjp-job-card { background: #161e2e; border-color: #2d3748; }
+.dark-mode .fjp-job-card__title { color: #f1f5f9; }
+.dark-mode .fjp-job-card__desc { color: #94a3b8; }
+.dark-mode .fjp-meta-value { color: #e2e8f0; }
+.dark-mode .fjp-skill-tag { background: #2d3748; color: #cbd5e1; }
+.dark-mode .fjp-sidebar__title { color: #f1f5f9; }
+.dark-mode .fjp-cat-btn:hover { background: #2d3748; color: #fff; }
+.dark-mode .fjp-cat-btn.active { background: #1e3a8a; color: #3b82f6; }
+
+@media (max-width: 900px) {
+  .fjp-container { grid-template-columns: 1fr; }
+  .fjp-sidebar { display: none; }
+}

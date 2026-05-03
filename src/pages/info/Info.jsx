@@ -38,6 +38,15 @@ import Footer from "../footer/Footer";
 import { Link, useNavigate } from "react-router-dom";
 import AppHeader from "../components/AppHeader/AppHeader";
 import { useTranslation } from "react-i18next";
+import { getLandingData } from "../../api/landing";
+
+const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/api\/?$/, "");
+
+function avatarSrc(url) {
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  return `${BACKEND}${url.startsWith("/") ? url : `/${url}`}`;
+}
 
 const Info = () => {
   const { t } = useTranslation();
@@ -49,6 +58,29 @@ const Info = () => {
     const saved = localStorage.getItem("darkMode");
     return saved ? JSON.parse(saved) : false;
   });
+
+  // ── Real API data ──────────────────────────────────────────
+  const [landingData, setLandingData] = useState(null);
+  const [landingLoading, setLandingLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    getLandingData().then((res) => {
+      if (mounted && res?.success !== false) {
+        setLandingData(res);
+      }
+      setLandingLoading(false);
+    });
+    return () => { mounted = false; };
+  }, []);
+
+  // Real stats: from backend, fallback to 0
+  const realStats = landingData?.stats || {};
+  const realFreelancers = landingData?.freelancers || [];
+  const realJobs = landingData?.featured_jobs || [];
+  const realReviews = landingData?.reviews || [];
+  const realSkills = landingData?.skills || [];
+  // ──────────────────────────────────────────────────────────
 
   const toggleDarkMode = () => {
     setIsDarkMode(prev => {
@@ -64,9 +96,10 @@ const Info = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/search/talent?q=${encodeURIComponent(searchQuery.trim())}`);
+      const target = heroTab === "hire" ? "/hire" : "/jobs";
+      navigate(`${target}?q=${encodeURIComponent(searchQuery.trim())}`);
     } else {
-      navigate("/search/talent");
+      navigate(heroTab === "hire" ? "/hire" : "/jobs");
     }
   };
 
@@ -84,6 +117,7 @@ const Info = () => {
       document.documentElement.classList.remove("dark-mode");
     }
   }, [isDarkMode]);
+
 
 
 
@@ -777,9 +811,7 @@ const Info = () => {
                 className={`category-card ${selectedCategory === cat.title ? "active" : ""
                   }`}
                 onClick={() =>
-                  setSelectedCategory(
-                    selectedCategory === cat.title ? null : cat.title
-                  )
+                  navigate(`/hire?q=${encodeURIComponent(cat.title)}`)
                 }
                 style={{ "--card-color": cat.color }}
               >
@@ -797,49 +829,57 @@ const Info = () => {
             ))}
           </div>
 
-          {/* Top Freelancers */}
-          {selectedCategory && topFreelancers[selectedCategory] && (
-            <div className="top-freelancers-section">
+          {/* Top Freelancers — real data from backend */}
+          {realFreelancers.length > 0 && (
+            <div className="top-freelancers-section" style={{ marginTop: 40 }}>
               <h3 className="freelancers-title">
-                {t("info.headers.topSpecialists", { category: selectedCategory })}
+                {t("info.headers.topSpecialists", { category: selectedCategory || "" })}
               </h3>
               <div className="freelancers-grid">
-                {topFreelancers[selectedCategory].map((freelancer, i) => (
+                {realFreelancers.slice(0, 6).map((freelancer, i) => (
                   <div
-                    key={i}
+                    key={freelancer.id || i}
                     className={`freelancer-card ${i === 1 ? "featured" : ""}`}
+                    onClick={() => navigate(`/profile/${freelancer.id}`)}
+                    style={{ cursor: "pointer" }}
                   >
-                    <img
-                      src={freelancer.avatar}
-                      alt={freelancer.name}
-                      className="freelancer-avatar"
-                    />
+                    {avatarSrc(freelancer.avatar_url) ? (
+                      <img
+                        src={avatarSrc(freelancer.avatar_url)}
+                        alt={freelancer.full_name}
+                        className="freelancer-avatar"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <div className="freelancer-avatar" style={{ background: 'linear-gradient(135deg,#3b82f6,#2563eb)', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:700, fontSize:'1.4rem', borderRadius:'50%' }}>
+                        {(freelancer.full_name || 'F')[0].toUpperCase()}
+                      </div>
+                    )}
                     <div className="freelancer-info">
-                      <h4 className="freelancer-name">{freelancer.name}</h4>
+                      <h4 className="freelancer-name">{freelancer.full_name}</h4>
                       <p className="freelancer-title">{freelancer.title}</p>
                       <div className="freelancer-stats">
                         <div className="freelancer-rating">
                           <Star className="rating-star" fill="#fbbf24" />
-                          <span>{freelancer.rating}</span>
+                          <span>{Number(freelancer.rating).toFixed(1)}</span>
                           <span className="jobs-count">
-                            ({freelancer.jobs} jobs)
+                            ({freelancer.completed_jobs} jobs)
                           </span>
                         </div>
                       </div>
                       <div className="freelancer-rate">
-                        {freelancer.hourlyRate}{t("info.perHour")}
+                        ${Number(freelancer.hourly_rate).toFixed(0)}{t("info.perHour")}
                       </div>
                     </div>
-                    <button className="freelancer-btn">{t("info.viewBtn")}</button>
+                    <button className="freelancer-btn" onClick={(e) => { e.stopPropagation(); navigate(`/profile/${freelancer.id}`); }}>{t("info.viewBtn")}</button>
                   </div>
                 ))}
               </div>
-              <button
-                className="close-freelancers-btn"
-                onClick={() => setSelectedCategory(null)}
-              >
-                {t("info.closeBtn")}
-              </button>
+              <div style={{ textAlign: 'center', marginTop: 24 }}>
+                <button className="freelancer-btn" style={{ padding:'10px 32px', background:'var(--blue,#3b82f6)', color:'#fff', border:'none', borderRadius:10, cursor:'pointer', fontWeight:600 }} onClick={() => navigate('/client/talent')}>
+                  {t("info.browseFreelancers")} →
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -960,26 +1000,33 @@ const Info = () => {
             </p>
           </div>
           <div className="testimonials-grid">
-            {testimonials.map((test, i) => (
+            {(realReviews.length > 0 ? realReviews : (t("info.testimonials", { returnObjects: true }) || []).map((item, i) => ({ ...item, rating: 5 }))).map((test, i) => (
               <div key={i} className="testimonial-card">
                 <div className="testimonial-top">
-                  <img
-                    src={test.avatar}
-                    alt={test.name}
-                    className="testimonial-avatar-top"
-                  />
+                  {test.avatar_url || test.avatar ? (
+                    <img
+                      src={test.avatar_url ? avatarSrc(test.avatar_url) : test.avatar}
+                      alt={test.full_name || test.name || ''}
+                      className="testimonial-avatar-top"
+                      onError={(e) => { e.target.style.display='none'; }}
+                    />
+                  ) : (
+                    <div className="testimonial-avatar-top" style={{ background:'linear-gradient(135deg,#3b82f6,#2563eb)', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:700, fontSize:'1.1rem', borderRadius:'50%', width:48, height:48 }}>
+                      {((test.full_name || test.name || 'U')[0]).toUpperCase()}
+                    </div>
+                  )}
                   <div className="testimonial-user-info">
-                    <div className="testimonial-name">{test.name}</div>
-                    <div className="testimonial-role">{test.role}</div>
+                    <div className="testimonial-name">{test.full_name || test.name}</div>
+                    <div className="testimonial-role">{test.role || 'Foydalanuvchi'}</div>
                   </div>
                   <div className="testimonial-stars">
-                    {[...Array(test.rating)].map((_, i) => (
+                    {[...Array(Math.round(test.rating) || 5)].map((_, i) => (
                       <Star key={i} className="star-icon" fill="#fbbf24" />
                     ))}
                   </div>
                 </div>
-                <p className="testimonial-text">"{test.text}"</p>
-                <div className="testimonial-company-badge">{test.company}</div>
+                <p className="testimonial-text">"{test.comment || test.text}"</p>
+                <div className="testimonial-company-badge">{test.company || 'UzWork'}</div>
               </div>
             ))}
           </div>
@@ -992,7 +1039,7 @@ const Info = () => {
             <p className="find-box__desc">
               {t("info.findTrustedDesc")}
             </p>
-            <Link to="/search/talent" className="find-box__btn">
+            <Link to="/hire" className="find-box__btn">
               {t("info.browseFreelancers")} →
             </Link>
           </div>
@@ -1015,7 +1062,9 @@ const Info = () => {
                 <div className="faq-stat-icon">
                   <Users className="w-6 h-6 text-white" />
                 </div>
-                <div className="faq-stat-value">50K+</div>
+                <div className="faq-stat-value">
+                  {landingLoading ? '...' : (realStats.users ? `${realStats.users.toLocaleString()}+` : '0')}
+                </div>
                 <div className="faq-stat-label">{t("info.activeUsers")}</div>
               </div>
 
@@ -1023,23 +1072,29 @@ const Info = () => {
                 <div className="faq-stat-icon">
                   <Briefcase className="w-6 h-6 text-white" />
                 </div>
-                <div className="faq-stat-value">100K+</div>
+                <div className="faq-stat-value">
+                  {landingLoading ? '...' : (realStats.contracts ? `${realStats.contracts.toLocaleString()}+` : '0')}
+                </div>
                 <div className="faq-stat-label">{t("info.completedProjects")}</div>
               </div>
 
               <div className="faq-stat-card">
                 <div className="faq-stat-icon">
-                  <DollarSign className="w-6 h-6 text-white" />
+                  <Briefcase className="w-6 h-6 text-white" />
                 </div>
-                <div className="faq-stat-value">$5M+</div>
-                <div className="faq-stat-label">{t("info.paidAmount")}</div>
+                <div className="faq-stat-value">
+                  {landingLoading ? '...' : (realStats.jobs ? `${realStats.jobs.toLocaleString()}+` : '0')}
+                </div>
+                <div className="faq-stat-label">{t("info.completedProjects").replace('bajarilgan', "e'lon qilingan")}</div>
               </div>
 
               <div className="faq-stat-card">
                 <div className="faq-stat-icon">
-                  <Star className="w-6 h-6 text-white" />
+                  <Users className="w-6 h-6 text-white" />
                 </div>
-                <div className="faq-stat-value">4.9</div>
+                <div className="faq-stat-value">
+                  {landingLoading ? '...' : (realStats.freelancers ? `${realStats.freelancers.toLocaleString()}+` : '0')}
+                </div>
                 <div className="faq-stat-label">{t("info.avgRating")}</div>
               </div>
             </div>

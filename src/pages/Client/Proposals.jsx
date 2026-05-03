@@ -48,8 +48,15 @@ const Toast = ({ msg, type, onClose }) => {
 const ConfirmationModal = ({ isOpen, type, title, desc, onConfirm, onCancel, isLoading }) => {
   if (!isOpen) return null;
   const isReject = type === "reject";
+
+  const handleOverlayClick = (e) => {
+    if (e.target.classList.contains("cp-modal-overlay") && !isLoading) {
+      onCancel();
+    }
+  };
+
   return (
-    <div className="cp-modal-overlay">
+    <div className="cp-modal-overlay" onClick={handleOverlayClick}>
       <div className="cp-modal">
         <div className={`cp-modal-icon ${isReject ? "red" : "blue"}`}>
           {isReject ? <AlertCircle size={32} /> : <UserCheck size={32} />}
@@ -174,14 +181,14 @@ const Proposals = () => {
     const { type, data: modalData } = modal;
     if (!modalData) return;
 
+    if (type === "success") {
+      setModal({ isOpen: false, type: null, data: null });
+      navigate(`/contracts/${modalData}`);
+      return;
+    }
+
     setActionLoading(modalData);
     try {
-      if (type === "success") {
-        navigate(`/contracts/${modalData}`);
-        setModal({ isOpen: false, type: null, data: null });
-        return;
-      }
-
       const res = type === "reject" ? await rejectProposal(modalData) : await acceptProposal(modalData);
       
       if (res?.success !== false) {

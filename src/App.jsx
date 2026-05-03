@@ -18,6 +18,8 @@ import { CurrencyProvider } from "./pages/components/Currency/CurrencyContext.js
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 
 import Info from "./pages/info/Info.jsx";
+import HirePage from "./pages/public/HirePage.jsx";
+import FindJobsPage from "./pages/public/FindJobsPage.jsx";
 import CategoryPage from "./pages/hire/CategoryPage.jsx";
 
 
@@ -71,6 +73,8 @@ function App() {
           <Routes>
           {/* Public landing */}
           <Route path="/" element={<Info />} />
+          <Route path="/hire" element={<HirePage />} />
+          <Route path="/jobs" element={<FindJobsPage />} />
           <Route path="/hire/cold-callers" element={<CategoryPage />} />
 
           {/* Auth pages (separate layout) */}

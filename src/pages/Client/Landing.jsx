@@ -237,8 +237,8 @@ const Landing = () => {
 
       {/* Success Modal */}
       {successModal.isOpen && (
-        <div className="client-modal-overlay">
-          <div className="client-modal">
+        <div className="client-modal-overlay" onClick={() => setSuccessModal({ isOpen: false, contractId: null })}>
+          <div className="client-modal" onClick={e => e.stopPropagation()}>
             <div className="client-modal-icon" style={{ backgroundColor: "rgba(16, 185, 129, 0.1)", color: "#10b981" }}>
               <CheckCircle size={30} />
             </div>
@@ -248,8 +248,8 @@ const Landing = () => {
               <button onClick={() => setSuccessModal({ isOpen: false, contractId: null })}>Bekor qilish</button>
               <button 
                 onClick={() => {
-                  navigate(`/contracts/${successModal.contractId}`);
                   setSuccessModal({ isOpen: false, contractId: null });
+                  navigate(`/contracts/${successModal.contractId}`);
                 }} 
                 style={{ backgroundColor: "#10b981", color: "white" }}
               >
