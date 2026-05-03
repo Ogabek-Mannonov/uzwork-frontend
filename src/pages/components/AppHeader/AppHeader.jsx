@@ -348,7 +348,7 @@ function LandingHeader({ i18n, changeLanguage }) {
         {/* Right actions — NO SEARCH, only lang + dark + login + signup */}
         <div className="uw-actions">
           <LangSwitcher i18n={i18n} changeLanguage={changeLanguage} />
-          <CurrencySwitcher />
+
 
           <button type="button" onClick={toggle} className="uw-iconbtn" aria-label="Toggle dark mode">
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
