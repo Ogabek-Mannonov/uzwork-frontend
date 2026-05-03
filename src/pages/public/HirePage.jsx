@@ -21,14 +21,14 @@ function avatarSrc(url) {
 
 const CATEGORIES = [
   { label: "Barcha yo'nalishlar", value: "" },
-  { label: "Veb dasturlash", value: "web development" },
+  { label: "Veb dasturlash", value: "web" },
   { label: "Mobil dasturlash", value: "mobile" },
-  { label: "UI/UX dizayn", value: "ui ux" },
-  { label: "Grafik dizayn", value: "graphic design" },
+  { label: "UI/UX dizayn", value: "ui" },
+  { label: "Grafik dizayn", value: "dizayn" },
   { label: "Marketing & SMM", value: "smm" },
-  { label: "Tarjima & Matn", value: "translation" },
-  { label: "Virtual yordamchi", value: "virtual assistant" },
-  { label: "Ma'lumotlar tahlili", value: "data entry" },
+  { label: "Tarjima & Matn", value: "tarjima" },
+  { label: "Virtual yordamchi", value: "yordam" },
+  { label: "Ma'lumotlar tahlili", value: "data" },
 ];
 
 const PAGE_SIZE = 10;
@@ -118,12 +118,22 @@ export default function HirePage() {
       search: currentSearch || undefined,
     };
 
-    const res = await getFreelancers(params);
-    if (res?.success && res.data) {
-      const list = res.data.freelancers || [];
-      setFreelancers(list);
-      setTotal(res.data.pagination?.total || list.length);
-    } else {
+    try {
+      const res = await getFreelancers(params);
+      console.log("HirePage API Response:", res); // Debug for user
+
+      // Handle different possible response structures
+      const dataObj = res?.data || res;
+      if (dataObj && (dataObj.freelancers || Array.isArray(dataObj))) {
+        const list = dataObj.freelancers || (Array.isArray(dataObj) ? dataObj : []);
+        setFreelancers(list);
+        setTotal(dataObj.pagination?.total || list.length);
+      } else {
+        setFreelancers([]);
+        setTotal(0);
+      }
+    } catch (err) {
+      console.error("HirePage Fetch Error:", err);
       setFreelancers([]);
       setTotal(0);
     }
