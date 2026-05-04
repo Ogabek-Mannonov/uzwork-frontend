@@ -69,6 +69,7 @@ const Onboarding = () => {
       const res = await getCategories();
       if (res.success) {
         setCategories(res.data);
+        setFilteredCategories(res.data);
       }
     } catch (err) {
       console.error("Categories fetch error:", err);
@@ -76,6 +77,20 @@ const Onboarding = () => {
       setLoading(false);
     }
   };
+
+  const [categorySearch, setCategorySearch] = useState("");
+  const [filteredCategories, setFilteredCategories] = useState([]);
+
+  useEffect(() => {
+    if (categorySearch.trim()) {
+      const filtered = categories.filter(cat => 
+        cat.name.toLowerCase().includes(categorySearch.toLowerCase())
+      );
+      setFilteredCategories(filtered);
+    } else {
+      setFilteredCategories(categories);
+    }
+  }, [categorySearch, categories]);
 
   const nextStep = () => setStep(prev => Math.min(prev + 1, 5));
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
@@ -203,18 +218,30 @@ const Onboarding = () => {
                 {t("onboarding.welcomeDesc", "Sizning sohangiz nima? Biz sizga mos ishlarni topishimiz uchun asosiy yo'nalishingizni tanlang.")}
               </p>
               
+              <div className="onboarding-input-group" style={{ marginBottom: 20 }}>
+                <input 
+                  className="onboarding-input"
+                  placeholder={t("onboarding.searchCategory", "Kategoriyani qidiring...")}
+                  value={categorySearch}
+                  onChange={(e) => setCategorySearch(e.target.value)}
+                  style={{ borderRadius: 'var(--radius-lg)' }}
+                />
+              </div>
+
               <div className="category-grid">
                 {loading ? (
                   <div className="onboarding-loading">{t("common.loading", "Yuklanmoqda...")}</div>
-                ) : categories.length === 0 ? (
+                ) : filteredCategories.length === 0 ? (
                   <div className="onboarding-no-data">
-                    <p>{t("onboarding.noCategories", "Kategoriyalar topilmadi.")}</p>
-                    <button className="btn-secondary" onClick={fetchCategories} style={{ marginTop: 12 }}>
-                      {t("common.retry", "Qayta urinish")}
-                    </button>
+                    <p>{categorySearch ? t("onboarding.noSearchCategories", "Hech narsa topilmadi.") : t("onboarding.noCategories", "Kategoriyalar topilmadi.")}</p>
+                    {categories.length === 0 && (
+                      <button className="btn-secondary" onClick={fetchCategories} style={{ marginTop: 12 }}>
+                        {t("common.retry", "Qayta urinish")}
+                      </button>
+                    )}
                   </div>
                 ) : (
-                  categories.map(cat => (
+                  filteredCategories.map(cat => (
                     <div 
                       key={cat.id} 
                       className={`category-item ${formData.category_id === cat.id ? 'selected' : ''}`}
