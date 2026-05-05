@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  ChevronLeft, ChevronRight, Check, X, Plus,
+  ChevronLeft, ChevronRight, ChevronDown, Check, X, Plus,
   Lightbulb, Briefcase, Clock, DollarSign,
   FileText, Star, AlertCircle, CheckCircle,
   Rocket, ArrowLeft, Eye, Paperclip, File, Upload, Trash2
@@ -11,6 +11,7 @@ import {
 import "../Client/css/post.css";
 import { createJob, getJobById, updateJob } from "../../api/jobs";
 import { uploadFile, getSkills } from "../../api/common";
+import { getCategories } from "../../api/profile";
 import { useCurrency } from "../components/Currency/CurrencyContext";
 
 /* ================================================================
@@ -102,6 +103,19 @@ const PjToast = ({ msg, type, onClose }) => msg ? (
 const PjStep1 = ({ form, setForm, errors }) => {
   const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [categorySearch, setCategorySearch] = useState("");
+
+  useEffect(() => {
+    getCategories().then(res => {
+      if (res?.success) setCategories(res.data || []);
+    });
+  }, []);
+
+  const filteredCategories = categories.filter(c => 
+    c.name.toLowerCase().includes(categorySearch.toLowerCase())
+  );
 
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);
@@ -155,16 +169,47 @@ const PjStep1 = ({ form, setForm, errors }) => {
 
       <div className="pj-form-group">
         <label className="pj-label">{t('postJob.step1.category')} <span className="pj-label-req">*</span></label>
-        <select
-          className={`pj-select ${errors.category ? "error" : ""}`}
-          value={form.category}
-          onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
-        >
-          <option value="">{t('postJob.step1.selectCategory')}</option>
-          {CATEGORIES.map(c => (
-            <option key={c} value={c}>{t(`postJob.categories.${c}`)}</option>
-          ))}
-        </select>
+        <div className={`pj-custom-dropdown ${isCategoryOpen ? 'open' : ''}`}>
+          <div 
+            className={`pj-dropdown-selected ${errors.category ? "error" : ""}`} 
+            onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+          >
+            <span>{form.category ? categories.find(c => c.id === form.category)?.name || form.category : t('postJob.step1.selectCategory')}</span>
+            <ChevronDown className={`pj-dropdown-arrow ${isCategoryOpen ? 'rotate' : ''}`} size={18} />
+          </div>
+          
+          {isCategoryOpen && (
+            <div className="pj-dropdown-options">
+              <div className="pj-dropdown-search">
+                <input 
+                  type="text" 
+                  placeholder={t('onboarding.searchCategory', "Kategoriyani qidiring...")}
+                  value={categorySearch}
+                  onChange={(e) => setCategorySearch(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  autoFocus
+                />
+              </div>
+              {filteredCategories.length > 0 ? (
+                filteredCategories.map((c) => (
+                  <div 
+                    key={c.id} 
+                    className={`pj-dropdown-option ${form.category === c.id ? 'active' : ''}`}
+                    onClick={() => {
+                      setForm(p => ({ ...p, category: c.id }));
+                      setIsCategoryOpen(false);
+                      setCategorySearch("");
+                    }}
+                  >
+                    {c.name}
+                  </div>
+                ))
+              ) : (
+                <div className="pj-dropdown-empty">{t('onboarding.noSearchCategories', "Hech narsa topilmadi.")}</div>
+              )}
+            </div>
+          )}
+        </div>
         {errors.category && <div className="pj-error-msg"><AlertCircle size={13} />{errors.category}</div>}
       </div>
 
