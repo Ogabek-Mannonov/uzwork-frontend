@@ -138,7 +138,9 @@ export default function PublicProfile() {
             job_success_score: p.job_success_score || 0,
             total_earned: p.total_earned || 0,
             jobs_completed: p.completed_jobs || 0,
-            active_projects: p.active_projects || 0,
+            active_projects: rawData.in_progress_jobs || 0,
+            total_reviews: rawData.total_reviews || 0,
+            average_rating: rawData.average_rating || 0,
             skills: Array.isArray(p.skills) ? p.skills : (p.skills ? [p.skills] : []),
             languages: p.languages || [],
             cv_url: p.cv_url || "",
@@ -330,8 +332,16 @@ export default function PublicProfile() {
                 <div className="stat-card">
                   <div className="stat-icon"><FiBriefcase /></div>
                   <div className="stat-info">
-                    <span className="stat-value">${profile.total_earned || 0}</span>
-                    <span className="stat-label">{t("publicProfile.totalEarned")}</span>
+                    <span className="stat-value">{profile.jobs_completed || 0}</span>
+                    <span className="stat-label">{t("publicProfile.totalJobs", "Total Jobs")}</span>
+                  </div>
+                </div>
+
+                <div className="stat-card">
+                  <div className="stat-icon"><FiClock /></div>
+                  <div className="stat-info">
+                    <span className="stat-value">{profile.active_projects || 0}</span>
+                    <span className="stat-label">{t("publicProfile.inProgress", "In Progress")}</span>
                   </div>
                 </div>
               </div>

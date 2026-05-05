@@ -350,7 +350,12 @@ const MyProfile = () => {
             coverPhoto: p.cover_url || "",
             languages: p.languages || [],
             category_id: p.category_id || null,
-            categoryName: p.category_name || ""
+            categoryName: p.category_name || "",
+            jobsCompleted: p.completed_jobs || 0,
+            activeProjects: profileRes.data.in_progress_jobs || 0,
+            totalEarned: p.total_earned || 0,
+            successScore: p.job_success_score || 0,
+            rating: profileRes.data.average_rating || 0
           }));
 
 
