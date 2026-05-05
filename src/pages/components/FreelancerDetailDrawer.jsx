@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getFreelancerById, getPublicPortfolio, getPublicCertifications, saveFreelancer } from "../../api/freelancer";
-import { getUserReviews } from "../../api/ratings";
+import { getUserReviews, getReviews } from "../../api/ratings";
 import { getUserProfile } from "../../api/common";
 import Price from "./Currency/Price";
 import InviteForm from "./InviteForm";
@@ -53,7 +53,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
       const [userRes, portRes, revRes, certRes] = await Promise.all([
         getUserProfile(freelancerId),
         getPublicPortfolio(freelancerId),
-        getUserReviews(freelancerId),
+        getReviews({ freelancer_id: freelancerId }),
         getPublicCertifications(freelancerId)
       ]);
 
@@ -71,9 +71,18 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
           });
         }
       }
-      if (portRes?.success) setPortfolio(portRes.data.items || []);
-      if (revRes?.success) setReviews(revRes.data.reviews || revRes.data || []);
-      if (certRes?.success) setCerts(certRes.data.certifications || []);
+      
+      if (portRes?.success) setPortfolio(portRes.data.items || portRes.data || []);
+      
+      if (revRes?.success) {
+        const rData = revRes.data?.reviews || revRes.data?.items || revRes.data || [];
+        setReviews(Array.isArray(rData) ? rData : []);
+      }
+
+      if (certRes?.success) {
+        const cData = certRes.data?.certifications || certRes.data?.items || certRes.data || [];
+        setCerts(Array.isArray(cData) ? cData : []);
+      }
     } catch (error) {
       console.error("Error fetching freelancer full details:", error);
     } finally {
@@ -99,8 +108,8 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
 
   const tabs = [
     { id: "about", label: t("profile.about", "Haqida") },
+    { id: "history", label: t("profile.workHistory", "Ish tarixi"), count: reviews.length },
     { id: "portfolio", label: t("profile.portfolio", "Portfoliyo"), count: portfolio.length },
-    { id: "reviews", label: t("profile.reviews", "Fikrlar"), count: reviews.length },
     { id: "skills", label: t("profile.skills", "Ko'nikmalar") },
     { id: "certs", label: t("profile.certifications", "Sertifikatlar"), count: certs.length }
   ];
@@ -277,31 +286,52 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                     </div>
                   )}
 
-                  {activeTab === "reviews" && (
-                    <div className="fd-reviews-section soft-fade-in">
+                  {activeTab === "history" && (
+                    <div className="fd-history-section soft-fade-in">
                        {reviews.length === 0 ? (
                         <div className="fd-empty-tab">
                           <ThumbsUp size={40} />
-                          <p>{t("profile.noReviews", "Fikrlar hali mavjud emas.")}</p>
+                          <p>{t("profile.noHistory", "Ish tarixi hali mavjud emas.")}</p>
                         </div>
                       ) : (
-                        <div className="fd-reviews-list">
+                        <div className="fd-history-list">
                           {reviews.map(rev => (
-                            <div key={rev.id} className="fd-review-card">
-                              <div className="fd-review-header">
-                                <div className="fd-review-stars">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star key={i} size={14} fill={i < rev.rating ? "#f59e0b" : "none"} stroke={i < rev.rating ? "#f59e0b" : "#ccc"} />
-                                  ))}
-                                  <span className="fd-review-date">{new Date(rev.created_at).toLocaleDateString()}</span>
+                            <div key={rev.id} className="fd-history-card">
+                              <div className="fd-history-header">
+                                <h4 className="fd-history-job-title">{rev.job_title || t("profile.untitledJob", "Loyiha nomi")}</h4>
+                                <div className="fd-history-rating">
+                                  <div className="fd-stars">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star key={i} size={14} fill={i < rev.rating ? "#f59e0b" : "none"} stroke={i < rev.rating ? "#f59e0b" : "#ccc"} />
+                                    ))}
+                                  </div>
+                                  <span className="fd-rating-num">{rev.rating?.toFixed(1)}</span>
                                 </div>
-                                <div className="fd-review-price"><Price amount={rev.project_amount} currency="USD" /></div>
                               </div>
-                              <h4 className="fd-review-job-title">{rev.job_title || "Loyiha nomi"}</h4>
-                              <p className="fd-review-text">"{rev.comment}"</p>
-                              <div className="fd-review-client">
-                                <img src={`https://ui-avatars.com/api/?name=Client`} alt="Client" />
-                                <span>Verified Client</span>
+                              
+                              <div className="fd-history-meta">
+                                <div className="fd-meta-item">
+                                  <Price amount={rev.project_amount} currency="USD" />
+                                </div>
+                                <div className="fd-meta-sep" />
+                                <div className="fd-meta-item">
+                                  {rev.is_fixed ? t("common.fixedPrice", "Fixed price") : t("common.hourly", "Hourly")}
+                                </div>
+                                <div className="fd-meta-sep" />
+                                <div className="fd-meta-item">
+                                  {new Date(rev.created_at).toLocaleDateString()}
+                                </div>
+                              </div>
+
+                              <div className="fd-history-comment">
+                                <p>"{rev.comment}"</p>
+                              </div>
+
+                              <div className="fd-history-footer">
+                                <div className="fd-client-brief">
+                                  <img src={`https://ui-avatars.com/api/?name=Client`} alt="Client" />
+                                  <span>{t("profile.verifiedClient", "Tasdiqlangan mijoz")}</span>
+                                </div>
                               </div>
                             </div>
                           ))}

@@ -428,40 +428,109 @@
 .fd-portfolio-info h4 { margin: 0 0 4px 0; font-size: 16px; }
 .fd-portfolio-info p { margin: 0; font-size: 13px; color: var(--fd-text-muted); }
 
-/* Reviews */
-.fd-reviews-list {
+/* Work History */
+.fd-history-list {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
-.fd-review-card {
+.fd-history-card {
   padding: 24px;
-  border-radius: 16px;
-  background: #f9fafb;
+  background: white;
+  border: 1px solid var(--fd-border);
+  border-radius: 20px;
+  transition: all 0.2s ease;
 }
 
-.fd-review-header {
+.fd-history-card:hover {
+  border-color: var(--fd-accent);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.05);
+}
+
+.fd-history-header {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 12px;
 }
 
-.fd-review-stars { display: flex; align-items: center; gap: 4px; }
-.fd-review-date { margin-left: 12px; font-size: 13px; color: var(--fd-text-muted); }
-.fd-review-price { font-weight: 700; color: #10b981; }
+.fd-history-job-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--fd-accent);
+  margin: 0;
+  cursor: pointer;
+}
 
-.fd-review-job-title { margin: 0 0 8px 0; font-size: 16px; }
-.fd-review-text { margin: 0 0 16px 0; color: #4b5563; font-style: italic; }
+.fd-history-job-title:hover {
+  text-decoration: underline;
+}
 
-.fd-review-client {
+.fd-history-rating {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.fd-review-client img { width: 24px; height: 24px; border-radius: 50%; }
-.fd-review-client span { font-size: 13px; font-weight: 600; }
+.fd-stars { display: flex; gap: 2px; }
+
+.fd-rating-num {
+  font-weight: 700;
+  font-size: 14px;
+  color: #f59e0b;
+}
+
+.fd-history-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  color: var(--fd-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.fd-meta-sep {
+  width: 4px;
+  height: 4px;
+  background: #cbd5e1;
+  border-radius: 50%;
+}
+
+.fd-history-comment {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  font-style: italic;
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.fd-history-footer {
+  display: flex;
+  align-items: center;
+}
+
+.fd-client-brief {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fd-client-brief img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.fd-client-brief span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fd-text-muted);
+}
 
 /* Skills & Technologies */
 .fd-skills-wrap {
