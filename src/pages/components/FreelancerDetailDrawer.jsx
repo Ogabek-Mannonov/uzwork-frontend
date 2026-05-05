@@ -4,7 +4,7 @@ import {
   ExternalLink, Calendar, Briefcase, Award, 
   Clock, CheckCircle2, ChevronRight, Share2, 
   ThumbsUp, UserCheck, BarChart3, Globe,
-  FileText, Download, PlayCircle
+  FileText, Download, PlayCircle, ArrowLeft
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getFreelancerById, getPublicPortfolio, getPublicCertifications, saveFreelancer } from "../../api/freelancer";
@@ -164,17 +164,19 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
         
         {/* Top Control Bar */}
         <div className="fd-controls">
-          <button className="fd-control-btn close" onClick={onClose} title={t("common.close")}>
-            <X size={20} />
+          <button className="fd-control-btn close-btn" onClick={onClose} aria-label="Back">
+            <ArrowLeft size={22} />
           </button>
+          
           <div className="fd-controls-right">
-            <button className="fd-control-btn"><Share2 size={18} /></button>
-            <button className={`fd-control-btn ${data?.is_saved ? "liked" : ""}`} onClick={handleSaveInternal}>
-              <Heart size={18} fill={data?.is_saved ? "currentColor" : "none"} />
+            <button className="fd-control-btn" title="Share"><Share2 size={18} /></button>
+            <button 
+              className={`fd-control-btn ${data?.is_saved ? "liked" : ""}`} 
+              onClick={handleSaveInternal}
+              title="Save"
+            >
+              <Heart size={18} fill={data?.is_saved ? "#ef4444" : "none"} stroke={data?.is_saved ? "#ef4444" : "currentColor"} />
             </button>
-            <a href={`/profile/${freelancerId}`} target="_blank" rel="noreferrer" className="fd-full-profile-link">
-              {t("findTalent.card.viewFullProfile", "To'liq profil")} <ExternalLink size={14} />
-            </a>
           </div>
         </div>
 
@@ -256,6 +258,16 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                   {tab.count > 0 && <span className="fd-tab-count">{tab.count}</span>}
                 </button>
               ))}
+              
+              <a 
+                href={`/profile/${freelancerId}`} 
+                target="_blank" 
+                rel="noreferrer" 
+                className="fd-tab-extra-link"
+              >
+                {t("findTalent.card.viewFullProfile", "View full profile")}
+                <ExternalLink size={14} />
+              </a>
             </div>            {/* Tab Content */}
             <div className="fd-tab-content">
               {showInvite ? (
