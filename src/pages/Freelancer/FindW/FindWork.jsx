@@ -27,7 +27,7 @@ export default function FindWork() {
   // Filter States
   const [showFilters, setShowFilters] = useState(false);
   const [jobType, setJobType] = useState("all"); 
-  const [budgetRange, setBudgetRange] = useState("all"); 
+  const [budgetRange, setBudgetRange] = useState("all");
   const [proposalsTier, setProposalsTier] = useState("all");
   const [clientHistory, setClientHistory] = useState("all");
   const [sortBy, setSortBy] = useState("created_at"); 

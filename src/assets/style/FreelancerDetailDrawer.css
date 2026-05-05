@@ -196,12 +196,19 @@
 /* Quick Stats */
 .fd-quick-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   background: #f9fafb;
   padding: 16px 24px;
   border-radius: 16px;
   margin-bottom: 24px;
+}
+
+@media (max-width: 640px) {
+  .fd-quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
 }
 
 .fd-stat-val {

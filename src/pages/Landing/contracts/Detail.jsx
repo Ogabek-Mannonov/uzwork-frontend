@@ -109,6 +109,9 @@ export default function ContractDetail() {
 
   useEffect(() => { load(); }, [load]);
 
+  const isClient = data?.contract ? String(currentUser?.id) === String(data.contract.client_id) : false;
+  const isFreelancer = data?.contract ? String(currentUser?.id) === String(data.contract.freelancer_id) : false;
+
   useEffect(() => {
     if (!data?.contract) return;
     const partnerId = isClient ? data.contract.freelancer_id : data.contract.client_id;
@@ -192,8 +195,6 @@ export default function ContractDetail() {
   );
 
   const { contract, milestones } = data;
-  const isClient = String(currentUser?.id) === String(contract.client_id);
-  const isFreelancer = String(currentUser?.id) === String(contract.freelancer_id);
   const st = STATUS_CONFIG[contract.status] || STATUS_CONFIG.active;
 
   return (

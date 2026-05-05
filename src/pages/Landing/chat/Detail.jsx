@@ -22,6 +22,7 @@ import { translateToUzbek, translateBatchToUzbek } from "../../../api/translate_
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 import { useThemeContext } from "../../components/Theme/ThemeContext";
+import { useCurrency } from "../../components/Currency/CurrencyContext";
 
 // ── constants ────────────────────────────────────────────
 const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/api\/?$/, "");
@@ -1012,6 +1013,9 @@ export default function ChatDetail() {
   const [isRejecting, setIsRejecting] = useState(false);
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [contractData, setContractData] = useState(null);
+
+  const { formatAmount } = useCurrency();
 
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
@@ -1180,6 +1184,8 @@ export default function ChatDetail() {
     if (chatId && chatInfo?.contract_id && (chatInfo.contract_id || showSubmissionModal)) {
       getContractById(chatInfo.contract_id).then(res => {
         if (res?.success) {
+          const cData = res.data?.contract || res.data || {};
+          setContractData(cData);
           setMilestones(res.data.milestones || []);
           const pending = res.data.milestones?.filter(m => m.status === 'pending');
           if (pending?.length > 0) {
@@ -2955,7 +2961,9 @@ export default function ChatDetail() {
                     >
                       <option value="">-- {t("chat.select", "Select")} --</option>
                       {milestones.filter(m => m.status === 'pending').map(m => (
-                        <option key={m.id} value={m.id}>{m.title} ({Number(m.amount).toLocaleString()} UZS)</option>
+                        <option key={m.id} value={m.id}>
+                          {m.title} ({formatAmount(m.amount, contractData?.currency || 'USD')})
+                        </option>
                       ))}
                     </select>
                   )}

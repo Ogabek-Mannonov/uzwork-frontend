@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { getFreelancerById, getPublicPortfolio, getPublicCertifications, saveFreelancer } from "../../api/freelancer";
 import { getUserReviews, getReviews } from "../../api/ratings";
 import { getUserProfile } from "../../api/common";
+import { getContracts } from "../../api/contracts";
 import Price from "./Currency/Price";
 import InviteForm from "./InviteForm";
 import "../../assets/style/FreelancerDetailDrawer.css";
@@ -50,11 +51,12 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      const [userRes, portRes, revRes, certRes] = await Promise.all([
+      const [userRes, portRes, revRes, certRes, contRes] = await Promise.all([
         getUserProfile(freelancerId),
         getPublicPortfolio(freelancerId),
         getReviews({ freelancer_id: freelancerId }),
-        getPublicCertifications(freelancerId)
+        getPublicCertifications(freelancerId),
+        getContracts({ freelancer_id: freelancerId, status: 'completed' })
       ]);
 
       if (userRes?.success) {
@@ -65,6 +67,10 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
           setData({
             ...p,
             ...u,
+            in_progress_jobs: rawData.in_progress_jobs || 0,
+            completed_jobs: rawData.completed_jobs || 0,
+            total_reviews: rawData.total_reviews || 0,
+            average_rating: rawData.average_rating || 0,
             fullName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || u.name || "User",
             languages: p.languages || [],
             skills: Array.isArray(p.skills) ? p.skills : (p.skills ? [p.skills] : []),
@@ -74,10 +80,48 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
       
       if (portRes?.success) setPortfolio(portRes.data.items || portRes.data || []);
       
-      if (revRes?.success) {
-        const rData = revRes.data?.reviews || revRes.data?.items || revRes.data || [];
-        setReviews(Array.isArray(rData) ? rData : []);
-      }
+      // Combine reviews and completed contracts for "Work History"
+      const rData = revRes.data?.reviews || revRes.data?.items || revRes.data || [];
+      const cData = contRes.data?.contracts || contRes.data || [];
+      
+      const historyItems = [];
+      
+      // 1. First add all reviews
+      rData.forEach(rev => {
+        historyItems.push({
+          id: `rev-${rev.id}`,
+          job_title: rev.job_title,
+          rating: rev.rating,
+          comment: rev.comment,
+          project_amount: rev.project_amount,
+          project_currency: rev.project_currency || 'USD',
+          created_at: rev.created_at,
+          contract_id: rev.contract_id,
+          is_review: true
+        });
+      });
+      
+      // 2. Add contracts that DON'T have reviews yet
+      cData.forEach(cont => {
+        const hasReview = rData.some(r => String(r.contract_id) === String(cont.id));
+        if (!hasReview) {
+          historyItems.push({
+            id: `cont-${cont.id}`,
+            job_title: cont.job_title || cont.title,
+            rating: null,
+            comment: null,
+            project_amount: cont.total_amount,
+            project_currency: cont.currency || 'USD',
+            created_at: cont.completed_at || cont.updated_at || cont.created_at,
+            contract_id: cont.id,
+            is_review: false
+          });
+        }
+      });
+      
+      // Sort by date desc
+      historyItems.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      setReviews(historyItems);
 
       if (certRes?.success) {
         const cData = certRes.data?.certifications || certRes.data?.items || certRes.data || [];
@@ -183,6 +227,10 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                   <div className="fd-stat-item">
                     <div className="fd-stat-val">{data.completed_jobs || 0}</div>
                     <div className="fd-stat-lbl">Total Jobs</div>
+                  </div>
+                  <div className="fd-stat-item">
+                    <div className="fd-stat-val">{data.in_progress_jobs || 0}</div>
+                    <div className="fd-stat-lbl">In Progress</div>
                   </div>
                 </div>
                 <div className="fd-action-buttons">
@@ -300,22 +348,28 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                               <div className="fd-history-header">
                                 <h4 className="fd-history-job-title">{rev.job_title || t("profile.untitledJob", "Loyiha nomi")}</h4>
                                 <div className="fd-history-rating">
-                                  <div className="fd-stars">
-                                    {[...Array(5)].map((_, i) => (
-                                      <Star key={i} size={14} fill={i < rev.rating ? "#f59e0b" : "none"} stroke={i < rev.rating ? "#f59e0b" : "#ccc"} />
-                                    ))}
-                                  </div>
-                                  <span className="fd-rating-num">{rev.rating?.toFixed(1)}</span>
+                                  {rev.rating ? (
+                                    <>
+                                      <div className="fd-stars">
+                                        {[...Array(5)].map((_, i) => (
+                                          <Star key={i} size={14} fill={i < rev.rating ? "#f59e0b" : "none"} stroke={i < rev.rating ? "#f59e0b" : "#ccc"} />
+                                        ))}
+                                      </div>
+                                      <span className="fd-rating-num">{rev.rating?.toFixed(1)}</span>
+                                    </>
+                                  ) : (
+                                    <span className="fd-no-feedback">{t("profile.noFeedback", "Fikr bildirilmagan")}</span>
+                                  )}
                                 </div>
                               </div>
                               
                               <div className="fd-history-meta">
                                 <div className="fd-meta-item">
-                                  <Price amount={rev.project_amount} currency="USD" />
+                                  <Price amount={rev.project_amount} currency={rev.project_currency || 'USD'} />
                                 </div>
                                 <div className="fd-meta-sep" />
                                 <div className="fd-meta-item">
-                                  {rev.is_fixed ? t("common.fixedPrice", "Fixed price") : t("common.hourly", "Hourly")}
+                                  {t("common.fixedPrice", "Fixed price")}
                                 </div>
                                 <div className="fd-meta-sep" />
                                 <div className="fd-meta-item">
@@ -323,9 +377,15 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                                 </div>
                               </div>
 
-                              <div className="fd-history-comment">
-                                <p>"{rev.comment}"</p>
-                              </div>
+                              {rev.comment ? (
+                                <div className="fd-history-comment">
+                                  <p>"{rev.comment}"</p>
+                                </div>
+                              ) : (
+                                <div className="fd-history-comment empty">
+                                  <p style={{ fontStyle: 'italic', color: '#94a3b8' }}>{t("profile.noComment", "Izoh qoldirilmagan.")}</p>
+                                </div>
+                              )}
 
                               <div className="fd-history-footer">
                                 <div className="fd-client-brief">
