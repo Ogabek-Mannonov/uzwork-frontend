@@ -327,6 +327,80 @@ body { font-family: var(--ft-font); color: var(--ft-text); background: var(--ft-
 .ft-clear-btn:hover { background: #fecaca; }
 
 /* ============================================================
+   LANGUAGE & LEVEL FILTER
+   ============================================================ */
+.ft-lang-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.ft-lang-tab {
+  flex: 1;
+  min-width: 70px;
+  padding: 8px 4px;
+  border: 1.5px solid var(--ft-border);
+  border-radius: var(--ft-radius-sm);
+  background: var(--ft-bg);
+  color: var(--ft-text-3);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s var(--ft-ease);
+  font-family: var(--ft-font);
+}
+
+.ft-lang-tab:hover {
+  border-color: var(--ft-blue-border);
+  background: var(--ft-blue-light);
+  color: var(--ft-blue);
+}
+
+.ft-lang-tab.active {
+  border-color: var(--ft-blue);
+  background: var(--ft-blue-soft);
+  color: var(--ft-blue);
+  box-shadow: 0 2px 8px var(--ft-blue-glow);
+}
+
+.ft-level-select-wrap {
+  margin-top: 12px;
+  animation: ft-reveal .2s var(--ft-ease);
+}
+
+.ft-level-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ft-text-3);
+  margin-bottom: 6px;
+}
+
+.ft-level-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--ft-blue-border);
+  border-radius: var(--ft-radius-sm);
+  font-size: 13.5px;
+  font-family: var(--ft-font);
+  color: var(--ft-text-2);
+  background: var(--ft-surface);
+  outline: none;
+  cursor: pointer;
+  transition: all .2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.ft-level-select:focus {
+  border-color: var(--ft-blue);
+  box-shadow: 0 0 0 3px var(--ft-blue-glow);
+}
+
+/* ============================================================
    RESULTS PANEL
    ============================================================ */
 .ft-results { padding: 22px 32px 64px; }

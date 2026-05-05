@@ -262,6 +262,9 @@ const FindTalent = () => {
   const [maxRate,     setMaxRate]     = useState(150);
   const [location,    setLocation]    = useState("");
   const [successRate, setSuccessRate] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState("");
+  const [langUI, setLangUI] = useState(""); // Faqat UI uchun, fetch ni trigger qilmaydi
   const [sort,        setSort]        = useState("relevance");
   const [toast,       setToast]       = useState("");
   const [targetJobId, setTargetJobId] = useState(searchParams.get("jobId"));
@@ -282,14 +285,28 @@ const FindTalent = () => {
           search: search || undefined,
           location: location || undefined,
           min_rating: successRate ? parseInt(successRate) : undefined,
+          language: selectedLanguage || undefined,
+          lang: selectedLanguage || undefined, // Qo'shimcha ehtimoliy nom
+          proficiency: selectedLevel || undefined,
+          level: selectedLevel || undefined, // Qo'shimcha ehtimoliy nom
+          language_level: selectedLevel || undefined, 
         };
         if (minRate > 10) params.min_rate = minRate;
         if (maxRate < 150) params.max_rate = maxRate;
 
         const res = await getFreelancers(params);
 
-        // Backend returns { success: true, data: { freelancers: [...] } }
-        let list = res?.data?.freelancers || [];
+        // Backend javobi har xil bo'lishi mumkin: { data: { freelancers: [] } } yoki { data: [] }
+        let list = [];
+        if (res?.data) {
+          if (Array.isArray(res.data)) {
+            list = res.data;
+          } else if (res.data.freelancers && Array.isArray(res.data.freelancers)) {
+            list = res.data.freelancers;
+          } else if (res.data.data && Array.isArray(res.data.data)) {
+            list = res.data.data;
+          }
+        }
         
         const mapped = list.map(item => {
           return {
@@ -318,7 +335,7 @@ const FindTalent = () => {
       }
     };
     fetch();
-  }, [search, location, minRate, maxRate, successRate, t]);
+  }, [search, location, minRate, maxRate, successRate, selectedLanguage, selectedLevel, t]);
 
   const presenceMap = useUsersPresence(freelancers.map(f => f.id));
 
@@ -353,6 +370,8 @@ const FindTalent = () => {
   const clearFilters = () => {
     setBadges([]); setMinRate(10); setMaxRate(150);
     setLocation(""); setSuccessRate("");
+    setSelectedLanguage(""); setSelectedLevel("");
+    setLangUI("");
     notify("Filtrlar tozalandi!");
   };
 
@@ -362,7 +381,9 @@ const FindTalent = () => {
     badges.length +
     (minRate !== 10 || maxRate !== 150 ? 1 : 0) +
     (location ? 1 : 0) +
-    (successRate ? 1 : 0);
+    (successRate ? 1 : 0) +
+    (selectedLanguage ? 1 : 0) +
+    (selectedLevel ? 1 : 0);
 
   return (
     <div className="ft-page">
@@ -501,20 +522,51 @@ const FindTalent = () => {
             ))}
           </FtFilterSection>
 
-          {/* English Level */}
-          <FtFilterSection title={t("findTalent.filter.englishLevel")} defaultOpen={false}>
-            {[
-              { id: "any", label: t("findTalent.englishLevels.any") },
-              { id: "basic", label: t("findTalent.englishLevels.basic") },
-              { id: "conversational", label: t("findTalent.englishLevels.conversational") },
-              { id: "fluent", label: t("findTalent.englishLevels.fluent") },
-              { id: "native", label: t("findTalent.englishLevels.native") }
-            ].map(l => (
-              <label key={l.id} className="ft-check-item">
-                <div className="ft-checkbox"><Check size={10} className="ft-check-tick" /></div>
-                <span className="ft-check-label">{l.label}</span>
-              </label>
-            ))}
+          {/* Language & Level Filter */}
+          <FtFilterSection title={t("findTalent.filter.languageFilter") || "Til filtri"}>
+            <div className="ft-lang-tabs">
+              {[
+                { id: "Uzbek", label: "Uzbek" },
+                { id: "Russian", label: "Russian" },
+                { id: "English", label: "English" }
+              ].map(lang => (
+                <button
+                  key={lang.id}
+                  className={`ft-lang-tab ${langUI === lang.id ? "active" : ""}`}
+                  onClick={() => {
+                    if (langUI === lang.id) {
+                      setLangUI("");
+                      setSelectedLanguage("");
+                      setSelectedLevel("");
+                    } else {
+                      setLangUI(lang.id);
+                    }
+                  }}
+                >
+                  {lang.label}
+                </button>
+              ))}
+            </div>
+
+            {langUI && (
+              <div className="ft-level-select-wrap">
+                <label className="ft-level-label">Darajani tanlang:</label>
+                <select
+                  className="ft-level-select"
+                  value={selectedLevel}
+                  onChange={e => {
+                    setSelectedLevel(e.target.value);
+                    setSelectedLanguage(langUI); // Daraja tanlanganda tilni ham "commit" qilamiz
+                  }}
+                >
+                  <option value="">{t("findTalent.englishLevels.any") || "Istalgan daraja"}</option>
+                  <option value="Basic">{t("findTalent.englishLevels.basic") || "Boshlang'ich"}</option>
+                  <option value="Conversational">{t("findTalent.englishLevels.conversational") || "So'zlashuv"}</option>
+                  <option value="Fluent">{t("findTalent.englishLevels.fluent") || "Erkin"}</option>
+                  <option value="Native/Bilingual">{t("findTalent.englishLevels.native") || "Ona tili"}</option>
+                </select>
+              </div>
+            )}
           </FtFilterSection>
 
           {activeFilterCount > 0 && (
