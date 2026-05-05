@@ -97,7 +97,9 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
           project_currency: rev.project_currency || 'USD',
           created_at: rev.created_at,
           contract_id: rev.contract_id,
-          is_review: true
+          is_review: true,
+          client_name: `${rev.client_first_name || ""} ${rev.client_last_name || ""}`.trim(),
+          client_avatar: rev.client_avatar
         });
       });
       
@@ -114,7 +116,9 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
             project_currency: cont.currency || 'USD',
             created_at: cont.completed_at || cont.updated_at || cont.created_at,
             contract_id: cont.id,
-            is_review: false
+            is_review: false,
+            client_name: `${cont.client_first_name || ""} ${cont.client_last_name || ""}`.trim(),
+            client_avatar: cont.client_avatar
           });
         }
       });
@@ -151,11 +155,11 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
   if (!isOpen && !isAnimating) return null;
 
   const tabs = [
-    { id: "about", label: t("profile.about", "Haqida") },
-    { id: "history", label: t("profile.workHistory", "Ish tarixi"), count: reviews.length },
-    { id: "portfolio", label: t("profile.portfolio", "Portfoliyo"), count: portfolio.length },
-    { id: "skills", label: t("profile.skills", "Ko'nikmalar") },
-    { id: "certs", label: t("profile.certifications", "Sertifikatlar"), count: certs.length }
+    { id: "about", label: t("profile.about") },
+    { id: "history", label: t("profile.reviews"), count: reviews.length },
+    { id: "portfolio", label: t("profile.portfolio"), count: portfolio.length },
+    { id: "skills", label: t("profile.skills") },
+    { id: "certs", label: t("profile.certifications"), count: certs.length }
   ];
 
   return (
@@ -164,16 +168,16 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
         
         {/* Top Control Bar */}
         <div className="fd-controls">
-          <button className="fd-control-btn close-btn" onClick={onClose} aria-label="Back">
+          <button className="fd-control-btn close-btn" onClick={onClose} aria-label={t("common.back")}>
             <ArrowLeft size={22} />
           </button>
           
           <div className="fd-controls-right">
-            <button className="fd-control-btn" title="Share"><Share2 size={18} /></button>
+            <button className="fd-control-btn" title={t("common.share", "Share")}><Share2 size={18} /></button>
             <button 
               className={`fd-control-btn ${data?.is_saved ? "liked" : ""}`} 
               onClick={handleSaveInternal}
-              title="Save"
+              title={t("common.save")}
             >
               <Heart size={18} fill={data?.is_saved ? "#ef4444" : "none"} stroke={data?.is_saved ? "#ef4444" : "currentColor"} />
             </button>
@@ -189,7 +193,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
         ) : !data ? (
           <div className="fd-error-state">
             <CheckCircle2 size={48} color="#ef4444" />
-            <p>{t("common.errorLoading", "Ma'lumot yuklashda xatolik")}</p>
+            <p>{t("common.error")}</p>
           </div>
         ) : (
           <div className="fd-main-scroll custom-scrollbar">
@@ -211,7 +215,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                     <span>{data.location}</span>
                     <span className="fd-dot">•</span>
                     <Clock size={14} />
-                    <span>1:53 am local time</span>
+                    <span>{t("common.localTime", "local time")}</span>
                   </div>
                 </div>
               </div>
@@ -219,20 +223,20 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
               <div className="fd-header-actions">
                 <div className="fd-quick-stats">
                   <div className="fd-stat-item">
-                    <div className="fd-stat-val"><Price amount={data.hourly_rate} currency="USD" />/hr</div>
-                    <div className="fd-stat-lbl">Rate</div>
+                    <div className="fd-stat-val"><Price amount={data.hourly_rate} currency="USD" />{t("profile.perHour")}</div>
+                    <div className="fd-stat-lbl">{t("profile.rate")}</div>
                   </div>
                   <div className="fd-stat-item">
                     <div className="fd-stat-val">100%</div>
-                    <div className="fd-stat-lbl">Job Success</div>
+                    <div className="fd-stat-lbl">{t("profile.successScore")}</div>
                   </div>
                   <div className="fd-stat-item">
                     <div className="fd-stat-val">{data.completed_jobs || 0}</div>
-                    <div className="fd-stat-lbl">Total Jobs</div>
+                    <div className="fd-stat-lbl">{t("profile.jobsCompleted")}</div>
                   </div>
                   <div className="fd-stat-item">
                     <div className="fd-stat-val">{data.in_progress_jobs || 0}</div>
-                    <div className="fd-stat-lbl">In Progress</div>
+                    <div className="fd-stat-lbl">{t("profile.activeProjects")}</div>
                   </div>
                 </div>
                 <div className="fd-action-buttons">
@@ -265,7 +269,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                 rel="noreferrer" 
                 className="fd-tab-extra-link"
               >
-                {t("findTalent.card.viewFullProfile", "View full profile")}
+                {t("findTalent.card.viewFullProfile")}
                 <ExternalLink size={14} />
               </a>
             </div>            {/* Tab Content */}
@@ -283,9 +287,9 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                 <>
                   {activeTab === "about" && (
                     <div className="fd-about-section soft-fade-in">
-                      <h3 className="fd-content-title">{t("profile.about", "Haqida")}</h3>
+                      <h3 className="fd-content-title">{t("profile.about")}</h3>
                       <div className="fd-bio-text">
-                        {data.bio ? data.bio : t("profile.noBio", "Biografiya kiritilmagan.")}
+                        {data.bio ? data.bio : t("profile.noBio")}
                       </div>
                       
                       <div className="fd-metrics-grid">
@@ -293,21 +297,21 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                           <BarChart3 size={20} />
                           <div>
                             <div className="fd-m-val">98%</div>
-                            <div className="fd-m-lbl">Client satisfaction</div>
+                            <div className="fd-m-lbl">{t("profile.clientSatisfaction")}</div>
                           </div>
                         </div>
                         <div className="fd-metric-card">
                           <Clock size={20} />
                           <div>
                             <div className="fd-m-val">24h</div>
-                            <div className="fd-m-lbl">Avg. response time</div>
+                            <div className="fd-m-lbl">{t("profile.avgResponseTime")}</div>
                           </div>
                         </div>
                         <div className="fd-metric-card">
                           <UserCheck size={20} />
                           <div>
                             <div className="fd-m-val">12</div>
-                            <div className="fd-m-lbl">Repeat clients</div>
+                            <div className="fd-m-lbl">{t("profile.repeatClients")}</div>
                           </div>
                         </div>
                       </div>
@@ -319,7 +323,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                       {portfolio.length === 0 ? (
                         <div className="fd-empty-tab">
                           <Briefcase size={40} />
-                          <p>{t("profile.noPortfolio", "Portfoliyo hali qo'shilmagan.")}</p>
+                          <p>{t("profile.noPortfolio")}</p>
                         </div>
                       ) : (
                         <div className="fd-portfolio-grid">
@@ -332,7 +336,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                                   <div className="fd-portfolio-placeholder"><FileText size={32} /></div>
                                 )}
                                 <div className="fd-portfolio-overlay">
-                                  <button className="fd-portfolio-view"><PlayCircle size={20} /> View project</button>
+                                  <button className="fd-portfolio-view"><PlayCircle size={20} /> {t("profile.viewProject")}</button>
                                 </div>
                               </div>
                               <div className="fd-portfolio-info">
@@ -344,14 +348,12 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                         </div>
                       )}
                     </div>
-                  )}
-
-                  {activeTab === "history" && (
+                  )}                  {activeTab === "history" && (
                     <div className="fd-history-section soft-fade-in">
                        {reviews.length === 0 ? (
                         <div className="fd-empty-tab">
                           <ThumbsUp size={40} />
-                          <p>{t("profile.noHistory", "Ish tarixi hali mavjud emas.")}</p>
+                          <p>{t("profile.noHistory")}</p>
                         </div>
                       ) : (
                         <div className="fd-history-list">
@@ -388,7 +390,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                                   {new Date(rev.created_at).toLocaleDateString()}
                                 </div>
                               </div>
-
+ 
                               {rev.comment ? (
                                 <div className="fd-history-comment">
                                   <p>"{rev.comment}"</p>
@@ -398,11 +400,14 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                                   <p style={{ fontStyle: 'italic', color: '#94a3b8' }}>{t("profile.noComment", "Izoh qoldirilmagan.")}</p>
                                 </div>
                               )}
-
+ 
                               <div className="fd-history-footer">
                                 <div className="fd-client-brief">
-                                  <img src={`https://ui-avatars.com/api/?name=Client`} alt="Client" />
-                                  <span>{t("profile.verifiedClient", "Tasdiqlangan mijoz")}</span>
+                                  <img 
+                                    src={rev.client_avatar || `https://ui-avatars.com/api/?name=${rev.client_name || "Client"}`} 
+                                    alt="Client" 
+                                  />
+                                  <span>{rev.client_name || t("profile.verifiedClient")}</span>
                                 </div>
                               </div>
                             </div>
@@ -414,16 +419,16 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
 
                   {activeTab === "skills" && (
                     <div className="fd-skills-section soft-fade-in">
-                      <h3 className="fd-content-title">{t("profile.skills", "Ko'nikmalar va Texnologiyalar")}</h3>
+                      <h3 className="fd-content-title">{t("profile.skills")}</h3>
                       <div className="fd-skills-wrap">
                         {(data.skills || []).length > 0 ? (data.skills || []).map(skill => (
                           <span key={skill} className="fd-skill-pill">{skill}</span>
                         )) : (
-                          <p style={{ color: '#94a3b8' }}>{t("profile.noSkills", "Ko'nikmalar kiritilmagan")}</p>
+                          <p style={{ color: '#94a3b8' }}>{t("profile.noSkills")}</p>
                         )}
                       </div>
                       
-                      <h3 className="fd-content-title" style={{ marginTop: 48 }}>{t("profile.languages", "Tillar")}</h3>
+                      <h3 className="fd-content-title" style={{ marginTop: 48 }}>{t("profile.languages")}</h3>
                       <div className="fd-langs-grid">
                         {(data.languages || data.language || []).length > 0 ? (data.languages || data.language || []).map((lang, idx) => (
                           <div key={idx} className="fd-lang-card">
@@ -433,7 +438,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                               </div>
                               <span className="fd-lang-name">{lang.language || lang.name || lang}</span>
                             </div>
-                            <span className="fd-lang-level-badge">{lang.proficiency || lang.level || t("profile.basic", "Basic")}</span>
+                            <span className="fd-lang-level-badge">{lang.proficiency || lang.level || t("profile.profBasic")}</span>
                           </div>
                         )) : (
                           <div className="fd-empty-tab" style={{ padding: '20px 0', gridColumn: '1/-1' }}>
@@ -450,7 +455,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                       {certs.length === 0 ? (
                         <div className="fd-empty-tab">
                           <Award size={40} />
-                          <p>{t("profile.noCerts", "Sertifikatlar mavjud emas.")}</p>
+                          <p>{t("profile.noCerts")}</p>
                         </div>
                       ) : (
                         <div className="fd-certs-list">
@@ -475,7 +480,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                                 {cert.certificate_file_url && (
                                   <div className="fd-cert-actions">
                                     <a href={cert.certificate_file_url} target="_blank" rel="noreferrer" className="fd-cert-btn-view">
-                                      <ExternalLink size={14} /> {t("profile.viewCredential", "Sertifikatni ko'rish")}
+                                      <ExternalLink size={14} /> {t("profile.viewCredential")}
                                     </a>
                                   </div>
                                 )}
