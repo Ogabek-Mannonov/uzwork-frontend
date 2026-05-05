@@ -6,6 +6,7 @@ import {
   Heart, ThumbsUp, ThumbsDown, X,
   CheckCircle, Zap, Star, RefreshCw,
   SlidersHorizontal, ArrowUpDown, Check,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import "../Client/css/find.css";
 import { getFreelancers, saveFreelancer } from "../../api/freelancer";
@@ -266,6 +267,9 @@ const FindTalent = () => {
   const [selectedLevel, setSelectedLevel] = useState("");
   const [langUI, setLangUI] = useState(""); // Faqat UI uchun, fetch ni trigger qilmaydi
   const [sort,        setSort]        = useState("relevance");
+  const [page,        setPage]        = useState(1);
+  const [totalPages,  setTotalPages]  = useState(1);
+  const [totalCount,  setTotalCount]  = useState(0);
   const [toast,       setToast]       = useState("");
   const [targetJobId, setTargetJobId] = useState(searchParams.get("jobId"));
   const [targetJobTitle, setTargetJobTitle] = useState("");
@@ -277,11 +281,19 @@ const FindTalent = () => {
   const [freelancers, setFreelancers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const PAGE_SIZE = 10;
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, location, minRate, maxRate, successRate, selectedLanguage, selectedLevel]);
+
   useEffect(() => {
     const fetch = async () => {
       setLoading(true);
       try {
         const params = {
+          page,
+          limit: PAGE_SIZE,
           search: search || undefined,
           location: location || undefined,
           min_rating: successRate ? parseInt(successRate) : undefined,
@@ -295,17 +307,18 @@ const FindTalent = () => {
         if (maxRate < 150) params.max_rate = maxRate;
 
         const res = await getFreelancers(params);
-
-        // Backend javobi har xil bo'lishi mumkin: { data: { freelancers: [] } } yoki { data: [] }
+        
         let list = [];
-        if (res?.data) {
-          if (Array.isArray(res.data)) {
-            list = res.data;
-          } else if (res.data.freelancers && Array.isArray(res.data.freelancers)) {
-            list = res.data.freelancers;
-          } else if (res.data.data && Array.isArray(res.data.data)) {
-            list = res.data.data;
-          }
+        let total = 0;
+        
+        // Backend strukturasi: { success: true, data: { freelancers: [], pagination: {} } }
+        if (res?.success && res.data) {
+          list = res.data.freelancers || [];
+          total = res.data.pagination?.total || list.length;
+        } else if (Array.isArray(res?.data)) {
+          // Fallback agar backend faqat array qaytarsa
+          list = res.data;
+          total = res.data.length;
         }
         
         const mapped = list.map(item => {
@@ -326,7 +339,10 @@ const FindTalent = () => {
             is_saved: !!item.is_saved,
           };
         });
+        
         setFreelancers(mapped);
+        setTotalCount(total);
+        setTotalPages(Math.ceil(total / PAGE_SIZE) || 1);
       } catch (error) {
         console.error("Fetch freelancers error:", error);
         setFreelancers([]);
@@ -335,7 +351,21 @@ const FindTalent = () => {
       }
     };
     fetch();
-  }, [search, location, minRate, maxRate, successRate, selectedLanguage, selectedLevel, t]);
+  }, [page, search, location, minRate, maxRate, successRate, selectedLanguage, selectedLevel, t]);
+
+  const pageItems = useMemo(() => {
+    const pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+      return pages;
+    }
+    pages.push(1, 2, 3);
+    if (page > 4) pages.push("dots-left");
+    if (page > 3 && page < totalPages - 2) pages.push(page);
+    if (page < totalPages - 3) pages.push("dots-right");
+    pages.push(totalPages);
+    return pages.filter((v, idx, arr) => arr.indexOf(v) === idx);
+  }, [page, totalPages]);
 
   const presenceMap = useUsersPresence(freelancers.map(f => f.id));
 
@@ -411,7 +441,7 @@ const FindTalent = () => {
           />
         </div>
         <button className="ft-advanced-link">{t("findTalent.results.advancedSearch")}</button>
-        <span className="ft-result-count">{t("findTalent.results.freelancersFound", { count: shown.length })}</span>
+        <span className="ft-result-count">{t("findTalent.results.freelancersFound", { count: totalCount })}</span>
       </div>
 
       <div className="ft-body">
@@ -672,11 +702,47 @@ const FindTalent = () => {
             </div>
           )}
 
-          {shown.length > 0 && (
-            <div className="ft-load-more">
-              <button className="ft-load-more-btn"
-                onClick={() => notify(t("findTalent.results.loadingMore"))}>
-                <RefreshCw size={15} /> {t("findTalent.results.loadMore")}
+          {freelancers.length > 0 && totalPages > 1 && (
+            <div className="ft-pagination">
+              <button 
+                className="ft-pg-nav" 
+                disabled={page === 1}
+                onClick={() => {
+                  setPage(p => p - 1);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                title="Oldingi"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <div className="ft-pg-pages">
+                {pageItems.map((p, i) => {
+                  if (p === "dots-left" || p === "dots-right") {
+                    return <span key={p + i} className="ft-pg-dots">...</span>;
+                  }
+                  return (
+                    <button
+                      key={p}
+                      className={`ft-pg-page ${page === p ? "active" : ""}`}
+                      onClick={() => {
+                        setPage(p);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}>
+                      {p}
+                    </button>
+                  );
+                })}
+              </div>
+              <button 
+                className="ft-pg-nav" 
+                disabled={page === totalPages}
+                onClick={() => {
+                  setPage(p => p + 1);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                title="Keyingi"
+              >
+                <ChevronRight size={20} />
               </button>
             </div>
           )}
