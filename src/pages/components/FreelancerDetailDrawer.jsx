@@ -1,0 +1,395 @@
+import React, { useEffect, useState, useMemo } from "react";
+import { 
+  X, MapPin, Star, Zap, Heart, MessageCircle, 
+  ExternalLink, Calendar, Briefcase, Award, 
+  Clock, CheckCircle2, ChevronRight, Share2, 
+  ThumbsUp, UserCheck, BarChart3, Globe,
+  FileText, Download, PlayCircle
+} from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { getFreelancerById, getPublicPortfolio, getPublicCertifications, saveFreelancer } from "../../api/freelancer";
+import { getUserReviews } from "../../api/ratings";
+import { getUserProfile } from "../../api/common";
+import Price from "./Currency/Price";
+import InviteForm from "./InviteForm";
+import "../../assets/style/FreelancerDetailDrawer.css";
+
+export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, onInvite, onSaveToggle, initialView = "details" }) {
+  const { t } = useTranslation();
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(null);
+  const [portfolio, setPortfolio] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [certs, setCerts] = useState([]);
+  const [activeTab, setActiveTab] = useState("about");
+  const [showInvite, setShowInvite] = useState(initialView === "invite");
+
+  useEffect(() => {
+    if (isOpen && freelancerId) {
+      document.body.style.overflow = "hidden";
+      const timer = setTimeout(() => setIsAnimating(true), 10);
+      fetchAllData();
+      if (initialView === "invite") setShowInvite(true);
+      return () => clearTimeout(timer);
+    } else {
+      const timer = setTimeout(() => {
+        setIsAnimating(false);
+        document.body.style.overflow = "unset";
+        setData(null);
+        setActiveTab("about");
+        setShowInvite(false);
+      }, 400);
+      return () => {
+        clearTimeout(timer);
+        document.body.style.overflow = "unset";
+      };
+    }
+  }, [isOpen, freelancerId]);
+
+  const fetchAllData = async () => {
+    setLoading(true);
+    try {
+      const [userRes, portRes, revRes, certRes] = await Promise.all([
+        getUserProfile(freelancerId),
+        getPublicPortfolio(freelancerId),
+        getUserReviews(freelancerId),
+        getPublicCertifications(freelancerId)
+      ]);
+
+      if (userRes?.success) {
+        const rawData = userRes.data || (userRes.user ? userRes : null);
+        if (rawData) {
+          const u = rawData.user || {};
+          const p = rawData.profile || {};
+          setData({
+            ...p,
+            ...u,
+            fullName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || u.name || "User",
+            languages: p.languages || [],
+            skills: Array.isArray(p.skills) ? p.skills : (p.skills ? [p.skills] : []),
+          });
+        }
+      }
+      if (portRes?.success) setPortfolio(portRes.data.items || []);
+      if (revRes?.success) setReviews(revRes.data.reviews || revRes.data || []);
+      if (certRes?.success) setCerts(certRes.data.certifications || []);
+    } catch (error) {
+      console.error("Error fetching freelancer full details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveInternal = async () => {
+    if (!data) return;
+    try {
+      const res = await saveFreelancer(data.id);
+      if (res?.success) {
+        const newState = !data.is_saved;
+        setData({ ...data, is_saved: newState });
+        onSaveToggle?.(data.name || `${data.first_name} ${data.last_name}`, newState);
+      }
+    } catch (err) {
+      console.error("Error toggling save in drawer:", err);
+    }
+  };
+
+  if (!isOpen && !isAnimating) return null;
+
+  const tabs = [
+    { id: "about", label: t("profile.about", "Haqida") },
+    { id: "portfolio", label: t("profile.portfolio", "Portfoliyo"), count: portfolio.length },
+    { id: "reviews", label: t("profile.reviews", "Fikrlar"), count: reviews.length },
+    { id: "skills", label: t("profile.skills", "Ko'nikmalar") },
+    { id: "certs", label: t("profile.certifications", "Sertifikatlar"), count: certs.length }
+  ];
+
+  return (
+    <div className={`fd-overlay ${isOpen ? "is-open" : ""}`} onClick={onClose}>
+      <div className={`fd-drawer ${isOpen ? "is-open" : ""}`} onClick={(e) => e.stopPropagation()}>
+        
+        {/* Top Control Bar */}
+        <div className="fd-controls">
+          <button className="fd-control-btn close" onClick={onClose} title={t("common.close")}>
+            <X size={20} />
+          </button>
+          <div className="fd-controls-right">
+            <button className="fd-control-btn"><Share2 size={18} /></button>
+            <button className={`fd-control-btn ${data?.is_saved ? "liked" : ""}`} onClick={handleSaveInternal}>
+              <Heart size={18} fill={data?.is_saved ? "currentColor" : "none"} />
+            </button>
+            <a href={`/profile/${freelancerId}`} target="_blank" rel="noreferrer" className="fd-full-profile-link">
+              {t("findTalent.card.viewFullProfile", "To'liq profil")} <ExternalLink size={14} />
+            </a>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="fd-loading-wrap">
+            <div className="fd-shimmer-header" />
+            <div className="fd-shimmer-tabs" />
+            <div className="fd-shimmer-content" />
+          </div>
+        ) : !data ? (
+          <div className="fd-error-state">
+            <CheckCircle2 size={48} color="#ef4444" />
+            <p>{t("common.errorLoading", "Ma'lumot yuklashda xatolik")}</p>
+          </div>
+        ) : (
+          <div className="fd-main-scroll custom-scrollbar">
+            {/* Header Section */}
+            <div className="fd-profile-header">
+              <div className="fd-header-left">
+                <div className="fd-avatar-container">
+                  <img src={data.avatar_url || `https://ui-avatars.com/api/?name=${data.first_name}+${data.last_name}`} alt={data.name} className="fd-avatar" />
+                  {data.is_online && <span className="fd-online-indicator" />}
+                </div>
+                <div className="fd-info-main">
+                  <h1 className="fd-name">
+                    {data.first_name} {data.last_name}
+                    {data.is_verified && <CheckCircle2 size={18} className="fd-verified-icon" />}
+                  </h1>
+                  <p className="fd-title-text">{data.title}</p>
+                  <div className="fd-location-row">
+                    <MapPin size={14} />
+                    <span>{data.location}</span>
+                    <span className="fd-dot">•</span>
+                    <Clock size={14} />
+                    <span>1:53 am local time</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="fd-header-actions">
+                <div className="fd-quick-stats">
+                  <div className="fd-stat-item">
+                    <div className="fd-stat-val"><Price amount={data.hourly_rate} currency="USD" />/hr</div>
+                    <div className="fd-stat-lbl">Rate</div>
+                  </div>
+                  <div className="fd-stat-item">
+                    <div className="fd-stat-val">100%</div>
+                    <div className="fd-stat-lbl">Job Success</div>
+                  </div>
+                  <div className="fd-stat-item">
+                    <div className="fd-stat-val">{data.completed_jobs || 0}</div>
+                    <div className="fd-stat-lbl">Total Jobs</div>
+                  </div>
+                </div>
+                <div className="fd-action-buttons">
+                  <button className="fd-btn-primary" onClick={() => setShowInvite(true)}>
+                    {t("findTalent.card.invite", "Taklif qilish")}
+                  </button>
+                  <button className="fd-btn-secondary" onClick={() => window.location.href=`/messages?userId=${freelancerId}`}>
+                    <MessageCircle size={18} /> {t("findTalent.card.sendMessage", "Xabar yozish")}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="fd-tabs-nav">
+              {tabs.map(tab => (
+                <button 
+                  key={tab.id} 
+                  className={`fd-tab-item ${activeTab === tab.id ? "active" : ""}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.label}
+                  {tab.count > 0 && <span className="fd-tab-count">{tab.count}</span>}
+                </button>
+              ))}
+            </div>            {/* Tab Content */}
+            <div className="fd-tab-content">
+              {showInvite ? (
+                <InviteForm 
+                  freelancer={data}
+                  onInviteSuccess={(name, success) => {
+                    onInvite?.(data, success);
+                    if (success) setShowInvite(false);
+                  }}
+                  onBack={() => setShowInvite(false)}
+                />
+              ) : (
+                <>
+                  {activeTab === "about" && (
+                    <div className="fd-about-section soft-fade-in">
+                      <h3 className="fd-content-title">{t("profile.about", "Haqida")}</h3>
+                      <div className="fd-bio-text">
+                        {data.bio ? data.bio : t("profile.noBio", "Biografiya kiritilmagan.")}
+                      </div>
+                      
+                      <div className="fd-metrics-grid">
+                        <div className="fd-metric-card">
+                          <BarChart3 size={20} />
+                          <div>
+                            <div className="fd-m-val">98%</div>
+                            <div className="fd-m-lbl">Client satisfaction</div>
+                          </div>
+                        </div>
+                        <div className="fd-metric-card">
+                          <Clock size={20} />
+                          <div>
+                            <div className="fd-m-val">24h</div>
+                            <div className="fd-m-lbl">Avg. response time</div>
+                          </div>
+                        </div>
+                        <div className="fd-metric-card">
+                          <UserCheck size={20} />
+                          <div>
+                            <div className="fd-m-val">12</div>
+                            <div className="fd-m-lbl">Repeat clients</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === "portfolio" && (
+                    <div className="fd-portfolio-section soft-fade-in">
+                      {portfolio.length === 0 ? (
+                        <div className="fd-empty-tab">
+                          <Briefcase size={40} />
+                          <p>{t("profile.noPortfolio", "Portfoliyo hali qo'shilmagan.")}</p>
+                        </div>
+                      ) : (
+                        <div className="fd-portfolio-grid">
+                          {portfolio.map(item => (
+                            <div key={item.id} className="fd-portfolio-card">
+                              <div className="fd-portfolio-thumb">
+                                {item.media?.[0]?.url ? (
+                                  <img src={item.media[0].url} alt={item.title} />
+                                ) : (
+                                  <div className="fd-portfolio-placeholder"><FileText size={32} /></div>
+                                )}
+                                <div className="fd-portfolio-overlay">
+                                  <button className="fd-portfolio-view"><PlayCircle size={20} /> View project</button>
+                                </div>
+                              </div>
+                              <div className="fd-portfolio-info">
+                                <h4>{item.title}</h4>
+                                <p>{item.role}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {activeTab === "reviews" && (
+                    <div className="fd-reviews-section soft-fade-in">
+                       {reviews.length === 0 ? (
+                        <div className="fd-empty-tab">
+                          <ThumbsUp size={40} />
+                          <p>{t("profile.noReviews", "Fikrlar hali mavjud emas.")}</p>
+                        </div>
+                      ) : (
+                        <div className="fd-reviews-list">
+                          {reviews.map(rev => (
+                            <div key={rev.id} className="fd-review-card">
+                              <div className="fd-review-header">
+                                <div className="fd-review-stars">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star key={i} size={14} fill={i < rev.rating ? "#f59e0b" : "none"} stroke={i < rev.rating ? "#f59e0b" : "#ccc"} />
+                                  ))}
+                                  <span className="fd-review-date">{new Date(rev.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <div className="fd-review-price"><Price amount={rev.project_amount} currency="USD" /></div>
+                              </div>
+                              <h4 className="fd-review-job-title">{rev.job_title || "Loyiha nomi"}</h4>
+                              <p className="fd-review-text">"{rev.comment}"</p>
+                              <div className="fd-review-client">
+                                <img src={`https://ui-avatars.com/api/?name=Client`} alt="Client" />
+                                <span>Verified Client</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {activeTab === "skills" && (
+                    <div className="fd-skills-section soft-fade-in">
+                      <h3 className="fd-content-title">{t("profile.skills", "Ko'nikmalar va Texnologiyalar")}</h3>
+                      <div className="fd-skills-wrap">
+                        {(data.skills || []).length > 0 ? (data.skills || []).map(skill => (
+                          <span key={skill} className="fd-skill-pill">{skill}</span>
+                        )) : (
+                          <p style={{ color: '#94a3b8' }}>{t("profile.noSkills", "Ko'nikmalar kiritilmagan")}</p>
+                        )}
+                      </div>
+                      
+                      <h3 className="fd-content-title" style={{ marginTop: 48 }}>{t("profile.languages", "Tillar")}</h3>
+                      <div className="fd-langs-grid">
+                        {(data.languages || data.language || []).length > 0 ? (data.languages || data.language || []).map((lang, idx) => (
+                          <div key={idx} className="fd-lang-card">
+                            <div className="fd-lang-info">
+                              <div className="fd-lang-icon-wrap">
+                                <Globe size={18} />
+                              </div>
+                              <span className="fd-lang-name">{lang.language || lang.name || lang}</span>
+                            </div>
+                            <span className="fd-lang-level-badge">{lang.proficiency || lang.level || t("profile.basic", "Basic")}</span>
+                          </div>
+                        )) : (
+                          <div className="fd-empty-tab" style={{ padding: '20px 0', gridColumn: '1/-1' }}>
+                            <Globe size={32} />
+                            <p>{t("profile.noLanguages", "Tillar kiritilmagan")}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === "certs" && (
+                    <div className="fd-certs-section soft-fade-in">
+                      {certs.length === 0 ? (
+                        <div className="fd-empty-tab">
+                          <Award size={40} />
+                          <p>{t("profile.noCerts", "Sertifikatlar mavjud emas.")}</p>
+                        </div>
+                      ) : (
+                        <div className="fd-certs-list">
+                          {certs.map(cert => (
+                            <div key={cert.id} className="fd-cert-card soft-fade-in">
+                              <div className="fd-cert-badge-wrap">
+                                <Award size={32} />
+                              </div>
+                              <div className="fd-cert-main-info">
+                                <div className="fd-cert-header-row">
+                                  <h4 className="fd-cert-name">
+                                    {cert.title}
+                                    <CheckCircle2 size={16} className="fd-cert-verified" />
+                                  </h4>
+                                  <span className="fd-cert-year-tag">{cert.issue_year}</span>
+                                </div>
+                                <div className="fd-cert-issuer-line">
+                                  <span>{cert.issuer}</span>
+                                  <div className="fd-cert-dot-sep" />
+                                  <span>{t("profile.verifiedCredential", "Tasdiqlangan sertifikat")}</span>
+                                </div>
+                                {cert.certificate_file_url && (
+                                  <div className="fd-cert-actions">
+                                    <a href={cert.certificate_file_url} target="_blank" rel="noreferrer" className="fd-cert-btn-view">
+                                      <ExternalLink size={14} /> {t("profile.viewCredential", "Sertifikatni ko'rish")}
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -12,10 +12,11 @@ import { getFreelancers, saveFreelancer } from "../../api/freelancer";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { inviteFreelancer } from "../../api/proposals";
-import InviteDrawer from "../components/InviteDrawer";
+// InviteDrawer removed as it is now integrated into FreelancerDetailDrawer
 import { getSocket, onSocketReady, normalizeUserStatus } from "../../hooks/useSocket";
 import { useUsersPresence } from "../../hooks/useUserPresence";
 import Price from "../components/Currency/Price";
+import FreelancerDetailDrawer from "../components/FreelancerDetailDrawer";
 
 /* ================================================================
    MOCK DATA
@@ -65,13 +66,14 @@ const FtFilterSection = ({ title, info, children, defaultOpen = true }) => {
 /* ================================================================
    FREELANCER CARD
    ================================================================ */
-const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle, onOpenInviteDrawer, presence }) => {
+const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle, onOpenInviteDrawer, presence, onOpenDetail }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [invited, setInvited] = useState(false);
   const [isSaved, setIsSaved] = useState(fl.is_saved || false);
 
-  const handleInvite = async () => {
+  const handleInvite = async (e) => {
+    e.stopPropagation();
     if (invited) return;
     
     if (targetJobId) {
@@ -121,7 +123,7 @@ const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle, onOpenInvit
   const MAX_SKILLS = 6;
 
   return (
-    <div className="ft-card">
+    <div className="ft-card" onClick={() => onOpenDetail(fl.id)}>
       <div className="ft-card-inner">
 
         {/* Top row */}
@@ -204,8 +206,8 @@ const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle, onOpenInvit
               </div>
               <div className="ft-insights-feedback">
                 {t("findTalent.card.feedback")}
-                <button className="ft-thumb-btn"><ThumbsUp size={13} /></button>
-                <button className="ft-thumb-btn"><ThumbsDown size={13} /></button>
+                <button className="ft-thumb-btn" onClick={(e) => e.stopPropagation()}><ThumbsUp size={13} /></button>
+                <button className="ft-thumb-btn" onClick={(e) => e.stopPropagation()}><ThumbsDown size={13} /></button>
               </div>
             </div>
             <ul className="ft-insights-list">
@@ -234,8 +236,8 @@ const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle, onOpenInvit
 
       {/* Card footer */}
       <div className="ft-card-divider" />
-      <div className="ft-card-footer">
-        <button className="ft-card-footer-link" onClick={() => navigate(`/profile/${fl.id}`)}>{t("findTalent.card.viewProfile")}</button>
+      <div className="ft-card-footer" onClick={(e) => e.stopPropagation()}>
+        <button className="ft-card-footer-link" onClick={() => onOpenDetail(fl.id)}>{t("findTalent.card.viewProfile")}</button>
         <button className="ft-card-footer-link" onClick={() => navigate(`/messages?userId=${fl.id}`)}>{t("findTalent.card.sendMessage")}</button>
         <button className="ft-card-footer-link" onClick={handleSave}>
           {isSaved ? "Saqlangan" : t("findTalent.card.saveAction")}
@@ -265,9 +267,9 @@ const FindTalent = () => {
   const [targetJobId, setTargetJobId] = useState(searchParams.get("jobId"));
   const [targetJobTitle, setTargetJobTitle] = useState("");
 
-  const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
-  const [selectedFreelancerForInvite, setSelectedFreelancerForInvite] = useState(null);
-  const [activeSetInvitedCb, setActiveSetInvitedCb] = useState(null);
+  const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
+  const [selectedFreelancerId, setSelectedFreelancerId] = useState(null);
+  const [drawerInitialView, setDrawerInitialView] = useState("details");
 
   const [freelancers, setFreelancers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -569,10 +571,15 @@ const FindTalent = () => {
                 presence={presenceMap[String(fl.id).toLowerCase()]}
                 targetJobId={targetJobId}
                 onSaveToggle={onSaveToggle}
-                onOpenInviteDrawer={(freelancer, setInvitedCb) => {
-                  setSelectedFreelancerForInvite(freelancer);
-                  setActiveSetInvitedCb(() => setInvitedCb);
-                  setInviteDrawerOpen(true);
+                onOpenInviteDrawer={(freelancer) => {
+                  setSelectedFreelancerId(freelancer.id);
+                  setDrawerInitialView("invite");
+                  setDetailDrawerOpen(true);
+                }}
+                onOpenDetail={(id) => {
+                  setSelectedFreelancerId(id);
+                  setDrawerInitialView("details");
+                  setDetailDrawerOpen(true);
                 }}
                 onInvite={(name, isSuccess) => {
                   if (isSuccess) {
@@ -625,22 +632,22 @@ const FindTalent = () => {
       </div>
 
       <FtToast msg={toast} onClose={() => setToast("")} />
-      <InviteDrawer 
-        isOpen={inviteDrawerOpen} 
+      <FreelancerDetailDrawer 
+        isOpen={detailDrawerOpen}
         onClose={() => {
-          setInviteDrawerOpen(false);
-          setSelectedFreelancerForInvite(null);
-          setActiveSetInvitedCb(null);
-        }} 
-        freelancer={selectedFreelancerForInvite}
-        onInviteSuccess={(msgOrName, isSuccess) => {
+          setDetailDrawerOpen(false);
+          setSelectedFreelancerId(null);
+          setDrawerInitialView("details");
+        }}
+        freelancerId={selectedFreelancerId}
+        initialView={drawerInitialView}
+        onInvite={(freelancer, isSuccess) => {
           if (isSuccess) {
-            notify(`${msgOrName} ga ushbu loyiha uchun taklif yuborildi!`);
-            if (activeSetInvitedCb) activeSetInvitedCb(true);
-          } else {
-            notify(msgOrName);
+            notify(`${freelancer.name || (freelancer.first_name + " " + freelancer.last_name)} ga ushbu loyiha uchun taklif yuborildi!`);
+            setDetailDrawerOpen(false);
           }
         }}
+        onSaveToggle={onSaveToggle}
       />
     </div>
   );
