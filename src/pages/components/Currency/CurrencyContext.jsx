@@ -61,15 +61,17 @@ export const CurrencyProvider = ({ children }) => {
   const convert = (amount, from = 'USD') => {
     if (!amount) return 0;
     const val = Number(amount);
+    const fromNormalized = String(from || 'USD').toUpperCase();
+    const targetNormalized = String(currency || 'USD').toUpperCase();
     
     // 1. Avval USD ga o'giramiz (agar USD bo'lmasa)
     let usdValue = val;
-    if (from === 'UZS') usdValue = val / rates.UZS;
-    if (from === 'RUB') usdValue = val / rates.RUB;
+    if (fromNormalized === 'UZS') usdValue = val / rates.UZS;
+    if (fromNormalized === 'RUB') usdValue = val / rates.RUB;
 
     // 2. Keyin maqsadli valyutaga o'giramiz
-    if (currency === 'UZS') return usdValue * rates.UZS;
-    if (currency === 'RUB') return usdValue * rates.RUB;
+    if (targetNormalized === 'UZS') return usdValue * rates.UZS;
+    if (targetNormalized === 'RUB') return usdValue * rates.RUB;
     return usdValue;
   };
 

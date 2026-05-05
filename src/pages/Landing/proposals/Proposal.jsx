@@ -116,7 +116,11 @@ export default function Proposal() {
     setLoading(false);
 
     if (res?.success === false) {
-      notify(res?.message || t("submitProposal.toast.error"), "error");
+      if (res?.message === "proposals.error.alreadySubmitted") {
+        notify(t("submitProposal.error.alreadySubmitted", "Siz bu ishga allaqachon taklif yuborgansiz"), "error");
+      } else {
+        notify(res?.message || t("submitProposal.toast.error"), "error");
+      }
     } else {
       setSubmitted(true);
     }

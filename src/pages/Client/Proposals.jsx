@@ -195,23 +195,24 @@ const Proposals = () => {
         if (type === "reject") {
           setProposals(prev => prev.map(p => p.id === modalData ? { ...p, status: "rejected" } : p));
           notify("Taklif rad etildi va arxivga olindi");
+          setModal({ isOpen: false, type: null, data: null });
         } else {
           // Success acceptance
           setProposals(prev => prev.map(p => {
              if (p.id === modalData) return { ...p, status: "accepted" };
-             // If other proposals for the same job were automatically rejected
-             if (p.job_id === res.data?.proposal?.job_id && p.id !== modalData) return { ...p, status: "rejected" };
+             if (p.job_id === (res.data?.proposal?.job_id || res.data?.job_id) && p.id !== modalData) return { ...p, status: "rejected" };
              return p;
           }));
           notify("Tabriklaymiz! Freelancer muvaffaqiyatli yollangan.");
           
-          // Custom modal for redirect instead of window.confirm
           if (res.data?.contract?.id) {
             setModal({ 
               isOpen: true, 
               type: "success", 
               data: res.data.contract.id 
             });
+          } else {
+            setModal({ isOpen: false, type: null, data: null });
           }
         }
       } else {
@@ -233,16 +234,14 @@ const Proposals = () => {
         } else {
           notify(res?.message || "Xatolik yuz berdi", "error");
         }
+        setModal({ isOpen: false, type: null, data: null });
       }
     } catch (err) {
+      console.error("executeAction error:", err);
       notify("Server bilan bog'lanishda xato", "error");
+      setModal({ isOpen: false, type: null, data: null });
     } finally {
       setActionLoading(null);
-      if (!modal.isOpen || modal.type !== "success") {
-         if (modal.type !== "hire") {
-           setModal({ isOpen: false, type: null, data: null });
-         }
-      }
     }
   };
 
