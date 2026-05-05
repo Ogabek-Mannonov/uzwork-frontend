@@ -95,6 +95,7 @@
   letter-spacing: -0.04em;
   background: linear-gradient(135deg, var(--fprop-text) 0%, var(--fprop-blue) 60%, var(--fprop-violet) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   margin: 0 0 0.75rem 0;
   line-height: 1.1;

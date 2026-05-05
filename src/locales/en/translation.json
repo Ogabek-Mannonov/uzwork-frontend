@@ -6,13 +6,28 @@
     "back": "Back",
     "localTime": "local time",
     "fixedPrice": "Fixed price",
-    "share": "Share"
+    "share": "Share",
+    "viewAll": "View All",
+    "export": "Export",
+    "save": "Save",
+    "cancel": "Cancel",
+    "description": "Description",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "amount": "Amount",
+    "logout": "Logout",
+    "retry": "Retry",
+    "saving": "Saving...",
+    "errorDelete": "An error occurred while deleting",
+    "errorCopy": "An error occurred while copying",
+    "errorStatusUpdate": "An error occurred while updating status"
   },
   "findTalent": {
     "badges": {"top_rated_plus": "Top Rated Plus","top_rated": "Top Rated","rising_talent": "Rising Talent"},
     "filter": {"title": "Filters","clearAll": "Clear all","clearAllCount": "Clear all filters ({{count}})","talentBadge": "Talent badge","talentBadgeInfo": "Badges awarded based on performance","hourlyRate": "Hourly rate","under": "under ${{min}}","location": "Location","searchLocation": "City, country or region","jobSuccess": "Job success","jobSuccessInfo": "Minimum job success score","successUp": "{{percent}}% & up","englishLevel": "English level"},
     "results": {"searchPlaceholder": "Search for a skill or name","advancedSearch": "Advanced search","freelancersFound": "{{count}} freelancers found","location": "Location","successCount": "✅ {{percent}}%+ success","sort": {"relevance": "Best Match","rate_asc": "Rate: Low to High","rate_desc": "Rate: High to Low","success": "Job Success","earned": "Most Earned"},"loading": "Loading freelancers...","empty": "No freelancers found","emptySub": "Try adjusting your filters or search query","loadMore": "Load more","loadingMore": "Loading more freelancers..."},
-    "card": {"save": "Save freelancer","invited": "Invited","invite": "Invite to job","success": "Job Success","earned": "earned","consults": "Offers consultations","insights": "Insights about {{name}}","insightsInfo": "AI-generated insights","feedback": "Insight feedback","associatedWith": "Associated with","viewProfile": "View Profile","viewFullProfile": "View full profile","sendMessage": "Send Message","saveAction": "Save","boosted": "Boosted", "mutaxassis": "Specialist", "negotiable": "Negotiable", "jobsDone": "jobs done", "newFreelancer": "New freelancer"},
+    "card": {"save": "Save freelancer","invited": "Invited","invite": "Invite to job","success": "Job Success","earned": "earned","consults": "Offers consultations","insights": "Insights about {{name}}","insightsInfo": "AI-generated insights","feedback": "Insight feedback","associatedWith": "Associated with","viewProfile": "View Profile","viewFullProfile": "View full profile","sendMessage": "Send Message","saveAction": "Save","boosted": "Boosted", "mutaxassis": "Specialist", "negotiable": "Negotiable", "jobsDone": "jobs completed", "newFreelancer": "New freelancer"},
     "nations": {"uz": "Uzbekistan","tashkent": "Tashkent","samarkand": "Samarkand","bukhara": "Bukhara","kz": "Kazakhstan","kg": "Kyrgyzstan","remote": "Remote (Any)"},
     "englishLevels": {"any": "Any level","basic": "Basic","conversational": "Conversational","fluent": "Fluent","native": "Native"}
   },
@@ -35,17 +50,7 @@
     "saved": "Saved Talent",
     "contracts": "Contracts"
   },
-  "common": {
-    "viewAll": "View All",
-    "export": "Export",
-    "save": "Save",
-    "cancel": "Cancel",
-    "description": "Description",
-    "actions": "Actions",
-    "status": "Status",
-    "date": "Date",
-    "amount": "Amount"
-  },
+
   "header": {
     "hireTalent": "Hire Talent",
     "findWork": "Find Work",
@@ -305,12 +310,6 @@
     "edit": "Edit",
     "about": "About",
     "reviews": "Work history",
-    "skills": "Skills & Technologies",
-    "certifications": "Certifications",
-    "totalEarned": "Total earned",
-    "jobsCompleted": "Jobs completed",
-    "successScore": "Success score",
-    "activeProjects": "Active projects",
     "rate": "Rate",
     "perHour": "/hr",
     "clientSatisfaction": "Client satisfaction",
@@ -318,7 +317,6 @@
     "repeatClients": "Repeat clients",
     "noBio": "No bio provided",
     "noHistory": "No work history yet",
-    "noPortfolio": "No portfolio yet",
     "noCerts": "No certifications yet",
     "hireBtn": "Invite to job",
     "messageBtn": "Send message",
@@ -371,7 +369,7 @@
     "addLanguage": "Add Language",
     "editLanguage": "Edit Language",
     "languageLevel": "Proficiency",
-    "languages": "Languages",
+
     "languagesDesc": "Select languages you can speak and write",
     "chooseLanguage": "Choose Language",
     "noLanguagesAdded": "No languages added yet",
@@ -396,7 +394,7 @@
     "media": "Project Media",
     "uploadMedia": "Click to upload images or PDF",
     "uploadLimit": "Images, PDF (max 5MB)",
-    "skills": "Skills & Technologies",
+
     "publishProject": "Publish Project",
     "updateProject": "Update Project",
     "saving": "Saving...",
@@ -587,7 +585,7 @@
     "captionPlaceholder": "Add a caption...",
     "addMore": "Add More",
     "yearSuffix": "",
-    "stickers": "Stickers",
+
     "profile": "User Details",
     "images": "Images",
     "videos": "Videos",
@@ -596,7 +594,7 @@
     "links": "Links",
     "blockUser": "Block User",
     "noPendingMilestones": "No pending milestones.",
-    "select": "Select",
+
     "submit": "SUBMIT",
     "openWith": "VIEW",
     "downloadAction": "DOWNLOAD",
@@ -918,14 +916,7 @@
     "readyDesc": "You're ready to join the UzWork community. Click the button below to confirm.",
     "finish": "Finish"
   },
-  "common": {
-    "next": "Next",
-    "back": "Back",
-    "logout": "Logout",
-    "loading": "Loading...",
-    "retry": "Retry",
-    "saving": "Saving..."
-  },
+
   "wallet": {
     "title": "My Wallet",
     "availableBalance": "Available Balance",
@@ -968,8 +959,6 @@
     "insufficientBalance": "Insufficient available balance",
     "lockedBalanceLow": "Insufficient locked balance"
   },
-  "wallet.insufficientBalance": "Insufficient available balance",
-  "wallet.lockedBalanceLow": "Insufficient locked balance",
   "proposals.error.freelancerOnly": "Only freelancers can create proposals.",
   "proposals.error.missingFields": "Please fill in all required fields.",
   "proposals.error.ownJob": "You cannot apply to your own job.",
@@ -1286,12 +1275,7 @@
       "in_progress": "In Progress"
     }
   },
-  "common": {
-    "loading": "Loading...",
-    "errorDelete": "An error occurred while deleting",
-    "errorCopy": "An error occurred while copying",
-    "errorStatusUpdate": "An error occurred while updating status"
-  },
+
   "postJob": {
     "header": {
       "post": "Post a Job",
@@ -1405,17 +1389,7 @@
       "noSkills": "No skills added",
       "noDesc": "No description provided"
     },
-    "categories": {
-      "Web Development": "Web Development",
-      "Mobile Development": "Mobile Development",
-      "Design & Creative": "Design & Creative",
-      "Writing & Translation": "Writing & Translation",
-      "IT & Networking": "IT & Networking",
-      "Data Science & AI": "Data Science & AI",
-      "Marketing": "Marketing",
-      "Business Consulting": "Business Consulting",
-      "Video & Animation": "Video & Animation"
-    },
+
     "sidebar": {
       "progress": "Progress",
       "tips": "Tips for Step {{step}}",
@@ -1658,47 +1632,7 @@
     "date": "Date",
     "amount": "Amount"
   },
-  "wallet": {
-    "title": "My Wallet",
-    "subtitle": "Securely manage your funds and transactions",
-    "overview": "Overview",
-    "transactions": "Transaction History",
-    "methods": "My Cards",
-    "availableBalance": "Available Balance",
-    "lockedBalance": "Locked (Escrow)",
-    "totalEarned": "Total Earned",
-    "addCard": "Add Card",
-    "myCards": "My Cards",
-    "deposit": "Deposit",
-    "withdraw": "Withdraw",
-    "noTransactions": "No transactions yet",
-    "history": "Transaction History",
-    "amountPlaceholder": "Enter amount",
-    "cardNumberPlaceholder": "Card Number",
-    "cardHolderPlaceholder": "Card Holder",
-    "expiryDatePlaceholder": "Expiry (MM/YY)",
-    "noCards": "No cards found",
-    "deleteCard": "Delete Card",
-    "confirmDelete": "Are you sure you want to delete this card?",
-    "yes": "Yes",
-    "no": "No",
-    "successCard": "Card added successfully!",
-    "successDelete": "Card deleted successfully!",
-    "successDeposit": "Deposit successful!",
-    "successWithdraw": "Withdrawal request sent!",
-    "errorCardNumber": "Invalid card number",
-    "errorGeneric": "Something went wrong",
-    "types": {
-      "deposit": "Deposit",
-      "withdrawal": "Withdrawal",
-      "escrow_hold": "Locked (Escrow)",
-      "escrow_release": "Released",
-      "proposal_deposit_lock": "Proposal Deposit (Locked)",
-      "proposal_deposit_refund": "Proposal Refund",
-      "payment": "Payment",
-      "refund": "Refund"
-    }
-  },
+
   "notifications": {
     "title": "Notifications",
     "all": "All",

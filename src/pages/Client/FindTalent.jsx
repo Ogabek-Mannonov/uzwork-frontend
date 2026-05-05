@@ -174,7 +174,7 @@ const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle, onOpenInvit
             }
           </span>
           <span className="ft-stat-sep" />
-          <span className="ft-stat">{fl.earned} {t("findTalent.card.earned")}</span>
+          <span className="ft-stat">{fl.earned}</span>
           {fl.consults && (
             <>
               <span className="ft-stat-sep" />

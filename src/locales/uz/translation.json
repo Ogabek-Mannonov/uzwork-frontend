@@ -3,7 +3,25 @@
     "loading": "Yuklanmoqda...",
     "error": "Xatolik yuz berdi",
     "next": "Keyingi",
-    "back": "Orqaga"
+    "back": "Orqaga",
+    "viewAll": "Hammasini ko'rish",
+    "export": "Eksport qilish",
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "description": "Tavsif",
+    "actions": "Harakatlar",
+    "status": "Holati",
+    "date": "Sana",
+    "amount": "Summa",
+    "logout": "Chiqish",
+    "retry": "Qayta urinish",
+    "saving": "Saqlanmoqda...",
+    "errorDelete": "O'chirishda xatolik yuz berdi",
+    "errorCopy": "Nusxalashda xatolik yuz berdi",
+    "errorStatusUpdate": "Holatni yangilashda xatolik yuz berdi",
+    "localTime": "mahalliy vaqt",
+    "fixedPrice": "Ruxsat etilgan narx",
+    "share": "Ulashish"
   },
   "findTalent": {
     "badges": {
@@ -63,8 +81,8 @@
       "boosted": "Tavsiya etilgan",
       "mutaxassis": "Mutaxassis",
       "negotiable": "Kelishiladi",
-      "jobsDone": "ta topshirilgan",
-      "newFreelancer": "Yangi frilanser"
+      "jobsDone": "ta bajarilgan ish",
+      "newFreelancer": "Yangi mutaxassis"
     },
     "nations": {
       "uz": "O'zbekiston",
@@ -122,29 +140,7 @@
     "billing": "To'lovlar",
     "saved": "Saqlanganlar"
   },
-  "common": {
-    "viewAll": "Hammasini ko'rish",
-    "export": "Eksport qilish",
-    "save": "Saqlash",
-    "cancel": "Bekor qilish",
-    "description": "Tavsif",
-    "actions": "Harakatlar",
-    "status": "Holati",
-    "date": "Sana",
-    "amount": "Summa",
-    "next": "Keyingisi",
-    "back": "Orqaga",
-    "logout": "Chiqish",
-    "loading": "Yuklanmoqda...",
-    "retry": "Qayta urinish",
-    "saving": "Saqlanmoqda...",
-    "errorDelete": "O'chirishda xatolik yuz berdi",
-    "errorCopy": "Nusxalashda xatolik yuz berdi",
-    "errorStatusUpdate": "Holatni yangilashda xatolik yuz berdi",
-    "localTime": "mahalliy vaqt",
-    "fixedPrice": "Ruxsat etilgan narx",
-    "share": "Ulashish"
-  },
+
   "header": {
     "hireTalent": "Mutaxassis yollash",
     "findWork": "Ish topish",
@@ -410,12 +406,6 @@
     "edit": "Tahrirlash",
     "about": "Haqida",
     "reviews": "Ish tarixi",
-    "skills": "Ko'nikmalar va Texnologiyalar",
-    "certifications": "Sertifikatlar",
-    "totalEarned": "Umumiy daromad",
-    "jobsCompleted": "Bajarilgan ishlar",
-    "successScore": "Muvaffaqiyat ko'rsatkichi",
-    "activeProjects": "Faol loyihalar",
     "rate": "Narxi",
     "perHour": "/soat",
     "clientSatisfaction": "Mijozlar mamnuniyati",
@@ -423,11 +413,10 @@
     "repeatClients": "Doimiy mijozlar",
     "noBio": "Ma'lumot berilmagan",
     "noHistory": "Ish tarixi hali yo'q",
-    "noPortfolio": "Portfolio hali yo'q",
     "noCerts": "Sertifikatlar hali yo'q",
     "hireBtn": "Ishga taklif qilish",
     "messageBtn": "Xabar yozish",
-    "languages": "Tillar",
+
     "untitledJob": "Nomsiz loyiha",
     "noFeedback": "Fikr bildirilmagan",
     "noComment": "Izoh qoldirilmagan",
@@ -476,7 +465,7 @@
     "addLanguage": "Til qo'shish",
     "editLanguage": "Tilni tahrirlash",
     "languageLevel": "Bilish darajasi",
-    "languages": "Tillar",
+
     "languagesDesc": "Siz yoza oladigan va so'zlasha oladigan tillarni kiritish",
     "chooseLanguage": "Tilni tanlang",
     "noLanguagesAdded": "Hali tillar kiritilmagan",
@@ -501,7 +490,7 @@
     "media": "Loyiha media fayllari",
     "uploadMedia": "Rasm yoki PDF yuklash uchun bosing",
     "uploadLimit": "Rasm, PDF (maks. 5MB)",
-    "skills": "Ko'nikmalar va Texnologiyalar",
+
     "publishProject": "Loyihani chop etish",
     "updateProject": "Loyihani yangilash",
     "saving": "Saqlanmoqda...",
@@ -692,7 +681,7 @@
     "captionPlaceholder": "Izoh qoldiring...",
     "addMore": "Yana qo'shish",
     "yearSuffix": "-yil",
-    "stickers": "Stikerlar",
+
     "profile": "Ma'lumotlar",
     "images": "Rasmlar",
     "videos": "Videolar",
@@ -701,7 +690,7 @@
     "links": "Linklar",
     "blockUser": "Bloklash",
     "noPendingMilestones": "Topshiriladigan bosqichlar yo'q.",
-    "select": "Tanlang",
+
     "submit": "TOPSHIRISH",
     "openWith": "KO'RISH",
     "downloadAction": "YUKLAB OLISH",
@@ -762,7 +751,7 @@
     "approved": "Tasdiqlangan",
     "revisionRequested": "Tuzatish so'ralgan",
     "revisionRequestedNotify": "Tuzatish so'raldi",
-    "select": "Tanlang",
+
     "approveWork": "Tasdiqlash",
     "requestRevision": "Tuzatish so'rash",
     "attachments": "Fayllar",
@@ -980,30 +969,7 @@
       "next": "Keyingi"
     }
   },
-  "myJobsFreelancer": {
-    "title": "Mening ishlarim",
-    "subtitle": "Barcha faol va yakunlangan loyihalaringizni boshqaring",
-    "activeProjects": "Faol loyihalar",
-    "totalEarnings": "Umumiy daromad",
-    "tabs": {
-      "active": "Faol",
-      "completed": "Yakunlangan",
-      "all": "Barchasi"
-    },
-    "searchPlaceholder": "Loyiha yoki mijoz nomi bo'yicha qidirish...",
-    "empty": {
-      "noProjects": "Loyihalar topilmadi",
-      "desc": "Sizda hali hech qanday {{status}} loyiha yo'q. Mijozlarga taklif yuboring va ishlarni boshlang!",
-      "findWork": "Ish topish"
-    },
-    "contract": {
-      "amount": "Summa",
-      "startDate": "Boshlangan sana",
-      "lastUpdate": "Oxirgi yangilanish",
-      "chat": "Chat",
-      "details": "Batafsil"
-    }
-  },
+
   "onboarding": {
     "step": "Bosqich",
     "welcomeTitle": "Xush kelibsiz! Platformaga kirish uchun oz qoldi.",
