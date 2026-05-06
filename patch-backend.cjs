@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const path = 'C:/Users/ismoil/Desktop/uzwork/uzwork-backend/src/server.js';
+const path = '../uzwork-backend/src/server.js';
 let content = fs.readFileSync(path, 'utf8');
 
 if (!content.includes('socket.on("removeReaction"')) {

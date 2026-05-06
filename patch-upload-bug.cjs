@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const path = 'C:/Users/ismoil/Desktop/uzwork/uzwork-backend/src/controllers/uploadController.js';
+const path = '../uzwork-backend/src/controllers/uploadController.js';
 let content = fs.readFileSync(path, 'utf8');
 
 // The bug: subDir is either "documents" or "voice", ignoring "images"
