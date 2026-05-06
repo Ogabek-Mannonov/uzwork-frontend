@@ -244,7 +244,7 @@ const Settings = () => {
           totalSpent: p.total_spent || 0,
           completedJobs: p.jobs_posted_count || p.completed_jobs || 0,
           activeJobs: p.active_jobs_count || p.active_jobs || 0,
-          rating: parseFloat(p.rating || u.rating || 0),
+          rating: parseFloat(profileRes.data.average_rating || p.rating || u.rating || 0),
           membership: p.membership_tier || "Client Basic"
         }));
       }

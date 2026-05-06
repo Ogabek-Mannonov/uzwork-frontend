@@ -515,8 +515,13 @@ const Proposals = () => {
                         </div>
                         <div className="cp-meta-row">
                           <div className="cp-rating">
-                            <Star size={12} fill="#f59e0b" />
-                            {proposal.freelancer_rating || "4.9"} ({proposal.freelancer_reviews_count || "24"} ta sharh)
+                            <Star size={12} fill="#f59e0b" stroke="#f59e0b" />
+                            <span style={{ marginLeft: "4px", fontWeight: "600", color: "#eab308" }}>
+                              {proposal.freelancer_rating ? Number(proposal.freelancer_rating).toFixed(1) : "0.0"}
+                            </span>
+                            <span style={{ marginLeft: "4px", color: "var(--text-muted, #6b7280)" }}>
+                              ({proposal.freelancer_reviews_count || 0} ta sharh)
+                            </span>
                           </div>
                           {proposal.freelancer_location && (
                             <div className="cp-location">

@@ -210,6 +210,24 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                     {data.is_verified && <CheckCircle2 size={18} className="fd-verified-icon" />}
                   </h1>
                   <p className="fd-title-text">{data.title}</p>
+                  <div className="fd-header-rating" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', marginBottom: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i} 
+                          size={15} 
+                          fill={i < Math.round(parseFloat(data.average_rating || 0)) ? "#f59e0b" : "none"} 
+                          stroke="#f59e0b" 
+                        />
+                      ))}
+                    </div>
+                    <span style={{ fontWeight: '600', color: '#eab308', fontSize: '14px' }}>
+                      {parseFloat(data.average_rating || 0).toFixed(1)}
+                    </span>
+                    <span style={{ color: '#6b7280', fontSize: '13px' }}>
+                      ({data.total_reviews || 0} sharh)
+                    </span>
+                  </div>
                   <div className="fd-location-row">
                     <MapPin size={14} />
                     <span>{data.location}</span>

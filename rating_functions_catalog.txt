@@ -1,0 +1,113 @@
+================================================================================
+          UZWORK PLATFORMASI — REYTING VA BAHOLASH TIZIMI KATALOGI (YANGILANGAN)
+================================================================================
+
+Ushbu hujjatda loyihaning Backend va Frontend qismlarida reyting hamda baholash (ratings & reviews) tizimiga daxldor bo'lgan barcha funktsiyalar, API so'rovlar, ma'lumotlar bazasi hisob-kitoblari, avtomatik fon vazifalari (Cron Jobs) va UI komponentlari ro'yxati va ishlash tamoyillari jamlangan.
+
+---
+
+PART 1: BACKEND REYTING FUNKTSIYALARI & API ENDPOINTLARI
+Fayl manzili: c/Users/ismoil/Desktop/uzwork/uzwork-backend/src/controllers/reviewController.js
+              c/Users/ismoil/Desktop/uzwork/uzwork-backend/src/jobs/autoRatingJob.js
+              c/Users/ismoil/Desktop/uzwork/uzwork-backend/src/cron.js
+
+1. calculateWeightedRating(ratingsRows, role)
+   -----------------------------------------
+   * Tavsif: Foydalanuvchining umumiy reytingini "Exponential Decay" (Eskirish hisobi) algoritmi bo'yicha hisoblaydi. 
+   * Ishlash printsipi: Ohirgi 3 oyda olingan baholarga 70% vazn, undan oldingi baholarga esa 30% vazn beradi.
+   * Hisoblash formulalari:
+     - Frilanserlar uchun: (Sifat + Muddat + Muloqot) / 3
+     - Mijozlar uchun: (To'lov + Texnik topshiriq) / 2
+   * Xavfsizlik: Har qanday `null` yoki bo'sh kategoriya qiymatlari matematikani buzib yubormasligi uchun har bir satrda faqat bor bo'lgan metrikalar hisobga olinadi.
+
+2. updateUserRating(userId)
+   -------------------------
+   * Tavsif: Foydalanuvchining rolini (freelancer yoki client) aniqlaydi, unga berilgan barcha baholarni bazadan yuklaydi, "calculateWeightedRating" orqali umumiy yangi ballni hisoblaydi va tegishli profil jadvaliga (`freelancer_profiles` o'zgaruvchisi yoki `client_profiles`) yozadi.
+
+3. createReview(req, res) | Endpoint: POST /reviews
+   -------------------------------------------------
+   * Tavsif: Shartnoma yakunlanganda (completed statusida) uning ishtirokchilariga reyting va yozma sharh yozish imkonini beradi.
+   * Tekshiruvlar & Xavfsizlik (Security & Anti-Abuse):
+     - Foydalanuvchi ushbu shartnomaning ishtirokchisimi?
+     - Shartnoma "completed" statusidami?
+     - Foydalanuvchi bir oy ichida ushbu shaxsga 2 martadan ko'p baho beryaptimi? (Max 2 checks per month)
+     - Bu shartnoma uchun avval baho berilmaganmi?
+     - Baholar 1 dan 5 gacha oraliqdami?
+   * Yangi Qo'shilgan Cheklov (Low-Rating Comment Rule):
+     - Agar berilgan baholardan birortasi past bo'lsa (1-3 yulduz oralig'ida), backend va frontendda Comment (izoh/sharh) yozish majburiy hisoblanadi va kamida 20 ta harfdan iborat bo'lishi talab qilinadi. Bu asossiz past baholarni oldini oladi.
+
+4. runAutoRatingJob() | Silent Completion Background Job
+   -----------------------------------------------------
+   * Fayl: src/jobs/autoRatingJob.js
+   * Tavsif: Agar loyiha tugagandan keyin 14 kun davomida tomonlar bir-biriga munosabat bildirmasa (baho bermasa), fondagi Cron Job vazifasi ishga tushadi:
+     - Ikkala tomonga ham "is_automatic: true" statusi bilan neytral-ijobiy (4 yulduzli) avtomatik baholarni yozadi.
+     - Frilanserning JSS (Job Success Score) ko'rsatkichiga +0.5 ball qo'shib ketadi.
+     - Profil umumiy reytingini qayta hisoblaydi.
+   * Reja: Har kuni yarim tunda `0 0 * * *` jadvali bo'yicha `cron.js` orqali ishga tushiriladi.
+
+5. getReviews(req, res) | Endpoint: GET /reviews
+   -----------------------------------------------
+   * Tavsif: Tizimdagi barcha reytinglarni filtrlar asosida sahifalab qaytaradi.
+   * Xavfsizlik (PG SQL Bug Patch): SQL so'rovida `(r.score_quality + r.score_timeliness + r.score_communication) / 3.0` ifodasi bitta metrika `NULL` bo'lganda butun qiymatni buzib yuborishini oldini olish uchun, `COALESCE` va `NULLIF` yordamida faqat bor bo'lgan metrikalar hisoblanadigan xavfsiz matematik modelga o'tkazildi.
+
+6. getReviewById(req, res) | Endpoint: GET /reviews/:id
+   -----------------------------------------------------
+   * Tavsif: Berilgan ID bo'yicha bitta reytingni xavfsiz matematik formula bilan yuklaydi.
+
+7. getUserReviews(req, res) | Endpoint: GET /reviews/user/:userId
+   --------------------------------------------------------------
+   * Tavsif: Foydalanuvchining barcha sharhlarini batafsil tahlil (yulduzlar taqsimoti, yulduz ulushlari) bilan yuklaydi.
+   * Yangi Qo'shilgan Hisob-kitoblar (Completion Stats / JSS):
+     - Endi ushbu endpoint foydalanuvchining shartnomalari yakunlanish foizini ham hisoblab qaytaradi:
+       * `completion_rate`: Loyihalarning muvaffaqiyatli yakunlanish foizi. Formula: (Bajarilgan shartnomalar / Jami shartnomalar) * 100
+       * `total_contracts`: Jami shartnomalar soni.
+       * `completed_contracts`: Muvaffaqiyatli yakunlangan shartnomalar soni.
+
+---
+
+PART 2: FRONTEND REYTING API METODLARI
+Fayl manzili: c/Users/ismoil/Desktop/uzwork/uzwork-frontend/src/api/ratings.js
+
+1. getReviews(params)         | GET `/reviews`
+2. getReviewById(id)          | GET `/reviews/${id}`
+3. getUserReviews(userId)     | GET `/reviews/user/${userId}` (tarkibida `completion_rate` ham bor)
+4. createReview(payload)      | POST `/reviews`
+5. updateReview(id, payload)  | PUT `/reviews/${id}`
+
+---
+
+PART 3: FRONTEND INTERFEYSI VA REYTING KOMPONENTLARI
+
+1. Shartnoma Tafsilotlari Sahifasi (`ContractDetail`)
+   * Fayl: src/pages/Landing/contracts/Detail.jsx
+   * Tarkibi:
+     - `StarRating`: foydalanuvchiga yulduzchalarni chiroyli hover effekti bilan tanlash imkonini beradi.
+     - Low-Rating Validatsiya: Agar foydalanuvchi 1-3 yulduz oralig'ida past baho tanlasa, tizim "Iltimos, past baho berganda kamida 20 ta harfdan iborat batafsil izoh qoldiring!" deb ogohlantiradi va yuborishni to'xtatadi.
+
+2. Real-Vaqt Chat Sahifasi (`ChatDetail`)
+   * Fayl: src/pages/Landing/chat/Detail.jsx
+   * Tarkibi:
+     - Mijoz topshirilgan milestoneni qabul qilganda, chat tarixining o'zida baholash modal oynasini (`showRatingModal`) ochadi va yuqoridagi past baholarni asoslash (20 tadan ko'p harfli izoh) qoidasi bu yerda ham to'liq ishlaydi.
+
+3. Loyihaga Arizalar Sahifasi (`Proposals`)
+   * Fayl: src/pages/Client/Proposals.jsx
+   * Integratsiya: Mutaxassislar reyting beydji dinamik ko'rsatiladi.
+
+4. Mutaxassis Qidirish Sahifasi (`FindTalent`)
+   * Fayl: src/pages/Client/FindTalent.jsx
+   * Integratsiya: Qidiruv natijasidagi har bir kartada o'rtacha reyting va sharhlar soni.
+
+5. Saqlangan Mutaxassislar Sahifasi (`SavedTalent`)
+   * Fayl: src/pages/Client/SavedTalent.jsx
+   * Integratsiya: Saqlangan freelancerlar ro'yxatida haqiqiy reyting ko'rsatkichlari.
+
+6. Mutaxassis Tafsilotlari Drawer Oynasi (`FreelancerDetailDrawer`)
+   * Fayl: src/pages/components/FreelancerDetailDrawer.jsx
+   * Integratsiya: Oyna ochilganda reyting va yulduzlar tahlili.
+
+7. Mijoz Profili Sahifasi (`Client`)
+   * Fayl: src/pages/Client/Client.jsx
+   * Integratsiya: Mijozning profil sahifasida o'zining reyting va muvaffaqiyat foizlari.
+
+================================================================================
+================================================================================
