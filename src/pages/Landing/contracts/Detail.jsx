@@ -56,6 +56,8 @@ export default function ContractDetail() {
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
   const [hasRated, setHasRated] = useState(true);
   const [skipConfirm, setSkipConfirm] = useState(false);
+  const [myReview, setMyReview] = useState(null);
+  const [partnerReview, setPartnerReview] = useState(null);
 
   const notify = useCallback((msg, type = "success") => {
     setToast({ msg, type });
@@ -145,20 +147,29 @@ export default function ContractDetail() {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       setCurrentUser(user);
 
-      // Check if ratings exist for this completed contract
+      // Fetch reviews for this completed contract
       if (contractData?.contract?.status === "completed" && user?.id) {
-        const reviewsRes = await getReviews({ contract_id: id, reviewer_id: user.id });
-        if (reviewsRes?.success && reviewsRes?.data?.reviews?.length === 0) {
-          setHasRated(false);
-          setShowRatingModal(true);
-          // Set initial empty rating structure depending on user role
-          if (String(user.id) === String(contractData.contract.client_id)) {
-            setRatingScores({ score_quality: 0, score_timeliness: 0, score_communication: 0 });
+        const reviewsRes = await getReviews({ contract_id: id });
+        if (reviewsRes?.success) {
+          const reviews = reviewsRes.data?.reviews || [];
+          const myReviewObj = reviews.find(r => String(r.from_user_id) === String(user.id));
+          const partnerReviewObj = reviews.find(r => String(r.from_user_id) !== String(user.id));
+          
+          setMyReview(myReviewObj || null);
+          setPartnerReview(partnerReviewObj || null);
+
+          if (!myReviewObj) {
+            setHasRated(false);
+            setShowRatingModal(true);
+            // Set initial empty rating structure depending on user role
+            if (String(user.id) === String(contractData.contract.client_id)) {
+              setRatingScores({ score_quality: 0, score_timeliness: 0, score_communication: 0 });
+            } else {
+              setRatingScores({ score_payment: 0, score_clarity: 0 });
+            }
           } else {
-            setRatingScores({ score_payment: 0, score_clarity: 0 });
+            setHasRated(true);
           }
-        } else {
-          setHasRated(true);
         }
       }
     } catch (err) {
@@ -178,6 +189,18 @@ export default function ContractDetail() {
     } else {
       if (!ratingScores.score_payment || !ratingScores.score_clarity) {
         notify("Iltimos, barcha metrikalarni baholang!", "error");
+        return;
+      }
+    }
+
+    // Low rating comment validation (1-3 stars)
+    const isLowRating = isClientRating
+      ? (ratingScores.score_quality <= 3 || ratingScores.score_timeliness <= 3 || ratingScores.score_communication <= 3)
+      : (ratingScores.score_payment <= 3 || ratingScores.score_clarity <= 3);
+
+    if (isLowRating) {
+      if (!comment || comment.trim().length < 20) {
+        notify("Past baho (1-3 yulduz) berganda kamida 20 ta harfdan iborat batafsil izoh/sharh qoldirishingiz shart!", "error");
         return;
       }
     }
@@ -242,8 +265,19 @@ export default function ContractDetail() {
         ? await submitMilestone(milestoneId) 
         : await approveMilestone(milestoneId);
       if (res?.success !== false) {
-        notify(newStatus === "submitted" ? "Ish ko'rib chiqish uchun yuborildi" : "To'lov tasdiqlandi");
+        notify(newStatus === "submitted" ? "Ish ko'rib chiqish uchun yuborildi" : "Ish muvaffaqiyatli qabul qilindi");
         load();
+
+        if (newStatus === "released" && res?.data?.contractCompleted) {
+          const isClientUser = String(currentUser?.id) === String(data?.contract?.client_id);
+          setRatingScores(isClientUser
+            ? { score_quality: 0, score_timeliness: 0, score_communication: 0 }
+            : { score_payment: 0, score_clarity: 0 }
+          );
+          setComment("");
+          setSkipConfirm(false);
+          setShowRatingModal(true);
+        }
       } else {
         notify(res?.message || "Xatolik yuz berdi", "error");
       }
@@ -419,7 +453,7 @@ export default function ContractDetail() {
                             disabled={actionLoading === m.id}
                             onClick={() => handleMilestoneAction(m.id, "released")}
                           >
-                            To'lash
+                            Tasdiqlash
                           </button>
                         )}
                         {(m.status === "released" || m.status === "approved") && (
@@ -458,6 +492,91 @@ export default function ContractDetail() {
                 <button className="cd-btn-premium cd-btn-outline" style={{ color: "var(--text)" }} onClick={() => navigate(`/disputes/new?contract=${contract.id}`)}>
                   <AlertCircle size={18} /> Nizo ochish
                 </button>
+              </div>
+            </div>
+          )}
+
+          {contract.status === "completed" && (
+            <div className="cd-admin-panel" style={{ marginTop: 40 }}>
+              <h4 style={{ fontSize: 18, fontWeight: 850, marginBottom: 16, color: 'var(--text)' }}>
+                ⭐ Shartnoma yakunlangan - Baholash va Sharhlar
+              </h4>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
+                {/* Sizning bahoyingiz */}
+                <div style={{ background: "var(--surface-2, rgba(255,255,255,0.02))", border: "1px solid var(--border)", borderRadius: 16, padding: 20 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: "var(--brand)" }}>Sizning bahoingiz</span>
+                    {!myReview && (
+                      <button 
+                        className="cd-btn-premium cd-btn-primary" 
+                        style={{ padding: "6px 12px", fontSize: 12, borderRadius: 8 }}
+                        onClick={() => {
+                          setSkipConfirm(false);
+                          setShowRatingModal(true);
+                        }}
+                      >
+                        Baho berish
+                      </button>
+                    )}
+                  </div>
+                  {myReview ? (
+                    <div>
+                      <div style={{ display: "flex", gap: 12, marginBottom: 10, flexWrap: "wrap" }}>
+                        {isClient ? (
+                          <>
+                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Sifat: <strong style={{ color: "#fbbf24" }}>★ {myReview.score_quality}</strong></span>
+                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Muddat: <strong style={{ color: "#fbbf24" }}>★ {myReview.score_timeliness}</strong></span>
+                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Muloqot: <strong style={{ color: "#fbbf24" }}>★ {myReview.score_communication}</strong></span>
+                          </>
+                        ) : (
+                          <>
+                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>To'lov: <strong style={{ color: "#fbbf24" }}>★ {myReview.score_payment}</strong></span>
+                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Texnik topshiriq: <strong style={{ color: "#fbbf24" }}>★ {myReview.score_clarity}</strong></span>
+                          </>
+                        )}
+                      </div>
+                      <p style={{ margin: 0, fontSize: 14, color: "var(--muted)", fontStyle: "italic", lineHeight: 1.5 }}>
+                        "{myReview.comment || "Sharh qoldirilmagan."}"
+                      </p>
+                    </div>
+                  ) : (
+                    <div style={{ color: "var(--muted)", fontSize: 13, fontStyle: "italic" }}>
+                      Siz hali ushbu shartnoma bo'yicha baho bermadingiz.
+                    </div>
+                  )}
+                </div>
+
+                {/* Hamkorning bahosi */}
+                <div style={{ background: "var(--surface-2, rgba(255,255,255,0.02))", border: "1px solid var(--border)", borderRadius: 16, padding: 20 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: "var(--muted)" }}>Hamkorning bahosi</span>
+                  </div>
+                  {partnerReview ? (
+                    <div>
+                      <div style={{ display: "flex", gap: 12, marginBottom: 10, flexWrap: "wrap" }}>
+                        {!isClient ? (
+                          <>
+                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Sifat: <strong style={{ color: "#fbbf24" }}>★ {partnerReview.score_quality}</strong></span>
+                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Muddat: <strong style={{ color: "#fbbf24" }}>★ {partnerReview.score_timeliness}</strong></span>
+                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Muloqot: <strong style={{ color: "#fbbf24" }}>★ {partnerReview.score_communication}</strong></span>
+                          </>
+                        ) : (
+                          <>
+                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>To'lov: <strong style={{ color: "#fbbf24" }}>★ {partnerReview.score_payment}</strong></span>
+                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Texnik topshiriq: <strong style={{ color: "#fbbf24" }}>★ {partnerReview.score_clarity}</strong></span>
+                          </>
+                        )}
+                      </div>
+                      <p style={{ margin: 0, fontSize: 14, color: "var(--muted)", fontStyle: "italic", lineHeight: 1.5 }}>
+                        "{partnerReview.comment || "Sharh qoldirilmagan."}"
+                      </p>
+                    </div>
+                  ) : (
+                    <div style={{ color: "var(--muted)", fontSize: 13, fontStyle: "italic" }}>
+                      Hamkor hali sizga baho bermadi.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}

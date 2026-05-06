@@ -16,6 +16,7 @@ import SubmissionCard from "./SubmissionCard";
 import ScreenshotGuard from "../../components/ScreenshotGuard";
 import { getContractById } from "../../../api/contracts";
 import { submitMilestone, approveMilestone, rejectMilestone } from "../../../api/milestones";
+import { createReview } from "../../../api/ratings";
 import i18n from "../../../i18n";
 import { useTranslation } from "react-i18next";
 import { translateToUzbek, translateBatchToUzbek } from "../../../api/translate_service";
@@ -1015,6 +1016,13 @@ export default function ChatDetail() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [contractData, setContractData] = useState(null);
 
+  // --- Rating State ---
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingScores, setRatingScores] = useState({});
+  const [comment, setComment] = useState("");
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
+  const [skipConfirm, setSkipConfirm] = useState(false);
+
   const { formatAmount } = useCurrency();
 
   const bottomRef = useRef(null);
@@ -1196,6 +1204,86 @@ export default function ChatDetail() {
     }
   }, [chatId, chatInfo?.contract_id, showSubmissionModal]);
 
+  const StarRating = ({ label, rating, onChange, description }) => {
+    const [hover, setHover] = useState(0);
+    return (
+      <div style={{ marginBottom: 16, textAlign: "left" }}>
+        <label style={{ display: "block", fontSize: 14, fontWeight: 750, color: "var(--text)", marginBottom: 2 }}>
+          {label}
+        </label>
+        {description && <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>{description}</div>}
+        <div style={{ display: "flex", gap: 6 }}>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              onClick={() => onChange(star)}
+              onMouseEnter={() => setHover(star)}
+              onMouseLeave={() => setHover(0)}
+              style={{
+                background: "none", border: "none", padding: 0, cursor: "pointer",
+                color: star <= (hover || rating) ? "#fbbf24" : "var(--border-color, #e2e8f0)",
+                transition: "transform 0.15s ease",
+                transform: star === (hover || rating) ? "scale(1.15)" : "scale(1)"
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill={star <= (hover || rating) ? "#fbbf24" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const handleRatingSubmit = async () => {
+    const isClientRating = currentUser?.role === 'client';
+    if (isClientRating) {
+      if (!ratingScores.score_quality || !ratingScores.score_timeliness || !ratingScores.score_communication) {
+        notify("Iltimos, barcha metrikalarni baholang!", "error");
+        return;
+      }
+    } else {
+      if (!ratingScores.score_payment || !ratingScores.score_clarity) {
+        notify("Iltimos, barcha metrikalarni baholang!", "error");
+        return;
+      }
+    }
+
+    // Low rating comment validation (1-3 stars)
+    const isLowRating = isClientRating
+      ? (ratingScores.score_quality <= 3 || ratingScores.score_timeliness <= 3 || ratingScores.score_communication <= 3)
+      : (ratingScores.score_payment <= 3 || ratingScores.score_clarity <= 3);
+
+    if (isLowRating) {
+      if (!comment || comment.trim().length < 20) {
+        notify("Past baho (1-3 yulduz) berganda kamida 20 ta harfdan iborat batafsil izoh/sharh qoldirishingiz shart!", "error");
+        return;
+      }
+    }
+
+    setRatingSubmitting(true);
+    try {
+      const payload = {
+        contract_id: chatInfo?.contract_id || contractData?.id,
+        comment,
+        ...ratingScores
+      };
+      const res = await createReview(payload);
+      if (res?.success !== false) {
+        notify("Baho muvaffaqiyatli qoldirildi, rahmat!");
+        setShowRatingModal(false);
+      } else {
+        notify(res?.message || "Xatolik yuz berdi", "error");
+      }
+    } catch (err) {
+      notify("Server xatosi", "error");
+    } finally {
+      setRatingSubmitting(false);
+    }
+  };
+
   const handleApproveSubmission = async (msg) => {
     const metadata = typeof msg.metadata === 'string' ? JSON.parse(msg.metadata) : msg.metadata;
     if (!metadata?.milestone_id) return notify("Milestone ID topilmadi", "error");
@@ -1213,6 +1301,17 @@ export default function ChatDetail() {
         return m;
       }));
       loadHistory();
+
+      // Show rating modal if contract completed
+      if (res.data?.contractCompleted) {
+        setRatingScores(currentUser?.role === 'client'
+          ? { score_quality: 0, score_timeliness: 0, score_communication: 0 }
+          : { score_payment: 0, score_clarity: 0 }
+        );
+        setComment("");
+        setSkipConfirm(false);
+        setShowRatingModal(true);
+      }
     } else {
       notify(res.message || "Approve qilishda xato", "error");
     }
@@ -3032,6 +3131,155 @@ export default function ChatDetail() {
                 {sending ? <div className="btn-spinner" /> : t("chat.submit", "SUBMIT")}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showRatingModal && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, width: "100%", height: "100%", 
+          background: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(20px)", zIndex: 10000, display: "flex", 
+          alignItems: "center", justifyContent: "center", padding: 20
+        }}>
+          <div className="cd-panel" style={{ 
+            maxWidth: 550, width: "100%", padding: "32px 40px", borderRadius: "32px", 
+            background: 'var(--surface, #1e293b)', border: "1px solid rgba(255, 255, 255, 0.08)",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)", color: "var(--text, #f8fafc)"
+          }}>
+            {!skipConfirm ? (
+              <>
+                <div style={{ 
+                  width: 56, height: 56, borderRadius: "18px", margin: "0 auto 16px",
+                  background: "rgba(251, 191, 36, 0.1)", color: "#fbbf24",
+                  display: "flex", alignItems: "center", justifyContent: "center"
+                }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </div>
+                
+                <h3 style={{ fontSize: 22, fontWeight: 850, marginBottom: 8, textAlign: "center", color: "var(--text)" }}>
+                  Shartnoma yakunlandi! Hamkorga baho bering
+                </h3>
+                <p style={{ color: "var(--muted, #94a3b8)", marginBottom: 24, textAlign: "center", fontSize: 14, lineHeight: 1.5 }}>
+                  Baho berish ixtiyoriy, lekin bu hamjamiyat uchun juda muhimdir. Hamkorlik sifatini baholang!
+                </p>
+
+                {currentUser?.role === 'client' ? (
+                  <>
+                    <StarRating 
+                      label="Ish sifati (Sifat)" 
+                      description="Freelancer bajargan ish sifatini qanday baholaysiz?"
+                      rating={ratingScores.score_quality} 
+                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_quality: val }))} 
+                    />
+                    <StarRating 
+                      label="O'z vaqtida topshirish (Muddat)" 
+                      description="Ish muddatlariga qanchalik rioya qilindi?"
+                      rating={ratingScores.score_timeliness} 
+                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_timeliness: val }))} 
+                    />
+                    <StarRating 
+                      label="Muloqot va aloqa (Kommunikatsiya)" 
+                      description="Savollarga javob berish tezligi va hamkorlik sifati."
+                      rating={ratingScores.score_communication} 
+                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_communication: val }))} 
+                    />
+                  </>
+                ) : (
+                  <>
+                    <StarRating 
+                      label="To'lov madaniyati (To'lov)" 
+                      description="To'lovlar o'z vaqtida tasdiqlandimi?"
+                      rating={ratingScores.score_payment} 
+                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_payment: val }))} 
+                    />
+                    <StarRating 
+                      label="Vazifaning aniqligi (Texnik topshiriq aniqligi)" 
+                      description="Texnik topshiriq va talablar aniq tushuntirildimi?"
+                      rating={ratingScores.score_clarity} 
+                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_clarity: val }))} 
+                    />
+                  </>
+                )}
+
+                {/* Comment field */}
+                <div style={{ marginBottom: 24, textAlign: "left" }}>
+                  <label style={{ display: "block", fontSize: 15, fontWeight: 750, color: "var(--text)", marginBottom: 6 }}>
+                    Sharh (ixtiyoriy)
+                  </label>
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Loyiha va hamkorlik haqida fikringizni yozib qoldiring..."
+                    style={{
+                      width: "100%", height: 80, padding: 12, borderRadius: 12,
+                      background: "var(--surface-2, #1e293b)", border: "1px solid rgba(255, 255, 255, 0.1)",
+                      color: "var(--text)", fontSize: 14, outline: "none", resize: "none"
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: "flex", gap: 16 }}>
+                  <button 
+                    className="cd-btn-premium cd-btn-outline" 
+                    style={{ flex: 1, color: "#94a3b8", borderColor: "rgba(148, 163, 184, 0.3)", padding: "10px 16px", borderRadius: "12px", background: "none", cursor: "pointer", fontWeight: 600 }} 
+                    onClick={() => setSkipConfirm(true)}
+                  >
+                    Baho bermaslik
+                  </button>
+                  <button 
+                    className="cd-btn-premium cd-btn-primary" 
+                    style={{ flex: 1, padding: "10px 16px", borderRadius: "12px", background: "var(--brand, #2563eb)", color: "#fff", border: "none", cursor: "pointer", fontWeight: 600 }}
+                    disabled={ratingSubmitting}
+                    onClick={handleRatingSubmit}
+                  >
+                    {ratingSubmitting ? "Yuborilmoqda..." : "Yuborish"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ 
+                  width: 56, height: 56, borderRadius: "18px", margin: "0 auto 16px",
+                  background: "rgba(239, 68, 68, 0.1)", color: "#ef4444",
+                  display: "flex", alignItems: "center", justifyContent: "center"
+                }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                </div>
+                
+                <h3 style={{ fontSize: 20, fontWeight: 850, marginBottom: 12, textAlign: "center", color: "var(--text)" }}>
+                  Baho bermaslikni tasdiqlaysizmi?
+                </h3>
+                <p style={{ color: "var(--muted, #94a3b8)", marginBottom: 24, textAlign: "center", fontSize: 14, lineHeight: 1.6 }}>
+                  Baholash tizimi frilanser va mijozlar orasida ishonch va xavfsiz loyiha almashinuvini ta'minlaydi. Sizning fikringiz hamjamiyatimiz rivojlanishi uchun muhimdir.
+                </p>
+
+                <div style={{ display: "flex", gap: 16 }}>
+                  <button 
+                    className="cd-btn-premium cd-btn-outline" 
+                    style={{ flex: 1, color: "var(--text)", padding: "10px 16px", borderRadius: "12px", background: "none", border: "1px solid var(--border)", cursor: "pointer", fontWeight: 600 }} 
+                    onClick={() => setSkipConfirm(false)}
+                  >
+                    Orqaga (Baholash)
+                  </button>
+                  <button 
+                    className="cd-btn-premium" 
+                    style={{ flex: 1, background: "#ef4444", color: "#fff", border: "none", padding: "10px 16px", borderRadius: "12px", cursor: "pointer", fontWeight: 600 }}
+                    onClick={() => {
+                      setShowRatingModal(false);
+                      setSkipConfirm(false);
+                    }}
+                  >
+                    O'tkazib yuborish
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

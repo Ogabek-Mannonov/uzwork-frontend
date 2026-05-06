@@ -168,11 +168,9 @@ const FtFreelancerCard = ({ fl, onInvite, targetJobId, onSaveToggle, onOpenInvit
             <Price amount={fl.rate_value} currency="USD" />/soat
           </span>
           <span className="ft-stat-sep" />
-          <span className={`ft-success-badge ${successClass}`}>
-            {fl.jobSuccess >= 95
-              ? <><span style={{ fontSize: 13 }}>👑</span> {fl.jobSuccess}% {t("findTalent.card.success")}</>
-              : <><Star size={12} fill="currentColor" /> {fl.jobSuccess}% {t("findTalent.card.success")}</>
-            }
+          <span className="ft-rating-badge" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#fef9c3', color: '#ca8a04', padding: '3px 8px', borderRadius: '12px', fontSize: '13px', fontWeight: '600', border: '1px solid #fde047' }}>
+            <Star size={13} fill="#eab308" stroke="#eab308" style={{ display: 'inline-block', verticalAlign: 'middle' }} />
+            <span>{fl.jobSuccess ? Number(fl.jobSuccess).toFixed(1) : "0.0"}</span>
           </span>
           <span className="ft-stat-sep" />
           <span className="ft-stat">{fl.earned}</span>

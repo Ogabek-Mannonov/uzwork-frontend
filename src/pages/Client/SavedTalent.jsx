@@ -157,8 +157,10 @@ const SavedTalent = () => {
                         <span>{fl.location || t("findTalent.nations.uz")}</span>
                       </div>
                       <div className="st-meta-item">
-                        <Star size={14} className="st-star" fill="currentColor" />
-                        <span>{fl.rating || 0}% {t("findTalent.card.success")}</span>
+                        <Star size={14} className="st-star" fill="#eab308" stroke="#eab308" />
+                        <span style={{ fontWeight: "600", color: "#ca8a04", marginLeft: "4px" }}>
+                          {fl.rating ? Number(fl.rating).toFixed(1) : "0.0"}
+                        </span>
                       </div>
                     </div>
 
