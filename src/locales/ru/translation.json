@@ -217,6 +217,7 @@
     }
   },
   "profile": {
+    "skills": "Навыки",
     "settings": "Настройки",
     "myInfo": "Мои данные",
     "professionalProfile": "Профессиональный профиль",

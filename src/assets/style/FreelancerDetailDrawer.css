@@ -82,7 +82,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #1a1a1a;
+  color: var(--fd-text-main);
   transition: all 0.2s;
 }
 
@@ -356,7 +356,7 @@
 .fd-bio-text {
   font-size: 16px;
   line-height: 1.6;
-  color: #374151;
+  color: var(--fd-text-main);
   margin-bottom: 32px;
   white-space: pre-wrap;
 }
@@ -544,7 +544,7 @@
   background: var(--fd-accent-soft);
   border-radius: 12px;
   font-style: italic;
-  color: #475569;
+  color: var(--fd-text-main);
   font-size: 15px;
   line-height: 1.6;
 }
@@ -582,12 +582,12 @@
 
 .fd-skill-pill {
   padding: 10px 20px;
-  background: white;
+  background: var(--fd-drawer-bg);
   border: 1px solid var(--fd-border);
   border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
-  color: #4b5563;
+  color: var(--fd-text-main);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: default;
   display: flex;
@@ -759,7 +759,7 @@
   align-items: center;
   gap: 12px;
   padding: 16px;
-  background: #f8fafc;
+  background: var(--fd-accent-soft);
   border-radius: 12px;
   margin-bottom: 24px;
 }
