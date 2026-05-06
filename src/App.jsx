@@ -43,6 +43,7 @@ import Transactions from "./pages/Landing/wallet/Transactions.jsx";
 
 import DisputesList from "./pages/Landing/disputes/List.jsx";
 import DisputeDetail from "./pages/Landing/disputes/Detail.jsx";
+import CreateDispute from "./pages/Landing/disputes/Create.jsx";
 
 import NotFound from "./pages/NotFound.jsx";
 import Client from './pages/Client/Client.jsx';
@@ -149,6 +150,7 @@ function App() {
 
               {/* Disputes */}
               <Route path="/disputes" element={<DisputesList />} />
+              <Route path="/disputes/new" element={<CreateDispute />} />
               <Route path="/disputes/:id" element={<DisputeDetail />} />
             </Route>
 

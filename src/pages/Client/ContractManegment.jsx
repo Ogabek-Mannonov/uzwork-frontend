@@ -254,12 +254,19 @@ const ContractManagement = () => {
                   <h3>{contract.job_title || t('contracts.card.projectTitle')}</h3>
                   {getStatusBadge(contract.status)}
                 </div>
-                <div className="cm-contract-actions">
+                <div className="cm-contract-actions" style={{ display: "flex", gap: "8px" }}>
                   <button 
                     className="cm-action-btn cm-view"
                     onClick={() => handleViewDetails(contract)}
                   >
                     <Eye size={16} /> {t('contracts.card.viewDetails')}
+                  </button>
+                  <button 
+                    className="cm-action-btn cm-view"
+                    style={{ background: "var(--brand, #2563eb)", color: "#fff", borderColor: "var(--brand, #2563eb)" }}
+                    onClick={() => navigate(`/contracts/${contract.id}`)}
+                  >
+                    <ExternalLink size={16} /> Boshqarish
                   </button>
                 </div>
               </div>
@@ -466,8 +473,15 @@ const ContractManagement = () => {
                 </div>
               )}
               
-              <div className="cm-modal-footer">
-                <button className="cm-primary-btn" onClick={() => setIsModalOpen(false)}>{t('contracts.modal.close')}</button>
+              <div className="cm-modal-footer" style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+                <button className="cm-secondary-btn" style={{ padding: "10px 20px", border: "1px solid var(--border)", borderRadius: "10px", color: "var(--text-2)", background: "none", cursor: "pointer" }} onClick={() => setIsModalOpen(false)}>{t('contracts.modal.close')}</button>
+                <button 
+                  className="cm-primary-btn" 
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                  onClick={() => navigate(`/contracts/${selectedContract.contract?.id || selectedContract.id}`)}
+                >
+                  <ExternalLink size={16} /> Boshqarish & Nizo ochish
+                </button>
               </div>
             </div>
           </div>

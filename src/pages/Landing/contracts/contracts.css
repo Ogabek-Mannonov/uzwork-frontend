@@ -198,6 +198,7 @@
 .cl-status--active, .cd-status--active { background: rgba(37, 99, 235, 0.12); color: var(--brand); }
 .cl-status--completed, .cd-status--completed { background: rgba(37, 99, 235, 0.2); color: var(--brand); }
 .cl-status--cancelled, .cd-status--cancelled { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.cl-status--disputed, .cd-status--disputed { background: rgba(245, 158, 11, 0.15) !important; color: #f59e0b !important; }
 
 .cd-status--pending { background: rgba(148, 163, 184, 0.1); color: var(--muted); }
 .cd-status--submitted { background: rgba(37, 99, 235, 0.1); color: var(--brand); }

@@ -77,7 +77,7 @@ export default function ContractsList() {
       <div className="cl-controls">
         <div className="cl-tabs-wrapper">
           <div className="cl-tabs">
-            {["all", "active", "completed", "cancelled"].map((tab) => (
+            {["all", "active", "completed", "cancelled", "disputed"].map((tab) => (
               <button
                 key={tab}
                 className={`cl-tab ${activeTab === tab ? "active" : ""}`}

@@ -423,7 +423,7 @@ const Escrow = () => {
                   </button>
                   <button 
                     className="dispute-btn"
-                    onClick={() => handleDispute(contract)}
+                    onClick={() => navigate(`/disputes/new?contract=${contract.id}`)}
                   >
                     <AlertCircle size={14} /> Nizo ochish
                   </button>
