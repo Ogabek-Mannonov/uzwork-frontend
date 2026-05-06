@@ -673,6 +673,8 @@ function AuthHeader({ user }) {
           { to: "/client/talent", label: t("navbar.findTalent") },
           { to: "/client/my-jobs", label: t("navbar.myJobs") },
           { to: "/client/proposals", label: t("navbar.proposals") },
+          { to: "/client/management", label: "Shartnoma tahlili & Stats" },
+          { to: "/contracts", label: "Shartnomalarim & Nizolar" },
           { to: "/messages", label: t("navbar.messages") },
         ]
       : [
@@ -800,12 +802,30 @@ function AuthHeader({ user }) {
                     </div>
                   </div>
 
-                  <NavLink 
-                    to="/client/management" 
-                    className={({ isActive }) => "nav__link" + (isActive ? " is-active" : "")}
-                  >
-                    {t("navbar.contracts")}
-                  </NavLink>
+                  {/* Kontraktlar Dropdown */}
+                  <div className="nav__item-with-dropdown">
+                    <NavLink 
+                      to="/client/management" 
+                      className={({ isActive }) => {
+                        const isSubActive = location.pathname.startsWith('/contracts') || 
+                                           location.pathname.startsWith('/client/management');
+                        return "nav__link" + (isActive || isSubActive ? " is-active" : "");
+                      }}
+                    >
+                      {t("navbar.contracts")}
+                      <ChevronDown size={14} className="nav__chevron" />
+                    </NavLink>
+                    <div className="nav__dropdown">
+                      <NavLink to="/client/management" className={({ isActive }) => "dropdown__link" + (isActive ? " is-active" : "")}>
+                        <Briefcase size={16} />
+                        <span>Shartnoma tahlili & Stats</span>
+                      </NavLink>
+                      <NavLink to="/contracts" className={({ isActive }) => "dropdown__link" + (isActive ? " is-active" : "")}>
+                        <FileText size={16} />
+                        <span>Shartnomalarim & Nizolar</span>
+                      </NavLink>
+                    </div>
+                  </div>
 
                   <NavLink
                     to="/messages"
