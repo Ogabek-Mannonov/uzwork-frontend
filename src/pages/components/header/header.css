@@ -672,6 +672,13 @@
   }
 }
 
+@media (max-width: 768px) {
+  .lang-sw,
+  .uw-iconbtn {
+    display: none !important;
+  }
+}
+
 /* Dark mode  */
 
 /* ===================== DARK MODE HEADER ===================== */

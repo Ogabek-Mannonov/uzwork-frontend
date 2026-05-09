@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
-  Sun, Moon, Menu, X, ChevronDown, Globe,
+  Sun, Moon, Menu, X, ChevronDown, ChevronRight, Globe,
   Bell, HelpCircle, Settings, User, Search, Check,
   RefreshCw, Users, Briefcase, Plus, Star,
   CreditCard, Shield, Award, FileText, AlertTriangle, LogOut
@@ -425,12 +425,16 @@ function LandingHeader({ i18n, changeLanguage }) {
                 <button key={l.code} onClick={() => changeLanguage(l.code)}
                   className={`uw-drawer__langbtn ${i18n.language.startsWith(l.code) ? "active" : ""}`}
                 >
-                  {l.short}
+                  <span className="uw-drawer__langbtn-flag">{l.flag}</span><span className="uw-drawer__langbtn-text">{l.short}</span>
                 </button>
               ))}
             </div>
 
-            <NavLink to="/hire"         onClick={() => setMenuOpen(false)} className="uw-drawer__link">{t("header.hireTalent")}</NavLink>
+            <NavLink to="/hire" onClick={() => setMenuOpen(false)} className="uw-drawer__link">
+              <span className="uw-drawer__link-icon-box"><Users size={16} /></span>
+              <span className="uw-drawer__link-text">{t("header.hireTalent")}</span>
+              <ChevronRight size={14} className="uw-drawer__link-arrow" />
+            </NavLink>
             <NavLink to="/find-work"    onClick={() => setMenuOpen(false)} className="uw-drawer__link">{t("header.findWork")}</NavLink>
             <NavLink to="/how-it-works" onClick={() => setMenuOpen(false)} className="uw-drawer__link">{t("header.howItWorks")}</NavLink>
             <NavLink to="/enterprise"   onClick={() => setMenuOpen(false)} className="uw-drawer__link">{t("header.enterprise")}</NavLink>
