@@ -3891,3 +3891,660 @@ body {
 * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
+
+/* ==========================================================================
+   ==================== FULL RESPONSIVE OVERRIDES (TABLET & MOBILE) ========
+   ========================================================================== */
+
+/* === 1. MEDIUM DEVICES & TABLETS (max-width: 768px) === */
+@media (max-width: 768px) {
+  /* Global spacing reductions */
+  .hero-section,
+  .categories-section,
+  .work-section,
+  .features-section,
+  .testimonials-section,
+  .pricing-section,
+  .faq-section,
+  .cta-section {
+    padding: 3.5rem 1rem !important;
+  }
+
+  /* Section Titles & Headers */
+  .section-header {
+    margin-bottom: 2rem !important;
+  }
+
+  .section-title {
+    font-size: 1.85rem !important;
+  }
+
+  .section-subtitle {
+    font-size: 0.95rem !important;
+  }
+
+  /* Hero Section */
+  .hero-section {
+    padding: 5.5rem 1rem 3rem !important;
+  }
+
+  .hero-title {
+    font-size: clamp(1.8rem, 5vw, 2.6rem) !important;
+    text-align: center;
+  }
+
+  .hero-desc {
+    font-size: 1rem !important;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .hero-quick {
+    max-width: 100% !important;
+    border-radius: 16px !important;
+  }
+
+  .hero-quick__tabs {
+    padding: 0 10px;
+  }
+
+  .hero-quick__tab {
+    flex: 1 !important;
+    width: auto !important;
+    font-size: 13px !important;
+    height: 40px !important;
+  }
+
+  .hero-quick__panel {
+    padding: 14px !important;
+  }
+
+  /* Categories Section */
+  .category-card {
+    padding: 1.75rem 1rem !important;
+    border-radius: 16px !important;
+  }
+
+  .category-icon {
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 16px !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .category-icon svg {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .category-title {
+    font-size: 0.95rem !important;
+  }
+
+  .category-count {
+    font-size: 0.9rem !important;
+  }
+
+  /* How It Works Section */
+  .work-steps {
+    gap: 1.5rem !important;
+  }
+
+  .work-step-card {
+    border-radius: 16px !important;
+  }
+
+  .step-image-wrapper {
+    height: 220px !important;
+  }
+
+  .step-number {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 1.5rem !important;
+    border-radius: 12px !important;
+    top: 1rem !important;
+    left: 1rem !important;
+  }
+
+  .step-content {
+    padding: 1.5rem 1.25rem !important;
+  }
+
+  .step-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .step-desc {
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Features Section */
+  .features-grid {
+    gap: 1.25rem !important;
+  }
+
+  .feature-card {
+    padding: 2rem 1.25rem !important;
+    border-radius: 16px !important;
+    min-height: auto !important;
+  }
+
+  .feature-icon {
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 16px !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .feature-icon svg {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .feature-title {
+    font-size: 1.1rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .feature-desc {
+    font-size: 0.9rem !important;
+  }
+
+  /* Testimonials Section */
+  .testimonial-card {
+    padding: 1.5rem !important;
+    border-radius: 16px !important;
+  }
+
+  .testimonial-text {
+    font-size: 0.9rem !important;
+    line-height: 1.6 !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Pricing Section */
+  .pricing-card {
+    padding: 1.5rem !important;
+    border-radius: 16px !important;
+  }
+
+  .price-value {
+    font-size: 2rem !important;
+  }
+
+  /* FAQ Section */
+  .faq-main-title {
+    font-size: 2rem !important;
+    text-align: center;
+  }
+
+  .faq-subtitle {
+    text-align: center;
+  }
+
+  .faq-question-wrapper {
+    padding: 1.25rem 1rem !important;
+  }
+
+  .faq-question {
+    font-size: 1rem !important;
+  }
+
+  .faq-icon {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+  }
+
+  .faq-icon svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .faq-toggle {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+  }
+
+  .faq-toggle svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .faq-answer {
+    padding: 0 1rem 1.25rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .faq-promo {
+    padding: 1.25rem !important;
+    border-radius: 16px !important;
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 1rem !important;
+  }
+
+  .faq-promo-btn {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* CTA Section */
+  .cta-container {
+    padding: 3rem 1.5rem !important;
+    border-radius: 24px !important;
+  }
+
+  .cta-title {
+    font-size: 1.85rem !important;
+  }
+
+  .cta-desc {
+    font-size: 0.95rem !important;
+    margin-bottom: 1.75rem !important;
+  }
+
+  .cta-btn {
+    padding: 1rem 2.5rem !important;
+    font-size: 1rem !important;
+    border-radius: 14px !important;
+  }
+}
+
+/* === 2. MOBILE DEVICES (max-width: 480px) === */
+@media (max-width: 480px) {
+  /* Section padding and layout controls */
+  .hero-section,
+  .categories-section,
+  .work-section,
+  .features-section,
+  .testimonials-section,
+  .pricing-section,
+  .faq-section,
+  .cta-section {
+    padding: 2.75rem 0.5rem !important;
+  }
+
+  .section-title {
+    font-size: 1.55rem !important;
+  }
+
+  /* Hero Section */
+  .hero-section {
+    padding: 4.5rem 0.5rem 2rem !important;
+  }
+
+  .hero-title {
+    font-size: 1.7rem !important;
+  }
+
+  .hero-quick {
+    border-radius: 12px !important;
+  }
+
+  .hero-quick__panel {
+    padding: 12px !important;
+  }
+
+  .hero-quick__input {
+    height: 48px !important;
+    font-size: 13px !important;
+    padding: 0 12px 0 42px !important;
+  }
+
+  .hero-quick__search-icon {
+    left: 14px !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .hero-quick__btn {
+    height: 48px !important;
+    font-size: 14px !important;
+    padding: 0 16px !important;
+  }
+
+  .hero-quick__tag {
+    padding: 6px 12px !important;
+    font-size: 11.5px !important;
+    border-radius: 8px !important;
+  }
+
+  .hero-quick__popular-title {
+    font-size: 11px !important;
+  }
+
+  .hero-quick__workTitle {
+    font-size: 15px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .hero-quick__workDesc {
+    font-size: 12.5px !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* Categories Section */
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+
+  .category-card {
+    padding: 1.15rem 0.65rem !important;
+    border-radius: 12px !important;
+  }
+
+  .category-icon {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 12px !important;
+    margin-bottom: 0.75rem !important;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .category-icon svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  .category-title {
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .category-count {
+    font-size: 0.8rem !important;
+  }
+
+  /* Top Freelancers */
+  .freelancers-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .freelancer-card {
+    padding: 1.25rem 1rem !important;
+    border-radius: 16px !important;
+    min-height: auto !important;
+    max-width: 100% !important;
+  }
+
+  .freelancer-avatar {
+    width: 76px !important;
+    height: 76px !important;
+  }
+
+  .freelancer-name {
+    font-size: 1.1rem !important;
+  }
+
+  .freelancer-title {
+    font-size: 0.85rem !important;
+  }
+
+  .freelancer-rating {
+    padding: 4px 10px !important;
+    font-size: 0.85rem !important;
+    border-radius: 8px !important;
+  }
+
+  .rating-star {
+    width: 1rem !important;
+    height: 1rem !important;
+  }
+
+  .freelancer-rate {
+    padding: 4px 12px !important;
+    font-size: 0.95rem !important;
+    border-radius: 8px !important;
+  }
+
+  .freelancer-btn {
+    padding: 8px 20px !important;
+    font-size: 0.85rem !important;
+    border-radius: 10px !important;
+    width: 100% !important;
+  }
+
+  /* How It Works Section */
+  .step-image-wrapper {
+    height: 170px !important;
+  }
+
+  .step-number {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 1.25rem !important;
+    border-radius: 8px !important;
+    top: 0.75rem !important;
+    left: 0.75rem !important;
+  }
+
+  .step-content {
+    padding: 1rem !important;
+  }
+
+  .step-title {
+    font-size: 1.05rem !important;
+  }
+
+  .step-desc {
+    font-size: 0.85rem !important;
+  }
+
+  /* Features Section */
+  .features-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .feature-card {
+    padding: 1.25rem !important;
+    border-radius: 12px !important;
+  }
+
+  .feature-icon {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 12px !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .feature-icon svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  .feature-title {
+    font-size: 1.05rem !important;
+  }
+
+  .feature-desc {
+    font-size: 0.85rem !important;
+  }
+
+  /* Testimonials Section */
+  .testimonial-card {
+    padding: 1.15rem !important;
+    border-radius: 12px !important;
+  }
+
+  .testimonial-avatar-top {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .testimonial-name {
+    font-size: 0.95rem !important;
+  }
+
+  .testimonial-role {
+    font-size: 0.8rem !important;
+  }
+
+  .testimonial-text {
+    font-size: 0.85rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .testimonial-company-badge {
+    padding: 4px 8px !important;
+    font-size: 0.75rem !important;
+    border-radius: 8px !important;
+  }
+
+  /* Find Box */
+  .find-box {
+    padding: 32px 16px !important;
+    border-radius: 16px !important;
+    margin-top: 30px !important;
+  }
+
+  .find-box__title {
+    font-size: 1.25rem !important;
+    margin-bottom: 8px !important;
+  }
+
+  .find-box__desc {
+    font-size: 12px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .find-box__btn {
+    font-size: 12px !important;
+    padding: 10px 18px !important;
+  }
+
+  /* Pricing Section */
+  .pricing-grid {
+    gap: 1.25rem !important;
+  }
+
+  .pricing-card {
+    padding: 1.15rem !important;
+    border-radius: 12px !important;
+  }
+
+  .pricing-title {
+    font-size: 1.1rem !important;
+  }
+
+  .price-value {
+    font-size: 1.75rem !important;
+  }
+
+  .price-label {
+    font-size: 0.8rem !important;
+  }
+
+  .pricing-features li {
+    padding: 8px 10px !important;
+    font-size: 0.8rem !important;
+    border-radius: 8px !important;
+  }
+
+  .pricing-btn {
+    font-size: 0.8rem !important;
+    padding: 10px !important;
+    border-radius: 8px !important;
+  }
+
+  /* FAQ Section */
+  .faq-main-title {
+    font-size: 1.6rem !important;
+  }
+
+  .faq-subtitle {
+    font-size: 0.9rem !important;
+  }
+
+  .faq-stats {
+    gap: 0.75rem !important;
+  }
+
+  .faq-stat-card {
+    padding: 1rem 0.75rem !important;
+    border-radius: 12px !important;
+  }
+
+  .faq-stat-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .faq-stat-icon svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .faq-stat-value {
+    font-size: 1.25rem !important;
+  }
+
+  .faq-stat-label {
+    font-size: 0.75rem !important;
+  }
+
+  /* CTA Section */
+  .cta-container {
+    padding: 2.25rem 1rem !important;
+    border-radius: 16px !important;
+  }
+
+  .cta-badge {
+    margin-bottom: 1.25rem !important;
+    padding: 6px 12px !important;
+  }
+
+  .cta-badge-icon {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .cta-badge-text {
+    font-size: 11px !important;
+  }
+
+  .cta-title {
+    font-size: 1.45rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .cta-desc {
+    font-size: 0.85rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .cta-btn {
+    padding: 0.75rem 1.75rem !important;
+    font-size: 0.95rem !important;
+    border-radius: 10px !important;
+    width: 100%;
+  }
+}
+
+/* === 3. VERY NARROW DEVICES (max-width: 360px) === */
+@media (max-width: 360px) {
+  .categories-grid {
+    grid-template-columns: 1fr !important; /* Force 1 column on extremely small screens to prevent overlap */
+  }
+
+  .hero-title {
+    font-size: 1.5rem !important;
+  }
+
+  .hero-quick__tag {
+    padding: 4px 8px !important;
+    font-size: 10.5px !important;
+  }
+}
