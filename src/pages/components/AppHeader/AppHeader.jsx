@@ -435,21 +435,44 @@ function LandingHeader({ i18n, changeLanguage }) {
               <span className="uw-drawer__link-text">{t("header.hireTalent")}</span>
               <ChevronRight size={14} className="uw-drawer__link-arrow" />
             </NavLink>
-            <NavLink to="/find-work"    onClick={() => setMenuOpen(false)} className="uw-drawer__link">{t("header.findWork")}</NavLink>
-            <NavLink to="/how-it-works" onClick={() => setMenuOpen(false)} className="uw-drawer__link">{t("header.howItWorks")}</NavLink>
-            <NavLink to="/enterprise"   onClick={() => setMenuOpen(false)} className="uw-drawer__link">{t("header.enterprise")}</NavLink>
-            <NavLink to="/pricing"      onClick={() => setMenuOpen(false)} className="uw-drawer__link">{t("header.pricing")}</NavLink>
-            <NavLink to="/support"      onClick={() => setMenuOpen(false)} className="uw-drawer__link">{t("header.support")}</NavLink>
+            <NavLink to="/find-work" onClick={() => setMenuOpen(false)} className="uw-drawer__link">
+              <span className="uw-drawer__link-icon-box"><Briefcase size={16} /></span>
+              <span className="uw-drawer__link-text">{t("header.findWork")}</span>
+              <ChevronRight size={14} className="uw-drawer__link-arrow" />
+            </NavLink>
+            <NavLink to="/how-it-works" onClick={() => setMenuOpen(false)} className="uw-drawer__link">
+              <span className="uw-drawer__link-icon-box"><Award size={16} /></span>
+              <span className="uw-drawer__link-text">{t("header.howItWorks")}</span>
+              <ChevronRight size={14} className="uw-drawer__link-arrow" />
+            </NavLink>
+            <NavLink to="/enterprise" onClick={() => setMenuOpen(false)} className="uw-drawer__link">
+              <span className="uw-drawer__link-icon-box"><Shield size={16} /></span>
+              <span className="uw-drawer__link-text">{t("header.enterprise")}</span>
+              <ChevronRight size={14} className="uw-drawer__link-arrow" />
+            </NavLink>
+            <NavLink to="/pricing" onClick={() => setMenuOpen(false)} className="uw-drawer__link">
+              <span className="uw-drawer__link-icon-box"><CreditCard size={16} /></span>
+              <span className="uw-drawer__link-text">{t("header.pricing")}</span>
+              <ChevronRight size={14} className="uw-drawer__link-arrow" />
+            </NavLink>
+            <NavLink to="/support" onClick={() => setMenuOpen(false)} className="uw-drawer__link">
+              <span className="uw-drawer__link-icon-box"><HelpCircle size={16} /></span>
+              <span className="uw-drawer__link-text">{t("header.support")}</span>
+              <ChevronRight size={14} className="uw-drawer__link-arrow" />
+            </NavLink>
 
             {/* Dark mode toggle in drawer */}
-            <button className="uw-drawer__link" onClick={toggle} style={{ display: "flex", alignItems: "center", gap: 8, border: "none", background: "none", width: "100%", textAlign: "left", cursor: "pointer", color: "var(--text)" }}>
-              {isDark ? <Sun size={16} /> : <Moon size={16} />}
-              {isDark ? "Light mode" : "Dark mode"}
+            <button className="uw-drawer__link uw-drawer__link--theme" onClick={toggle}>
+              <span className="uw-drawer__link-icon-box">{isDark ? <Sun size={16} /> : <Moon size={16} />}</span>
+              <span className="uw-drawer__link-text">{isDark ? t("profile.lightMode") : t("profile.darkMode")}</span>
+              <span className="uw-drawer__theme-toggle-switch">
+                <span className={`uw-drawer__theme-toggle-dot ${isDark ? "active" : ""}`} />
+              </span>
             </button>
           </div>
           <div className="uw-drawer__actions">
-            <Link to="/login"  onClick={() => setMenuOpen(false)} className="uw-linkbtn uw-linkbtn--full">{t("header.login")}</Link>
-            <Link to="/signup" onClick={() => setMenuOpen(false)} className="uw-ctabtn uw-ctabtn--full">{t("header.signup")}</Link>
+            <Link to="/login" onClick={() => setMenuOpen(false)} className="uw-drawer__btn-login">{t("header.login")}</Link>
+            <Link to="/signup" onClick={() => setMenuOpen(false)} className="uw-drawer__btn-signup">{t("header.signup")}</Link>
           </div>
         </div>
       </div>

@@ -320,13 +320,22 @@
 
 /* Responsive */
 @media (max-width: 640px) {
+  .signup-container {
+    padding: 0 !important;
+    overflow-y: auto !important;
+  }
+
   .signup-card {
     padding: 32px 24px;
-    border-radius: 0;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .role-boxes {
@@ -335,5 +344,38 @@
   
   .input-row {
     grid-template-columns: 1fr;
+  }
+}
+
+.otp-input {
+  letter-spacing: 12px !important;
+  text-align: center !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  text-indent: 12px !important; /* Fix horizontal caret displacement */
+  padding-left: 12px !important; /* Balance letter-spacing offset on the right */
+}
+
+@media (max-width: 640px) {
+  .otp-input {
+    letter-spacing: 8px !important;
+    font-size: 18px !important;
+    text-indent: 8px !important;
+    padding-left: 8px !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .otp-input {
+    letter-spacing: 6px !important;
+    font-size: 16px !important;
+    text-indent: 6px !important;
+    padding-left: 6px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
   }
 }

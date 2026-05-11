@@ -4185,39 +4185,63 @@ body {
   }
 
   .hero-quick {
-    border-radius: 12px !important;
+    border-radius: 20px !important;
+  }
+
+  .hero-quick__tabs {
+    margin-top: 10px !important;
+    gap: 8px !important;
+  }
+
+  .hero-quick__tab {
+    height: 36px !important;
+    font-size: 12.5px !important;
+    border-radius: 18px !important;
   }
 
   .hero-quick__panel {
-    padding: 12px !important;
+    padding: 12px 14px 14px !important;
   }
 
   .hero-quick__input {
-    height: 48px !important;
-    font-size: 13px !important;
-    padding: 0 12px 0 42px !important;
+    height: 42px !important;
+    font-size: 12.5px !important;
+    padding: 0 12px 0 36px !important;
+    border-radius: 10px !important;
   }
 
   .hero-quick__search-icon {
-    left: 14px !important;
-    width: 18px !important;
-    height: 18px !important;
+    left: 11px !important;
+    width: 15px !important;
+    height: 15px !important;
   }
 
   .hero-quick__btn {
-    height: 48px !important;
-    font-size: 14px !important;
+    height: 42px !important;
+    font-size: 13px !important;
     padding: 0 16px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.2) !important;
   }
 
-  .hero-quick__tag {
-    padding: 6px 12px !important;
-    font-size: 11.5px !important;
-    border-radius: 8px !important;
+  .hero-quick__popular {
+    margin-top: 12px !important;
+    gap: 8px !important;
   }
 
   .hero-quick__popular-title {
+    font-size: 10px !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  .hero-quick__tags {
+    gap: 6px !important;
+  }
+
+  .hero-quick__tag {
+    padding: 5px 10px !important;
     font-size: 11px !important;
+    border-radius: 6px !important;
   }
 
   .hero-quick__workTitle {

@@ -39,6 +39,39 @@ const MILESTONE_STATUS = {
   released:  { label: "To'langan", class: "cd-status--released" },
 };
 
+function StarRating({ label, rating, onChange, description }) {
+  const [hover, setHover] = useState(0);
+  return (
+    <div style={{ marginBottom: 16, textAlign: "left" }}>
+      <label style={{ display: "block", fontSize: 14, fontWeight: 750, color: "var(--text)", marginBottom: 2 }}>
+        {label}
+      </label>
+      {description && <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>{description}</div>}
+      <div style={{ display: "flex", gap: 6 }}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => onChange(star)}
+            onMouseEnter={() => setHover(star)}
+            onMouseLeave={() => setHover(0)}
+            style={{
+              background: "none", border: "none", padding: 0, cursor: "pointer",
+              color: star <= (hover || rating) ? "#fbbf24" : "var(--border-color, #e2e8f0)",
+              transition: "transform 0.15s ease",
+              transform: star === (hover || rating) ? "scale(1.15)" : "scale(1)"
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill={star <= (hover || rating) ? "#fbbf24" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ContractDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -63,39 +96,6 @@ export default function ContractDetail() {
     setToast({ msg, type });
     setTimeout(() => setToast({ msg: "", type: "" }), 4000);
   }, []);
-
-  function StarRating({ label, rating, onChange, description }) {
-    const [hover, setHover] = useState(0);
-    return (
-      <div style={{ marginBottom: 16, textAlign: "left" }}>
-        <label style={{ display: "block", fontSize: 14, fontWeight: 750, color: "var(--text)", marginBottom: 2 }}>
-          {label}
-        </label>
-        {description && <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>{description}</div>}
-        <div style={{ display: "flex", gap: 6 }}>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              type="button"
-              onClick={() => onChange(star)}
-              onMouseEnter={() => setHover(star)}
-              onMouseLeave={() => setHover(0)}
-              style={{
-                background: "none", border: "none", padding: 0, cursor: "pointer",
-                color: star <= (hover || rating) ? "#fbbf24" : "var(--border-color, #e2e8f0)",
-                transition: "transform 0.15s ease",
-                transform: star === (hover || rating) ? "scale(1.15)" : "scale(1)"
-              }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill={star <= (hover || rating) ? "#fbbf24" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-              </svg>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   const BACKEND = import.meta.env.VITE_API_URL || "http://localhost:3000";
   const avatarSrc = (url) => {

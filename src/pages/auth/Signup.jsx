@@ -439,11 +439,11 @@ function Signup() {
                     <label>{t("auth.otpLabel", "Tasdiqlash kodi")}</label>
                     <input
                       type="text"
+                      className="otp-input"
                       placeholder="000 000"
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value)}
                       required
-                      style={{ letterSpacing: '8px', textAlign: 'center', fontSize: '20px', fontWeight: 700 }}
                     />
                   </div>
 

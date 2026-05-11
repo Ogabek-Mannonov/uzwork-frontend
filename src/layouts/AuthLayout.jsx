@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 
 export default function AuthLayout() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg)' }}>
+    <div className="auth-layout-wrapper" style={{ width: '100%', minHeight: '100vh' }}>
       <Outlet />
     </div>
   );
