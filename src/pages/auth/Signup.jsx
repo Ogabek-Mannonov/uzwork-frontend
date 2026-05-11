@@ -228,7 +228,7 @@ function Signup() {
 
   return (
     <div className="signup-container">
-      <div className="signup-card">
+      <div className={`signup-card ${step === 3 ? "otp-step" : ""}`}>
         {/* ✅ SUCCESS CARD */}
         {showSuccess ? (
           <div className="success-card soft-fade-in">
@@ -257,11 +257,15 @@ function Signup() {
               </button>
             )}
 
-            <h2 className="title-signup">{t("auth.signUp", "Ro'yxatdan o'tish")}</h2>
+            <h2 className="title-signup">
+              {step === 3 ? t("auth.verifyCode", "Tasdiqlash") : t("auth.signUp", "Ro'yxatdan o'tish")}
+            </h2>
             <p className="subtitle-signup">
               {step === 1 
                 ? t("auth.selectRoleDesc", "Platformada qaysi maqsadda foydalanmoqchisiz?")
-                : t("auth.fillDetailsDesc", "Hisobingizni yaratish uchun quyidagi ma'lumotlarni to'ldiring.")
+                : step === 3
+                  ? t("auth.otpSentDesc", "Siz ko'rsatgan manzilga 6-xonali kod yuborild.")
+                  : t("auth.fillDetailsDesc", "Hisobingizni yaratish uchun quyidagi ma'lumotlarni to'ldiring.")
               }
             </p>
 
@@ -428,12 +432,6 @@ function Signup() {
             {/* STEP 3: OTP VERIFICATION */}
             {step === 3 && (
               <div className="soft-fade-in">
-                <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                  <p style={{ color: 'var(--muted)', fontSize: 14 }}>
-                    {t("auth.otpSentDesc", "Siz ko'rsatgan manzilga 6-xonali kod yuborild.")}
-                  </p>
-                </div>
-
                 <form onSubmit={handleVerifyOtp} className="upwork-signup-form">
                   <div className="input-group">
                     <label>{t("auth.otpLabel", "Tasdiqlash kodi")}</label>
