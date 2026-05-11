@@ -1018,7 +1018,7 @@ export default function ChatDetail() {
 
   // --- Rating State ---
   const [showRatingModal, setShowRatingModal] = useState(false);
-  const [ratingScores, setRatingScores] = useState({});
+  const [ratingValue, setRatingValue] = useState(0);
   const [comment, setComment] = useState("");
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
   const [skipConfirm, setSkipConfirm] = useState(false);
@@ -1238,23 +1238,13 @@ export default function ChatDetail() {
   };
 
   const handleRatingSubmit = async () => {
-    const isClientRating = currentUser?.role === 'client';
-    if (isClientRating) {
-      if (!ratingScores.score_quality || !ratingScores.score_timeliness || !ratingScores.score_communication) {
-        notify("Iltimos, barcha metrikalarni baholang!", "error");
-        return;
-      }
-    } else {
-      if (!ratingScores.score_payment || !ratingScores.score_clarity) {
-        notify("Iltimos, barcha metrikalarni baholang!", "error");
-        return;
-      }
+    if (!ratingValue) {
+      notify("Iltimos, umumiy bahoni yulduzchalar orqali belgilang!", "error");
+      return;
     }
 
     // Low rating comment validation (1-3 stars)
-    const isLowRating = isClientRating
-      ? (ratingScores.score_quality <= 3 || ratingScores.score_timeliness <= 3 || ratingScores.score_communication <= 3)
-      : (ratingScores.score_payment <= 3 || ratingScores.score_clarity <= 3);
+    const isLowRating = ratingValue <= 3;
 
     if (isLowRating) {
       if (!comment || comment.trim().length < 20) {
@@ -1263,12 +1253,17 @@ export default function ChatDetail() {
       }
     }
 
+    const isClientRating = currentUser?.role === 'client';
+    const scores = isClientRating
+      ? { score_quality: ratingValue, score_timeliness: ratingValue, score_communication: ratingValue }
+      : { score_payment: ratingValue, score_clarity: ratingValue };
+
     setRatingSubmitting(true);
     try {
       const payload = {
         contract_id: chatInfo?.contract_id || contractData?.id,
         comment,
-        ...ratingScores
+        ...scores
       };
       const res = await createReview(payload);
       if (res?.success !== false) {
@@ -1304,10 +1299,7 @@ export default function ChatDetail() {
 
       // Show rating modal if contract completed
       if (res.data?.contractCompleted) {
-        setRatingScores(currentUser?.role === 'client'
-          ? { score_quality: 0, score_timeliness: 0, score_communication: 0 }
-          : { score_payment: 0, score_clarity: 0 }
-        );
+        setRatingValue(0);
         setComment("");
         setSkipConfirm(false);
         setShowRatingModal(true);
@@ -2427,6 +2419,31 @@ export default function ChatDetail() {
                 </div>
 
                 {msgs.map((msg, idx) => {
+                  if (msg.type === "system") {
+                    return (
+                      <div
+                        key={msg.id || idx}
+                        className="system-message-row"
+                        data-message-id={msg.id}
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          margin: "24px 0",
+                          width: "100%"
+                        }}
+                      >
+                        <div className="date-separator" style={{ width: "100%", margin: 0 }}>
+                          <div className="date-separator-line" />
+                          <span className="date-separator-text">
+                            {msg.content || msg.message || msg.message_text}
+                          </span>
+                          <div className="date-separator-line" />
+                        </div>
+                      </div>
+                    );
+                  }
+
                   const isOwn = String(msg.sender_id) === String(currentUser?.id);
                   const prevMsg = msgs[idx - 1];
                   const nextMsg = msgs[idx + 1];
@@ -3165,43 +3182,12 @@ export default function ChatDetail() {
                   Baho berish ixtiyoriy, lekin bu hamjamiyat uchun juda muhimdir. Hamkorlik sifatini baholang!
                 </p>
 
-                {currentUser?.role === 'client' ? (
-                  <>
-                    <StarRating 
-                      label="Ish sifati (Sifat)" 
-                      description="Freelancer bajargan ish sifatini qanday baholaysiz?"
-                      rating={ratingScores.score_quality} 
-                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_quality: val }))} 
-                    />
-                    <StarRating 
-                      label="O'z vaqtida topshirish (Muddat)" 
-                      description="Ish muddatlariga qanchalik rioya qilindi?"
-                      rating={ratingScores.score_timeliness} 
-                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_timeliness: val }))} 
-                    />
-                    <StarRating 
-                      label="Muloqot va aloqa (Kommunikatsiya)" 
-                      description="Savollarga javob berish tezligi va hamkorlik sifati."
-                      rating={ratingScores.score_communication} 
-                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_communication: val }))} 
-                    />
-                  </>
-                ) : (
-                  <>
-                    <StarRating 
-                      label="To'lov madaniyati (To'lov)" 
-                      description="To'lovlar o'z vaqtida tasdiqlandimi?"
-                      rating={ratingScores.score_payment} 
-                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_payment: val }))} 
-                    />
-                    <StarRating 
-                      label="Vazifaning aniqligi (Texnik topshiriq aniqligi)" 
-                      description="Texnik topshiriq va talablar aniq tushuntirildimi?"
-                      rating={ratingScores.score_clarity} 
-                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_clarity: val }))} 
-                    />
-                  </>
-                )}
+                 <StarRating 
+                   label="Hamkorga umumiy baho" 
+                   description={currentUser?.role === 'client' ? "Freelancer bajargan ishini umumiy qanday baholaysiz?" : "Mijoz bilan hamkorlikni umumiy qanday baholaysiz?"}
+                   rating={ratingValue} 
+                   onChange={(val) => setRatingValue(val)} 
+                 />
 
                 {/* Comment field */}
                 <div style={{ marginBottom: 24, textAlign: "left" }}>

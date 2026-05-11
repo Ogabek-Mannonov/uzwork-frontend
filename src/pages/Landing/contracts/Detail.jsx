@@ -84,7 +84,7 @@ export default function ContractDetail() {
 
   // Rating and Feedback states
   const [showRatingModal, setShowRatingModal] = useState(false);
-  const [ratingScores, setRatingScores] = useState({});
+  const [ratingValue, setRatingValue] = useState(0);
   const [comment, setComment] = useState("");
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
   const [hasRated, setHasRated] = useState(true);
@@ -161,12 +161,7 @@ export default function ContractDetail() {
           if (!myReviewObj) {
             setHasRated(false);
             setShowRatingModal(true);
-            // Set initial empty rating structure depending on user role
-            if (String(user.id) === String(contractData.contract.client_id)) {
-              setRatingScores({ score_quality: 0, score_timeliness: 0, score_communication: 0 });
-            } else {
-              setRatingScores({ score_payment: 0, score_clarity: 0 });
-            }
+            setRatingValue(0);
           } else {
             setHasRated(true);
           }
@@ -180,23 +175,13 @@ export default function ContractDetail() {
   }, [id, notify]);
 
   const handleRatingSubmit = async () => {
-    const isClientRating = String(currentUser?.id) === String(data?.contract?.client_id);
-    if (isClientRating) {
-      if (!ratingScores.score_quality || !ratingScores.score_timeliness || !ratingScores.score_communication) {
-        notify("Iltimos, barcha metrikalarni baholang!", "error");
-        return;
-      }
-    } else {
-      if (!ratingScores.score_payment || !ratingScores.score_clarity) {
-        notify("Iltimos, barcha metrikalarni baholang!", "error");
-        return;
-      }
+    if (!ratingValue) {
+      notify("Iltimos, umumiy bahoni yulduzchalar orqali belgilang!", "error");
+      return;
     }
 
     // Low rating comment validation (1-3 stars)
-    const isLowRating = isClientRating
-      ? (ratingScores.score_quality <= 3 || ratingScores.score_timeliness <= 3 || ratingScores.score_communication <= 3)
-      : (ratingScores.score_payment <= 3 || ratingScores.score_clarity <= 3);
+    const isLowRating = ratingValue <= 3;
 
     if (isLowRating) {
       if (!comment || comment.trim().length < 20) {
@@ -205,12 +190,17 @@ export default function ContractDetail() {
       }
     }
 
+    const isClientRating = String(currentUser?.id) === String(data?.contract?.client_id);
+    const scores = isClientRating
+      ? { score_quality: ratingValue, score_timeliness: ratingValue, score_communication: ratingValue }
+      : { score_payment: ratingValue, score_clarity: ratingValue };
+
     setRatingSubmitting(true);
     try {
       const payload = {
         contract_id: id,
         comment,
-        ...ratingScores
+        ...scores
       };
       const res = await createReview(payload);
       if (res?.success !== false) {
@@ -269,11 +259,7 @@ export default function ContractDetail() {
         load();
 
         if (newStatus === "released" && res?.data?.contractCompleted) {
-          const isClientUser = String(currentUser?.id) === String(data?.contract?.client_id);
-          setRatingScores(isClientUser
-            ? { score_quality: 0, score_timeliness: 0, score_communication: 0 }
-            : { score_payment: 0, score_clarity: 0 }
-          );
+          setRatingValue(0);
           setComment("");
           setSkipConfirm(false);
           setShowRatingModal(true);
@@ -522,18 +508,7 @@ export default function ContractDetail() {
                   {myReview ? (
                     <div>
                       <div style={{ display: "flex", gap: 12, marginBottom: 10, flexWrap: "wrap" }}>
-                        {isClient ? (
-                          <>
-                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Sifat: <strong style={{ color: "#fbbf24" }}>★ {myReview.score_quality}</strong></span>
-                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Muddat: <strong style={{ color: "#fbbf24" }}>★ {myReview.score_timeliness}</strong></span>
-                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Muloqot: <strong style={{ color: "#fbbf24" }}>★ {myReview.score_communication}</strong></span>
-                          </>
-                        ) : (
-                          <>
-                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>To'lov: <strong style={{ color: "#fbbf24" }}>★ {myReview.score_payment}</strong></span>
-                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Texnik topshiriq: <strong style={{ color: "#fbbf24" }}>★ {myReview.score_clarity}</strong></span>
-                          </>
-                        )}
+                        <span style={{ fontSize: 13, color: "var(--text-2)" }}>Umumiy baho: <strong style={{ color: "#fbbf24" }}>★ {myReview.score_quality || myReview.score_payment}</strong></span>
                       </div>
                       <p style={{ margin: 0, fontSize: 14, color: "var(--muted)", fontStyle: "italic", lineHeight: 1.5 }}>
                         "{myReview.comment || "Sharh qoldirilmagan."}"
@@ -554,18 +529,7 @@ export default function ContractDetail() {
                   {partnerReview ? (
                     <div>
                       <div style={{ display: "flex", gap: 12, marginBottom: 10, flexWrap: "wrap" }}>
-                        {!isClient ? (
-                          <>
-                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Sifat: <strong style={{ color: "#fbbf24" }}>★ {partnerReview.score_quality}</strong></span>
-                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Muddat: <strong style={{ color: "#fbbf24" }}>★ {partnerReview.score_timeliness}</strong></span>
-                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Muloqot: <strong style={{ color: "#fbbf24" }}>★ {partnerReview.score_communication}</strong></span>
-                          </>
-                        ) : (
-                          <>
-                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>To'lov: <strong style={{ color: "#fbbf24" }}>★ {partnerReview.score_payment}</strong></span>
-                            <span style={{ fontSize: 13, color: "var(--text-2)" }}>Texnik topshiriq: <strong style={{ color: "#fbbf24" }}>★ {partnerReview.score_clarity}</strong></span>
-                          </>
-                        )}
+                        <span style={{ fontSize: 13, color: "var(--text-2)" }}>Umumiy baho: <strong style={{ color: "#fbbf24" }}>★ {partnerReview.score_quality || partnerReview.score_payment}</strong></span>
                       </div>
                       <p style={{ margin: 0, fontSize: 14, color: "var(--muted)", fontStyle: "italic", lineHeight: 1.5 }}>
                         "{partnerReview.comment || "Sharh qoldirilmagan."}"
@@ -659,44 +623,12 @@ export default function ContractDetail() {
                   Baho berish ixtiyoriy, lekin bu hamjamiyat uchun juda muhimdir. Hamkorlik sifatini baholang!
                 </p>
 
-                {/* Dynamic Star Ratings based on User Role */}
-                {isClient ? (
-                  <>
-                    <StarRating 
-                      label="Ish sifati (Sifat)" 
-                      description="Freelancer bajargan ish sifatini qanday baholaysiz?"
-                      rating={ratingScores.score_quality} 
-                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_quality: val }))} 
-                    />
-                    <StarRating 
-                      label="O'z vaqtida topshirish (Muddat)" 
-                      description="Ish muddatlariga qanchalik rioya qilindi?"
-                      rating={ratingScores.score_timeliness} 
-                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_timeliness: val }))} 
-                    />
-                    <StarRating 
-                      label="Muloqot va aloqa (Kommunikatsiya)" 
-                      description="Savollarga javob berish tezligi va hamkorlik sifati."
-                      rating={ratingScores.score_communication} 
-                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_communication: val }))} 
-                    />
-                  </>
-                ) : (
-                  <>
-                    <StarRating 
-                      label="To'lov madaniyati (To'lov)" 
-                      description="To'lovlar va milestone-lar o'z vaqtida tasdiqlandimi?"
-                      rating={ratingScores.score_payment} 
-                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_payment: val }))} 
-                    />
-                    <StarRating 
-                      label="Vazifaning aniqligi (Texnik topshiriq aniqligi)" 
-                      description="Texnik topshiriq va talablar aniq tushuntirildimi?"
-                      rating={ratingScores.score_clarity} 
-                      onChange={(val) => setRatingScores(prev => ({ ...prev, score_clarity: val }))} 
-                    />
-                  </>
-                )}
+                 <StarRating 
+                   label="Hamkorga umumiy baho" 
+                   description={isClient ? "Freelancer bajargan ishini umumiy qanday baholaysiz?" : "Mijoz bilan hamkorlikni umumiy qanday baholaysiz?"}
+                   rating={ratingValue} 
+                   onChange={(val) => setRatingValue(val)} 
+                 />
 
                 {/* Comment field */}
                 <div style={{ marginBottom: 24, textAlign: "left" }}>
