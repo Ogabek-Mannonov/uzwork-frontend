@@ -133,7 +133,19 @@ const Escrow = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('uz-UZ', {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    // Since i18n isn't imported here, we'll assume uz-UZ layout issue needs a fallback or check
+    const isUz = localStorage.getItem('i18nextLng') === 'uz';
+    const isRu = localStorage.getItem('i18nextLng') === 'ru';
+    if (isUz) {
+      const months = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+      return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    } else if (isRu) {
+      const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+      return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    }
+    return date.toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
