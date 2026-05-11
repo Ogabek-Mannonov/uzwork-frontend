@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getMyContracts, getContractById } from "../../api/contracts";
+import { findOrCreateContractChat } from "../../api/messages";
 import Price from "../components/Currency/Price";
 import { useCurrency } from "../components/Currency/CurrencyContext";
 import "./css/contractmanegment.css";
@@ -88,6 +89,21 @@ const ContractManagement = () => {
     }
   };
 
+  const handleMessageClick = async (contractId) => {
+    try {
+      const res = await findOrCreateContractChat(contractId);
+      if (res?.success && res?.data?.chatId) {
+        navigate(`/messages/${res.data.chatId}`);
+      } else {
+        setToastMessage("Chatni ochib bo'lmadi");
+        setShowSuccessToast(true);
+        setTimeout(() => setShowSuccessToast(false), 3000);
+      }
+    } catch (error) {
+      console.error("Chat error:", error);
+    }
+  };
+
   const filteredContracts = contracts.filter(c => {
     const statusMatch = activeTab === "active" ? c.status === "active" : c.status !== "active";
     const searchMatch = 
@@ -115,7 +131,15 @@ const ContractManagement = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    return new Date(dateString).toLocaleDateString(i18n.language === 'uz' ? 'uz-UZ' : i18n.language === 'ru' ? 'ru-RU' : 'en-US', {
+    const date = new Date(dateString);
+    if (i18n.language === 'uz') {
+      const months = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+      return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    } else if (i18n.language === 'ru') {
+      const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+      return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    }
+    return date.toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
@@ -275,7 +299,7 @@ const ContractManagement = () => {
                 <div className="cm-freelancer-info">
                   <div className="cm-avatar-wrapper" 
                     style={{ position: 'relative', cursor: 'pointer' }}
-                    onClick={() => navigate(`/freelancers/${contract.freelancer_id}`)}
+                    onClick={() => navigate(`/profile/${contract.freelancer_id}`)}
                   >
                     {contract.freelancer_avatar_url ? (
                       <img 
@@ -299,20 +323,20 @@ const ContractManagement = () => {
                     <div 
                       className="cm-freelancer-name" 
                       style={{ cursor: 'pointer' }}
-                      onClick={() => navigate(`/freelancers/${contract.freelancer_id}`)}
+                      onClick={() => navigate(`/profile/${contract.freelancer_id}`)}
                     >
                       {`${contract.freelancer_first_name || ""} ${contract.freelancer_last_name || ""}`.trim() || "Freelancer Partner"}
                     </div>
                     <div className="cm-freelancer-actions">
                       <button 
                         className="cm-btn-secondary cm-btn-sm" 
-                        onClick={() => navigate(`/freelancers/${contract.freelancer_id}`)}
+                        onClick={() => navigate(`/profile/${contract.freelancer_id}`)}
                       >
                         <Users size={12} /> {t('contracts.card.profile')}
                       </button>
                       <button 
                         className="cm-btn-primary cm-btn-sm" 
-                        onClick={() => navigate(`/messages/${contract.id}`)}
+                        onClick={() => handleMessageClick(contract.id)}
                       >
                         <MessageSquare size={12} /> {t('contracts.card.chat')}
                       </button>
@@ -399,13 +423,13 @@ const ContractManagement = () => {
                             <div className="cm-freelancer-actions">
                               <button 
                                 className="cm-btn-secondary cm-btn-sm" 
-                                onClick={() => navigate(`/freelancers/${selectedContract.contract?.freelancer_id}`)}
+                                onClick={() => navigate(`/profile/${selectedContract.contract?.freelancer_id}`)}
                               >
                                 <Users size={14} /> {t('contracts.modal.viewProfile')}
                               </button>
                               <button 
                                 className="cm-btn-primary cm-btn-sm" 
-                                onClick={() => navigate(`/messages/${selectedContract.contract?.id || selectedContract.id}`)}
+                                onClick={() => handleMessageClick(selectedContract.contract?.id || selectedContract.id)}
                               >
                                 <MessageSquare size={14} /> {t('contracts.modal.goToChat')}
                               </button>

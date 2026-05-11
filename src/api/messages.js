@@ -46,6 +46,18 @@ export const findOrCreateProposalChat = async (proposalId) => {
 };
 
 /**
+ * Contract bo'yicha chatni topish yoki yaratish
+ */
+export const findOrCreateContractChat = async (contractId) => {
+  try {
+    const res = await api.post(`/messages/find-or-create-by-contract/${contractId}`);
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/**
  * Xabar yuborish
  * Backend kutadi: { chat_id, message_text, type?, file_url? }
  */
