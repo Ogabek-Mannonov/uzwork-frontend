@@ -1243,3 +1243,65 @@
   from { opacity: 0; transform: translate(-50%, -15px); }
   to { opacity: 1; transform: translate(-50%, 0); }
 }
+
+/* Premium Pagination Design */
+.v3-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--w-glass-border);
+}
+
+.v3-pagination-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid var(--w-glass-border);
+  background: var(--w-glass-bg);
+  color: var(--w-text-main);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.v3-pagination-btn:hover:not(:disabled) {
+  border-color: var(--w-primary);
+  color: var(--w-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--w-primary-glow);
+}
+
+.v3-pagination-btn.active {
+  background: var(--w-primary);
+  color: #ffffff;
+  border-color: var(--w-primary);
+  box-shadow: 0 6px 16px var(--w-primary-glow);
+}
+
+.v3-pagination-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Make pagination center beautifully on small screens too */
+@media (max-width: 480px) {
+  .v3-pagination {
+    gap: 6px;
+    margin-top: 20px;
+  }
+  .v3-pagination-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+}

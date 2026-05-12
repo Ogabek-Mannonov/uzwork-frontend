@@ -31,6 +31,7 @@ import {
   Download,
   Building2,
   ChevronRight,
+  ChevronLeft,
   TrendingDown,
   TrendingUp,
   RefreshCw,
@@ -48,6 +49,8 @@ export default function Wallet() {
   const [transactions, setTransactions] = useState([]);
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   
   // Modals
   const [showAddCard, setShowAddCard] = useState(false);
@@ -276,7 +279,7 @@ export default function Wallet() {
                <button 
                  key={tab} 
                  className={`luxury-tab-btn ${activeTab === tab ? "active" : ""}`}
-                 onClick={() => setActiveTab(tab)}
+                 onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
                >
                  {t(`wallet.${tab}`)}
                </button>
@@ -416,40 +419,74 @@ export default function Wallet() {
       )}
 
       {/* Transactions View */}
-      {activeTab === "transactions" && (
-        <div className="v3-full-content-box soft-fade-in">
-           <div className="content-header-v3">
-              <h3>{t("wallet.history")}</h3>
-              <button className="glass-btn small-v3"><Download size={14}/> {t("common.export")}</button>
-           </div>
-           <div className="v3-table-container">
-              <table className="v3-luxury-table">
-                 <thead>
-                    <tr>
-                       <th>{t("reports.date")}</th>
-                       <th>{t("reports.status")}</th>
-                       <th>{t("common.description")}</th>
-                       <th>{t("reports.amount")}</th>
-                    </tr>
-                 </thead>
-                 <tbody>
-                    {transactions.map(tx => (
-                       <tr key={tx.id}>
-                          <td>{new Date(tx.created_at).toLocaleDateString()}</td>
-                          <td>
-                             <span className={`v3-badge ${tx.type}`}>{t(`wallet.types.${tx.type}`)}</span>
-                          </td>
-                          <td className="desc-text">{tx.job_title || "-"}</td>
-                          <td className={`amount-text ${['deposit', 'escrow_release', 'refund'].includes(tx.type) ? 'pos' : 'neg'}`}>
-                             {['deposit', 'escrow_release', 'refund'].includes(tx.type) ? '+' : '-'}{formatMoney(tx.amount)}
-                          </td>
-                       </tr>
-                    ))}
-                 </tbody>
-              </table>
-           </div>
-        </div>
-      )}
+      {activeTab === "transactions" && (() => {
+        const totalPages = Math.ceil(transactions.length / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const paginatedTransactions = transactions.slice(startIndex, startIndex + itemsPerPage);
+
+        return (
+          <div className="v3-full-content-box soft-fade-in">
+             <div className="content-header-v3">
+                <h3>{t("wallet.history")}</h3>
+                <button className="glass-btn small-v3"><Download size={14}/> {t("common.export")}</button>
+             </div>
+             <div className="v3-table-container">
+                <table className="v3-luxury-table">
+                   <thead>
+                      <tr>
+                         <th>{t("reports.date")}</th>
+                         <th>{t("reports.status")}</th>
+                         <th>{t("common.description")}</th>
+                         <th>{t("reports.amount")}</th>
+                      </tr>
+                   </thead>
+                   <tbody>
+                      {paginatedTransactions.map(tx => (
+                         <tr key={tx.id}>
+                            <td>{new Date(tx.created_at).toLocaleDateString()}</td>
+                            <td>
+                               <span className={`v3-badge ${tx.type}`}>{t(`wallet.types.${tx.type}`)}</span>
+                            </td>
+                            <td className="desc-text">{tx.job_title || "-"}</td>
+                            <td className={`amount-text ${['deposit', 'escrow_release', 'refund'].includes(tx.type) ? 'pos' : 'neg'}`}>
+                               {['deposit', 'escrow_release', 'refund'].includes(tx.type) ? '+' : '-'}{formatMoney(tx.amount)}
+                            </td>
+                         </tr>
+                      ))}
+                   </tbody>
+                </table>
+             </div>
+
+             {totalPages > 1 && (
+                <div className="v3-pagination">
+                   <button 
+                      className="v3-pagination-btn prev" 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                   >
+                      <ChevronLeft size={16} />
+                   </button>
+                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button
+                         key={page}
+                         className={`v3-pagination-btn num ${currentPage === page ? 'active' : ''}`}
+                         onClick={() => setCurrentPage(page)}
+                      >
+                         {page}
+                      </button>
+                   ))}
+                   <button 
+                      className="v3-pagination-btn next" 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                   >
+                      <ChevronRight size={16} />
+                   </button>
+                </div>
+             )}
+          </div>
+        );
+      })()}
 
       {/* Methods View */}
       {activeTab === "methods" && (
