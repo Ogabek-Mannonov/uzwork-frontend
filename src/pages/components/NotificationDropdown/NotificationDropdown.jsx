@@ -197,6 +197,9 @@ const NotificationDropdown = () => {
     const related_id = notif.data?.related_id;
     
     switch (type) {
+      case 'new_review':
+        window.dispatchEvent(new Event('check_pending_review'));
+        break;
       case 'proposal_received':
         navigate('/client/proposals');
         break;

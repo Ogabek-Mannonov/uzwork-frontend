@@ -23,10 +23,12 @@ export const getJobById = async (id) => {
   }
 };
 
-/** Mening ishlarim (client) */
 export const getMyJobs = async (params = {}) => {
   try {
-    const res = await api.get("/projects/my", { params });
+    const userStr = localStorage.getItem("user");
+    const activeRole = userStr ? JSON.parse(userStr)?.role : null;
+    const finalParams = activeRole ? { role: activeRole, ...params } : params;
+    const res = await api.get("/projects/my", { params: finalParams });
     return res?.data;
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err?.message };

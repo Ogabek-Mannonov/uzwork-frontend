@@ -191,16 +191,19 @@ const Proposals = () => {
     try {
       const res = type === "reject" ? await rejectProposal(modalData) : await acceptProposal(modalData);
       
-      if (res?.success !== false) {
+      if (res && res.success !== false) {
         if (type === "reject") {
           setProposals(prev => prev.map(p => p.id === modalData ? { ...p, status: "rejected" } : p));
           notify("Taklif rad etildi va arxivga olindi");
           setModal({ isOpen: false, type: null, data: null });
         } else {
           // Success acceptance
+          const acceptedProposal = proposals.find(p => p.id === modalData);
+          const jobId = acceptedProposal?.job_id || res.data?.contract?.job_id || res.data?.job_id;
+
           setProposals(prev => prev.map(p => {
              if (p.id === modalData) return { ...p, status: "accepted" };
-             if (p.job_id === (res.data?.proposal?.job_id || res.data?.job_id) && p.id !== modalData) return { ...p, status: "rejected" };
+             if (jobId && p.job_id === jobId && p.id !== modalData) return { ...p, status: "rejected" };
              return p;
           }));
           notify("Tabriklaymiz! Freelancer muvaffaqiyatli yollangan.");

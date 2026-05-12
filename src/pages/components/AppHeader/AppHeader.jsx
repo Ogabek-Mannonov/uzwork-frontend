@@ -495,6 +495,70 @@ function AuthHeader({ user }) {
   const navigate = useNavigate();
   const [activeToast, setActiveToast] = useState(null);
 
+  // --- Global Rating State (Freelancer rating Client) ---
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingValue, setRatingValue] = useState(0);
+  const [comment, setComment] = useState("");
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
+  const [pendingContract, setPendingContract] = useState(null);
+
+  const checkPendingReview = async () => {
+    if (!user?.id) return;
+    try {
+      const { getPendingReview } = await import("../../../api/common");
+      const res = await getPendingReview();
+      if (res?.success && res.data) {
+        setPendingContract(res.data);
+        setRatingValue(0);
+        setComment("");
+        setShowRatingModal(true);
+      }
+    } catch (err) {
+      console.error("Error checking pending review:", err);
+    }
+  };
+
+  const handleRatingSubmit = async () => {
+    if (!ratingValue) {
+      alert("Iltimos, umumiy bahoni yulduzchalar orqali belgilang!");
+      return;
+    }
+
+    if (ratingValue <= 3) {
+      if (!comment || comment.trim().length < 20) {
+        alert("Past baho (1-3 yulduz) berganda kamida 20 ta harfdan iborat batafsil izoh/sharh qoldirishingiz shart!");
+        return;
+      }
+    }
+
+    const isClientRating = String(user?.id) === String(pendingContract?.client_id);
+    const scores = isClientRating
+      ? { score_quality: ratingValue, score_timeliness: ratingValue, score_communication: ratingValue }
+      : { score_payment: ratingValue, score_clarity: ratingValue };
+
+    setRatingSubmitting(true);
+    try {
+      const { createReview } = await import("../../../api/common");
+      const res = await createReview({
+        contract_id: pendingContract.contract_id,
+        comment,
+        ...scores
+      });
+
+      if (res?.success !== false) {
+        alert(isClientRating ? "Frilanserni muvaffaqiyatli baholadingiz, rahmat!" : "Mijozni muvaffaqiyatli baholadingiz, rahmat!");
+        setShowRatingModal(false);
+        setPendingContract(null);
+      } else {
+        alert(res?.message || "Xatolik yuz berdi");
+      }
+    } catch (err) {
+      alert("Server xatosi");
+    } finally {
+      setRatingSubmitting(false);
+    }
+  };
+
   const isClient = user?.role === "client";
 
   const [searchValue, setSearchValue] = useState("");
@@ -610,6 +674,7 @@ function AuthHeader({ user }) {
     };
 
     fetchCounts();
+    checkPendingReview();
 
     const socketObj = getSocket();
     if (!socketObj) return;
@@ -667,12 +732,22 @@ function AuthHeader({ user }) {
         if (noti.type && (noti.type.startsWith('proposal_') || noti.type === 'job_invitation')) {
           fetchCounts();
         }
+
+        // Agar yangi sharh bo'lsa, baholash modali ochiladi
+        if (noti.type === 'new_review') {
+          checkPendingReview();
+        }
       }
     };
 
     const handleRead = () => fetchCounts();
     const handleUnreadUpdate = () => fetchCounts();
     const handleNotifRead = () => { if (mounted) fetchCounts(); };
+
+    const handleCheckPending = () => {
+      checkPendingReview();
+    };
+    window.addEventListener('check_pending_review', handleCheckPending);
 
     socketObj.on("newMessage", handleNewMessage);
     socketObj.on("newNotification", handleNewNotification);
@@ -684,6 +759,7 @@ function AuthHeader({ user }) {
 
     return () => {
       mounted = false;
+      window.removeEventListener('check_pending_review', handleCheckPending);
       socketObj.off("newMessage", handleNewMessage);
       socketObj.off("newNotification", handleNewNotification);
       socketObj.off("unreadUpdate", handleUnreadUpdate);
@@ -1188,6 +1264,130 @@ function AuthHeader({ user }) {
             setActiveToast(null);
           }}
         />
+      )}
+
+      {showRatingModal && pendingContract && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+          background: "rgba(15, 23, 42, 0.75)", backdropFilter: "blur(8px)",
+          display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999,
+          padding: 16
+        }}>
+          <div style={{
+            background: "var(--surface, #1e293b)", border: "1px solid rgba(255, 255, 255, 0.1)",
+            width: "100%", maxWidth: 480, borderRadius: 24, padding: "32px 24px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)", position: "relative",
+            animation: "fadeInUp 0.3s ease-out", color: "var(--text, #fff)"
+          }}>
+            {/* Close button */}
+            <button 
+              onClick={() => setShowRatingModal(false)}
+              style={{
+                position: "absolute", top: 16, right: 16, background: "rgba(255,255,255,0.05)",
+                border: "none", color: "inherit", cursor: "pointer", width: 32, height: 32,
+                borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center"
+              }}
+            >
+              <X size={16} />
+            </button>
+
+            {/* Header / Icon */}
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: "50%", background: "rgba(59, 130, 246, 0.1)",
+                display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px"
+              }}>
+                <Award size={32} style={{ color: "var(--brand, #3b82f6)" }} />
+              </div>
+              <h3 style={{ fontSize: 20, fontWeight: 750, color: "var(--text, #fff)", marginBottom: 8, textAlign: "center" }}>
+                {String(user?.id) === String(pendingContract?.client_id) ? "Frilanserni baholash" : "Mijozni baholash"}
+              </h3>
+              <p style={{ color: "var(--muted, #94a3b8)", fontSize: 14, lineHeight: 1.5, textAlign: "center" }}>
+                Hamkorlik muvaffaqiyatli yakunlandi! <strong>{
+                  String(user?.id) === String(pendingContract?.client_id)
+                    ? `${pendingContract.freelancer_first_name || ""} ${pendingContract.freelancer_last_name || ""}`.trim()
+                    : `${pendingContract.client_first_name || ""} ${pendingContract.client_last_name || ""}`.trim()
+                }</strong> bilan ishlashni qanday baholaysiz?
+              </p>
+            </div>
+
+            {/* Star input */}
+            <div style={{ marginBottom: 24, textAlign: "center" }}>
+              <label style={{ display: "block", fontSize: 15, fontWeight: 750, color: "var(--text)", marginBottom: 12 }}>
+                Umumiy baho
+              </label>
+              <div style={{ display: "flex", justifyContent: "center", gap: 10 }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRatingValue(star)}
+                    style={{
+                      background: "none", border: "none", cursor: "pointer", padding: 4,
+                      transition: "transform 0.15s ease", transform: ratingValue >= star ? "scale(1.15)" : "scale(1)"
+                    }}
+                  >
+                    <Star 
+                      size={36} 
+                      fill={ratingValue >= star ? "#f59e0b" : "none"} 
+                      color={ratingValue >= star ? "#f59e0b" : "#cbd5e1"} 
+                    />
+                  </button>
+                ))}
+              </div>
+              {ratingValue > 0 && (
+                <div style={{ marginTop: 8, fontSize: 13, color: "var(--brand, #3b82f6)", fontWeight: 600 }}>
+                  {ratingValue === 5 && "A'lo, juda mamnunman!"}
+                  {ratingValue === 4 && "Yaxshi, hamkorlik yoqdi!"}
+                  {ratingValue === 3 && "O'rtacha, kamchiliklar bor"}
+                  {ratingValue === 2 && "Yomon, tavsiya qilmayman"}
+                  {ratingValue === 1 && "Juda yomon!"}
+                </div>
+              )}
+            </div>
+
+            {/* Comment field */}
+            <div style={{ marginBottom: 24, textAlign: "left" }}>
+              <label style={{ display: "block", fontSize: 15, fontWeight: 750, color: "var(--text)", marginBottom: 6 }}>
+                Sharh {ratingValue <= 3 && ratingValue > 0 && <span style={{ color: "#ef4444" }}>* (kamida 20 ta harf)</span>}
+              </label>
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Mijoz va loyiha haqida fikringizni yozib qoldiring..."
+                style={{
+                  width: "100%", height: 80, padding: 12, borderRadius: 12,
+                  background: "var(--surface-2, #1e293b)", border: "1px solid rgba(255, 255, 255, 0.1)",
+                  color: "var(--text)", fontSize: 14, outline: "none", resize: "none"
+                }}
+              />
+              {ratingValue <= 3 && ratingValue > 0 && (!comment || comment.trim().length < 20) && (
+                <span style={{ color: "#ef4444", fontSize: 12, display: "block", marginTop: 4 }}>
+                  Past baho berganda sharh qoldirish majburiy! Hozirgi uzunlik: {comment ? comment.trim().length : 0}/20
+                </span>
+              )}
+            </div>
+
+            {/* Submit buttons */}
+            <div style={{ display: "flex", gap: 16 }}>
+              <button 
+                className="cd-btn-premium cd-btn-outline" 
+                style={{ flex: 1, color: "#94a3b8", borderColor: "rgba(148, 163, 184, 0.3)", padding: "10px 16px", borderRadius: "12px", background: "none", cursor: "pointer", fontWeight: 600 }} 
+                onClick={() => setShowRatingModal(false)}
+              >
+                Keyinroq
+              </button>
+              <button 
+                className="cd-btn-premium cd-btn-primary" 
+                style={{ flex: 1, padding: "10px 16px", borderRadius: "12px", background: "var(--brand, #2563eb)", color: "#fff", border: "none", cursor: "pointer", fontWeight: 600 }}
+                disabled={ratingSubmitting}
+                onClick={handleRatingSubmit}
+              >
+                {ratingSubmitting ? "Yuborilmoqda..." : "Yuborish"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <div className={`mobile-drawer${drawerOpen ? " open" : ""}`} aria-modal="true" role="dialog">
