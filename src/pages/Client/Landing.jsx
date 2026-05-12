@@ -150,11 +150,12 @@ const Landing = () => {
           setSuccessModal({ isOpen: true, contractId: res.data.contract.id });
         }
       } else {
-        const isBalanceError = res?.message?.toLowerCase().includes("balans") || res?.message?.toLowerCase().includes("balance");
+        const msg = res?.message ? String(res.message).toLowerCase() : "";
+        const isBalanceError = msg.includes("balans") || msg.includes("balance");
         if (isBalanceError) {
           notify(
             <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-              <span>{res.message}</span>
+              <span>{res?.message || "Balansda yetarli mablag' yo'q"}</span>
               <button onClick={() => navigate("/client/payments")} style={{ background: "white", color: "#ef4444", border: "none", borderRadius: "4px", padding: "2px 8px", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}>
                 To'ldirish
               </button>

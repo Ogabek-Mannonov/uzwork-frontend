@@ -179,7 +179,11 @@ const Proposals = () => {
 
   const executeAction = async () => {
     const { type, data: modalData } = modal;
-    if (!modalData) return;
+    console.log("executeAction triggered. Modal state:", { type, modalData });
+    if (!modalData) {
+      console.warn("executeAction aborted: modalData is falsy.");
+      return;
+    }
 
     if (type === "success") {
       setModal({ isOpen: false, type: null, data: null });
@@ -187,9 +191,12 @@ const Proposals = () => {
       return;
     }
 
+    console.log(`Setting actionLoading to: ${modalData}`);
     setActionLoading(modalData);
     try {
+      console.log(`Calling API to ${type === "reject" ? "reject" : "accept"} proposal:`, modalData);
       const res = type === "reject" ? await rejectProposal(modalData) : await acceptProposal(modalData);
+      console.log("API response received:", res);
       
       if (res && res.success !== false) {
         if (type === "reject") {
@@ -209,22 +216,26 @@ const Proposals = () => {
           notify("Tabriklaymiz! Freelancer muvaffaqiyatli yollangan.");
           
           if (res.data?.contract?.id) {
+            console.log("Hiring successful, transitioning to success modal with contract ID:", res.data.contract.id);
             setModal({ 
               isOpen: true, 
               type: "success", 
               data: res.data.contract.id 
             });
           } else {
+            console.log("Hiring successful, closing modal (no contract ID returned).");
             setModal({ isOpen: false, type: null, data: null });
           }
         }
       } else {
         // Error handling
-        const isBalanceError = res?.message?.toLowerCase().includes("balans") || res?.message?.toLowerCase().includes("balance");
+        console.warn("API returned error response:", res);
+        const msg = res?.message ? String(res.message).toLowerCase() : "";
+        const isBalanceError = msg.includes("balans") || msg.includes("balance");
         if (isBalanceError) {
           notify(
             <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-              <span>{res.message}</span>
+              <span>{res?.message || "Balansda yetarli mablag' yo'q"}</span>
               <button 
                 onClick={() => navigate("/client/payments")}
                 style={{ background: "white", color: "#ef4444", border: "none", borderRadius: "4px", padding: "2px 8px", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}
@@ -240,10 +251,11 @@ const Proposals = () => {
         setModal({ isOpen: false, type: null, data: null });
       }
     } catch (err) {
-      console.error("executeAction error:", err);
+      console.error("executeAction error caught:", err);
       notify("Server bilan bog'lanishda xato", "error");
       setModal({ isOpen: false, type: null, data: null });
     } finally {
+      console.log("executeAction finalized. Resetting actionLoading.");
       setActionLoading(null);
     }
   };

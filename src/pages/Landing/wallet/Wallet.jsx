@@ -103,6 +103,20 @@ export default function Wallet() {
     loadData(); 
   }, []);
 
+  // Lock body scroll when any modal is active
+  useEffect(() => {
+    const isAnyModalOpen = showAddCard || showDeposit || showWithdraw || !!confirmDeleteId;
+    if (isAnyModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showAddCard, showDeposit, showWithdraw, confirmDeleteId]);
+
   // tx (transaction object) ni ham qabul qiladi — metadata.amount_usd bo'lsa shu aniq USD summani ishlatadi
   const formatMoney = (amountInUzs, tx = null) => {
     const meta = tx?.metadata ? (typeof tx.metadata === 'string' ? (() => { try { return JSON.parse(tx.metadata); } catch { return {}; } })() : tx.metadata) : null;
@@ -239,7 +253,8 @@ export default function Wallet() {
   }
 
   return (
-    <div className="wallet-v3 soft-fade-in">
+    <div className="wallet-v3-wrapper">
+      <div className="wallet-v3 soft-fade-in">
       {/* Toast Notification */}
       {toast.msg && (
         <div className={`premium-toast ${toast.type === "error" ? "error" : "success"}`}>
@@ -477,6 +492,8 @@ export default function Wallet() {
          </div>
       )}
 
+      </div>
+
       {/* MODALS (Simplified for better UI) */}
       {showAddCard && (
         <div className="v3-modal-overlay" onClick={() => setShowAddCard(false)}>
@@ -541,15 +558,29 @@ export default function Wallet() {
                     <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" />
                   </div>
                </div>
-               <div className="v3-selected-card-box">
-                  {selectedCard ? (
-                    <div className={`mini-card-item ${selectedCard.card_type}`}>
-                       <span>{selectedCard.card_type.toUpperCase()}</span>
-                       <span>•••• {selectedCard.card_number.slice(-4)}</span>
+               <div className="v3-field">
+                  <label>{t("wallet.selectCard") || "Kartani tanlang"}</label>
+                  {cards.length === 0 ? (
+                    <div className="no-cards-error-v3" onClick={() => { setShowDeposit(false); setShowAddCard(true); }}>
+                      <Plus size={16} /> {t("wallet.addCard") || "Karta qo'shish"}
                     </div>
-                  ) : <div className="no-cards-error">{t("wallet.noCards")}</div>}
+                  ) : (
+                    <div className="v3-card-selection-list">
+                       {cards.map(card => (
+                         <div 
+                           key={card.id} 
+                           className={`v3-selection-item ${selectedCard?.id === card.id ? 'active' : ''}`}
+                           onClick={() => setSelectedCard(card)}
+                         >
+                           <span className={`v3-v-type ${card.card_type}`}>{card.card_type.charAt(0).toUpperCase()}</span>
+                           <span>•••• {card.card_number.slice(-4)}</span>
+                           {selectedCard?.id === card.id && <CheckCircle2 size={14}/>}
+                         </div>
+                       ))}
+                    </div>
+                  )}
                </div>
-               <button className="v3-submit-btn" onClick={handleDeposit} disabled={processing || !selectedCard}>
+               <button className="v3-submit-btn" onClick={handleDeposit} disabled={processing || !selectedCard || !amount}>
                  {processing ? <RefreshCw className="spin" /> : t("wallet.deposit")}
                </button>
             </div>
@@ -614,7 +645,6 @@ export default function Wallet() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
