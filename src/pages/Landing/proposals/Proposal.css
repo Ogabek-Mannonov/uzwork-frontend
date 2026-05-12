@@ -295,11 +295,19 @@
 .pr-btn-cancel:hover { background: var(--surface); color: var(--text); }
 
 /* SUCCESS */
+.pr-page.pr-success-page {
+  padding: 24px 16px;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .pr-success {
   text-align: center;
-  max-width: 600px;
-  margin: 60px auto;
-  padding: 60px 40px;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 40px 32px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   border-radius: 32px;
@@ -307,8 +315,8 @@
   box-shadow: var(--glass-shadow);
 }
 
-.pr-success-title { font-size: 32px; font-weight: 850; margin-bottom: 20px; color: var(--text); }
-.pr-success-desc { font-size: 16px; color: var(--text-2); margin-bottom: 40px; line-height: 1.6; }
+.pr-success-title { font-size: 28px; font-weight: 850; margin-bottom: 16px; color: var(--text); line-height: 1.25; }
+.pr-success-desc { font-size: 15px; color: var(--text-2); margin-bottom: 32px; line-height: 1.6; }
 
 @media (max-width: 768px) {
   .pr-page { padding: 20px 15px; }

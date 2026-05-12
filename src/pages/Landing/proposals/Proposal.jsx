@@ -128,7 +128,7 @@ export default function Proposal() {
 
   if (submitted) {
     return (
-      <div className="pr-page">
+      <div className="pr-page pr-success-page">
         <div className="pr-success">
           <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'center' }}>
             <div style={{ background: "rgba(16, 185, 129, 0.1)", padding: "24px", borderRadius: "50%" }}>
