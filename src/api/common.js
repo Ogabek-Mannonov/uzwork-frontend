@@ -117,7 +117,10 @@ export const updateNotificationSettings = async (payload) => {
 /** O'qilmagan takliflar sonini olish */
 export const getUnreadProposalsCount = async () => {
   try {
-    const res = await api.get("/notifications/unread-proposals-count");
+    const userStr = localStorage.getItem("user");
+    const activeRole = userStr ? JSON.parse(userStr)?.role : null;
+    const params = activeRole ? { role: activeRole } : {};
+    const res = await api.get("/notifications/unread-proposals-count", { params });
     return res?.data;
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err?.message };
@@ -127,7 +130,9 @@ export const getUnreadProposalsCount = async () => {
 /** Bildirishnomalarni turi bo'yicha o'qilgan deb belgilandi */
 export const markAllNotificationsReadByType = async (typePrefix) => {
   try {
-    const res = await api.post("/notifications/mark-all-read-by-type", { typePrefix });
+    const userStr = localStorage.getItem("user");
+    const activeRole = userStr ? JSON.parse(userStr)?.role : null;
+    const res = await api.post("/notifications/mark-all-read-by-type", { typePrefix, role: activeRole });
     return res?.data;
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err?.message };
@@ -150,6 +155,16 @@ export const createReview = async (payload) => {
 export const getReviews = async (params = {}) => {
   try {
     const res = await api.get("/reviews", { params });
+    return res?.data;
+  } catch (err) {
+    return { success: false, message: err?.response?.data?.message || err?.message };
+  }
+};
+
+/** Kutilayotgan baholashni tekshirish (Freelancer uchun) */
+export const getPendingReview = async () => {
+  try {
+    const res = await api.get("/reviews/pending");
     return res?.data;
   } catch (err) {
     return { success: false, message: err?.response?.data?.message || err?.message };

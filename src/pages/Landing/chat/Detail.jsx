@@ -1253,7 +1253,9 @@ export default function ChatDetail() {
       }
     }
 
-    const isClientRating = currentUser?.role === 'client';
+    const isClientRating = contractData 
+      ? (String(currentUser?.id) === String(contractData?.client_id))
+      : (currentUser?.role === 'client');
     const scores = isClientRating
       ? { score_quality: ratingValue, score_timeliness: ratingValue, score_communication: ratingValue }
       : { score_payment: ratingValue, score_clarity: ratingValue };

@@ -19,7 +19,7 @@ export default function InviteForm({ freelancer, onInviteSuccess, onBack }) {
   const fetchActiveJobs = async () => {
     setLoading(true);
     try {
-      const response = await getMyJobs({ status: "open", limit: 100 });
+      const response = await getMyJobs({ limit: 100 });
       const allJobs = response?.data?.projects || response?.data || [];
       const activeJobs = allJobs.filter(j => j.status === "active" || j.status === "open");
       setJobs(activeJobs);
