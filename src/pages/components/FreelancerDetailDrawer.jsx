@@ -383,11 +383,14 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                                   {rev.rating ? (
                                     <>
                                       <div className="fd-stars">
-                                        {[...Array(5)].map((_, i) => (
-                                          <Star key={i} size={14} fill={i < rev.rating ? "#f59e0b" : "none"} stroke={i < rev.rating ? "#f59e0b" : "#ccc"} />
-                                        ))}
+                                        {[...Array(5)].map((_, i) => {
+                                          const ratingVal = Number(rev.rating || 0);
+                                          return (
+                                            <Star key={i} size={14} fill={i < ratingVal ? "#f59e0b" : "none"} stroke={i < ratingVal ? "#f59e0b" : "#ccc"} />
+                                          );
+                                        })}
                                       </div>
-                                      <span className="fd-rating-num">{rev.rating?.toFixed(1)}</span>
+                                      <span className="fd-rating-num">{Number(rev.rating || 0).toFixed(1)}</span>
                                     </>
                                   ) : (
                                     <span className="fd-no-feedback">{t("profile.noFeedback", "Fikr bildirilmagan")}</span>

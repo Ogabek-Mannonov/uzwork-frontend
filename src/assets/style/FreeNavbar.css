@@ -687,12 +687,12 @@
     padding: 7px 8px;
   }
   .nav__inner {
-    padding: 0 16px;
+    padding: 0 16px !important;
     gap: 12px;
   }
 }
 
-/* ≤ 900px: hide nav links, show hamburger */
+/* ≤ 900px: hide nav links, show hamburger & enforce flexbox */
 @media (max-width: 900px) {
   .nav__menu {
     display: none;
@@ -711,11 +711,13 @@
   }
 
   .nav__inner {
-    grid-template-columns: auto 1fr auto;
+    display: flex !important; /* Force flex on all mobile viewports to prevent empty grid column shifts! */
+    justify-content: space-between !important;
+    padding: 0 16px !important; /* Strict 16px gutter alignment with page search and results! */
   }
 }
 
-/* ≤ 640px: hide some icon buttons */
+/* ≤ 640px: hide some icon buttons & align with search/results page */
 @media (max-width: 640px) {
   .icon-btn--help,
   .icon-btn--settings {
@@ -725,14 +727,18 @@
     display: none;
   }
   .nav__inner {
-    grid-template-columns: auto 1fr auto;
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 0 16px !important;
   }
 }
 
 /* ≤ 400px: tighter padding */
 @media (max-width: 400px) {
   .nav__inner {
-    padding: 0 12px;
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 0 16px !important; /* Strict 16px gutter alignment */
     gap: 8px;
   }
   .nav__brand {

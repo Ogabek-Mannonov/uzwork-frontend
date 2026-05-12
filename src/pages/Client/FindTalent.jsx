@@ -269,6 +269,7 @@ const FindTalent = () => {
   const [totalPages,  setTotalPages]  = useState(1);
   const [totalCount,  setTotalCount]  = useState(0);
   const [toast,       setToast]       = useState("");
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [targetJobId, setTargetJobId] = useState(searchParams.get("jobId"));
   const [targetJobTitle, setTargetJobTitle] = useState("");
 
@@ -417,17 +418,8 @@ const FindTalent = () => {
     <div className="ft-page">
 
       {/* Top search bar */}
+      {/* Top search bar */}
       <div className="ft-searchbar">
-        <button
-          className="ft-back-btn"
-          onClick={() => navigate("/client/home")}
-          title="Bosh sahifaga qaytish">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-
         <div className="ft-search-wrap">
           <span className="ft-search-icon"><Search size={18} /></span>
           <input
@@ -445,7 +437,7 @@ const FindTalent = () => {
       <div className="ft-body">
 
         {/* FILTER SIDEBAR */}
-        <aside className="ft-sidebar">
+        <aside className={`ft-sidebar ${showMobileFilters ? "is-open" : ""}`}>
 
           <div className="ft-sidebar-hd">
             <div className="ft-sidebar-hd-title">
@@ -454,9 +446,14 @@ const FindTalent = () => {
                 <span className="ft-filter-count">{activeFilterCount}</span>
               )}
             </div>
-            {activeFilterCount > 0 && (
-              <button className="ft-sidebar-clear" onClick={clearFilters}>{t("findTalent.filter.clearAll")}</button>
-            )}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              {activeFilterCount > 0 && (
+                <button className="ft-sidebar-clear" onClick={clearFilters}>{t("findTalent.filter.clearAll")}</button>
+              )}
+              <button className="ft-sidebar-close-mobile" onClick={() => setShowMobileFilters(false)}>
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           {/* Talent Badge */}
@@ -608,6 +605,14 @@ const FindTalent = () => {
         <main className="ft-results">
 
           <div className="ft-results-top">
+            <button className="ft-mobile-filter-btn" onClick={() => setShowMobileFilters(true)}>
+              <SlidersHorizontal size={14} />
+              {t("findTalent.filter.title") || "Filtrlar"}
+              {activeFilterCount > 0 && (
+                <span className="ft-mobile-filter-badge">{activeFilterCount}</span>
+              )}
+            </button>
+
             <button className="ft-filter-pill">
               <MapPin size={13} />
               {location || t("findTalent.results.location")}
