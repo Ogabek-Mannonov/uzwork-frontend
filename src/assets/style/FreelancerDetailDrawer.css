@@ -20,7 +20,7 @@
   inset: 0;
   background: var(--fd-overlay-bg);
   backdrop-filter: blur(4px);
-  z-index: 1000;
+  z-index: 1200; /* Must be above navbar (1100)! */
   display: flex;
   justify-content: flex-end;
   opacity: 0;
@@ -51,7 +51,7 @@
 }
 
 @media (max-width: 768px) {
-  .fd-drawer { width: 100%; }
+  .fd-drawer { width: 100% !important; }
 }
 
 .fd-drawer.is-open {
@@ -916,3 +916,147 @@
   border-radius: 6px;
   border: 1px solid var(--fd-border);
 }
+
+/* =====================================================
+   MOBILE RESPONSIVE — Premium overhaul ≤768px
+   ===================================================== */
+@media (max-width: 768px) {
+  .fd-drawer { width: 100% !important; }
+
+  /* Controls bar */
+  .fd-controls {
+    height: 54px !important;
+    min-height: 54px !important;
+    padding: 0 14px !important;
+  }
+
+  /* Premium back button with Orqaga label */
+  .fd-control-btn.close-btn {
+    width: auto !important;
+    height: 36px !important;
+    padding: 0 12px !important;
+    border-radius: 10px !important;
+    gap: 6px !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    background: #f1f5f9 !important;
+    border-color: #e2e8f0 !important;
+    color: #0f172a !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  .fd-control-btn.close-btn::after {
+    content: "Orqaga";
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+  .fd-control-btn.close-btn:hover {
+    background: #e2e8f0 !important;
+  }
+
+  .fd-controls-right { gap: 8px !important; }
+  .fd-control-btn { width: 34px !important; height: 34px !important; border-radius: 8px !important; }
+
+  /* Main scroll */
+  .fd-main-scroll { padding: 16px 16px 32px !important; }
+
+  /* Profile header inline */
+  .fd-profile-header { flex-direction: column !important; gap: 14px !important; margin-bottom: 16px !important; }
+  .fd-header-left { flex-direction: row !important; align-items: center !important; gap: 14px !important; }
+
+  .fd-avatar { width: 58px !important; height: 58px !important; border-width: 2px !important; }
+  .fd-online-indicator { width: 11px !important; height: 11px !important; bottom: 2px !important; right: 2px !important; border-width: 2px !important; }
+
+  .fd-info-main { flex: 1; min-width: 0; }
+  .fd-info-main .fd-name { font-size: 17px !important; margin-bottom: 2px !important; line-height: 1.3 !important; }
+  .fd-title-text { font-size: 12.5px !important; margin-bottom: 5px !important; }
+  .fd-location-row { font-size: 11.5px !important; gap: 5px !important; }
+
+  /* Stats grid — segmented style */
+  .fd-quick-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1px !important;
+    padding: 0 !important;
+    background: var(--fd-border) !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    margin-bottom: 14px !important;
+    border: 1px solid var(--fd-border) !important;
+  }
+  .fd-stat-item { padding: 12px 14px !important; background: var(--fd-drawer-bg) !important; }
+  .fd-stat-val { font-size: 16px !important; font-weight: 700 !important; }
+  .fd-stat-lbl { font-size: 10px !important; letter-spacing: 0.3px !important; margin-top: 2px !important; }
+
+  /* Buttons */
+  .fd-action-buttons { gap: 8px !important; }
+  .fd-btn-primary { padding: 11px 16px !important; font-size: 13px !important; border-radius: 12px !important; }
+  .fd-btn-secondary { padding: 11px 14px !important; font-size: 13px !important; border-radius: 12px !important; }
+
+  /* Tabs */
+  .fd-tabs-nav { gap: 16px !important; margin-bottom: 16px !important; }
+  .fd-tab-item { font-size: 12.5px !important; padding: 10px 0 !important; }
+  .fd-tab-extra-link { font-size: 12px !important; padding: 4px 8px !important; white-space: nowrap !important; }
+
+  /* Content */
+  .fd-content-title { font-size: 15px !important; margin-bottom: 10px !important; }
+  .fd-bio-text { font-size: 13.5px !important; line-height: 1.6 !important; margin-bottom: 18px !important; }
+
+  /* Metrics */
+  .fd-metrics-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .fd-metric-card { padding: 12px !important; gap: 10px !important; border-radius: 12px !important; }
+  .fd-m-val { font-size: 15px !important; }
+  .fd-m-lbl { font-size: 11px !important; }
+
+  /* Portfolio */
+  .fd-portfolio-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+
+  /* History */
+  .fd-history-list { gap: 10px !important; }
+  .fd-history-card { padding: 14px !important; border-radius: 14px !important; }
+  .fd-history-job-title { font-size: 14px !important; }
+  .fd-history-meta { font-size: 11.5px !important; gap: 6px !important; margin-bottom: 10px !important; }
+  .fd-history-comment { font-size: 13px !important; padding: 10px 12px !important; margin-bottom: 10px !important; border-radius: 10px !important; }
+
+  /* Skills */
+  .fd-skills-wrap { gap: 7px !important; margin-top: 12px !important; }
+  .fd-skill-pill { padding: 7px 14px !important; font-size: 12.5px !important; border-radius: 10px !important; }
+
+  /* Languages */
+  .fd-langs-grid { grid-template-columns: 1fr !important; gap: 8px !important; margin-top: 12px !important; }
+  .fd-lang-card { padding: 12px 14px !important; border-radius: 12px !important; }
+  .fd-lang-name { font-size: 13.5px !important; }
+
+  /* Certs */
+  .fd-certs-list { gap: 10px !important; }
+  .fd-cert-card { gap: 12px !important; padding: 14px !important; border-radius: 14px !important; }
+  .fd-cert-badge-wrap { width: 46px !important; height: 46px !important; border-radius: 12px !important; }
+  .fd-cert-name { font-size: 14px !important; }
+  .fd-cert-issuer-line { font-size: 12px !important; margin-bottom: 10px !important; }
+}
+
+/* =====================================================
+   EXTRA SMALL — ≤480px
+   ===================================================== */
+@media (max-width: 480px) {
+  .fd-main-scroll { padding: 12px 12px 24px !important; }
+  .fd-avatar { width: 50px !important; height: 50px !important; }
+  .fd-info-main .fd-name { font-size: 15px !important; }
+  .fd-title-text { font-size: 12px !important; }
+  .fd-stat-val { font-size: 14px !important; }
+  .fd-stat-lbl { font-size: 9.5px !important; letter-spacing: 0; }
+  .fd-btn-primary, .fd-btn-secondary { padding: 9px 12px !important; font-size: 12.5px !important; }
+  .fd-tabs-nav { gap: 12px !important; }
+  .fd-tab-item { font-size: 12px !important; }
+  .fd-content-title { font-size: 14px !important; }
+  .fd-bio-text { font-size: 13px !important; }
+  .fd-metric-card { padding: 10px !important; }
+  .fd-m-val { font-size: 13px !important; }
+  .fd-history-card { padding: 12px !important; }
+  .fd-history-comment { font-size: 12px !important; padding: 8px 10px !important; }
+  .fd-history-job-title { font-size: 13px !important; }
+  .fd-skill-pill { padding: 6px 11px !important; font-size: 11.5px !important; }
+  .fd-cert-card { padding: 12px !important; gap: 10px !important; }
+  .fd-cert-badge-wrap { width: 38px !important; height: 38px !important; }
+  .fd-cert-name { font-size: 13px !important; }
+}
+
