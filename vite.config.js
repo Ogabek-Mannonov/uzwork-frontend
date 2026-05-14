@@ -17,6 +17,7 @@ const apiProxy = {
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: '0.0.0.0',   // telefon local IP orqali kira oladi
     port: 5173,
     proxy: {
       '/auth':          apiProxy,
@@ -41,6 +42,8 @@ export default defineConfig({
       '/uploads':       apiProxy,
       '/disputes':      apiProxy,
       '/milestones':    apiProxy,
+      '/skills':        apiProxy,
+      '/kyc':           apiProxy,
       '/api':           apiProxy,
       '/socket.io':     { target: 'http://localhost:3000', changeOrigin: true, ws: true },
     },

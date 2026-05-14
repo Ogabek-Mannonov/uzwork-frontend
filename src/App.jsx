@@ -65,6 +65,8 @@ import Escrow from "./pages/Client/Escrow.jsx";
 import Proposals from "./pages/Client/Proposals.jsx";
 import SavedTalent from "./pages/Client/SavedTalent.jsx";
 import Reports from "./pages/Freelancer/Reports.jsx";
+import KycPage from "./pages/kyc/KycPage.jsx";
+import KycFaceMobile from "./pages/kyc/KycFaceMobile.jsx";
 
 function App() {
   return (
@@ -77,6 +79,9 @@ function App() {
           <Route path="/hire" element={<HirePage />} />
           <Route path="/jobs" element={<FindJobsPage />} />
           <Route path="/hire/cold-callers" element={<CategoryPage />} />
+
+          {/* KYC Mobile face verification — auth kerak emas */}
+          <Route path="/kyc/face/:token" element={<KycFaceMobile />} />
 
           {/* Auth pages (separate layout) */}
           <Route element={<AuthLayout />}>
@@ -105,6 +110,10 @@ function App() {
             <Route element={<ProtectedRoute />}>
               {/* Profile */}
               <Route path="/profile" element={<MyProfile />} />
+              <Route path="/my-profile" element={<MyProfile />} />
+
+              {/* KYC Verification */}
+              <Route path="/kyc" element={<KycPage />} />
 
               {/* Proposals (freelancer) */}
               <Route element={<RoleRoute allow={["freelancer"]} />}>

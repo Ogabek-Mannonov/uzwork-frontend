@@ -355,7 +355,10 @@ const MyProfile = () => {
             activeProjects: profileRes.data.in_progress_jobs || 0,
             totalEarned: p.total_earned || 0,
             successScore: p.job_success_score || 0,
-            rating: profileRes.data.average_rating || 0
+            rating: profileRes.data.average_rating || 0,
+            // KYC ma'lumotlari
+            is_kyc_verified: u.is_kyc_verified || false,
+            kyc_status: u.kyc_status || 'none',
           }));
 
 
@@ -1847,10 +1850,27 @@ const MyProfile = () => {
                       <span className="profile-badge-item profile-badge-membership">
                         <Award size={14} />{userData.membership}
                       </span>
-                      <span className="profile-badge-item profile-badge-verified">
-                        <CheckCircle size={14} />{t("profile.verified", "Verified")}
-                      </span>
+                      {userData.is_kyc_verified ? (
+                        <span className="profile-badge-item profile-badge-verified" title="KYC tasdiqlangan">
+                          <CheckCircle size={14} />{t("profile.verified", "Tasdiqlangan")}
+                        </span>
+                      ) : userData.kyc_status === 'pending' ? (
+                        <span className="profile-badge-item" style={{ background: 'rgba(234,179,8,0.12)', color: '#b45309', borderColor: 'rgba(234,179,8,0.3)', cursor: 'default' }}>
+                          <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#f59e0b', display: 'inline-block', marginRight: 4 }} />
+                          {t("profile.kycPending", "Tekshirilmoqda")}
+                        </span>
+                      ) : (
+                        <button
+                          className="profile-badge-item"
+                          style={{ background: 'rgba(59,130,246,0.08)', color: '#2563eb', borderColor: 'rgba(59,130,246,0.25)', cursor: 'pointer', border: '1px solid', borderRadius: '20px', padding: '4px 10px', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}
+                          onClick={() => navigate('/kyc')}
+                          title="Hisobingizni tasdiqlash uchun KYC o'ting"
+                        >
+                          <Shield size={13} /> {t("profile.kycVerify", "Tasdiqlash")}
+                        </button>
+                      )}
                     </div>
+
                   </div>
 
                   {/* BIO SECTION */}

@@ -1,0 +1,305 @@
+/* src/pages/kyc/kyc-face-mobile.css */
+/* Mobile first — faqat kichik ekranlar uchun optimallashtirilgan */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.kfm-root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #0f172a;
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+
+/* ── Center utility ───────────────────────────────── */
+.kfm-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+}
+
+.kfm-center h2 { font-size: 22px; font-weight: 700; }
+.kfm-center p  { font-size: 15px; color: #94a3b8; line-height: 1.55; }
+.kfm-center small { font-size: 13px; color: #64748b; }
+
+/* ── Spinner ──────────────────────────────────────── */
+.kfm-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(255,255,255,0.15);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: kfm-spin 0.8s linear infinite;
+}
+@keyframes kfm-spin { to { transform: rotate(360deg); } }
+
+/* ── Icons ────────────────────────────────────────── */
+.kfm-icon {
+  font-size: 56px;
+  line-height: 1;
+  filter: drop-shadow(0 0 20px currentColor);
+}
+.kfm-icon--blue   { color: #3b82f6; }
+.kfm-icon--success{ color: #22c55e; }
+.kfm-icon--error  { color: #ef4444; }
+
+/* ── Success / Error states ───────────────────────── */
+.kfm-success-state h2 { color: #22c55e; }
+.kfm-error-state h2   { color: #ef4444; }
+
+/* ── Ready page ───────────────────────────────────── */
+.kfm-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.kfm-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+}
+
+.kfm-logo {
+  font-size: 18px;
+  font-weight: 800;
+  color: #3b82f6;
+  letter-spacing: -0.5px;
+}
+
+.kfm-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  gap: 20px;
+  text-align: center;
+}
+
+.kfm-content h1 {
+  font-size: 26px;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.kfm-content p {
+  font-size: 15.5px;
+  color: #94a3b8;
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+.kfm-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.kfm-tip {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #cbd5e1;
+  text-align: left;
+}
+
+/* ── Buttons ──────────────────────────────────────── */
+.kfm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 15px 32px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  max-width: 320px;
+}
+
+.kfm-btn--primary {
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(37,99,235,0.4);
+}
+.kfm-btn--primary:active { transform: scale(0.97); }
+
+.kfm-btn--outline {
+  background: rgba(255,255,255,0.07);
+  color: #f1f5f9;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.kfm-btn--outline:active { transform: scale(0.97); }
+
+/* ── Camera page ──────────────────────────────────── */
+.kfm-camera-page {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background: #000;
+}
+
+.kfm-camera-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.kfm-back {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ── Video ────────────────────────────────────────── */
+.kfm-video-wrapper {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.kfm-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* Mirror */
+}
+
+/* ── Face guide oval ──────────────────────────────── */
+.kfm-face-guide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.kfm-face-oval {
+  width: min(260px, 75vw);
+  height: min(340px, 55vh);
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.8);
+  box-shadow:
+    0 0 0 2000px rgba(0,0,0,0.45),
+    0 0 0 3px rgba(59,130,246,0.6) inset;
+  animation: kfm-pulse 2s ease-in-out infinite;
+}
+
+@keyframes kfm-pulse {
+  0%, 100% { border-color: rgba(255,255,255,0.8); }
+  50%       { border-color: #3b82f6; }
+}
+
+.kfm-face-label {
+  margin-top: 16px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  background: rgba(0,0,0,0.4);
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
+/* ── Shutter button ───────────────────────────────── */
+.kfm-shutter-row {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  padding: 24px 24px 40px;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+}
+
+.kfm-shutter {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 4px solid rgba(255,255,255,0.9);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.kfm-shutter:active { transform: scale(0.93); }
+
+.kfm-shutter-inner {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #fff;
+  display: block;
+}
+
+/* ── Preview page ─────────────────────────────────── */
+.kfm-preview-page {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background: #000;
+  position: relative;
+}
+
+.kfm-preview-img-wrapper {
+  flex: 1;
+  overflow: hidden;
+}
+
+.kfm-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.kfm-preview-actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px 36px;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+}
+
+.kfm-preview-actions .kfm-btn {
+  max-width: none;
+  flex: 1;
+  padding: 14px 12px;
+  font-size: 15px;
+}
