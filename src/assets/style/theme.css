@@ -121,10 +121,38 @@
 .stagger-5 { animation-delay: 0.5s; }
 
 
-/* GLOBAL APPLY */
+/* GLOBAL RESET & SCROLL FIX */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden; /* ✅ Gorizontal scrollni butunlay yo'qotadi */
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   background: var(--bg);
   background-attachment: var(--bg-fixed, initial);
   color: var(--text);
   min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure all containers respect screen width */
+.container, 
+.main-content,
+.uw-header,
+.auth-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }

@@ -18,11 +18,12 @@ export default function MainLayout() {
           backgroundAttachment: isChatPage ? "initial" : "var(--bg-fixed, initial)",
           color: "var(--text)",
           overflow: isChatPage ? "hidden" : undefined,
+          minHeight: isChatPage ? "auto" : "calc(100vh - 80px)", /* ✅ Header balandligini chegirib tashlaymiz */
         }}
-        className={isChatPage ? "" : "min-h-screen"}
       >
         <Outlet />
       </div>
+
       {!isChatPage && <Footer />}
     </div>
   );
