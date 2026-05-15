@@ -150,9 +150,15 @@ body {
 /* Ensure all containers respect screen width */
 .container, 
 .main-content,
-.uw-header,
 .auth-wrapper {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
 }
+
+.uw-header {
+  width: 100%;
+  max-width: 100%;
+  /* overflow olib tashlandi, dropdownlar chiqishi uchun */
+}
+

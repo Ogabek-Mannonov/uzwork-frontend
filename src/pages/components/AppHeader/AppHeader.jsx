@@ -93,9 +93,9 @@ function AvatarImage({ src, name, size = 40, className = "" }) {
 }
 
 // ══════════════════════════════════════════════════════════
-// PREMIUM LANG SWITCHER
+// PREMIUM PREFERENCES DROPDOWN (Lang + Theme)
 // ══════════════════════════════════════════════════════════
-function LangSwitcher({ i18n, changeLanguage }) {
+function PreferencesDropdown({ i18n, changeLanguage, isDark, toggle }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -114,13 +114,25 @@ function LangSwitcher({ i18n, changeLanguage }) {
 
   return (
     <div ref={ref} className="lang-sw">
-      <button className="lang-sw__trigger" onClick={() => setOpen(o => !o)} aria-label="Change language">
-        <span className="lang-sw__code">{cur.short}</span>
-        <ChevronDown size={13} className={`lang-sw__arrow ${open ? "open" : ""}`} />
+      <button className="uw-iconbtn" onClick={() => setOpen(o => !o)} aria-label="Preferences">
+        <Settings size={18} className={open ? "rotate-settings" : ""} />
       </button>
 
       {open && (
-        <div className="lang-sw__panel">
+        <div className="lang-sw__panel preferences-panel" style={{ minWidth: '200px', right: 0, left: 'auto' }}>
+          {/* Theme Toggle Section */}
+          <div className="pref-section">
+            <span className="pref-label">Mavzu: {isDark ? 'Tungi' : 'Kunduzgi'}</span>
+            <button className="pref-theme-toggle" onClick={toggle}>
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+              <span>{isDark ? 'Yorug' : 'Qorong\'u'}</span>
+            </button>
+          </div>
+          
+          <div className="pref-divider"></div>
+          
+          {/* Language Section */}
+          <span className="pref-label" style={{ padding: '4px 12px' }}>Tilni tanlang:</span>
           {langs.map(l => (
             <button
               key={l.code}
@@ -137,6 +149,7 @@ function LangSwitcher({ i18n, changeLanguage }) {
     </div>
   );
 }
+
 
 function CurrencySwitcher() {
   const { currency, setCurrency } = useCurrency();
@@ -393,17 +406,18 @@ function LandingHeader({ i18n, changeLanguage }) {
           </nav>
         </div>
 
-        {/* Right actions — NO SEARCH, only lang + dark + login + signup */}
+        {/* Right actions — NO SEARCH, only combined preferences + login + signup */}
         <div className="uw-actions">
-          <LangSwitcher i18n={i18n} changeLanguage={changeLanguage} />
-
-
-          <button type="button" onClick={toggle} className="uw-iconbtn" aria-label="Toggle dark mode">
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
+          <PreferencesDropdown 
+            i18n={i18n} 
+            changeLanguage={changeLanguage} 
+            isDark={isDark} 
+            toggle={toggle} 
+          />
 
           <Link to="/login" className="uw-linkbtn">{t("header.login")}</Link>
           <Link to="/signup" className="uw-ctabtn">{t("header.signup")}</Link>
+
 
           <button type="button" className="uw-burger" aria-label="Open menu" onClick={() => setMenuOpen(s => !s)}>
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
