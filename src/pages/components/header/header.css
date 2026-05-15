@@ -20,61 +20,59 @@
 
 .uw-header__container {
   width: 100%;
-  /* margin: 0 auto; */
-  padding: 14px 16px;
-  flex-wrap: nowrap;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 10px 24px; /* ✅ 40px dan 24px ga kamaytirildi */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 16px; /* ✅ 32px dan 16px ga kamaytirildi */
 }
 
 /* ✅ NEW: left group (brand + nav) */
 .uw-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 24px; /* ✅ 48px dan 24px ga qisqartirildi */
   min-width: 0;
-  flex: 1;
+  flex-shrink: 1; /* ✅ Elementlar siqilganda sig'ishi uchun */
 }
 
 /* Brand */
 .uw-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   text-decoration: none;
-  min-width: 0;
+  flex-shrink: 0; /* ✅ Qisilib qolmasligi uchun */
 }
 
 .uw-brand__icon {
-  width: 55px;
-  height: 55px;
-  border-radius: 14px;
+  width: 44px; /* ✅ Ideal o'lcham */
+  height: 44px;
+  border-radius: 12px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
   background: rgba(2, 6, 23, 0.03);
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.08);
+  border: 1px solid rgba(15, 23, 42, 0.08);
   overflow: hidden;
 }
 
 .uw-brand__logo {
-  width: 55px;
-  height: 55px;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   display: block;
 }
 
 .uw-brand__name {
-  font-weight: 900;
-  letter-spacing: 0.6px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
   color: #0f172a;
-  /* slate-900 */
-  font-size: 18px;
+  font-size: 19px;
   white-space: nowrap;
 }
 
@@ -82,23 +80,22 @@
 .uw-nav {
   display: flex;
   align-items: center;
-  gap: 8px;
-  justify-content: flex-start;
+  gap: 8px; /* ✅ 12px dan 8px ga qisqartirildi */
 }
 
 .uw-nav__link {
-  height: 38px;
-  padding: 0 14px;
-  border-radius: 12px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
 
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 
   text-decoration: none;
   font-weight: 600;
-  font-size: 14.5px;
-  color: rgba(15, 23, 42, 0.75);
+  font-size: 13px; /* ✅ 13.5px dan 13px ga ixchamlashtirildi */
+  color: rgba(15, 23, 42, 0.70);
   white-space: nowrap;
 
   border: 1px solid transparent;
@@ -394,7 +391,7 @@
 .uw-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px; /* ✅ Tugmalar orasidagi masofa ko'paytirildi */
 }
 
 /* icon button */
