@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   getFreelancerById,
   getPublicPortfolio,
@@ -11,11 +11,10 @@ import {
   FiBriefcase, FiAward, FiFileText, FiExternalLink,
   FiShield, FiCalendar, FiGlobe, FiShare2,
   FiLink, FiSend, FiLinkedin, FiPhone, FiMail,
-  FiClock, FiCheckCircle, FiTerminal, FiCpu, FiUser
+  FiClock, FiCheckCircle, FiTerminal, FiCpu, FiUser,
+  FiMessageSquare, FiUserPlus
 } from "react-icons/fi";
-import { FaQuoteLeft } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
-import { getSocket, onSocketReady, normalizeUserStatus } from "../../hooks/useSocket";
 import { useUserPresence } from "../../hooks/useUserPresence";
 import "./profile-css/public-profile.css";
 import "../../assets/style/theme.css";
@@ -38,42 +37,22 @@ function getInitials(name) {
   return parts[0] ? parts[0][0].toUpperCase() : "";
 }
 
-function formatLastSeen(dateStr, t) {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return "";
-  const now = new Date();
-  const diffMs = now - d;
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-
-  if (diffMins < 1) return t("chat.justNow", "Hozirgina");
-  if (diffMins < 60) return t("chat.minsAgo", "{{count}} daqiqa oldin", { count: diffMins });
-  if (diffHours < 24) return t("chat.hoursAgo", "{{count}} soat oldin", { count: diffHours });
-  
-  return d.toLocaleDateString();
-}
-
-function AvatarImage({ src, size = 40, className = "", alt = "Avatar" }) {
+function AvatarImage({ src, name, size = 40, className = "" }) {
   const [error, setError] = useState(false);
   
   if (!src || error) {
-    const initials = getInitials(alt);
+    const initials = getInitials(name);
     return (
       <div 
-        className={`${className} initials-avatar`} 
+        className={className} 
         style={{ 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
-          background: 'linear-gradient(135deg, var(--blue, #3b82f6), var(--blue-dark, #2563eb))', 
+          background: 'linear-gradient(135deg, var(--brand, #3b82f6), var(--brand-dark, #2563eb))', 
           color: '#fff', 
           fontWeight: '700',
-          fontSize: size > 100 ? '3rem' : size > 60 ? '2.2rem' : size > 40 ? '1.5rem' : '1rem',
-          borderRadius: '50%',
-          aspectRatio: '1/1',
-          width: `${size}px`,
-          height: `${size}px`
+          fontSize: size > 100 ? '3.5rem' : size > 60 ? '2.2rem' : size > 40 ? '1.5rem' : '1rem'
         }}
       >
         {initials || <FiUser size={size * 0.5} />}
@@ -84,12 +63,11 @@ function AvatarImage({ src, size = 40, className = "", alt = "Avatar" }) {
   return (
     <img 
       src={avatarSrc(src)} 
-      alt={alt} 
+      alt={name || "Avatar"} 
       className={className}
       onError={() => setError(true)}
       onContextMenu={(e) => e.preventDefault()}
       draggable="false"
-      style={{ objectFit: 'cover', borderRadius: '50%', width: `${size}px`, height: `${size}px`, userSelect: 'none', WebkitUserDrag: 'none' }}
     />
   );
 }
@@ -102,8 +80,6 @@ export default function PublicProfile() {
   const [portfolio, setPortfolio] = useState([]);
   const [certifications, setCertifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  const [isBioExpanded, setIsBioExpanded] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
 
@@ -125,445 +101,215 @@ export default function PublicProfile() {
 
           setProfile({
             id: u.id || "",
-            fullName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || u.name || "User",
-            first_name: u.first_name,
-            last_name: u.last_name,
+            fullName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || u.name || "Noma'lum foydalanuvchi",
             username: u.username,
-            email: u.email || p.email || rawData.email || "",
             avatar_url: p.avatar_url || u.avatar_url || "",
             title: p.title || "",
             bio: p.bio || "",
             location: p.location || "",
             hourly_rate: p.hourly_rate || 0,
-            job_success_score: p.job_success_score || 0,
+            job_success_score: rawData.job_success_score || p.job_success_score || 0,
             total_earned: p.total_earned || 0,
-            jobs_completed: p.completed_jobs || 0,
+            jobs_completed: rawData.completed_jobs || p.completed_jobs || 0,
             active_projects: rawData.in_progress_jobs || 0,
+            average_rating: rawData.average_rating || p.rating || 0,
             total_reviews: rawData.total_reviews || 0,
-            average_rating: rawData.average_rating || 0,
             skills: Array.isArray(p.skills) ? p.skills : (p.skills ? [p.skills] : []),
             languages: p.languages || [],
-            cv_url: p.cv_url || "",
             cover_url: p.cover_url || "",
-            phone: u.phone || p.phone || rawData.phone || "",
-            availability_status: p.availability_status || t("profile.status.available", "Hozir band emas"),
-            isOnline: false,
+            availability_status: p.availability_status || "Available",
           });
-        } else {
-          setProfile(null);
         }
-
-        const portData = portfolioRes?.data?.items || portfolioRes?.data || portfolioRes || [];
-        setPortfolio(Array.isArray(portData) ? portData : []);
-
-        const certData =
-          certRes?.data?.certifications ||
-          certRes?.data?.items ||
-          certRes?.data ||
-          certRes?.certifications ||
-          [];
-        setCertifications(Array.isArray(certData) ? certData : []);
+        
+        setPortfolio(portfolioRes?.data?.items || portfolioRes?.data || []);
+        setCertifications(certRes?.data?.items || certRes?.data || []);
 
       } catch (error) {
-        console.error("Error fetching public profile:", error);
-        setProfile(null);
+        console.error("Error:", error);
       } finally {
         setLoading(false);
       }
     };
     fetch();
-  }, [id]);
+  }, [id, t]);
 
   const presence = useUserPresence(id);
-  
-  const handleShare = (platform) => {
-    const url = window.location.href;
-    const text = t("publicProfile.shareText", "UzWork'da {{name}}ning professional profilini ko'ring!", { name: profile?.fullName });
-    
-    if (platform === 'copy') {
-      navigator.clipboard.writeText(url);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    } else if (platform === 'telegram') {
-      window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
-    } else if (platform === 'linkedin') {
-      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
-    }
-    setShowShareMenu(false);
-  };
 
   const handleBack = () => {
-    if (window.history.length > 1) {
+    if (window.history.length > 2) {
       navigate(-1);
     } else {
-      navigate("/profile");
+      navigate("/client/talent");
     }
   };
 
-  const MONTHS = [
-    t("common.months.jan", "Jan"), t("common.months.feb", "Feb"), t("common.months.mar", "Mar"), 
-    t("common.months.apr", "Apr"), t("common.months.may", "May"), t("common.months.jun", "Jun"), 
-    t("common.months.jul", "Jul"), t("common.months.aug", "Aug"), t("common.months.sep", "Sep"), 
-    t("common.months.oct", "Oct"), t("common.months.nov", "Nov"), t("common.months.dec", "Dec")
-  ];
-
-  const renderProficiencyDots = (lvl) => {
-    const dotsCount = lvl === 'Basic' ? 1 : lvl === 'Conversational' ? 2 : lvl === 'Fluent' ? 3 : 4;
-    return (
-      <div className="proficiency-container">
-        {[1,2,3,4].map(i => (
-          <div key={i} className={`prof-dot ${i <= dotsCount ? 'active' : ''}`} />
-        ))}
-      </div>
-    );
-  };
-
-  if (loading) return (
-    <div className="public-profile-container">
-      <div className="public-profile-card soft-fade-in" style={{ textAlign: "center", padding: "100px 0" }}>
-        <p>{t("publicProfile.loading")}</p>
-      </div>
-    </div>
-  );
-
-  if (!profile) return (
-    <div className="public-profile-container">
-      <div className="public-profile-card soft-fade-in" style={{ textAlign: "center", padding: "100px 0", color: "var(--danger)" }}>
-        <p>{t("publicProfile.notFound")}</p>
-        <button className="back-link" style={{ marginTop: 20 }} onClick={handleBack}>
-          <FiArrowLeft /> {t("publicProfile.back")}
-        </button>
-      </div>
-    </div>
-  );
+  if (loading) return <div className="public-profile-container"><p>Yuklanmoqda...</p></div>;
+  if (!profile) return <div className="public-profile-container"><p>Profil topilmadi.</p></div>;
 
   return (
     <div className="public-profile-container">
-      <button className="back-link soft-fade-in stagger-1" onClick={handleBack}>
-        <FiArrowLeft /> {t("publicProfile.back")}
+      <button className="back-link soft-fade-in" onClick={handleBack}>
+        <FiArrowLeft /> {t("publicProfile.back", "Orqaga")}
       </button>
 
-      {/* Profile header card */}
-      <div className="public-profile-card soft-fade-in stagger-2">
-        <div className="public-profile-cover">
-          {profile.cover_url ? (
-            <img src={avatarSrc(profile.cover_url)} alt="Cover" className="public-cover-img" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-          ) : (
-            <div className="public-cover-placeholder" />
-          )}
-          <div className="cover-overlay"></div>
+      {/* 🚀 HERO SECTION */}
+      <section className="profile-hero soft-fade-in stagger-1">
+        <div className="profile-banner">
+          {profile.cover_url && <img src={avatarSrc(profile.cover_url)} alt="Banner" className="profile-banner-img" />}
         </div>
-
-        <div className="profile-main-info">
-          <div className="public-avatar-wrapper">
-            <AvatarImage src={profile.avatar_url} alt={profile.fullName} size={170} className="public-avatar-img" />
-            <div className={`online-indicator ${presence.isOnline ? 'online' : 'offline'}`}></div>
+        
+        <div className="profile-header-content">
+          <div className="avatar-container">
+            <AvatarImage 
+              src={profile.avatar_url} 
+              name={profile.fullName} 
+              size={160} 
+              className="avatar-main" 
+            />
+            <div className={`status-dot ${presence.isOnline ? 'online' : 'offline'}`}></div>
           </div>
 
-          <div className="profile-header-details">
-            <div className="name-wrapper">
-              <h1 className="public-fullname">{profile.fullName}</h1>
-              <span className="verify-badge" title={t("publicProfile.verified")}>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                </svg>
-              </span>
-              
-              <div className="share-container">
-                <button 
-                  className={`public-share-btn ${showShareMenu ? 'active' : ''}`} 
-                  onClick={() => setShowShareMenu(!showShareMenu)}
-                  title={t("publicProfile.shareProfile", "Profilni ulashish")}
-                >
-                  <FiShare2 />
-                </button>
-                
-                {showShareMenu && (
-                  <div className="share-dropdown glass-card soft-fade-in">
-                    <button className="share-item" onClick={() => handleShare('copy')}>
-                      <FiLink /> {copySuccess ? t("common.copied", "Nusxa olindi!") : t("common.copyLink", "Havolani nusxalash")}
-                    </button>
-                    <button className="share-item" onClick={() => handleShare('telegram')}>
-                      <FiSend /> Telegram
-                    </button>
-                    <button className="share-item" onClick={() => handleShare('linkedin')}>
-                      <FiLinkedin /> LinkedIn
-                    </button>
-                  </div>
-                )}
+          <div className="profile-identity">
+            <div className="profile-name-row">
+              <h1>{profile.fullName}</h1>
+              <span className="verified-icon" title="Tasdiqlangan"><FiCheckCircle size={24} /></span>
+            </div>
+            <p className="profile-headline">{profile.title || "Mutaxassis"}</p>
+            <div className="contact-info-item" style={{ color: 'var(--muted)', fontSize: '14px' }}>
+              <FiMapPin /> <span>{profile.location || "O'zbekiston"}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="profile-grid-layout">
+        {/* ⬅️ MAIN CONTENT (70%) */}
+        <div className="main-sections">
+          
+          {/* ABOUT ME */}
+          <div className="premium-card soft-fade-in stagger-2">
+            <div className="section-content">
+              <div className="section-header">
+                <h2>{t("publicProfile.aboutMe", "O'zim haqimda")}</h2>
               </div>
+              <p className="bio-text">{profile.bio}</p>
+            </div>
+          </div>
+
+          {/* PORTFOLIO */}
+          {portfolio.length > 0 && (
+            <div className="premium-card soft-fade-in stagger-3">
+              <div className="section-content">
+                <div className="section-header">
+                  <h2>{t("publicProfile.portfolio", "Portfolio")}</h2>
+                </div>
+                <div className="portfolio-grid">
+                  {portfolio.map((item, i) => (
+                    <div key={i} className="portfolio-card">
+                      <div className="portfolio-thumb">
+                        <img 
+                          src={(item.media?.[0]?.url || item.portfolio_media?.[0]?.url) ? avatarSrc(item.media?.[0]?.url || item.portfolio_media?.[0]?.url) : "https://via.placeholder.com/400x250"} 
+                          alt={item.title} 
+                        />
+                      </div>
+                      <div className="portfolio-info">
+                        <h4>{item.title}</h4>
+                        <p>{item.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* CERTIFICATIONS */}
+          {certifications.length > 0 && (
+            <div className="premium-card soft-fade-in stagger-4">
+              <div className="section-content">
+                <div className="section-header">
+                  <h2>{t("publicProfile.certifications", "Sertifikatlar")}</h2>
+                </div>
+                <div className="cert-list">
+                  {certifications.map((cert, i) => (
+                    <div key={i} className="cert-item">
+                      <div className="cert-icon-box"><FiAward size={24} /></div>
+                      <div className="cert-details">
+                        <h4>{cert.title}</h4>
+                        <p>{cert.issuer} • {cert.issue_year}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ➡️ SIDEBAR (30%) */}
+        <aside className="sidebar-section">
+          
+          {/* ACTION CARD */}
+          <div className="premium-card action-card soft-fade-in stagger-2">
+            <div className="hourly-rate-box">
+              <span className="rate-value">${profile.hourly_rate}</span>
+              <span className="rate-unit">/{t("common.hour", "soat")}</span>
             </div>
             
-            {profile.username && <p className="public-username">@{profile.username}</p>}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {profile.title && <p className="public-title" style={{ margin: 0 }}>{profile.title}</p>}
-              {presence.isOnline ? (
-                <span className="status-text online" style={{ color: '#10b981', fontSize: '13px', fontWeight: '600' }}>
-                   • {t("chat.online", "Online")}
+            <button className="hire-btn">
+              <FiUserPlus /> {t("common.hireMe", "Ishga yollash")}
+            </button>
+            <button className="message-btn">
+              <FiMessageSquare /> {t("common.message", "Xabar yozish")}
+            </button>
+
+            <div className="stats-grid">
+              <div className="stat-mini-card">
+                <span className="stat-mini-value" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                  <FiStar fill="#eab308" color="#eab308" size={16} style={{ marginBottom: '2px' }} /> 
+                  {parseFloat(profile.average_rating || 0).toFixed(1)}
                 </span>
-              ) : (presence.lastSeen || profile.lastSeen) ? (
-                <span className="status-text offline" style={{ color: '#6b7280', fontSize: '13px' }}>
-                   • {formatLastSeen(presence.lastSeen || profile.lastSeen, t)}
-                </span>
-              ) : null}
-            </div>
-
-            <div className="header-meta-grid">
-              <div className="stats-dashboard">
-                <div className="stat-card">
-                  <div className="stat-icon"><FiDollarSign /></div>
-                  <div className="stat-info">
-                    <span className="stat-value">
-                      ${profile.hourly_rate || 0}
-                      <span className="stat-unit">/{t("common.hour", "soat")}</span>
-                    </span>
-                    <span className="stat-label">{t("publicProfile.hourlyRate")}</span>
-                  </div>
-                </div>
-
-                <div className="stat-card">
-                  <div className="stat-icon"><FiStar /></div>
-                  <div className="stat-info">
-                    <span className="stat-value">{profile.job_success_score || 0}%</span>
-                    <span className="stat-label">{t("publicProfile.successScore")}</span>
-                  </div>
-                </div>
-
-                <div className="stat-card">
-                  <div className="stat-icon"><FiBriefcase /></div>
-                  <div className="stat-info">
-                    <span className="stat-value">{profile.jobs_completed || 0}</span>
-                    <span className="stat-label">{t("publicProfile.totalJobs", "Total Jobs")}</span>
-                  </div>
-                </div>
-
-                <div className="stat-card">
-                  <div className="stat-icon"><FiClock /></div>
-                  <div className="stat-info">
-                    <span className="stat-value">{profile.active_projects || 0}</span>
-                    <span className="stat-label">{t("publicProfile.inProgress", "In Progress")}</span>
-                  </div>
-                </div>
+                <span className="stat-mini-label">{profile.total_reviews || 0} sharh</span>
               </div>
-
-              <div className="contact-quick-card glass-card">
-                <div className="availability-badges">
-                  <span className="availability-status-tag">
-                    <div className="pulse-dot"></div>
-                    {profile.availability_status && t(`profile.status.${profile.availability_status.toLowerCase().replace(/\s+/g, "_")}`, profile.availability_status)}
-                  </span>
-                  <span className="profile-membership-badge">
-                    <FiAward /> {t("profile.membershipProfessional", "Professional")}
-                  </span>
-                </div>
-                
-                <div className="contact-info-list">
-                  {profile.email && (
-                    <div className="contact-info-item">
-                      <FiMail /> <span>{profile.email}</span>
-                    </div>
-                  )}
-                  {profile.phone && (
-                    <div className="contact-info-item">
-                      <FiPhone /> <span>{profile.phone}</span>
-                    </div>
-                  )}
-                  {profile.location && (
-                    <div className="contact-info-item">
-                      <FiMapPin /> <span>{profile.location}</span>
-                    </div>
-                  )}
-                </div>
-
-                {profile.cv_url && (
-                  <a href={profile.cv_url} target="_blank" rel="noopener noreferrer" className="view-cv-btn">
-                    <FiFileText /> {t("publicProfile.viewResume")}
-                  </a>
-                )}
+              <div className="stat-mini-card">
+                <span className="stat-mini-value">{profile.job_success_score || 100}%</span>
+                <span className="stat-mini-label">Muvaffaqiyat</span>
+              </div>
+              <div className="stat-mini-card">
+                <span className="stat-mini-value">{profile.jobs_completed || 0}</span>
+                <span className="stat-mini-label">Ishlar</span>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="profile-main-content-full scroll-snap">
-            {profile.bio && (
-              <div className="bio-section soft-fade-in stagger-3">
-                <h3 className="section-title">{t("publicProfile.aboutMe")}</h3>
-                <div className="bio-quote-container">
-                  <FaQuoteLeft className="bio-quote-icon" />
-                  <div className={`public-bio ${isBioExpanded ? 'expanded' : ''}`}>
-                    {profile.bio.length > 500 && !isBioExpanded 
-                      ? `${profile.bio.substring(0, 500)}...` 
-                      : profile.bio
-                    }
+          {/* LANGUAGES */}
+          {profile.languages?.length > 0 && (
+            <div className="premium-card info-block soft-fade-in stagger-3">
+              <h3 className="info-title"><FiGlobe /> Tillar</h3>
+              <div className="lang-list">
+                {profile.languages.map((lang, i) => (
+                  <div key={i} className="lang-item">
+                    <span className="lang-name">{lang.language}</span>
+                    <span className="lang-level">{lang.proficiency}</span>
                   </div>
-                  {profile.bio.length > 500 && (
-                    <button className="bio-toggle-btn" onClick={() => setIsBioExpanded(!isBioExpanded)}>
-                      {isBioExpanded ? t("common.showLess", "Kamroq ko'rsatish") : t("common.readMore", "Batafsil")}
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className="profile-info-combined-row soft-fade-in stagger-4">
-              <div className="combined-left">
-                  <div className="pub-cert-section">
-                    <h3 className="section-title">
-                      <FiAward />
-                      {t("publicProfile.certifications", "Certifications")}
-                    </h3>
-                    <div className="pub-cert-list">
-                      {certifications.length > 0 ? certifications.map((cert) => (
-                        <div key={cert.id} className="pub-cert-card">
-                          <div className="pub-cert-icon">
-                              <FiAward />
-                          </div>
-                          <div className="pub-cert-body">
-                            <h4 className="pub-cert-title">{cert.title}</h4>
-                            {cert.issuer && <p className="pub-cert-issuer">{cert.issuer}</p>}
-                          </div>
-                          {(cert.issue_month || cert.issue_year || cert.credential_id) && (
-                            <div className="pub-cert-meta">
-                              {(cert.issue_month || cert.issue_year) && (
-                                <span className="pub-cert-tag">
-                                  <FiCalendar size={11} />
-                                  {cert.issue_month
-                                    ? `${MONTHS[cert.issue_month - 1]} ${cert.issue_year || ""}`
-                                    : cert.issue_year}
-                                </span>
-                              )}
-                              {cert.credential_id && (
-                                <span className="pub-cert-tag">
-                                  <FiShield size={11} />
-                                  {t("profile.credentialId", "ID")}: {cert.credential_id}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          {cert.credential_url && (
-                            <a 
-                              href={cert.credential_url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="pub-cert-link"
-                            >
-                              <FiExternalLink />
-                            </a>
-                          )}
-                        </div>
-                      )) : (
-                        <div className="pub-cert-empty">{t("profile.noCertifications", "Sertifikatlar hali qo'shilmagan.")}</div>
-                      )}
-                    </div>
-                  </div>
-              </div>
-
-              <div className="section-vertical-divider"></div>
-
-              <div className="combined-right">
-                {profile.languages?.length > 0 && (
-                  <div className="combined-sub-section">
-                    <h3 className="section-title">
-                      <FiGlobe />
-                      {t("profile.languages", "Tillar")}
-                    </h3>
-                    <div className="public-languages-list">
-                      {profile.languages.map((lang, idx) => (
-                        <div key={idx} className="language-item-premium">
-                          <div className="lang-info-dash">
-                            <span className="lang-name">{lang.language}</span>
-                            <span className="lang-proficiency">
-                              {lang.proficiency === 'Basic' ? t("profile.profBasic", "Boshlang'ich") : 
-                               lang.proficiency === 'Conversational' ? t("profile.profConversational", "Suhbat darajasi") : 
-                               lang.proficiency === 'Fluent' ? t("profile.profFluent", "Erkin") : 
-                               lang.proficiency === 'Native/Bilingual' ? t("profile.profNativeBilingual", "Ona tili") : lang.proficiency}
-                            </span>
-                          </div>
-                          {renderProficiencyDots(lang.proficiency)}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {profile.skills?.length > 0 && (
-                  <div className="combined-sub-section">
-                    <h3 className="section-title">
-                      <FiCpu />
-                      {t("profile.mySkills", "Ko'nikmalar")}
-                    </h3>
-                    <div className="public-skills-grid">
-                      {profile.skills.map((sk, i) => (
-                        <span key={i} className="public-skill-chip">{t(`skills.${sk}`, sk)}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                ))}
               </div>
             </div>
+          )}
 
-            {portfolio.length > 0 && (
-              <>
-                <div className="section-horizontal-divider"></div>
-                
-                <div className="public-portfolio-section-integrated">
-                  <div className="section-header-integrated">
-                    <h3 className="section-title">
-                      <FiBriefcase />
-                      {t("publicProfile.portfolio")}
-                    </h3>
-                  </div>
-                  
-                  <div className="public-portfolio-premium-grid">
-                    {portfolio.map((item, i) => (
-                      <div key={i} className="portfolio-premium-card-public">
-                        <div className="portfolio-card-media-public">
-                          <img 
-                            src={
-                              (item.media && item.media.length > 0) ? avatarSrc(item.media[0].url) : 
-                              (item.portfolio_media && item.portfolio_media.length > 0) ? avatarSrc(item.portfolio_media[0].url) :
-                              "https://via.placeholder.com/600x400?text=No+Media"
-                            } 
-                            alt={item.title} 
-                            onContextMenu={(e) => e.preventDefault()}
-                            draggable="false"
-                            style={{ userSelect: 'none', WebkitUserDrag: 'none' }}
-                          />
-                          <div className="portfolio-media-count">
-                            {item.media?.length || 0} <FiBriefcase size={10} />
-                          </div>
-                        </div>
-                        <div className="portfolio-card-content-public">
-                          <h4 className="portfolio-title-public">{item.title}</h4>
-                          <p className="portfolio-desc-public" title={item.description}>
-                            {item.description}
-                          </p>
-                          
-                          {item.skills && item.skills.length > 0 && (
-                            <div className="portfolio-skills-public">
-                              {item.skills.slice(0, 4).map((skill, sIdx) => (
-                                <span key={sIdx} className="skill-chip-mini">{skill}</span>
-                              ))}
-                              {item.skills.length > 4 && (
-                                <span className="skill-more-mini">+{item.skills.length - 4}</span>
-                              )}
-                            </div>
-                          )}
+          {/* SKILLS */}
+          {profile.skills?.length > 0 && (
+            <div className="premium-card info-block soft-fade-in stagger-4">
+              <h3 className="info-title"><FiCpu /> Ko'nikmalar</h3>
+              <div className="skill-pills">
+                {profile.skills.map((skill, i) => (
+                  <span key={i} className="skill-pill">{skill}</span>
+                ))}
+              </div>
+            </div>
+          )}
 
-                          {item.url && (
-                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="portfolio-link-public">
-                              <FiExternalLink size={14} /> {t("profile.viewProject", "Loyihani ko'rish")}
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-        </div>
+        </aside>
       </div>
     </div>
   );
