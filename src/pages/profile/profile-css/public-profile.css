@@ -457,6 +457,118 @@
   margin: 0;
 }
 
+/* 🖼️ Portfolio Modal (Upwork Style) */
+.portfolio-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: pmFadeIn 0.2s ease;
+}
+
+.portfolio-modal-content.upwork-style {
+  background: white;
+  width: 95%;
+  max-width: 1200px;
+  max-height: 90vh;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: pmSlideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  color: #1a1a1a;
+}
+
+.modal-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 30px;
+  border-bottom: 1px solid #e0e0e0;
+  background: white;
+}
+
+.modal-top-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0;
+}
+
+.modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.modal-body-wrapper {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  flex: 1;
+  overflow-y: auto;
+  background: white;
+}
+
+.modal-left-col {
+  padding: 30px;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.modal-right-col {
+  padding: 30px;
+  background: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.modal-section {
+  margin-bottom: 24px;
+}
+
+.modal-image-box {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+@keyframes pmFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pmSlideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .modal-body-wrapper {
+    grid-template-columns: 1fr;
+  }
+  .modal-left-col {
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+}
+
 /* Responsiveness */
 @media (max-width: 1024px) {
   .profile-grid-layout {

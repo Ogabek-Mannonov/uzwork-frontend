@@ -12,7 +12,7 @@ import {
   FiShield, FiCalendar, FiGlobe, FiShare2,
   FiLink, FiSend, FiLinkedin, FiPhone, FiMail,
   FiClock, FiCheckCircle, FiTerminal, FiCpu, FiUser,
-  FiMessageSquare, FiUserPlus
+  FiMessageSquare, FiUserPlus, FiX, FiChevronLeft, FiChevronRight
 } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import { useUserPresence } from "../../hooks/useUserPresence";
@@ -82,6 +82,8 @@ export default function PublicProfile() {
   const [loading, setLoading] = useState(true);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [selectedPortfolio, setSelectedPortfolio] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const fetch = async () => {
@@ -132,6 +134,53 @@ export default function PublicProfile() {
     };
     fetch();
   }, [id, t]);
+
+  useEffect(() => {
+    if (selectedPortfolio) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, [selectedPortfolio]);
+
+  useEffect(() => {
+    let interval;
+    const mediaList = selectedPortfolio?.media || selectedPortfolio?.portfolio_media || [];
+    
+    if (selectedPortfolio && mediaList.length > 1) {
+      interval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % mediaList.length);
+      }, 2000);
+    } else {
+      setCurrentImageIndex(0);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [selectedPortfolio]);
+
+  const handlePrevImage = (e) => {
+    if (e) e.stopPropagation();
+    const mediaList = selectedPortfolio?.media || selectedPortfolio?.portfolio_media || [];
+    if (mediaList.length > 1) {
+      setCurrentImageIndex((prev) => (prev - 1 + mediaList.length) % mediaList.length);
+    }
+  };
+
+  const handleNextImage = (e) => {
+    if (e) e.stopPropagation();
+    const mediaList = selectedPortfolio?.media || selectedPortfolio?.portfolio_media || [];
+    if (mediaList.length > 1) {
+      setCurrentImageIndex((prev) => (prev + 1) % mediaList.length);
+    }
+  };
 
   const presence = useUserPresence(id);
 
@@ -205,7 +254,7 @@ export default function PublicProfile() {
                 </div>
                 <div className="portfolio-grid">
                   {portfolio.map((item, i) => (
-                    <div key={i} className="portfolio-card">
+                    <div key={i} className="portfolio-card" onClick={() => setSelectedPortfolio(item)}>
                       <div className="portfolio-thumb">
                         <img 
                           src={(item.media?.[0]?.url || item.portfolio_media?.[0]?.url) ? avatarSrc(item.media?.[0]?.url || item.portfolio_media?.[0]?.url) : "https://via.placeholder.com/400x250"} 
@@ -311,6 +360,105 @@ export default function PublicProfile() {
 
         </aside>
       </div>
+
+      {/* 🖼️ PORTFOLIO DETAIL MODAL (Upwork Style) */}
+      {selectedPortfolio && (
+        <div className="portfolio-modal-overlay" onClick={() => setSelectedPortfolio(null)}>
+          <div className="portfolio-modal-content upwork-style" onClick={e => e.stopPropagation()}>
+            
+            {/* Header */}
+            <div className="modal-header-bar">
+              <h1 className="modal-top-title">{selectedPortfolio.title}</h1>
+              <div className="modal-header-actions">
+                <button className="copy-link-btn" style={{background: 'none', border: 'none', color: 'var(--brand)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer'}}>
+                  <FiLink /> Nusxalash
+                </button>
+                <button className="modal-close-btn-upwork" onClick={() => setSelectedPortfolio(null)} style={{background: 'none', border: 'none', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <FiX size={24} />
+                </button>
+              </div>
+            </div>
+            
+            <div className="modal-body-wrapper">
+              {/* Left Column - Text */}
+              <div className="modal-left-col">
+                <div className="modal-section">
+                  <h3 style={{fontSize: '14px', color: 'var(--muted)', marginBottom: '8px', fontWeight: '600'}}>Project description</h3>
+                  <p className="modal-description" style={{fontSize: '15px', lineHeight: '1.6', color: 'var(--text)'}}>
+                    {selectedPortfolio.description || "Tavsif qo'shilmagan."}
+                  </p>
+                </div>
+                
+                {selectedPortfolio.skills && selectedPortfolio.skills.length > 0 && (
+                  <div className="modal-section" style={{marginTop: '24px'}}>
+                    <h3 style={{fontSize: '14px', color: 'var(--muted)', marginBottom: '12px', fontWeight: '600'}}>Skills and deliverables</h3>
+                    <div className="skill-pills">
+                      {selectedPortfolio.skills.map((skill, i) => (
+                        <span key={i} className="skill-pill" style={{background: 'var(--surface-2)', color: 'var(--text)', padding: '6px 12px', borderRadius: '8px', fontSize: '13px'}}>{skill}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="modal-meta-info" style={{marginTop: '24px', fontSize: '13px', color: 'var(--muted)'}}>
+                  <p>Published on {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                </div>
+                
+                <div style={{marginTop: 'auto', paddingTop: '20px'}}>
+                  <button style={{background: 'none', border: 'none', color: 'var(--muted)', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline'}}>Report an issue</button>
+                </div>
+              </div>
+              
+              {/* Right Column - Image */}
+              <div className="modal-right-col">
+                <div className="modal-image-box" style={{background: '#f3f4f6', borderRadius: '12px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', position: 'relative'}}>
+                  
+                  {(selectedPortfolio.media?.length > 1 || selectedPortfolio.portfolio_media?.length > 1) && (
+                    <>
+                      <button onClick={handlePrevImage} style={{position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 5, boxShadow: '0 2px 10px rgba(0,0,0,0.15)', transition: 'all 0.2s'}}>
+                        <FiChevronLeft size={24} color="#1a1a1a" />
+                      </button>
+                      <button onClick={handleNextImage} style={{position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 5, boxShadow: '0 2px 10px rgba(0,0,0,0.15)', transition: 'all 0.2s'}}>
+                        <FiChevronRight size={24} color="#1a1a1a" />
+                      </button>
+                    </>
+                  )}
+
+                  <img 
+                    src={(selectedPortfolio.media?.[currentImageIndex]?.url || selectedPortfolio.portfolio_media?.[currentImageIndex]?.url) ? avatarSrc(selectedPortfolio.media?.[currentImageIndex]?.url || selectedPortfolio.portfolio_media?.[currentImageIndex]?.url) : "https://via.placeholder.com/1000x600"} 
+                    alt={selectedPortfolio.title} 
+                    style={{maxWidth: '100%', maxHeight: '500px', objectFit: 'contain'}}
+                  />
+                </div>
+                {(selectedPortfolio.media?.length > 1 || selectedPortfolio.portfolio_media?.length > 1) && (
+                  <div style={{display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '12px'}}>
+                    {(selectedPortfolio.media || selectedPortfolio.portfolio_media || []).map((_, i) => (
+                      <div key={i} style={{width: '8px', height: '8px', borderRadius: '50%', background: i === currentImageIndex ? 'var(--brand)' : '#e0e0e0'}}></div>
+                    ))}
+                  </div>
+                )}
+                <p className="image-caption" style={{textAlign: 'center', marginTop: '12px', color: 'var(--muted)', fontSize: '14px'}}>{selectedPortfolio.title}</p>
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="modal-footer-bar" style={{borderTop: '1px solid var(--border)', padding: '20px 30px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface)'}}>
+              <div className="footer-user-info" style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                <img src={avatarSrc(profile.avatar_url) || "https://ui-avatars.com/api/?name=U"} alt={profile.fullName} className="footer-avatar" style={{width: '48px', height: '48px', borderRadius: '50%'}} />
+                <div className="footer-user-text">
+                  <div className="footer-user-name" style={{fontWeight: '700', color: 'var(--text)'}}>{profile.fullName}</div>
+                  <div className="footer-user-title" style={{fontSize: '13px', color: 'var(--muted)'}}>{profile.title}</div>
+                </div>
+              </div>
+              <div className="footer-actions" style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                <button className="hire-btn-upwork" style={{background: 'var(--brand)', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '24px', fontWeight: '600', cursor: 'pointer'}}>Hire</button>
+                <button className="save-btn-upwork" style={{width: '44px', height: '44px', borderRadius: '50%', border: '1px solid var(--border)', background: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text)'}}><FiStar /></button>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      )}
     </div>
   );
 }
