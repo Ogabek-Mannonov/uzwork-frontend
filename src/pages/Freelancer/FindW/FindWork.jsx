@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { Search, Filter, ThumbsDown, Heart, CheckCircle, ChevronDown, Award, Star } from "lucide-react";
 import "../../../assets/Freelancer/FindW/FindWork.css";
 import Projects from "../../components/projectsCards";
@@ -391,7 +391,7 @@ export default function FindWork() {
             <p className="fw-card-desc">
               {t("findWork.layout.sidebar.idVerificationDesc")}
             </p>
-            <a href="#" className="fw-card-link">{t("findWork.layout.sidebar.enrollNow")}</a>
+            <Link to="/kyc" className="fw-card-link">{t("findWork.layout.sidebar.enrollNow")}</Link>
           </div>
 
           {/* Promote with ads */}
