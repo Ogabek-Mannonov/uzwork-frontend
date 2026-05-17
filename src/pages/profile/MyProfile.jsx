@@ -129,6 +129,7 @@ import { PROFESSIONAL_SKILLS } from "../../utils/skills";
 
 import { useTranslation } from "react-i18next";
 import { useThemeContext } from "../../pages/components/Theme/ThemeContext";
+import Price from "../components/Currency/Price";
 
 const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/api\/?$/, "");
 
@@ -351,11 +352,11 @@ const MyProfile = () => {
             languages: p.languages || [],
             category_id: p.category_id || null,
             categoryName: p.category_name || "",
-            jobsCompleted: p.completed_jobs || 0,
-            activeProjects: profileRes.data.in_progress_jobs || 0,
-            totalEarned: p.total_earned || 0,
-            successScore: p.job_success_score || 0,
-            rating: profileRes.data.average_rating || 0,
+            jobsCompleted: profileRes.data.completed_jobs || p.completed_jobs || 0,
+            activeProjects: profileRes.data.in_progress_jobs || profileRes.data.active_projects || 0,
+            totalEarned: profileRes.data.total_earned || p.total_earned || 0,
+            successScore: profileRes.data.job_success_score || p.job_success_score || 0,
+            rating: profileRes.data.average_rating || p.average_rating || 0,
             // KYC ma'lumotlari
             is_kyc_verified: u.is_kyc_verified || false,
             kyc_status: u.kyc_status || 'none',
@@ -1954,7 +1955,7 @@ const MyProfile = () => {
                   {/* STATS */}
                   <div className="profile-stats soft-fade-in stagger-3">
                     <div className="stat-item">
-                      <span className="stat-value">${(userData.totalEarned / 1000).toFixed(1)}k</span>
+                      <span className="stat-value"><Price amount={userData.totalEarned} currency="UZS" /></span>
                       <span className="stat-label">{t("profile.totalEarned", "Total Earned")}</span>
                     </div>
                     <div className="stat-item">
@@ -1962,8 +1963,8 @@ const MyProfile = () => {
                       <span className="stat-label">{t("profile.jobsCompleted", "Jobs Completed")}</span>
                     </div>
                     <div className="stat-item">
-                      <span className="stat-value">{userData.successScore}%</span>
-                      <span className="stat-label">{t("profile.successScore", "Success Score")}</span>
+                      <span className="stat-value">{parseFloat(userData.rating || 0).toFixed(1)}</span>
+                      <span className="stat-label">{t("profile.rating", "Reyting")}</span>
                     </div>
                     <div className="stat-item">
                       <span className="stat-value">{userData.activeProjects}</span>
