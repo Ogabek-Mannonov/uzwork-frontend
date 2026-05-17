@@ -346,7 +346,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                       ) : (
                         <div className="fd-portfolio-grid">
                           {portfolio.map(item => (
-                            <div key={item.id} className="fd-portfolio-card">
+                            <div key={item.id} className="fd-portfolio-card" onClick={() => window.open(`/profile/${freelancerId}#portfolio`, '_blank')} style={{ cursor: 'pointer' }}>
                               <div className="fd-portfolio-thumb">
                                 {item.media?.[0]?.url ? (
                                   <img src={item.media[0].url} alt={item.title} />
