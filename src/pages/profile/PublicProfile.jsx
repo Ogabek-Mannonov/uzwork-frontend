@@ -388,6 +388,15 @@ export default function PublicProfile() {
                     {selectedPortfolio.description || "Tavsif qo'shilmagan."}
                   </p>
                 </div>
+
+                {(selectedPortfolio.link || selectedPortfolio.project_url) && (
+                  <div className="modal-section" style={{marginTop: '16px'}}>
+                    <h3 style={{fontSize: '14px', color: 'var(--muted)', marginBottom: '8px', fontWeight: '600'}}>Loyiha havolasi</h3>
+                    <a href={selectedPortfolio.link || selectedPortfolio.project_url} target="_blank" rel="noreferrer" style={{color: 'var(--brand)', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '6px'}}>
+                      <FiExternalLink /> {selectedPortfolio.link || selectedPortfolio.project_url}
+                    </a>
+                  </div>
+                )}
                 
                 {selectedPortfolio.skills && selectedPortfolio.skills.length > 0 && (
                   <div className="modal-section" style={{marginTop: '24px'}}>
