@@ -1041,18 +1041,22 @@ function AuthHeader({ user }) {
                 onChange={(e) => setSearchValue(e.target.value)}
                 onKeyDown={handleSearch}
               />
-              <span className="search__divider" />
-              <button type="button" className="search__btn" onClick={() => setJobsOpen(v => !v)}>
-                {categories.find(c => c.key === searchCat)?.label} <ChevronDown size={14} className={`search__btn-chevron${jobsOpen ? " open" : ""}`} />
-              </button>
-              {jobsOpen && (
-                <div className="dropdown">
-                  {categories.map(cat => (
-                    <button key={cat.key} className="dropdown__item" onClick={() => { setSearchCat(cat.key); setJobsOpen(false); }}>
-                      {cat.label}
-                    </button>
-                  ))}
-                </div>
+              {isClient && (
+                <>
+                  <span className="search__divider" />
+                  <button type="button" className="search__btn" onClick={() => setJobsOpen(v => !v)}>
+                    {categories.find(c => c.key === searchCat)?.label} <ChevronDown size={14} className={`search__btn-chevron${jobsOpen ? " open" : ""}`} />
+                  </button>
+                  {jobsOpen && (
+                    <div className="dropdown">
+                      {categories.map(cat => (
+                        <button key={cat.key} className="dropdown__item" onClick={() => { setSearchCat(cat.key); setJobsOpen(false); }}>
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

@@ -4480,10 +4480,8 @@ input:checked + .slider:before {
   }
 }
 /* ===== GUARANTEED DARK MODE OVERRIDES FOR CLIENT PROFILE ===== */
-body.dark-mode .content-section,
 body.dark-mode .profile-card,
 body.dark-mode .profile-content,
-.dark .content-section,
 .dark .profile-card,
 .dark .profile-content {
   background: #0f172a !important;

@@ -348,6 +348,7 @@ const MyProfile = () => {
             profilePicture: p.avatar_url || u.avatar_url || "",
             hourlyRate: p.hourly_rate || 0,
             cv_url: p.cv_url || "",
+            accountType: u.role === 'client' ? 'Client' : 'Freelancer',
             coverPhoto: p.cover_url || "",
             languages: p.languages || [],
             category_id: p.category_id || null,
@@ -510,28 +511,21 @@ const MyProfile = () => {
   });
 
   // Membership plans
-  const membershipPlans = [
+  const freelancerPlans = [
     {
       id: "basic",
       name: "Basic",
       icon: <Star size={24} />,
-      price: {
-        monthly: 0,
-        yearly: 0
-      },
+      price: { monthly: 0, yearly: 0 },
       features: [
-        "5 job proposals per month",
-        "Basic profile visibility",
-        "Standard support (24h response)",
-        "Basic analytics",
-        "5MB portfolio space",
-        "Basic search ranking"
+        "Oyiga 10 ta taklif (Proposal)",
+        "Asosiy profil ko'rinishi",
+        "Standart qo'llab-quvvatlash",
+        "5MB portfel joyi"
       ],
       limitations: [
-        "No skill assessments",
-        "No featured profile",
-        "Limited search visibility",
-        "No priority support"
+        "Maxsus nishonlar yo'q",
+        "Qidiruvda ustunlik yo'q"
       ],
       color: "#64748b",
       popular: false,
@@ -541,85 +535,68 @@ const MyProfile = () => {
       id: "plus",
       name: "Plus",
       icon: <Zap size={24} />,
-      price: {
-        monthly: 14.99,
-        yearly: 149.99
-      },
+      price: { monthly: 14.99, yearly: 149.99 },
       yearlyDiscount: 17,
       features: [
-        "20 job proposals per month",
-        "Enhanced profile visibility",
-        "Priority support (12h response)",
-        "Advanced analytics",
-        "50MB portfolio space",
-        "Better search ranking",
-        "5 skill assessments per month",
-        "Profile badge"
+        "Oyiga 50 ta taklif (Proposal)",
+        "Raqobatchilar narxlarini ko'rish",
+        "Mavjudlik nishoni (Availability badge)",
+        "Qidiruvda yuqoriroq ko'rinish",
+        "50MB portfel joyi",
+        "Profil nishoni"
       ],
       limitations: [
-        "No featured profile",
-        "No exclusive events"
+        "Eksklyuziv tadbirlar yo'q"
       ],
       color: "#3b82f6",
+      popular: true,
+      current: userData.membership === "Plus" || userData.membership === "Pro" || userData.membership === "Professional"
+    }
+  ];
+
+  const clientPlans = [
+    {
+      id: "basic",
+      name: "Basic",
+      icon: <Star size={24} />,
+      price: { monthly: 0, yearly: 0 },
+      features: [
+        "Cheksiz ish joylashtirish",
+        "Frelanserlar takliflarini qabul qilish",
+        "Standart shartnoma boshqaruvi"
+      ],
+      limitations: [
+        "Premium e'lonlar yo'q",
+        "Shaxsiy menejer yo'q"
+      ],
+      color: "#64748b",
       popular: false,
-      current: userData.membership === "Plus"
+      current: userData.membership === "Basic"
     },
     {
-      id: "professional",
-      name: "Professional",
-      icon: <Crown size={24} />,
-      price: {
-        monthly: 29.99,
-        yearly: 299.99
-      },
+      id: "business",
+      name: "Business",
+      icon: <Briefcase size={24} />,
+      price: { monthly: 29.99, yearly: 299.99 },
       yearlyDiscount: 17,
       features: [
-        "Unlimited job proposals",
-        "Featured profile visibility",
-        "Premium support (4h response)",
-        "Real-time analytics",
-        "500MB portfolio space",
-        "Top search ranking",
-        "Unlimited skill assessments",
-        "Exclusive profile badge",
-        "Early access to new features",
-        "Invitation to exclusive events"
+        "Premium ish e'lonlari",
+        "Eng yaxshi frelanserlarni avtomatik taklif qilish",
+        "Shaxsiy menejer yordami",
+        "Kompaniya brendini ko'rsatish",
+        "Kengaytirilgan tahlillar"
       ],
       limitations: [],
       color: "#8b5cf6",
       popular: true,
-      current: userData.membership === "Professional" || userData.membership === "Pro"
-    },
-    {
-      id: "enterprise",
-      name: "Enterprise",
-      icon: <Rocket size={24} />,
-      price: {
-        monthly: 59.99,
-        yearly: 599.99
-      },
-      yearlyDiscount: 17,
-      features: [
-        "Unlimited everything",
-        "Verified expert badge",
-        "Dedicated account manager",
-        "API access",
-        "Custom analytics",
-        "White-label options",
-        "Team management",
-        "Bulk job posting",
-        "Advanced security",
-        "SLA guarantee"
-      ],
-      limitations: [],
-      color: "#f59e0b",
-      popular: false,
-      current: userData.membership === "Enterprise"
+      current: userData.membership === "Business" || userData.membership === "Professional" || userData.membership === "Pro"
     }
   ];
 
+  const membershipPlans = userData.accountType === 'Client' ? clientPlans : freelancerPlans;
+
   // Current membership details
-  const currentPlan = membershipPlans.find(plan => plan.current) || membershipPlans[2]; // Professional default
+  const currentPlan = membershipPlans.find(plan => plan.current) || membershipPlans[0];
 
   const navSections = [
     {
@@ -2819,7 +2796,7 @@ const MyProfile = () => {
                 </div>
 
                 <div className="membership-features-list">
-                  <h3>{t("profile.upgrade.benefits")}:</h3>
+                  <h3>{t("profile.upgrade.benefits")}</h3>
                   <div className="features-grid">
                     {currentPlan.features.map((feature, index) => (
                       <div key={index} className="feature-item">
