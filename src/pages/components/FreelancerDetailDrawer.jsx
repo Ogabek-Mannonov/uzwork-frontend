@@ -29,6 +29,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
   useEffect(() => {
     if (isOpen && freelancerId) {
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
       const timer = setTimeout(() => setIsAnimating(true), 10);
       fetchAllData();
       if (initialView === "invite") setShowInvite(true);
@@ -37,6 +38,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
       const timer = setTimeout(() => {
         setIsAnimating(false);
         document.body.style.overflow = "unset";
+        document.documentElement.style.overflow = "unset";
         setData(null);
         setActiveTab("about");
         setShowInvite(false);
@@ -44,6 +46,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
       return () => {
         clearTimeout(timer);
         document.body.style.overflow = "unset";
+        document.documentElement.style.overflow = "unset";
       };
     }
   }, [isOpen, freelancerId]);
@@ -225,7 +228,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                       {parseFloat(data.average_rating || 0).toFixed(1)}
                     </span>
                     <span style={{ color: '#6b7280', fontSize: '13px' }}>
-                      ({data.total_reviews || 0} sharh)
+                      ({t("profile.reviewsCount", { count: data.total_reviews || 0 })})
                     </span>
                   </div>
                   <div className="fd-location-row">
@@ -414,7 +417,7 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
  
                               {rev.comment ? (
                                 <div className="fd-history-comment">
-                                  <p>"{rev.comment}"</p>
+                                  <p>"{rev.comment === "Avtomatik baholash (14 kun ichida munosabat bildirilmagan)" ? t("profile.autoEvaluation") : rev.comment}"</p>
                                 </div>
                               ) : (
                                 <div className="fd-history-comment empty">
@@ -459,7 +462,16 @@ export default function FreelancerDetailDrawer({ isOpen, onClose, freelancerId, 
                               </div>
                               <span className="fd-lang-name">{lang.language || lang.name || lang}</span>
                             </div>
-                            <span className="fd-lang-level-badge">{lang.proficiency || lang.level || t("profile.profBasic")}</span>
+                            <span className="fd-lang-level-badge">
+                              {(() => {
+                                const prof = (lang.proficiency || lang.level || "").toUpperCase();
+                                if (prof === "NATIVE/BILINGUAL") return t("profile.profNative");
+                                if (prof === "CONVERSATIONAL") return t("profile.profConversational");
+                                if (prof === "FLUENT") return t("profile.profFluent");
+                                if (prof === "BASIC") return t("profile.profBasic");
+                                return prof || t("profile.profBasic");
+                              })()}
+                            </span>
                           </div>
                         )) : (
                           <div className="fd-empty-tab" style={{ padding: '20px 0', gridColumn: '1/-1' }}>

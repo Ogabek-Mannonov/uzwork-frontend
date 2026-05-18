@@ -1750,5 +1750,32 @@
       "mostPopular": "Most Popular",
       "currentPlanShort": "Current Plan"
     }
+  },
+  "profile": {
+    "about": "About",
+    "reviews": "Reviews",
+    "portfolio": "Portfolio",
+    "skills": "Skills",
+    "certifications": "Certifications",
+    "perHour": "/hr",
+    "rate": "Hourly Rate",
+    "successScore": "Job Success",
+    "jobsCompleted": "Jobs Completed",
+    "activeProjects": "Active Projects",
+    "reviewsCount": "{{count}} reviews",
+    "noFeedback": "No feedback",
+    "noComment": "No comment.",
+    "verifiedClient": "Verified client",
+    "autoEvaluation": "Automatic evaluation (No response within 14 days)",
+    "clientSatisfaction": "Client satisfaction",
+    "avgResponseTime": "Avg response time",
+    "repeatClients": "Repeat clients",
+    "viewProject": "View project",
+    "languages": "Languages",
+    "profNative": "Native or Bilingual",
+    "profConversational": "Conversational",
+    "profFluent": "Fluent",
+    "profBasic": "Basic",
+    "verifiedCredential": "Verified credential"
   }
 }
