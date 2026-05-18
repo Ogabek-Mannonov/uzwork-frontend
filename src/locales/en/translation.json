@@ -1669,5 +1669,77 @@
       "contract_completed_body": "Contract for \"{{jobTitle}}\" completed.",
       "contract_cancelled_body": "Contract for \"{{jobTitle}}\" cancelled."
     }
+  },
+  "profile": {
+    "settings": "Settings",
+    "lightMode": "Light Mode",
+    "myInfo": "My Info",
+    "cvUpload": "CV Upload",
+    "billing": "Billing",
+    "password": "Password",
+    "notifications": {
+      "title": "Notifications"
+    },
+    "appeals": {
+      "title": "Appeals"
+    },
+    "switchToClient": "Switch to Client",
+    "helpSupport": "Help & Support",
+    "signOut": "Sign Out",
+    "membership_details": {
+      "title": "Membership",
+      "current": "Current",
+      "freelancer": {
+        "basic": {
+          "prop10": "10 proposals per month",
+          "view": "Basic profile visibility",
+          "support": "Standard support",
+          "space5": "5MB portfolio space",
+          "nobadges": "No special badges",
+          "nosearch": "No search priority"
+        },
+        "plus": {
+          "prop50": "50 proposals per month",
+          "competitors": "View competitor bids",
+          "badge": "Availability badge",
+          "search": "Higher visibility in search",
+          "space50": "50MB portfolio space",
+          "profilebadge": "Profile badge",
+          "noevents": "No exclusive events"
+        }
+      },
+      "client": {
+        "basic": {
+          "jobs": "Unlimited job posting",
+          "proposals": "Receive freelancer proposals",
+          "contracts": "Standard contract management",
+          "nopremium": "No premium ads",
+          "nomanager": "No account manager"
+        },
+        "business": {
+          "premium": "Premium job postings",
+          "auto": "Auto-invite top freelancers",
+          "manager": "Account manager support",
+          "brand": "Showcase company brand",
+          "analytics": "Advanced analytics"
+        }
+      }
+    },
+    "upgrade": {
+      "mo": "mo",
+      "yr": "yr",
+      "currentPlan": "Current Plan: {{plan}}",
+      "started": "Started",
+      "nextBilling": "Next Billing",
+      "cancelMembership": "Cancel Membership",
+      "benefits": "Your benefits",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "save17": "Save 17%",
+      "free": "Free",
+      "downgrade": "Downgrade",
+      "mostPopular": "Most Popular",
+      "currentPlanShort": "Current Plan"
+    }
   }
 }

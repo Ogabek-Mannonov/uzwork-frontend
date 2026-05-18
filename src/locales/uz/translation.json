@@ -1986,5 +1986,77 @@
     "attachFile": "Fayl biriktirish",
     "info": "Ma'lumot",
     "stickers": "Stikerlar"
+  },
+  "profile": {
+    "settings": "Sozlamalar",
+    "lightMode": "Yorug' rejim",
+    "myInfo": "Mening ma'lumotlarim",
+    "cvUpload": "Rezyume yuklash",
+    "billing": "Hisob-kitob",
+    "password": "Parol",
+    "notifications": {
+      "title": "Bildirishnomalar"
+    },
+    "appeals": {
+      "title": "Shikoyatlar"
+    },
+    "switchToClient": "Mijoz rejimiga o'tish",
+    "helpSupport": "Yordam va qo'llab-quvvatlash",
+    "signOut": "Chiqish",
+    "membership_details": {
+      "title": "A'zolik",
+      "current": "Joriy",
+      "freelancer": {
+        "basic": {
+          "prop10": "Oyiga 10 ta taklif (Proposal)",
+          "view": "Asosiy profil ko'rinishi",
+          "support": "Standart qo'llab-quvvatlash",
+          "space5": "5MB portfel joyi",
+          "nobadges": "Maxsus nishonlar yo'q",
+          "nosearch": "Qidiruvda ustunlik yo'q"
+        },
+        "plus": {
+          "prop50": "Oyiga 50 ta taklif (Proposal)",
+          "competitors": "Raqobatchilar narxlarini ko'rish",
+          "badge": "Mavjudlik nishoni (Availability badge)",
+          "search": "Qidiruvda yuqoriroq ko'rinish",
+          "space50": "50MB portfel joyi",
+          "profilebadge": "Profil nishoni",
+          "noevents": "Eksklyuziv tadbirlar yo'q"
+        }
+      },
+      "client": {
+        "basic": {
+          "jobs": "Cheksiz ish joylashtirish",
+          "proposals": "Frelanserlar takliflarini qabul qilish",
+          "contracts": "Standart shartnoma boshqaruvi",
+          "nopremium": "Premium e'lonlar yo'q",
+          "nomanager": "Shaxsiy menejer yo'q"
+        },
+        "business": {
+          "premium": "Premium ish e'lonlari",
+          "auto": "Eng yaxshi frelanserlarni avtomatik taklif qilish",
+          "manager": "Shaxsiy menejer yordami",
+          "brand": "Kompaniya brendini ko'rsatish",
+          "analytics": "Kengaytirilgan tahlillar"
+        }
+      }
+    },
+    "upgrade": {
+      "mo": "oy",
+      "yr": "yil",
+      "currentPlan": "Joriy tarif: {{plan}}",
+      "started": "Boshlangan sana",
+      "nextBilling": "Keyingi hisob-kitob",
+      "cancelMembership": "A'zolikni bekor qilish",
+      "benefits": "Sizning imtiyozlaringiz",
+      "monthly": "Oylik",
+      "yearly": "Yillik",
+      "save17": "17% tejash",
+      "free": "Bepul",
+      "downgrade": "Pasaytirish",
+      "mostPopular": "Eng ommabop",
+      "currentPlanShort": "Joriy tarif"
+    }
   }
 }

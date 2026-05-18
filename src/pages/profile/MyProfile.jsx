@@ -518,14 +518,14 @@ const MyProfile = () => {
       icon: <Star size={24} />,
       price: { monthly: 0, yearly: 0 },
       features: [
-        "Oyiga 10 ta taklif (Proposal)",
-        "Asosiy profil ko'rinishi",
-        "Standart qo'llab-quvvatlash",
-        "5MB portfel joyi"
+        t("profile.membership_details.freelancer.basic.prop10", "Oyiga 10 ta taklif (Proposal)"),
+        t("profile.membership_details.freelancer.basic.view", "Asosiy profil ko'rinishi"),
+        t("profile.membership_details.freelancer.basic.support", "Standart qo'llab-quvvatlash"),
+        t("profile.membership_details.freelancer.basic.space5", "5MB portfel joyi")
       ],
       limitations: [
-        "Maxsus nishonlar yo'q",
-        "Qidiruvda ustunlik yo'q"
+        t("profile.membership_details.freelancer.basic.nobadges", "Maxsus nishonlar yo'q"),
+        t("profile.membership_details.freelancer.basic.nosearch", "Qidiruvda ustunlik yo'q")
       ],
       color: "#64748b",
       popular: false,
@@ -538,15 +538,15 @@ const MyProfile = () => {
       price: { monthly: 14.99, yearly: 149.99 },
       yearlyDiscount: 17,
       features: [
-        "Oyiga 50 ta taklif (Proposal)",
-        "Raqobatchilar narxlarini ko'rish",
-        "Mavjudlik nishoni (Availability badge)",
-        "Qidiruvda yuqoriroq ko'rinish",
-        "50MB portfel joyi",
-        "Profil nishoni"
+        t("profile.membership_details.freelancer.plus.prop50", "Oyiga 50 ta taklif (Proposal)"),
+        t("profile.membership_details.freelancer.plus.competitors", "Raqobatchilar narxlarini ko'rish"),
+        t("profile.membership_details.freelancer.plus.badge", "Mavjudlik nishoni (Availability badge)"),
+        t("profile.membership_details.freelancer.plus.search", "Qidiruvda yuqoriroq ko'rinish"),
+        t("profile.membership_details.freelancer.plus.space50", "50MB portfel joyi"),
+        t("profile.membership_details.freelancer.plus.profilebadge", "Profil nishoni")
       ],
       limitations: [
-        "Eksklyuziv tadbirlar yo'q"
+        t("profile.membership_details.freelancer.plus.noevents", "Eksklyuziv tadbirlar yo'q")
       ],
       color: "#3b82f6",
       popular: true,
@@ -561,13 +561,13 @@ const MyProfile = () => {
       icon: <Star size={24} />,
       price: { monthly: 0, yearly: 0 },
       features: [
-        "Cheksiz ish joylashtirish",
-        "Frelanserlar takliflarini qabul qilish",
-        "Standart shartnoma boshqaruvi"
+        t("profile.membership_details.client.basic.jobs", "Cheksiz ish joylashtirish"),
+        t("profile.membership_details.client.basic.proposals", "Frelanserlar takliflarini qabul qilish"),
+        t("profile.membership_details.client.basic.contracts", "Standart shartnoma boshqaruvi")
       ],
       limitations: [
-        "Premium e'lonlar yo'q",
-        "Shaxsiy menejer yo'q"
+        t("profile.membership_details.client.basic.nopremium", "Premium e'lonlar yo'q"),
+        t("profile.membership_details.client.basic.nomanager", "Shaxsiy menejer yo'q")
       ],
       color: "#64748b",
       popular: false,
@@ -580,11 +580,11 @@ const MyProfile = () => {
       price: { monthly: 29.99, yearly: 299.99 },
       yearlyDiscount: 17,
       features: [
-        "Premium ish e'lonlari",
-        "Eng yaxshi frelanserlarni avtomatik taklif qilish",
-        "Shaxsiy menejer yordami",
-        "Kompaniya brendini ko'rsatish",
-        "Kengaytirilgan tahlillar"
+        t("profile.membership_details.client.business.premium", "Premium ish e'lonlari"),
+        t("profile.membership_details.client.business.auto", "Eng yaxshi frelanserlarni avtomatik taklif qilish"),
+        t("profile.membership_details.client.business.manager", "Shaxsiy menejer yordami"),
+        t("profile.membership_details.client.business.brand", "Kompaniya brendini ko'rsatish"),
+        t("profile.membership_details.client.business.analytics", "Kengaytirilgan tahlillar")
       ],
       limitations: [],
       color: "#8b5cf6",
@@ -2763,9 +2763,9 @@ const MyProfile = () => {
             <div className="content-section">
               <div className="section-header">
                 <div className="header-left">
-                  <h1 className="section-title">Membership</h1>
+                  <h1 className="section-title">{t("profile.membership_details.title", "Membership")}</h1>
                   <span className="section-badge">
-                    <Award size={14} />Current: {userData.membership}
+                    <Award size={14} />{t("profile.membership_details.current", "Current")}: {userData.membership}
                   </span>
                 </div>
               </div>
@@ -2838,7 +2838,7 @@ const MyProfile = () => {
                       ) : (
                         <>
                           <span className="price">${plan.price[billingCycle]}</span>
-                          <span className="period">/{billingCycle === "monthly" ? "mo" : "yr"}</span>
+                          <span className="period">/{billingCycle === "monthly" ? t("profile.upgrade.mo", "mo") : t("profile.upgrade.yr", "yr")}</span>
                         </>
                       )}
                     </div>
