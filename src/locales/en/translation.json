@@ -865,7 +865,8 @@
       "jobsPosted": "jobs posted",
       "hireRate": "hire rate",
       "totalSpent": "total spent",
-      "hires": "hires"
+      "hires": "hires",
+      "locationNotSpecified": "Location not specified"
     },
     "projectCard": {
       "paymentVerified": "Payment verified",

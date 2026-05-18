@@ -840,7 +840,8 @@
       "jobsPosted": "вакансий опубликовано",
       "hireRate": "уровень найма",
       "totalSpent": "всего потрачено",
-      "hires": "наймов"
+      "hires": "нанято",
+      "locationNotSpecified": "Локация не указана"
     },
     "projectCard": {
       "paymentVerified": "Оплата подтверждена",
@@ -1836,6 +1837,49 @@
           "completeMsg": "Ваш профиль заполнен на 100%! Теперь у вас больше шансов получить работу."
         }
       }
+    },
+    "drawer": {
+      "openNewWindow": "Открыть вакансию в новом окне",
+      "posted": "Опубликовано: {{date}}",
+      "worldwide": "По всему миру",
+      "projectType": "Тип проекта",
+      "experienceLevel": "Уровень опыта",
+      "budget": "Бюджет",
+      "skillsExpertise": "Навыки и опыт",
+      "activityOnJob": "Активность по этой вакансии",
+      "stats": {
+        "proposals": "Предложения",
+        "interviewing": "Интервью",
+        "invitesSent": "Отправлено приглашений"
+      },
+      "applyNow": "Подать заявку",
+      "saveJob": "Сохранить",
+      "saved": "Сохранено",
+      "flagInappropriate": "Пожаловаться",
+      "aboutClient": "О клиенте",
+      "paymentVerified": "Способ оплаты подтвержден",
+      "reviews": "из {{rating}} отзывов",
+      "memberSince": "На сайте с: {{date}}",
+      "recently": "Недавно",
+      "jobsPosted": "вакансий опубликовано",
+      "hireRate": "процент найма",
+      "totalSpent": "всего потрачено",
+      "hires": "нанято",
+      "locationNotSpecified": "Локация не указана"
+    },
+    "projectCard": {
+      "paymentVerified": "Оплата подтверждена",
+      "fixed": "Фиксированная цена",
+      "hourly": "Почасовая",
+      "intermediate": "Средний уровень",
+      "recently": "Недавно",
+      "proposalsCount": "Предложений: {{count}}"
+    },
+    "projectsList": {
+      "noProjects": "Проекты не найдены. Попробуйте другое ключевое слово или вкладку.",
+      "loading": "Загрузка данных...",
+      "prev": "Пред.",
+      "next": "След."
     }
   },
   "profile": {

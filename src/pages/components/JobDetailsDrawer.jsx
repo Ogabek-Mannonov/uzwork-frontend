@@ -18,6 +18,7 @@ export default function JobDetailsDrawer({ job, isOpen, onClose, savedIds = [], 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
       const timer = setTimeout(() => setIsAnimating(true), 10);
       return () => {
         clearTimeout(timer);
@@ -26,10 +27,12 @@ export default function JobDetailsDrawer({ job, isOpen, onClose, savedIds = [], 
       const timer = setTimeout(() => {
         setIsAnimating(false);
         document.body.style.overflow = "unset";
+        document.documentElement.style.overflow = "unset";
       }, 400);
       return () => {
         clearTimeout(timer);
-        document.body.style.overflow = "unset"; // Har doim reset qilish
+        document.body.style.overflow = "unset";
+        document.documentElement.style.overflow = "unset";
       };
     }
   }, [isOpen]);
@@ -255,7 +258,7 @@ export default function JobDetailsDrawer({ job, isOpen, onClose, savedIds = [], 
               
               <div className="jd-client-meta">
                 <div className="jd-meta-item">
-                  <strong>{job.client_location || "Lokatsiya belgilanmagan"}</strong>
+                  <strong>{job.client_location || t("findWork.drawer.locationNotSpecified", "Lokatsiya belgilanmagan")}</strong>
                   <span>{job.client_member_since ? new Date(job.client_member_since).toLocaleDateString() : ""}</span>
                 </div>
                 <div className="jd-meta-item">

@@ -2052,6 +2052,49 @@
           "completeMsg": "Profilingiz 100% to'liq! Endi siz ish yutib olishingiz ehtimoli ko'proq."
         }
       }
+    },
+    "drawer": {
+      "openNewWindow": "Ishni yangi oynada ochish",
+      "posted": "E'lon qilingan sana: {{date}}",
+      "worldwide": "Butun dunyo bo'ylab",
+      "projectType": "Loyiha turi",
+      "experienceLevel": "Tajriba darajasi",
+      "budget": "Byudjet",
+      "skillsExpertise": "Ko'nikmalar va tajriba",
+      "activityOnJob": "Ushbu ish bo'yicha faollik",
+      "stats": {
+        "proposals": "Takliflar",
+        "interviewing": "Suhbatlashish",
+        "invitesSent": "Yuborilgan taklifnomalar"
+      },
+      "applyNow": "Hozir murojaat qiling",
+      "saveJob": "Saqlash",
+      "saved": "Saqlangan",
+      "flagInappropriate": "Tegishli bo'lmagan deb belgilash",
+      "aboutClient": "Mijoz haqida",
+      "paymentVerified": "To'lov usuli tasdiqlangan",
+      "reviews": "{{rating}} sharhlardan",
+      "memberSince": "A'zo bo'lgan sana: {{date}}",
+      "recently": "Yaqinda",
+      "jobsPosted": "ish joylashtirilgan",
+      "hireRate": "yollash darajasi",
+      "totalSpent": "jami xarajat",
+      "hires": "yollanganlar",
+      "locationNotSpecified": "Lokatsiya belgilanmagan"
+    },
+    "projectCard": {
+      "paymentVerified": "To'lov tasdiqlangan",
+      "fixed": "Ruxsat etilgan narx",
+      "hourly": "Soatbay",
+      "intermediate": "O'rta daraja",
+      "recently": "Yaqinda",
+      "proposalsCount": "Takliflar: {{count}}"
+    },
+    "projectsList": {
+      "noProjects": "Hech qanday loyiha topilmadi. Boshqa kalit so'z yoki yorliqni sinab ko'ring.",
+      "loading": "Ma'lumotlar yuklanmoqda...",
+      "prev": "Oldingi",
+      "next": "Keyingi"
     }
   },
   "profile": {
