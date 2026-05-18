@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { Search, Filter, ThumbsDown, Heart, CheckCircle, ChevronDown, Award, Star } from "lucide-react";
+import { Search, Filter, ThumbsDown, Heart, CheckCircle, ChevronDown, Award, Star, X } from "lucide-react";
 import "../../../assets/Freelancer/FindW/FindWork.css";
 import Projects from "../../components/projectsCards";
 import JobDetailsDrawer from "../../components/JobDetailsDrawer";
@@ -35,6 +35,10 @@ export default function FindWork() {
 
   // User details
   const [userData, setUserData] = useState(null);
+
+  // Boost Modal States
+  const [showBoostModal, setShowBoostModal] = useState(false);
+  const [boostModalType, setBoostModalType] = useState(""); // 'badge' or 'boost'
 
   // Calculate profile completion percentage
   const { profileCompletion, completionItems } = useMemo(() => {
@@ -342,7 +346,11 @@ export default function FindWork() {
             
             <div className="fw-profile-progress">
               <div className="fw-progress-text">
-                <a href="/profile">{t("findWork.layout.sidebar.completeProfile")}</a>
+                <a href="/profile">
+                  {profileCompletion === 100 
+                    ? "Profil to'liq" 
+                    : t("findWork.layout.sidebar.completeProfile")}
+                </a>
                 <span className={`fw-progress-pct ${profileCompletion === 100 ? 'complete' : ''}`}>
                   {profileCompletion}%
                 </span>
@@ -404,7 +412,16 @@ export default function FindWork() {
             <div className="fw-ad-item">
               <div className="fw-ad-text">
                 <span>{t("findWork.layout.sidebar.availabilityBadge")}</span>
-                <small>{t("findWork.layout.sidebar.off")}</small>
+                <span 
+                  className="fw-ad-toggle" 
+                  onClick={() => {
+                    setBoostModalType("badge");
+                    setShowBoostModal(true);
+                  }}
+                  style={{ cursor: 'pointer', color: 'var(--brand)', fontSize: '0.85rem', fontWeight: '600' }}
+                >
+                  Yoqish
+                </span>
               </div>
               <button className="fw-icon-btn"><Star size={18} /></button>
             </div>
@@ -412,7 +429,16 @@ export default function FindWork() {
             <div className="fw-ad-item">
               <div className="fw-ad-text">
                 <span>{t("findWork.layout.sidebar.boostProfile")}</span>
-                <small>{t("findWork.layout.sidebar.off")}</small>
+                <span 
+                  className="fw-ad-toggle" 
+                  onClick={() => {
+                    setBoostModalType("boost");
+                    setShowBoostModal(true);
+                  }}
+                  style={{ cursor: 'pointer', color: 'var(--brand)', fontSize: '0.85rem', fontWeight: '600' }}
+                >
+                  Yoqish
+                </span>
               </div>
               <button className="fw-icon-btn"><Star size={18} /></button>
             </div>
@@ -423,6 +449,47 @@ export default function FindWork() {
         </aside>
 
       </div>
+
+      {/* BOOST MODAL */}
+      {showBoostModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowBoostModal(false)}>
+          <div style={{ maxWidth: '500px', padding: '30px', width: '90%', background: 'var(--surface)', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text)', margin: 0 }}>
+                {boostModalType === 'badge' ? "Mavjudlik nishoni" : "Profilingizni ko'tarish"}
+              </h2>
+              <button onClick={() => setShowBoostModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div style={{ textAlign: 'center', padding: '10px 0' }}>
+              <div style={{ width: '80px', height: '80px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+                <Star size={40} color="var(--brand)" fill="var(--brand)" />
+              </div>
+              
+              <p style={{ fontSize: '1.1rem', color: 'var(--text)', marginBottom: '10px', fontWeight: '600' }}>
+                Ushbu funksiya tez kunda ishga tushadi!
+              </p>
+              
+              <p style={{ fontSize: '0.95rem', color: 'var(--muted)', lineHeight: '1.6', margin: 0 }}>
+                {boostModalType === 'badge' 
+                  ? "Tez kunda siz o'z ballaringizdan foydalanib 'Mavjudlik nishoni'ni yoqishingiz va mijozlarga hozir bo'sh ekanligingizni ko'rsatishingiz mumkin bo'ladi."
+                  : "Tez kunda siz o'z ballaringiz orqali profilingizni qidiruv natijalarida eng yuqoriga ko'tarishingiz (Boost) va ko'proq buyurtmalar olishingiz mumkin bo'ladi."}
+              </p>
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+              <button 
+                onClick={() => setShowBoostModal(false)} 
+                style={{ background: 'var(--brand)', color: 'white', border: 'none', padding: '12px 30px', borderRadius: '24px', fontWeight: '600', cursor: 'pointer' }}
+              >
+                Tushunarli
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* JOB DETAILS DRAWER */}
       <JobDetailsDrawer 
