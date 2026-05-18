@@ -348,7 +348,7 @@ export default function FindWork() {
               <div className="fw-progress-text">
                 <a href="/profile">
                   {profileCompletion === 100 
-                    ? "Profil to'liq" 
+                    ? t("findWork.layout.sidebar.profileComplete", "Profil to'liq") 
                     : t("findWork.layout.sidebar.completeProfile")}
                 </a>
                 <span className={`fw-progress-pct ${profileCompletion === 100 ? 'complete' : ''}`}>
@@ -420,7 +420,7 @@ export default function FindWork() {
                   }}
                   style={{ cursor: 'pointer', color: 'var(--brand)', fontSize: '0.85rem', fontWeight: '600' }}
                 >
-                  Yoqish
+                  {t("findWork.layout.sidebar.turnOn", "Yoqish")}
                 </span>
               </div>
               <button className="fw-icon-btn"><Star size={18} /></button>
@@ -437,7 +437,7 @@ export default function FindWork() {
                   }}
                   style={{ cursor: 'pointer', color: 'var(--brand)', fontSize: '0.85rem', fontWeight: '600' }}
                 >
-                  Yoqish
+                  {t("findWork.layout.sidebar.turnOn", "Yoqish")}
                 </span>
               </div>
               <button className="fw-icon-btn"><Star size={18} /></button>
@@ -456,7 +456,7 @@ export default function FindWork() {
           <div style={{ maxWidth: '500px', padding: '30px', width: '90%', background: 'var(--surface)', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text)', margin: 0 }}>
-                {boostModalType === 'badge' ? "Mavjudlik nishoni" : "Profilingizni ko'tarish"}
+                {boostModalType === 'badge' ? t("findWork.layout.sidebar.availabilityBadge") : t("findWork.layout.sidebar.boostProfile")}
               </h2>
               <button onClick={() => setShowBoostModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                 <X size={24} />
@@ -469,13 +469,13 @@ export default function FindWork() {
               </div>
               
               <p style={{ fontSize: '1.1rem', color: 'var(--text)', marginBottom: '10px', fontWeight: '600' }}>
-                Ushbu funksiya tez kunda ishga tushadi!
+                {t("findWork.layout.sidebar.comingSoon", "Ushbu funksiya tez kunda ishga tushadi!")}
               </p>
               
               <p style={{ fontSize: '0.95rem', color: 'var(--muted)', lineHeight: '1.6', margin: 0 }}>
                 {boostModalType === 'badge' 
-                  ? "Tez kunda siz o'z ballaringizdan foydalanib 'Mavjudlik nishoni'ni yoqishingiz va mijozlarga hozir bo'sh ekanligingizni ko'rsatishingiz mumkin bo'ladi."
-                  : "Tez kunda siz o'z ballaringiz orqali profilingizni qidiruv natijalarida eng yuqoriga ko'tarishingiz (Boost) va ko'proq buyurtmalar olishingiz mumkin bo'ladi."}
+                  ? t("findWork.layout.sidebar.badgeModalDesc", "Tez kunda siz o'z ballaringizdan foydalanib 'Mavjudlik nishoni'ni yoqishingiz va mijozlarga hozir bo'sh ekanligingizni ko'rsatishingiz mumkin bo'ladi.")
+                  : t("findWork.layout.sidebar.boostModalDesc", "Tez kunda siz o'z ballaringiz orqali profilingizni qidiruv natijalarida eng yuqoriga ko'tarishingiz (Boost) va ko'proq buyurtmalar olishingiz mumkin bo'ladi.")}
               </p>
             </div>
             
@@ -484,7 +484,7 @@ export default function FindWork() {
                 onClick={() => setShowBoostModal(false)} 
                 style={{ background: 'var(--brand)', color: 'white', border: 'none', padding: '12px 30px', borderRadius: '24px', fontWeight: '600', cursor: 'pointer' }}
               >
-                Tushunarli
+                {t("findWork.layout.sidebar.gotIt", "Tushunarli")}
               </button>
             </div>
           </div>

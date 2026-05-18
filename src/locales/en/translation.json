@@ -810,6 +810,7 @@
       },
       "sidebar": {
         "completeProfile": "Complete your profile",
+        "profileComplete": "Profile Complete",
         "idVerification": "Identity Verification",
         "idVerificationDesc": "Boost your profile visibility in search results and win more work with an IDV badge.",
         "enrollNow": "Enroll Now",
@@ -818,6 +819,11 @@
         "off": "Off",
         "boostProfile": "Boost your profile",
         "statsAnalytics": "Stats & Analytics",
+        "turnOn": "Turn on",
+        "comingSoon": "Coming soon!",
+        "badgeModalDesc": "Soon you will be able to use your points to turn on the 'Availability badge' and show clients that you are free now.",
+        "boostModalDesc": "Soon you will be able to use your points to boost your profile in search results and get more orders.",
+        "gotIt": "Got it",
         "checklist": {
           "avatar": "Avatar",
           "name": "First / Last Name",
@@ -1673,6 +1679,8 @@
   "profile": {
     "settings": "Settings",
     "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "membership": "Membership",
     "myInfo": "My Info",
     "cvUpload": "CV Upload",
     "billing": "Billing",

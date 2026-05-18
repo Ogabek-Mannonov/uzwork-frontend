@@ -1987,9 +1987,78 @@
     "info": "Ma'lumot",
     "stickers": "Stikerlar"
   },
+  "findWork": {
+    "layout": {
+      "bannerSub": "To'g'ridan-to'g'ri shartnomalar",
+      "bannerTitle": "UzWork-ga yangi mijozlarni olib keling va 5% lik past xizmat haqi bilan daromadingizni oshiring.",
+      "bannerBtn": "Shartnoma yaratish",
+      "searchPlaceholder": "Ish qidirish...",
+      "mainTitle": "Sizga yoqishi mumkin bo'lgan ishlar",
+      "tabs": {
+        "recommended": "Tavsiya etilgan",
+        "recent": "Eng so'nggi",
+        "saved": "Saqlangan ishlar"
+      },
+      "filterToggle": "Filtrlar",
+      "tabsSubtitle": "Sizning mahoratingizga mos keladigan loyihalar. Mijozning yollash tarixiga qarab saralangan.",
+      "filters": {
+        "jobType": "Ish turi",
+        "all": "Barchasi",
+        "fixed": "Ruxsat etilgan narx",
+        "hourly": "Soatbay",
+        "budget": "Byudjet",
+        "anyAmount": "Har qanday miqdor",
+        "upTo100": "$100 gacha",
+        "sort": "Saralash",
+        "newestFirst": "Avval yangilari",
+        "highestBudget": "Eng yuqori byudjet",
+        "lowestBudget": "Eng past byudjet",
+        "title": "Filtrlar",
+        "proposalsCount": "Takliflar soni",
+        "lessThan5": "5 tadan kam",
+        "5to10": "5 dan 10 tagacha",
+        "10to15": "10 dan 15 tagacha",
+        "15to50": "15 dan 50 tagacha",
+        "clientHistory": "Mijoz tarixi",
+        "newClient": "Yangi mijoz (xarajati yo'q)",
+        "hasSpent": "Xarajat qilgan mijoz"
+      },
+      "sidebar": {
+        "completeProfile": "Profilingizni to'ldiring",
+        "profileComplete": "Profil to'liq",
+        "idVerification": "Shaxsni tasdiqlash",
+        "idVerificationDesc": "Qidiruv natijalarida profilingiz ko'rinishini oshiring va IDV nishoni bilan ko'proq ish yuting.",
+        "enrollNow": "Hozir ro'yxatdan o'ting",
+        "promoteAds": "Reklama orqali ko'tarish",
+        "availabilityBadge": "Mavjudlik nishoni",
+        "boostProfile": "Profilni ko'tarish",
+        "statsAnalytics": "Statistika va tahlil",
+        "turnOn": "Yoqish",
+        "comingSoon": "Ushbu funksiya tez kunda ishga tushadi!",
+        "badgeModalDesc": "Tez kunda siz o'z ballaringizdan foydalanib 'Mavjudlik nishoni'ni yoqishingiz va mijozlarga hozir bo'sh ekanligingizni ko'rsatishingiz mumkin bo'ladi.",
+        "boostModalDesc": "Tez kunda siz o'z ballaringiz orqali profilingizni qidiruv natijalarida eng yuqoriga ko'tarishingiz (Boost) va ko'proq buyurtmalar olishingiz mumkin bo'ladi.",
+        "gotIt": "Tushunarli",
+        "checklist": {
+          "avatar": "Avatar",
+          "name": "Ism / Familiya",
+          "title": "Kasbiy unvon",
+          "bio": "Tarjimai hol",
+          "skills": "Ko'nikmalar",
+          "rate": "Soatbay stavka",
+          "category": "Kategoriya",
+          "location": "Manzil",
+          "portfolio": "Portfel",
+          "certification": "Sertifikatlash",
+          "completeMsg": "Profilingiz 100% to'liq! Endi siz ish yutib olishingiz ehtimoli ko'proq."
+        }
+      }
+    }
+  },
   "profile": {
     "settings": "Sozlamalar",
     "lightMode": "Yorug' rejim",
+    "darkMode": "Tungi rejim",
+    "membership": "A'zolik",
     "myInfo": "Mening ma'lumotlarim",
     "cvUpload": "Rezyume yuklash",
     "billing": "Hisob-kitob",
