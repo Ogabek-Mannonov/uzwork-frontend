@@ -58,7 +58,6 @@ body { font-family: var(--ft-font); color: var(--ft-text); background: var(--ft-
   min-height: 100vh; 
   background: var(--ft-bg); 
   font-family: var(--ft-font); 
-  overflow-x: hidden; /* Prevent any horizontal scroll from overflowing elements! */
 }
 
 /* ============================================================
@@ -847,7 +846,7 @@ body { font-family: var(--ft-font); color: var(--ft-text); background: var(--ft-
   
   .ft-searchbar { padding: 12px 16px !important; }
 
-  .ft-results { padding: 12px 16px 48px !important; }
+  .ft-results { padding: 12px 16px 48px !important; margin-left: 0 !important; }
 
   .ft-card {
     border-radius: 14px !important;
