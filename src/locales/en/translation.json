@@ -24,12 +24,83 @@
     "errorStatusUpdate": "An error occurred while updating status"
   },
   "findTalent": {
-    "badges": {"top_rated_plus": "Top Rated Plus","top_rated": "Top Rated","rising_talent": "Rising Talent"},
-    "filter": {"title": "Filters","clearAll": "Clear all","clearAllCount": "Clear all filters ({{count}})","talentBadge": "Talent badge","talentBadgeInfo": "Badges awarded based on performance","hourlyRate": "Hourly rate","under": "under ${{min}}","location": "Location","searchLocation": "City, country or region","jobSuccess": "Job success","jobSuccessInfo": "Minimum job success score","successUp": "{{percent}}% & up","englishLevel": "English level", "languageFilter": "Language filter"},
-    "results": {"searchPlaceholder": "Search for a skill or name","advancedSearch": "Advanced search","freelancersFound": "{{count}} freelancers found","location": "Location","successCount": "✅ {{percent}}%+ success","sort": {"relevance": "Best Match","rate_asc": "Rate: Low to High","rate_desc": "Rate: High to Low","success": "Job Success","earned": "Most Earned"},"loading": "Loading freelancers...","empty": "No freelancers found","emptySub": "Try adjusting your filters or search query","loadMore": "Load more","loadingMore": "Loading more freelancers..."},
-    "card": {"save": "Save freelancer","invited": "Invited","invite": "Invite to job","success": "Job Success","earned": "earned","consults": "Offers consultations","insights": "Insights about {{name}}","insightsInfo": "AI-generated insights","feedback": "Insight feedback","associatedWith": "Associated with","viewProfile": "View Profile","viewFullProfile": "View full profile","sendMessage": "Send Message","saveAction": "Save","boosted": "Boosted", "mutaxassis": "Specialist", "negotiable": "Negotiable", "jobsDone": "jobs completed", "newFreelancer": "New freelancer"},
-    "nations": {"uz": "Uzbekistan","tashkent": "Tashkent","samarkand": "Samarkand","bukhara": "Bukhara","kz": "Kazakhstan","kg": "Kyrgyzstan","remote": "Remote (Any)"},
-    "englishLevels": {"any": "Any level","basic": "Basic","conversational": "Conversational","fluent": "Fluent","native": "Native"}
+    "badges": {
+      "top_rated_plus": "Top Rated Plus",
+      "top_rated": "Top Rated",
+      "rising_talent": "Rising Talent"
+    },
+    "filter": {
+      "title": "Filters",
+      "clearAll": "Clear all",
+      "clearAllCount": "Clear all filters ({{count}})",
+      "talentBadge": "Talent badge",
+      "talentBadgeInfo": "Badges awarded based on performance",
+      "hourlyRate": "Hourly rate",
+      "under": "under ${{min}}",
+      "location": "Location",
+      "searchLocation": "City, country or region",
+      "jobSuccess": "Job success",
+      "jobSuccessInfo": "Minimum job success score",
+      "successUp": "{{percent}}% & up",
+      "englishLevel": "English level",
+      "languageFilter": "Language filter"
+    },
+    "results": {
+      "searchPlaceholder": "Search for a skill or name",
+      "advancedSearch": "Advanced search",
+      "freelancersFound": "{{count}} freelancers found",
+      "location": "Location",
+      "successCount": "✅ {{percent}}%+ success",
+      "sort": {
+        "relevance": "Best Match",
+        "rate_asc": "Rate: Low to High",
+        "rate_desc": "Rate: High to Low",
+        "success": "Job Success",
+        "earned": "Most Earned"
+      },
+      "loading": "Loading freelancers...",
+      "empty": "No freelancers found",
+      "emptySub": "Try adjusting your filters or search query",
+      "loadMore": "Load more",
+      "loadingMore": "Loading more freelancers..."
+    },
+    "card": {
+      "save": "Save freelancer",
+      "invited": "Invited",
+      "invite": "Invite to job",
+      "success": "Job Success",
+      "earned": "earned",
+      "consults": "Offers consultations",
+      "insights": "Insights about {{name}}",
+      "insightsInfo": "AI-generated insights",
+      "feedback": "Insight feedback",
+      "associatedWith": "Associated with",
+      "viewProfile": "View Profile",
+      "viewFullProfile": "View full profile",
+      "sendMessage": "Send Message",
+      "saveAction": "Save",
+      "boosted": "Boosted",
+      "mutaxassis": "Specialist",
+      "negotiable": "Negotiable",
+      "jobsDone": "jobs completed",
+      "newFreelancer": "New freelancer"
+    },
+    "nations": {
+      "uz": "Uzbekistan",
+      "tashkent": "Tashkent",
+      "samarkand": "Samarkand",
+      "bukhara": "Bukhara",
+      "kz": "Kazakhstan",
+      "kg": "Kyrgyzstan",
+      "remote": "Remote (Any)"
+    },
+    "englishLevels": {
+      "any": "Any level",
+      "basic": "Basic",
+      "conversational": "Conversational",
+      "fluent": "Fluent",
+      "native": "Native"
+    }
   },
   "navbar": {
     "findWork": "Find Work",
@@ -52,7 +123,6 @@
     "contractAnalysis": "Contract Analysis & Stats",
     "myContractsDisputes": "My Contracts & Disputes"
   },
-
   "header": {
     "hireTalent": "Hire Talent",
     "findWork": "Find Work",
@@ -101,7 +171,13 @@
     "tabWork": "Find work",
     "searchPlaceholder": "What kind of specialist are you looking for...",
     "searchBtn": "Search",
-    "popularTags": ["UI/UX Designer", "React Developer", "Python Expert", "Copywriter", "Mobile Developer"],
+    "popularTags": [
+      "UI/UX Designer",
+      "React Developer",
+      "Python Expert",
+      "Copywriter",
+      "Mobile Developer"
+    ],
     "popularSearches": "Popular searches",
     "workTitle": "Start and grow your freelancing career with UZWORK",
     "workDesc": "Thousands of new job listings wait for you every week.",
@@ -231,7 +307,7 @@
     "rating": "rating",
     "totalEarned": "Total Earned",
     "jobsCompleted": "Jobs Completed",
-    "successScore": "Success Score",
+    "successScore": "Job Success",
     "activeProjects": "Active Projects",
     "skillsExpertise": "Skills & Expertise",
     "skillsDesc": "Your professional capabilities",
@@ -243,8 +319,8 @@
     "phone": "Phone",
     "location": "Location",
     "cvUpload": "CV Upload",
-    "billing": "Billing & payments",
-    "password": "Password & Security",
+    "billing": "Billing",
+    "password": "Password",
     "membership": "Membership",
     "helpSupport": "Help & Support",
     "signOut": "Sign Out",
@@ -252,9 +328,9 @@
     "teams": "Teams & members",
     "taxInfo": "Tax information",
     "switchToFreelancer": "Switch to Freelancer mode",
-    "switchToClient": "Switch to Client mode",
-    "darkMode": "Night mode",
-    "lightMode": "Day mode",
+    "switchToClient": "Switch to Client",
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode",
     "notificationsList": "Notifications",
     "help": "Help",
     "profile": "Profile",
@@ -312,11 +388,11 @@
     "viewPublicProfile": "View Public Profile",
     "edit": "Edit",
     "about": "About",
-    "reviews": "Work history",
-    "rate": "Rate",
+    "reviews": "Reviews",
+    "rate": "Hourly Rate",
     "perHour": "/hr",
     "clientSatisfaction": "Client satisfaction",
-    "avgResponseTime": "Avg. response time",
+    "avgResponseTime": "Avg response time",
     "repeatClients": "Repeat clients",
     "noBio": "No bio provided",
     "noHistory": "No work history yet",
@@ -325,8 +401,8 @@
     "messageBtn": "Send message",
     "languages": "Languages",
     "untitledJob": "Untitled Project",
-    "noFeedback": "No feedback provided",
-    "noComment": "No comment left",
+    "noFeedback": "No feedback",
+    "noComment": "No comment.",
     "verifiedClient": "Verified client",
     "verifiedCredential": "Verified credential",
     "viewCredential": "View credential",
@@ -372,7 +448,6 @@
     "addLanguage": "Add Language",
     "editLanguage": "Edit Language",
     "languageLevel": "Proficiency",
-
     "languagesDesc": "Select languages you can speak and write",
     "chooseLanguage": "Choose Language",
     "noLanguagesAdded": "No languages added yet",
@@ -397,11 +472,10 @@
     "media": "Project Media",
     "uploadMedia": "Click to upload images or PDF",
     "uploadLimit": "Images, PDF (max 5MB)",
-
     "publishProject": "Publish Project",
     "updateProject": "Update Project",
     "saving": "Saving...",
-    "viewProject": "View Project",
+    "viewProject": "View project",
     "status": {
       "available_now": "Available now",
       "available": "Available",
@@ -449,7 +523,7 @@
       "revokeConfirm": "Are you sure you want to log out from this device?"
     },
     "notifications": {
-      "title": "Notification Settings",
+      "title": "Notifications",
       "settings": "Notification Settings",
       "deliveryPreferences": "Delivery Preferences",
       "email": "Email notifications",
@@ -478,7 +552,7 @@
       }
     },
     "appeals": {
-      "title": "Appeals Tracker",
+      "title": "Appeals",
       "subtitle": "Support Requests",
       "desc": "Track your support tickets, disputes, and account-related appeals.",
       "underDevelopment": "This section is under development and will be available soon."
@@ -487,7 +561,7 @@
       "title": "Upgrade to {{plan}}",
       "current": "Current Plan",
       "new": "New Plan",
-      "benefits": "You'll get:",
+      "benefits": "Your benefits",
       "total": "Total",
       "note": "You will be charged immediately. Your billing cycle will reset today.",
       "processing": "Processing...",
@@ -495,9 +569,9 @@
       "success": "Successfully upgraded to {{plan}} plan!",
       "subtotal": "Subtotal",
       "tax": "Tax",
-      "currentPlan": "{{plan}} Plan",
+      "currentPlan": "Current Plan: {{plan}}",
       "started": "Started",
-      "nextBilling": "Next billing",
+      "nextBilling": "Next Billing",
       "cancelMembership": "Cancel Membership",
       "monthly": "Monthly",
       "yearly": "Yearly",
@@ -506,7 +580,9 @@
       "free": "Free",
       "currentPlanShort": "Current Plan",
       "downgrade": "Downgrade",
-      "upgrade": "Upgrade"
+      "upgrade": "Upgrade",
+      "mo": "mo",
+      "yr": "yr"
     },
     "messages": {
       "portfolioSaved": "Portfolio saved successfully",
@@ -523,7 +599,55 @@
     "contactUpdateConfirmTitle": "Do you want to confirm the changes?",
     "contactUpdateConfirmDesc": "Changing contact information may affect the security of your profile.",
     "contactUpdateNotice": "Changes will take effect immediately on all devices.",
-    "confirm": "Confirm and Save"
+    "confirm": "Confirm and Save",
+    "membership_details": {
+      "title": "Membership",
+      "current": "Current",
+      "freelancer": {
+        "basic": {
+          "prop10": "10 proposals per month",
+          "view": "Basic profile visibility",
+          "support": "Standard support",
+          "space5": "5MB portfolio space",
+          "nobadges": "No special badges",
+          "nosearch": "No search priority"
+        },
+        "plus": {
+          "prop50": "50 proposals per month",
+          "competitors": "View competitor bids",
+          "badge": "Availability badge",
+          "search": "Higher visibility in search",
+          "space50": "50MB portfolio space",
+          "profilebadge": "Profile badge",
+          "noevents": "No exclusive events"
+        }
+      },
+      "client": {
+        "basic": {
+          "jobs": "Unlimited job posting",
+          "proposals": "Receive freelancer proposals",
+          "contracts": "Standard contract management",
+          "nopremium": "No premium ads",
+          "nomanager": "No account manager"
+        },
+        "business": {
+          "premium": "Premium job postings",
+          "auto": "Auto-invite top freelancers",
+          "manager": "Account manager support",
+          "brand": "Showcase company brand",
+          "analytics": "Advanced analytics"
+        }
+      }
+    },
+    "reviewsCount": "{{count}} reviews",
+    "autoEvaluation": "Automatic evaluation (No response within 14 days)",
+    "profNative": "Native or Bilingual",
+    "projectDescription": "Project description",
+    "noDescription": "No description provided.",
+    "projectLink": "Project link",
+    "publishedOn": "Published on",
+    "reportIssue": "Report an issue",
+    "hireMe": "Hire"
   },
   "skills": {
     "React": "React",
@@ -588,7 +712,6 @@
     "captionPlaceholder": "Add a caption...",
     "addMore": "Add More",
     "yearSuffix": "",
-
     "profile": "User Details",
     "images": "Images",
     "videos": "Videos",
@@ -597,7 +720,6 @@
     "links": "Links",
     "blockUser": "Block User",
     "noPendingMilestones": "No pending milestones.",
-
     "submit": "SUBMIT",
     "openWith": "VIEW",
     "downloadAction": "DOWNLOAD",
@@ -926,7 +1048,6 @@
     "readyDesc": "You're ready to join the UzWork community. Click the button below to confirm.",
     "finish": "Finish"
   },
-
   "wallet": {
     "title": "My Wallet",
     "availableBalance": "Available Balance",
@@ -1286,7 +1407,6 @@
       "in_progress": "In Progress"
     }
   },
-
   "postJob": {
     "header": {
       "post": "Post a Job",
@@ -1298,10 +1418,22 @@
       "saving": "Saving..."
     },
     "steps": {
-      "details": { "label": "Job Details", "sub": "Title & description" },
-      "skills": { "label": "Skills", "sub": "Required skills" },
-      "budget": { "label": "Budget", "sub": "Price & duration" },
-      "review": { "label": "Review", "sub": "Preview & publish" }
+      "details": {
+        "label": "Job Details",
+        "sub": "Title & description"
+      },
+      "skills": {
+        "label": "Skills",
+        "sub": "Required skills"
+      },
+      "budget": {
+        "label": "Budget",
+        "sub": "Price & duration"
+      },
+      "review": {
+        "label": "Review",
+        "sub": "Preview & publish"
+      }
     },
     "categories": {
       "Web Development": "Web Development",
@@ -1322,8 +1454,14 @@
       "category": "Category",
       "selectCategory": "Select a category...",
       "jobType": "Job Type",
-      "fixedType": { "name": "Fixed Price", "desc": "Pay a set price for the entire project when complete." },
-      "hourlyType": { "name": "Hourly Rate", "desc": "Pay per hour worked. Great for ongoing or evolving tasks." },
+      "fixedType": {
+        "name": "Fixed Price",
+        "desc": "Pay a set price for the entire project when complete."
+      },
+      "hourlyType": {
+        "name": "Hourly Rate",
+        "desc": "Pay per hour worked. Great for ongoing or evolving tasks."
+      },
       "description": "Job Description",
       "descPlaceholder": "Describe your project in detail. Include:\n• What you need done\n• The goals and deliverables\n• Any specific requirements or constraints\n• Preferred tech stack or tools",
       "attachments": "Attach Documents",
@@ -1333,9 +1471,18 @@
       "docType": "Formats: PDF, DOCX, PNG, JPG",
       "experience": "Experience Level",
       "exp": {
-        "entry": { "name": "Entry Level", "desc": "Looking for someone new to this field; willing to provide guidance and mentorship." },
-        "mid": { "name": "Intermediate", "desc": "Looking for substantial experience in this field. Has previous work to show." },
-        "expert": { "name": "Expert", "desc": "Looking for comprehensive and deep expertise in this field." }
+        "entry": {
+          "name": "Entry Level",
+          "desc": "Looking for someone new to this field; willing to provide guidance and mentorship."
+        },
+        "mid": {
+          "name": "Intermediate",
+          "desc": "Looking for substantial experience in this field. Has previous work to show."
+        },
+        "expert": {
+          "name": "Expert",
+          "desc": "Looking for comprehensive and deep expertise in this field."
+        }
       }
     },
     "step2": {
@@ -1347,8 +1494,14 @@
       "suggested": "Suggested skills",
       "freelancersCount": "Number of Freelancers Needed",
       "count": {
-        "1": { "name": "1 Freelancer", "desc": "Single person for the job" },
-        "2plus": { "name": "2+ Freelancers", "desc": "Multiple people for larger scope" }
+        "1": {
+          "name": "1 Freelancer",
+          "desc": "Single person for the job"
+        },
+        "2plus": {
+          "name": "2+ Freelancers",
+          "desc": "Multiple people for larger scope"
+        }
       }
     },
     "step3": {
@@ -1360,9 +1513,18 @@
       "budgetRange": "Budget Range",
       "hourlyRange": "Hourly Rate Range",
       "types": {
-        "fixed": { "name": "Fixed Price", "desc": "Set total price" },
-        "range": { "name": "Price Range", "desc": "Min–Max budget" },
-        "hourly": { "name": "Hourly Rate", "desc": "Pay per hour" }
+        "fixed": {
+          "name": "Fixed Price",
+          "desc": "Set total price"
+        },
+        "range": {
+          "name": "Price Range",
+          "desc": "Min–Max budget"
+        },
+        "hourly": {
+          "name": "Hourly Rate",
+          "desc": "Pay per hour"
+        }
       },
       "min": "Min",
       "max": "Max",
@@ -1370,22 +1532,62 @@
       "maxHr": "Max/hr",
       "duration": "Project Duration",
       "durations": {
-        "less1": { "icon": "⚡", "name": "Quick", "sub": "< 1 month" },
-        "1to3": { "icon": "📅", "name": "Short", "sub": "1–3 months" },
-        "3to6": { "icon": "🗓️", "name": "Medium", "sub": "3–6 months" },
-        "6plus": { "icon": "🏗️", "name": "Long", "sub": "6+ months" },
-        "ongoing": { "icon": "♾️", "name": "Ongoing", "sub": "Recurring" }
+        "less1": {
+          "icon": "⚡",
+          "name": "Quick",
+          "sub": "< 1 month"
+        },
+        "1to3": {
+          "icon": "📅",
+          "name": "Short",
+          "sub": "1–3 months"
+        },
+        "3to6": {
+          "icon": "🗓️",
+          "name": "Medium",
+          "sub": "3–6 months"
+        },
+        "6plus": {
+          "icon": "🏗️",
+          "name": "Long",
+          "sub": "6+ months"
+        },
+        "ongoing": {
+          "icon": "♾️",
+          "name": "Ongoing",
+          "sub": "Recurring"
+        }
       },
       "scope": "Project Scope",
       "scopes": {
-        "small": { "icon": "🎯", "name": "Small", "sub": "Simple task" },
-        "medium": { "icon": "🚀", "name": "Medium", "sub": "Moderate" },
-        "large": { "icon": "🏢", "name": "Large", "sub": "Complex" }
+        "small": {
+          "icon": "🎯",
+          "name": "Small",
+          "sub": "Simple task"
+        },
+        "medium": {
+          "icon": "🚀",
+          "name": "Medium",
+          "sub": "Moderate"
+        },
+        "large": {
+          "icon": "🏢",
+          "name": "Large",
+          "sub": "Complex"
+        }
       },
       "visibility": "Visibility",
       "vis": {
-        "public": { "icon": "🌍", "name": "Public", "desc": "Visible to all freelancers" },
-        "private": { "icon": "🔒", "name": "Private", "desc": "Invite only — by your choice" }
+        "public": {
+          "icon": "🌍",
+          "name": "Public",
+          "desc": "Visible to all freelancers"
+        },
+        "private": {
+          "icon": "🔒",
+          "name": "Private",
+          "desc": "Invite only — by your choice"
+        }
       }
     },
     "step4": {
@@ -1400,7 +1602,6 @@
       "noSkills": "No skills added",
       "noDesc": "No description provided"
     },
-
     "sidebar": {
       "progress": "Progress",
       "tips": "Tips for Step {{step}}",
@@ -1643,7 +1844,6 @@
     "date": "Date",
     "amount": "Amount"
   },
-
   "notifications": {
     "title": "Notifications",
     "all": "All",
@@ -1678,113 +1878,5 @@
       "contract_completed_body": "Contract for \"{{jobTitle}}\" completed.",
       "contract_cancelled_body": "Contract for \"{{jobTitle}}\" cancelled."
     }
-  },
-  "profile": {
-    "settings": "Settings",
-    "lightMode": "Light Mode",
-    "darkMode": "Dark Mode",
-    "membership": "Membership",
-    "myInfo": "My Info",
-    "cvUpload": "CV Upload",
-    "billing": "Billing",
-    "password": "Password",
-    "notifications": {
-      "title": "Notifications"
-    },
-    "appeals": {
-      "title": "Appeals"
-    },
-    "switchToClient": "Switch to Client",
-    "helpSupport": "Help & Support",
-    "signOut": "Sign Out",
-    "membership_details": {
-      "title": "Membership",
-      "current": "Current",
-      "freelancer": {
-        "basic": {
-          "prop10": "10 proposals per month",
-          "view": "Basic profile visibility",
-          "support": "Standard support",
-          "space5": "5MB portfolio space",
-          "nobadges": "No special badges",
-          "nosearch": "No search priority"
-        },
-        "plus": {
-          "prop50": "50 proposals per month",
-          "competitors": "View competitor bids",
-          "badge": "Availability badge",
-          "search": "Higher visibility in search",
-          "space50": "50MB portfolio space",
-          "profilebadge": "Profile badge",
-          "noevents": "No exclusive events"
-        }
-      },
-      "client": {
-        "basic": {
-          "jobs": "Unlimited job posting",
-          "proposals": "Receive freelancer proposals",
-          "contracts": "Standard contract management",
-          "nopremium": "No premium ads",
-          "nomanager": "No account manager"
-        },
-        "business": {
-          "premium": "Premium job postings",
-          "auto": "Auto-invite top freelancers",
-          "manager": "Account manager support",
-          "brand": "Showcase company brand",
-          "analytics": "Advanced analytics"
-        }
-      }
-    },
-    "upgrade": {
-      "mo": "mo",
-      "yr": "yr",
-      "currentPlan": "Current Plan: {{plan}}",
-      "started": "Started",
-      "nextBilling": "Next Billing",
-      "cancelMembership": "Cancel Membership",
-      "benefits": "Your benefits",
-      "monthly": "Monthly",
-      "yearly": "Yearly",
-      "save17": "Save 17%",
-      "free": "Free",
-      "downgrade": "Downgrade",
-      "mostPopular": "Most Popular",
-      "currentPlanShort": "Current Plan"
-    }
-  },
-  "profile": {
-    "about": "About",
-    "reviews": "Reviews",
-    "portfolio": "Portfolio",
-    "skills": "Skills",
-    "certifications": "Certifications",
-    "perHour": "/hr",
-    "rate": "Hourly Rate",
-    "successScore": "Job Success",
-    "jobsCompleted": "Jobs Completed",
-    "activeProjects": "Active Projects",
-    "reviewsCount": "{{count}} reviews",
-    "noFeedback": "No feedback",
-    "noComment": "No comment.",
-    "verifiedClient": "Verified client",
-    "autoEvaluation": "Automatic evaluation (No response within 14 days)",
-    "clientSatisfaction": "Client satisfaction",
-    "avgResponseTime": "Avg response time",
-    "repeatClients": "Repeat clients",
-    "viewProject": "View project",
-    "languages": "Languages",
-    "profNative": "Native or Bilingual",
-    "profConversational": "Conversational",
-    "profFluent": "Fluent",
-    "profBasic": "Basic",
-    "verifiedCredential": "Verified credential",
-    "projectDescription": "Project description",
-    "noDescription": "No description provided.",
-    "projectLink": "Project link",
-    "skillsDeliverables": "Skills and deliverables",
-    "publishedOn": "Published on",
-    "reportIssue": "Report an issue",
-    "hireMe": "Hire"
   }
 }
