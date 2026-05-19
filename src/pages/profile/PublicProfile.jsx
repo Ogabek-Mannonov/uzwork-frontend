@@ -73,7 +73,7 @@ function AvatarImage({ src, name, size = 40, className = "" }) {
 }
 
 export default function PublicProfile() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
@@ -84,6 +84,13 @@ export default function PublicProfile() {
   const [copySuccess, setCopySuccess] = useState(false);
   const [selectedPortfolio, setSelectedPortfolio] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const savedLng = localStorage.getItem("appLanguage");
+    if (savedLng && i18n.language !== savedLng) {
+      i18n.changeLanguage(savedLng);
+    }
+  }, [i18n]);
 
   useEffect(() => {
     const fetch = async () => {
@@ -306,7 +313,7 @@ export default function PublicProfile() {
             </div>
             
             <button className="hire-btn">
-              <FiUserPlus /> {t("common.hireMe", "Ishga yollash")}
+              <FiUserPlus /> {t("profile.hireMe", "Ishga yollash")}
             </button>
             <button className="message-btn">
               <FiMessageSquare /> {t("common.message", "Xabar yozish")}
@@ -371,7 +378,7 @@ export default function PublicProfile() {
               <h1 className="modal-top-title">{selectedPortfolio.title}</h1>
               <div className="modal-header-actions">
                 <button className="copy-link-btn" style={{background: 'none', border: 'none', color: 'var(--brand)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer'}}>
-                  <FiLink /> Nusxalash
+                  <FiLink /> {t("common.copy", "Nusxalash")}
                 </button>
                 <button className="modal-close-btn-upwork" onClick={() => setSelectedPortfolio(null)} style={{background: 'none', border: 'none', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                   <FiX size={24} />
@@ -383,15 +390,15 @@ export default function PublicProfile() {
               {/* Left Column - Text */}
               <div className="modal-left-col">
                 <div className="modal-section">
-                  <h3 style={{fontSize: '14px', color: 'var(--muted)', marginBottom: '8px', fontWeight: '600'}}>Project description</h3>
+                  <h3 style={{fontSize: '14px', color: 'var(--muted)', marginBottom: '8px', fontWeight: '600'}}>{t("profile.projectDescription", "Loyiha tavsifi")}</h3>
                   <p className="modal-description" style={{fontSize: '15px', lineHeight: '1.6', color: 'var(--text)'}}>
-                    {selectedPortfolio.description || "Tavsif qo'shilmagan."}
+                    {selectedPortfolio.description || t("profile.noDescription", "Tavsif qo'shilmagan.")}
                   </p>
                 </div>
 
                 {(selectedPortfolio.link || selectedPortfolio.project_url) && (
                   <div className="modal-section" style={{marginTop: '16px'}}>
-                    <h3 style={{fontSize: '14px', color: 'var(--muted)', marginBottom: '8px', fontWeight: '600'}}>Loyiha havolasi</h3>
+                    <h3 style={{fontSize: '14px', color: 'var(--muted)', marginBottom: '8px', fontWeight: '600'}}>{t("profile.projectLink", "Loyiha havolasi")}</h3>
                     <a href={selectedPortfolio.link || selectedPortfolio.project_url} target="_blank" rel="noreferrer" style={{color: 'var(--brand)', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '6px'}}>
                       <FiExternalLink /> {selectedPortfolio.link || selectedPortfolio.project_url}
                     </a>
@@ -400,7 +407,7 @@ export default function PublicProfile() {
                 
                 {selectedPortfolio.skills && selectedPortfolio.skills.length > 0 && (
                   <div className="modal-section" style={{marginTop: '24px'}}>
-                    <h3 style={{fontSize: '14px', color: 'var(--muted)', marginBottom: '12px', fontWeight: '600'}}>Skills and deliverables</h3>
+                    <h3 style={{fontSize: '14px', color: 'var(--muted)', marginBottom: '12px', fontWeight: '600'}}>{t("profile.skillsDeliverables", "Ko'nikmalar va natijalar")}</h3>
                     <div className="skill-pills">
                       {selectedPortfolio.skills.map((skill, i) => (
                         <span key={i} className="skill-pill" style={{background: 'var(--surface-2)', color: 'var(--text)', padding: '6px 12px', borderRadius: '8px', fontSize: '13px'}}>{skill}</span>
@@ -410,11 +417,11 @@ export default function PublicProfile() {
                 )}
                 
                 <div className="modal-meta-info" style={{marginTop: '24px', fontSize: '13px', color: 'var(--muted)'}}>
-                  <p>Published on {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                  <p>{t("profile.publishedOn", "E'lon qilingan sana")} {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                 </div>
                 
                 <div style={{marginTop: 'auto', paddingTop: '20px'}}>
-                  <button style={{background: 'none', border: 'none', color: 'var(--muted)', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline'}}>Report an issue</button>
+                  <button style={{background: 'none', border: 'none', color: 'var(--muted)', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline'}}>{t("profile.reportIssue", "Muammo haqida xabar berish")}</button>
                 </div>
               </div>
               
@@ -460,7 +467,7 @@ export default function PublicProfile() {
                 </div>
               </div>
               <div className="footer-actions" style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
-                <button className="hire-btn-upwork" style={{background: 'var(--brand)', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '24px', fontWeight: '600', cursor: 'pointer'}}>Hire</button>
+                <button className="hire-btn-upwork" style={{background: 'var(--brand)', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '24px', fontWeight: '600', cursor: 'pointer'}}>{t("profile.hireMe", "Ishga yollash")}</button>
                 <button className="save-btn-upwork" style={{width: '44px', height: '44px', borderRadius: '50%', border: '1px solid var(--border)', background: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text)'}}><FiStar /></button>
               </div>
             </div>

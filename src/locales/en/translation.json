@@ -48,7 +48,9 @@
     "signup": "Sign Up",
     "billing": "Payments",
     "saved": "Saved Talent",
-    "contracts": "Contracts"
+    "contracts": "Contracts",
+    "contractAnalysis": "Contract Analysis & Stats",
+    "myContractsDisputes": "My Contracts & Disputes"
   },
 
   "header": {
@@ -1776,6 +1778,13 @@
     "profConversational": "Conversational",
     "profFluent": "Fluent",
     "profBasic": "Basic",
-    "verifiedCredential": "Verified credential"
+    "verifiedCredential": "Verified credential",
+    "projectDescription": "Project description",
+    "noDescription": "No description provided.",
+    "projectLink": "Project link",
+    "skillsDeliverables": "Skills and deliverables",
+    "publishedOn": "Published on",
+    "reportIssue": "Report an issue",
+    "hireMe": "Hire"
   }
 }

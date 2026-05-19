@@ -790,8 +790,8 @@ function AuthHeader({ user }) {
           { to: "/client/talent", label: t("navbar.findTalent") },
           { to: "/client/my-jobs", label: t("navbar.myJobs") },
           { to: "/client/proposals", label: t("navbar.proposals") },
-          { to: "/client/management", label: "Shartnoma tahlili & Stats" },
-          { to: "/contracts", label: "Shartnomalarim & Nizolar" },
+          { to: "/client/management", label: t("navbar.contractAnalysis") },
+          { to: "/contracts", label: t("navbar.myContractsDisputes") },
           { to: "/messages", label: t("navbar.messages") },
         ]
       : [
@@ -935,11 +935,11 @@ function AuthHeader({ user }) {
                     <div className="nav__dropdown">
                       <NavLink to="/client/management" className={({ isActive }) => "dropdown__link" + (isActive ? " is-active" : "")}>
                         <Briefcase size={16} />
-                        <span>Shartnoma tahlili & Stats</span>
+                        <span>{t("navbar.contractAnalysis")}</span>
                       </NavLink>
                       <NavLink to="/contracts" className={({ isActive }) => "dropdown__link" + (isActive ? " is-active" : "")}>
                         <FileText size={16} />
-                        <span>Shartnomalarim & Nizolar</span>
+                        <span>{t("navbar.myContractsDisputes")}</span>
                       </NavLink>
                     </div>
                   </div>
