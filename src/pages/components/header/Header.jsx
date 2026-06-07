@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Sun, Moon, Menu, X, ChevronDown, Search, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import "./Header.css";
+import "./header.css";
 
 export default function Header({
   isDarkMode,
