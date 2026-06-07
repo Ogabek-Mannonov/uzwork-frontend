@@ -866,7 +866,7 @@ const Settings = () => {
     setIsLoading(true);
     try {
       const formData = new FormData();
-      formData.append("file", file); // Must be 'file' instead of 'image' because multer on backend expects 'file'
+      formData.append("image", file); // Backend expects 'image' for /upload/image
       formData.append("type", type); // 'avatar' or 'cover'
 
       const res = await uploadImage(formData);
