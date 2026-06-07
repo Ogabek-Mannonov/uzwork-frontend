@@ -10,7 +10,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useThemeContext } from "../Theme/ThemeContext";
 
-import "../header/Header.css";
+import "../header/header.css";
 import "../../../assets/style/FreeNavbar.css";
 import "../../../assets/style/theme.css";
 import { useCurrency } from "../Currency/CurrencyContext";
