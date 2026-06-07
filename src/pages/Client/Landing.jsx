@@ -7,7 +7,7 @@ import {
   Briefcase, Send, Filter, Plus, Save, Download, Eye, Target,
   MapPin, X, UserSearch, ArrowRight, Search, Bell, Settings
 } from "lucide-react";
-import "./css/Landing.css";
+import "./css/landing.css";
 import { getJobById, updateJob } from "../../api/jobs";
 import { getProjectProposals, acceptProposal } from "../../api/proposals";
 import Price from "../components/Currency/Price";
