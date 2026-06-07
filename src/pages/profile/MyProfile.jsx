@@ -1038,7 +1038,7 @@ const MyProfile = () => {
     setIsLoading(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("image", file);
       formData.append("type", "avatar"); // Send type for resizing
 
       const uploadRes = await uploadImage(formData);
@@ -1078,7 +1078,7 @@ const MyProfile = () => {
     setIsLoading(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("image", file);
       formData.append("type", "cover"); // Send type for resizing
 
       const uploadRes = await uploadImage(formData);
