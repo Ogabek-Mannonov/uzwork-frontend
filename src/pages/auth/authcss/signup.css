@@ -336,6 +336,7 @@
     justify-content: center;
     width: 100%;
     box-sizing: border-box;
+<<<<<<< Updated upstream
   }
 
   .signup-card.otp-step {
@@ -343,6 +344,8 @@
     padding-bottom: 16px !important;
     justify-content: flex-start !important;
     margin-top: 24px !important;
+=======
+>>>>>>> Stashed changes
   }
   
   .role-boxes {
